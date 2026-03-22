@@ -10,7 +10,7 @@ subfolders = [
 subfolders.sort()
 
 links = "\n".join(
-    f'    <li><a href="{folder}/">{folder.replace("-", " ").title()}</a></li>'
+    f'    <li><a href="{folder}/index.html">{folder.replace("-", " ").title()}</a></li>'
     for folder in subfolders
 )
 
