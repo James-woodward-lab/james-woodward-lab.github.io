@@ -1,215 +1,65 @@
 import os
 
-# Folders to ignore (not user-facing app directories)
-IGNORE = {".git", ".github", "__pycache__", "css"}
-
-# Optional: icon, colour class, short description — used when a folder matches
-TOOL_METADATA = {
-    "fluid-calculator": (
-        "💧",
-        "blue",
-        "Holliday-Segar maintenance fluid calculation by weight.",
-    ),
-    "renal-fluid-calculator": (
-        "🫘",
-        "teal",
-        "Fluid management adjusted for renal impairment and restriction.",
-    ),
-    "qtc-calculator": (
-        "❤️",
-        "purple",
-        "Corrected QT interval using Bazett and Fridericia formulae.",
-    ),
-    "safeguarding-calculator": (
-        "🛡️",
-        "red",
-        "Age and date calculations for safeguarding assessments.",
-    ),
-    "developmental-milestones": (
-        "🧒",
-        "green",
-        "Age-appropriate milestone reference across all developmental domains.",
-    ),
-}
-
-CARD_COLORS = ("blue", "teal", "purple", "red", "green", "orange", "pink")
-
-# Overrides for .title() (e.g. acronyms)
-DISPLAY_TITLE = {
-    "qtc-calculator": "QTc Calculator",
-}
-
-# Inline CSS so the homepage stays styled on GitHub Pages without extra asset paths
-STYLE_BLOCK = """  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f4f8;
-      min-height: 100vh;
-      color: #1a2e44;
-    }
-
-    header {
-      background: linear-gradient(135deg, #1a2e44 0%, #2563a8 100%);
-      color: white;
-      padding: 48px 24px 40px;
-      text-align: center;
-    }
-
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    header p {
-      margin-top: 8px;
-      font-size: 1rem;
-      opacity: 0.75;
-    }
-
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 40px 24px 60px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 28px 24px;
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      border: 1px solid #e2e8f0;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 24px rgba(37, 99, 168, 0.15);
-      border-color: #93c5fd;
-    }
-
-    .card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
-
-    .card h2 {
-      font-size: 1.05rem;
-      font-weight: 600;
-      line-height: 1.3;
-    }
-
-    .card p {
-      font-size: 0.85rem;
-      color: #64748b;
-      line-height: 1.5;
-    }
-
-    .card .arrow {
-      margin-top: auto;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #2563a8;
-      letter-spacing: 0.3px;
-    }
-
-    .blue   .card-icon { background: #dbeafe; }
-    .teal   .card-icon { background: #ccfbf1; }
-    .purple .card-icon { background: #ede9fe; }
-    .red    .card-icon { background: #fee2e2; }
-    .green  .card-icon { background: #dcfce7; }
-    .orange .card-icon { background: #ffedd5; }
-    .pink   .card-icon { background: #fce7f3; }
-
-    .blue   h2 { color: #1e40af; }
-    .teal   h2 { color: #0f766e; }
-    .purple h2 { color: #6d28d9; }
-    .red    h2 { color: #b91c1c; }
-    .green  h2 { color: #15803d; }
-    .orange h2 { color: #c2410c; }
-    .pink   h2 { color: #be185d; }
-
-    footer {
-      text-align: center;
-      padding: 24px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-    }
-  </style>"""
-
-
-def card_html(folder: str, index: int) -> str:
-    title = DISPLAY_TITLE.get(folder, folder.replace("-", " ").title())
-    if folder in TOOL_METADATA:
-        icon, color, desc = TOOL_METADATA[folder]
-    else:
-        icon = "📋"
-        color = CARD_COLORS[index % len(CARD_COLORS)]
-        desc = "Quick-access clinical tool."
-    return f"""  <a href="{folder}/index.html" class="card {color}">
-    <div class="card-icon">{icon}</div>
-    <h2>{title}</h2>
-    <p>{desc}</p>
-    <span class="arrow">Open tool →</span>
-  </a>
-"""
-
+# Folders to ignore
+IGNORE = {'.git', '.github', '__pycache__', 'css'}
 
 subfolders = [
-    f
-    for f in os.listdir(".")
-    if os.path.isdir(f) and f not in IGNORE and not f.startswith(".")
+    f for f in os.listdir('.')
+    if os.path.isdir(f) and f not in IGNORE and not f.startswith('.')
 ]
 subfolders.sort()
 
-cards = "\n\n".join(card_html(folder, i) for i, folder in enumerate(subfolders))
+links = "\n".join(
+    f'      <li><a href="{folder}/index.html">{folder.replace("-", " ").title()}</a></li>'
+    for folder in subfolders
+)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Paediatric Tools</title>
-{STYLE_BLOCK}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <title>James Woodward Lab</title>
+  <link rel="stylesheet" href="css/app-theme.css">
+  <style>
+    .index-links {{ list-style: none; padding: 0; margin: 0; }}
+    .index-links li {{ margin-bottom: 8px; }}
+    .index-links li:last-child {{ margin-bottom: 0; }}
+    .index-links a {{
+      display: block;
+      padding: 12px 14px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: border-color 0.2s, background 0.2s;
+    }}
+    .index-links a:hover {{
+      border-color: var(--accent);
+      background: rgba(32, 178, 170, 0.08);
+      color: var(--accent2);
+    }}
+  </style>
 </head>
 <body>
-
-  <header>
-    <h1>🩺 Paediatric Clinical Tools</h1>
-    <p>Quick-access calculators and decision aids for clinical use</p>
+<div class="container">
+  <header class="app-header-center">
+    <h1>🩺 James Woodward Lab</h1>
+    <p>Paediatric clinical tools & calculators</p>
   </header>
-
-  <main>
-   <div class="grid">
-
-{cards}
-
-</div>
-  </main>
-
-  <footer>
-    For clinical decision support only — always apply clinical judgement.
+  <div class="card">
+    <h2>Tools</h2>
+    <ul class="index-links">
+{links}
+    </ul>
+  </div>
+  <footer class="app-footer">
+    For clinical decision support only. Always verify against local guidelines.
   </footer>
-
+</div>
 </body>
 </html>
 """
