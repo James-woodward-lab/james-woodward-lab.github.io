@@ -203,7 +203,7 @@ body {
 
 .unit-tog input[type="radio"]:checked + label {
   background: var(--accent);
-  color: #0f1117;
+  color: var(--accent-on);
   font-weight: 700;
 }
 
@@ -455,7 +455,7 @@ body {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #0f1117;
+  color: var(--accent-on);
   background: var(--accent);
   padding: 2px 7px;
   border-radius: 4px;

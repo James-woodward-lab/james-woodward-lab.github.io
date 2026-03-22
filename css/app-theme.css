@@ -1,7 +1,9 @@
 /**
- * Shared UI theme — aligned with fluid-calculator (PaedsFluids).
+ * Shared UI theme — dark/light mode, mobile-friendly.
  * Apps: fluid-calculator, renal-fluid-calculator, qtc-calculator, etc.
  */
+
+/* —— Dark mode (default) —— */
 :root {
   --bg: #0f1117;
   --surface: #1a1d27;
@@ -9,17 +11,36 @@
   --border: #2e3246;
   --accent: #20b2aa;
   --accent2: #4ecdc4;
+  --accent-on: #0f1117;
   --warn: #f59e0b;
   --danger: #ef4444;
   --success: #22c55e;
   --text: #e2e8f0;
   --muted: #8892a4;
   --radius: 12px;
-  --tab-h: 64px; /* used by fluid-app / tab bars */
+  --tab-h: 64px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
+}
+
+/* —— Light mode —— */
+html.theme-light {
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --surface2: #e2e8f0;
+  --border: #cbd5e1;
+  --accent: #0d9488;
+  --accent2: #14b8a6;
+  --accent-on: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+}
+
+html.theme-light .stat.highlight,
+html.theme-light .stat.hi {
+  background: rgba(13, 148, 136, 0.08);
 }
 
 *,
@@ -44,6 +65,7 @@ body {
   min-height: 100%;
   padding-top: var(--safe-t);
   font-size: 16px;
+  line-height: 1.5;
   overflow-x: hidden;
 }
 
@@ -54,9 +76,21 @@ body {
   padding: 20px calc(20px + var(--safe-r)) 24px calc(20px + var(--safe-l));
 }
 
+@media (max-width: 600px) {
+  .container {
+    padding: 16px calc(16px + var(--safe-r)) 20px calc(16px + var(--safe-l));
+  }
+}
+
 .app-header-center {
   text-align: center;
   padding: 24px 0 20px;
+}
+
+@media (max-width: 600px) {
+  .app-header-center {
+    padding: 20px 0 16px;
+  }
 }
 
 .app-header-center h1 {
@@ -64,12 +98,20 @@ body {
   font-weight: 700;
   color: var(--accent);
   letter-spacing: 0.5px;
+  line-height: 1.3;
+}
+
+@media (max-width: 600px) {
+  .app-header-center h1 {
+    font-size: 1.4rem;
+  }
 }
 
 .app-header-center p {
   color: var(--muted);
-  font-size: 0.85rem;
-  margin-top: 4px;
+  font-size: 0.9rem;
+  margin-top: 6px;
+  line-height: 1.4;
 }
 
 /* —— Cards —— */
@@ -81,8 +123,15 @@ body {
   margin-bottom: 14px;
 }
 
+@media (max-width: 600px) {
+  .card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+}
+
 .card-title {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -91,7 +140,7 @@ body {
 }
 
 .card h2 {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -110,10 +159,11 @@ body {
 
 .field label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--muted);
   margin-bottom: 6px;
   font-weight: 500;
+  line-height: 1.3;
 }
 
 .field input,
@@ -131,6 +181,7 @@ body {
   transition: border-color 0.2s;
   appearance: none;
   -webkit-appearance: none;
+  min-height: 44px;
 }
 
 .field input:focus,
@@ -149,16 +200,21 @@ body {
   padding-right: 36px;
 }
 
+html.theme-light .field select,
+html.theme-light .form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
 .hint,
 .field .hint {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--muted);
   margin-top: 5px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .field .unit {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--accent2);
   margin-left: 4px;
 }
@@ -185,6 +241,7 @@ body {
 @media (max-width: 600px) {
   .grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
@@ -193,7 +250,7 @@ body {
   width: 100%;
   padding: 12px 14px;
   background: var(--accent);
-  color: #0f1117;
+  color: var(--accent-on);
   font-weight: 700;
   font-size: 1rem;
   border: none;
@@ -202,6 +259,7 @@ body {
   margin-top: 8px;
   transition: background 0.2s;
   min-height: 44px;
+  touch-action: manipulation;
 }
 
 .btn:hover {
@@ -225,7 +283,7 @@ body {
   width: 100%;
   padding: 14px;
   background: var(--accent);
-  color: #0f1117;
+  color: var(--accent-on);
   border: none;
   border-radius: 10px;
   font-size: 0.95rem;
@@ -234,6 +292,7 @@ body {
   transition: background 0.15s;
   min-height: 44px;
   margin-top: 8px;
+  touch-action: manipulation;
 }
 
 .btn-primary:hover {
@@ -295,7 +354,7 @@ body {
 
 .stat .lbl,
 .stat .label {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -308,12 +367,12 @@ body {
   font-weight: 700;
   color: var(--text);
   margin-top: 4px;
-  line-height: 1.1;
+  line-height: 1.2;
 }
 
 .stat .val span,
 .stat .value span {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--muted);
   font-weight: 400;
   margin-left: 2px;
@@ -328,17 +387,17 @@ body {
 }
 
 .stat .sub {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: var(--muted);
   margin-top: 3px;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 /* —— Alerts —— */
 .alert {
   padding: 12px 14px;
   border-radius: 10px;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   line-height: 1.55;
   margin-top: 10px;
 }
@@ -369,12 +428,12 @@ body {
 
 .alert strong {
   display: block;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   margin-bottom: 3px;
 }
 
 .alert p {
-  opacity: 0.88;
+  opacity: 0.92;
 }
 
 /* —— Misc —— */
@@ -388,20 +447,21 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: var(--muted);
   cursor: pointer;
   min-height: 44px;
   padding: 8px 0;
+  line-height: 1.4;
 }
 
 .checkbox-row input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   accent-color: var(--accent);
   cursor: pointer;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .page-header {
@@ -409,23 +469,31 @@ body {
 }
 
 .page-header h1 {
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--accent);
+  line-height: 1.3;
+}
+
+@media (max-width: 600px) {
+  .page-header h1 {
+    font-size: 1.2rem;
+  }
 }
 
 .page-header p {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--muted);
-  margin-top: 3px;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 
 .page-footer,
 footer.app-footer {
   text-align: center;
-  padding: 10px 0 8px;
+  padding: 12px 0 10px;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   line-height: 1.6;
 }
 
@@ -435,9 +503,9 @@ footer.app-footer a {
 }
 
 .breakdown {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--muted);
-  line-height: 1.8;
+  line-height: 1.75;
 }
 
 .breakdown b {
@@ -448,7 +516,7 @@ footer.app-footer a {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 20px;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
@@ -483,4 +551,51 @@ footer.app-footer a {
 
 .section-full {
   grid-column: 1 / -1;
+}
+
+/* —— Theme toggle button —— */
+.theme-toggle {
+  position: fixed;
+  top: calc(12px + var(--safe-t));
+  right: calc(12px + var(--safe-r));
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: border-color 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  touch-action: manipulation;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.theme-toggle:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+html.theme-light .theme-toggle {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Light mode: tab bars and desktop nav (fluid-app, qtc-ecg) */
+html.theme-light .fluid-app .tab-bar,
+html.theme-light .tab-bar {
+  background: rgba(255, 255, 255, 0.97);
+}
+
+html.theme-light .fluid-app .desktop-nav,
+html.theme-light .desktop-nav {
+  background: rgba(241, 245, 249, 0.95);
 }

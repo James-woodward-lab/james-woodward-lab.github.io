@@ -88,7 +88,7 @@ body.safeguarding-app {
   width: 26px;
   height: 26px;
   background: var(--accent);
-  color: #0f1117;
+  color: var(--accent-on);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -379,7 +379,7 @@ body.safeguarding-app {
   width: 100%;
   padding: 14px;
   background: var(--accent);
-  color: #0f1117;
+  color: var(--accent-on);
   border: none;
   border-radius: var(--radius);
   font-size: 1rem;
@@ -552,5 +552,15 @@ body.safeguarding-app {
 @media (max-width: 600px) {
   .safeguarding-app .form-row {
     grid-template-columns: 1fr;
+  }
+  .safeguarding-app header {
+    padding: 14px calc(16px + var(--safe-r)) 14px calc(16px + var(--safe-l));
+  }
+  .safeguarding-app main {
+    padding: 16px calc(12px + var(--safe-r)) 40px calc(12px + var(--safe-l));
+  }
+  .safeguarding-app .radio-group,
+  .safeguarding-app .toggle-group {
+    flex-direction: column;
   }
 }

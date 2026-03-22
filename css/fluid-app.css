@@ -173,7 +173,7 @@ body.fluid-app {
 
 .fluid-app .gender-toggle input[type="radio"]:checked + label {
   background: var(--accent);
-  color: #0f1117;
+  color: var(--accent-on);
   font-weight: 700;
 }
 
@@ -293,7 +293,7 @@ body.fluid-app {
 
 .fluid-app .install-btn {
   background: var(--accent);
-  color: #0f1117;
+  color: var(--accent-on);
   border: none;
   border-radius: 8px;
   padding: 8px 14px;

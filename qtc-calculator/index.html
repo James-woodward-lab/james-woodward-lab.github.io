@@ -5,13 +5,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0f1117">
+<meta name="color-scheme" content="dark light">
 <title>Paediatric ECG Tool</title>
 <link rel="stylesheet" href="../css/app-theme.css">
+<script src="../js/theme-toggle.js"></script>
 <link rel="stylesheet" href="../css/qtc-ecg.css">
 
 </head>
 <body>
-
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
 <!-- DESKTOP NAV -->
 <nav class="desktop-nav">
   <button class="dnb active" data-page="qtc" onclick="switchPage('qtc')">&#9889; QTc Calculator</button>

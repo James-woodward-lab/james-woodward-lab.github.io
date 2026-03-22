@@ -7,13 +7,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PaedsFluids">
 <meta name="theme-color" content="#0f1117">
+<meta name="color-scheme" content="dark light">
 <title>Paediatric Fluid &amp; Feed Calculator</title>
 <link rel="manifest" href='data:application/manifest+json,{"name":"Paediatric Fluid %26 Feed Calculator","short_name":"PaedsFluids","start_url":".","display":"standalone","background_color":"%230f1117","theme_color":"%2320b2aa","description":"Paediatric maintenance fluid, electrolyte and feed volume calculator"}'>
 <link rel="stylesheet" href="../css/app-theme.css">
+<script src="../js/theme-toggle.js"></script>
 <link rel="stylesheet" href="../css/fluid-app.css">
 </head>
 <body class="fluid-app">
-
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
 <nav class="desktop-nav">
   <button class="desktop-nav-btn" onclick="scrollToId('sec-maint')">💧 Maintenance</button>
   <button class="desktop-nav-btn" onclick="scrollToId('sec-balance')">⚖️ 24h Balance</button>
