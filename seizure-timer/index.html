@@ -28,6 +28,53 @@
     📄 View RCUK Paediatric Emergency Algorithms (PDF)
   </a>
 
+  <!-- Weight-based dose calculator -->
+  <div class="card dose-calc-card">
+    <div class="card-title">Weight-based dose calculator</div>
+    <div class="field">
+      <label>Weight (kg)</label>
+      <input type="number" id="doseWeight" inputmode="decimal" min="2" max="150" step="0.1" placeholder="e.g. 15" oninput="calcDoses()">
+    </div>
+    <div class="dose-results" id="doseResults">
+      <div class="dose-section">
+        <div class="dose-section-title">1st / 2nd line benzodiazepines</div>
+        <div class="dose-grid" id="benzoDoses">
+          <div class="dose-item">
+            <div class="dose-drug">Buccal midazolam</div>
+            <div class="dose-value" id="doseBuccalMidaz">—</div>
+            <div class="dose-note">0.5 mg/kg, max 10 mg</div>
+          </div>
+          <div class="dose-item">
+            <div class="dose-drug">IV Lorazepam</div>
+            <div class="dose-value" id="doseLorazepam">—</div>
+            <div class="dose-note">0.1 mg/kg, max 4 mg</div>
+          </div>
+          <div class="dose-item">
+            <div class="dose-drug">PR Diazepam</div>
+            <div class="dose-value" id="dosePRDiazepam">—</div>
+            <div class="dose-note">0.5 mg/kg, max 10 mg</div>
+          </div>
+        </div>
+      </div>
+      <div class="dose-section">
+        <div class="dose-section-title">2nd line agents</div>
+        <div class="dose-grid" id="secondLineDoses">
+          <div class="dose-item">
+            <div class="dose-drug">Levetiracetam IV</div>
+            <div class="dose-value" id="doseLevetiracetam">—</div>
+            <div class="dose-note">40 mg/kg, max 3 g, over 5 min</div>
+          </div>
+          <div class="dose-item">
+            <div class="dose-drug">Phenytoin IV</div>
+            <div class="dose-value" id="dosePhenytoin">—</div>
+            <div class="dose-note">20 mg/kg, over 20 min, ECG monitoring</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="dose-calc-hint">Verify all doses against BNFc and local protocols. Buccolam has age-band dosing — see SPC if using pre-filled syringes.</p>
+  </div>
+
   <!-- Initial state: big start button -->
   <div class="card start-card" id="startCard">
     <button type="button" class="btn-start" id="btnStart" onclick="startTimer()">
@@ -84,6 +131,29 @@
 <script>
 (function() {
   let startTime = null;
+
+  window.calcDoses = function() {
+    const w = parseFloat(document.getElementById('doseWeight').value);
+    if (!w || w < 2) {
+      document.getElementById('doseBuccalMidaz').textContent = '—';
+      document.getElementById('doseLorazepam').textContent = '—';
+      document.getElementById('dosePRDiazepam').textContent = '—';
+      document.getElementById('doseLevetiracetam').textContent = '—';
+      document.getElementById('dosePhenytoin').textContent = '—';
+      return;
+    }
+    const buccalMidaz = Math.min(w * 0.5, 10);
+    const lorazepam = Math.min(w * 0.1, 4);
+    const prDiazepam = Math.min(w * 0.5, 10);
+    const levetiracetam = Math.min(w * 40, 3000);
+    const phenytoin = w * 20;
+    document.getElementById('doseBuccalMidaz').textContent = buccalMidaz % 1 ? buccalMidaz.toFixed(1) + ' mg' : buccalMidaz + ' mg';
+    document.getElementById('doseLorazepam').textContent = lorazepam % 1 ? lorazepam.toFixed(1) + ' mg' : lorazepam + ' mg';
+    document.getElementById('dosePRDiazepam').textContent = prDiazepam % 1 ? prDiazepam.toFixed(1) + ' mg' : prDiazepam + ' mg';
+    document.getElementById('doseLevetiracetam').textContent = levetiracetam >= 1000 ? (levetiracetam / 1000).toFixed(1) + ' g' : levetiracetam + ' mg';
+    document.getElementById('dosePhenytoin').textContent = phenytoin >= 1000 ? (phenytoin / 1000).toFixed(1) + ' g' : phenytoin + ' mg';
+  };
+
   let intervalId = null;
   let dose1Given = false;
   let dose2Given = false;

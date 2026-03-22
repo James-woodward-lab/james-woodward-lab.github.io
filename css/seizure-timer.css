@@ -47,6 +47,73 @@
   border-color: var(--accent);
 }
 
+/* Dose calculator */
+.dose-calc-card {
+  margin-bottom: 20px;
+}
+
+.dose-section {
+  margin-bottom: 16px;
+}
+
+.dose-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.dose-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.dose-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.dose-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.dose-drug {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dose-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+}
+
+.dose-note {
+  grid-column: 1 / -1;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.dose-calc-hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 12px;
+  margin-bottom: 0;
+  line-height: 1.45;
+}
+
 /* Start button */
 .start-card {
   text-align: center;
