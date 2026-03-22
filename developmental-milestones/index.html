@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Milestone Red Flag Screen</title>
+<style>
+  :root {
+    --blue:#1a56a0;--blue-light:#e8f0fb;--blue-mid:#c2d6f5;
+    --red:#c0392b;--red-light:#fdecea;--red-mid:#f5b7b1;
+    --orange:#d35400;--orange-light:#fef3e8;--orange-mid:#f5cba7;
+    --green:#1e8449;--green-light:#eafaf1;--green-mid:#a9dfbf;
+    --yellow:#b7950b;--yellow-light:#fefbd8;--yellow-mid:#f9e79f;
+    --purple:#6c3483;--purple-light:#f5eef8;--purple-mid:#d7bde2;
+    --teal:#117a65;--teal-light:#e8f8f5;
+    --grey:#5d6d7e;--grey-light:#f4f6f8;--grey-mid:#d5d8dc;
+    --text:#1a1a2e;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef2f9;color:var(--text);font-size:14px;}
+  .header{background:linear-gradient(135deg,var(--blue) 0%,#2471a3 100%);color:white;padding:14px 22px;display:flex;align-items:center;gap:12px;}
+  .header h1{font-size:1.15rem;font-weight:700;}
+  .header p{font-size:0.75rem;opacity:0.82;margin-top:2px;}
+  .disclaimer{background:#fff3cd;border-left:4px solid #ffc107;padding:7px 16px;font-size:0.72rem;color:#856404;}
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:0;align-items:start;}
+  @media(max-width:900px){.layout{grid-template-columns:1fr;}}
+  .sidebar{background:white;border-right:1px solid var(--grey-mid);padding:14px;display:flex;flex-direction:column;gap:10px;position:sticky;top:0;max-height:100vh;overflow-y:auto;}
+  .main-area{display:grid;grid-template-columns:1fr 360px;gap:0;align-items:start;}
+  @media(max-width:1100px){.main-area{grid-template-columns:1fr;}}
+  .checklist-col{padding:14px;display:flex;flex-direction:column;gap:10px;}
+  .results-col{background:white;border-left:1px solid var(--grey-mid);padding:14px;display:flex;flex-direction:column;gap:10px;position:sticky;top:0;max-height:100vh;overflow-y:auto;}
+
+  /* INPUT */
+  .card{background:white;border-radius:var(--radius);border:1px solid var(--grey-mid);overflow:hidden;}
+  .card-hd{padding:9px 14px;font-weight:700;font-size:0.82rem;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--grey-mid);}
+  .card-bd{padding:12px 14px;}
+  .age-big{font-size:2rem;font-weight:800;color:var(--blue);text-align:center;line-height:1;}
+  .age-sub{font-size:0.72rem;color:var(--grey);text-align:center;margin-top:2px;}
+  .age-slider{width:100%;accent-color:var(--blue);margin:7px 0;cursor:pointer;}
+  .row{display:flex;gap:6px;align-items:center;}
+  .age-in{width:64px;padding:5px 8px;border:2px solid var(--grey-mid);border-radius:6px;font-size:0.95rem;text-align:center;font-weight:700;}
+  .age-in:focus{outline:none;border-color:var(--blue);}
+  .ubtn{flex:1;padding:6px 4px;border:2px solid var(--grey-mid);border-radius:6px;background:white;cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--grey);transition:all .15s;}
+  .ubtn.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+  .tog{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--grey-light);border-radius:6px;cursor:pointer;margin-top:6px;}
+  .tog input{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;}
+  .tog span{font-size:0.78rem;font-weight:500;}
+  .gest-row{display:flex;gap:6px;align-items:center;margin-top:6px;}
+  .gest-row input{flex:1;padding:5px 8px;border:2px solid var(--grey-mid);border-radius:6px;font-size:0.85rem;}
+  .gest-row input:focus{outline:none;border-color:var(--blue);}
+  .corr-note{font-size:0.72rem;color:var(--teal);background:var(--teal-light);padding:4px 8px;border-radius:5px;margin-top:5px;font-weight:500;}
+  .reg-box{background:var(--red-light);border:2px solid var(--red-mid);border-radius:7px;padding:9px 11px;margin-top:8px;}
+  .reg-box label{font-size:0.8rem;font-weight:700;color:var(--red);display:flex;align-items:center;gap:7px;cursor:pointer;}
+  .reg-box input{accent-color:var(--red);width:16px;height:16px;cursor:pointer;}
+  .reg-box .sub{font-size:0.7rem;color:var(--red);margin-top:3px;margin-left:23px;}
+  .btn-run{width:100%;padding:10px;background:var(--blue);color:white;border:none;border-radius:7px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:8px;}
+  .btn-run:hover{background:#1448a0;}
+  .btn-clr{width:100%;padding:7px;background:white;color:var(--grey);border:2px solid var(--grey-mid);border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;margin-top:5px;}
+  .btn-clr:hover{border-color:var(--red);color:var(--red);}
+  .stat-row{display:flex;gap:6px;}
+  .sc{flex:1;text-align:center;padding:7px 4px;border-radius:7px;border:1px solid;}
+  .sc .n{font-size:1.2rem;font-weight:800;}
+  .sc .l{font-size:0.62rem;font-weight:700;text-transform:uppercase;}
+  .sc.bl{background:var(--blue-light);border-color:var(--blue-mid);color:var(--blue);}
+  .sc.or{background:var(--orange-light);border-color:var(--orange-mid);color:var(--orange);}
+  .sc.gn{background:var(--green-light);border-color:var(--green-mid);color:var(--green);}
+
+  /* TIP BOXES */
+  .tip{padding:8px 12px;border-left:3px solid;border-radius:0 6px 6px 0;font-size:0.74rem;line-height:1.45;}
+  .tip.blue{background:var(--blue-light);border-color:var(--blue);color:#1a3a6b;}
+  .tip.orange{background:var(--orange-light);border-color:var(--orange);color:#7d3c00;}
+  .tip.red{background:var(--red-light);border-color:var(--red);color:#7b241c;}
+  .tip.purple{background:var(--purple-light);border-color:var(--purple);color:#4a235a;}
+  .tip-title{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+
+  /* DOMAIN CARDS */
+  .domain-card{background:white;border-radius:var(--radius);border:2px solid var(--grey-mid);overflow:visible;transition:border-color .2s;}
+  .domain-card.has-flags{border-color:var(--red-mid);}
+  .domain-card.has-warns{border-color:var(--orange-mid);}
+  .domain-hd{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .domain-hd:hover{filter:brightness(.97);}
+  .domain-icon-big{font-size:1.3rem;}
+  .domain-title{font-weight:800;font-size:0.92rem;flex:1;}
+  .domain-badges{display:flex;gap:5px;align-items:center;}
+  .dbadge{font-size:0.65rem;padding:2px 8px;border-radius:20px;font-weight:700;}
+  .dbadge.flag{background:var(--red);color:white;}
+  .dbadge.warn{background:var(--orange);color:white;}
+  .dbadge.ok{background:var(--green-mid);color:var(--green);}
+  .dbadge.empty{background:var(--grey-mid);color:var(--grey);}
+  .collapse-arrow{font-size:0.7rem;color:var(--grey);transition:transform .2s;}
+  .collapse-arrow.open{transform:rotate(180deg);}
+
+  /* MILESTONE TIMELINE */
+  .milestone-list{padding:4px 14px 12px 14px;position:relative;}
+  .milestone-list::before{content:'';position:absolute;left:29px;top:8px;bottom:8px;width:2px;background:var(--grey-light);}
+  .ms-item{display:flex;align-items:flex-start;gap:0;margin-bottom:2px;position:relative;}
+  .ms-age{width:44px;flex-shrink:0;padding-top:7px;}
+  .age-chip{font-size:0.62rem;font-weight:800;padding:2px 5px;border-radius:10px;background:var(--grey-light);color:var(--grey);text-align:center;white-space:nowrap;}
+  .age-chip.overdue{background:var(--red-mid);color:var(--red);}
+  .age-chip.current{background:var(--blue-mid);color:var(--blue);}
+  .age-chip.ok{background:var(--green-mid);color:var(--green);}
+  .ms-dot{width:18px;flex-shrink:0;display:flex;justify-content:center;padding-top:9px;position:relative;z-index:1;}
+  .dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--grey-mid);background:white;transition:all .15s;}
+  .dot.achieved{background:var(--green);border-color:var(--green);}
+  .dot.cascade{background:var(--green-mid);border-color:var(--green);}
+  .dot.flagged{background:var(--red-light);border-color:var(--red);}
+  .dot.warned{background:var(--orange-light);border-color:var(--orange);}
+  .ms-content{flex:1;padding:5px 6px 5px 8px;border-radius:6px;cursor:pointer;transition:background .1s;display:flex;align-items:flex-start;gap:6px;}
+  .ms-content:hover{background:var(--grey-light);}
+  .ms-cb{width:15px;height:15px;flex-shrink:0;margin-top:1px;cursor:pointer;accent-color:var(--green);}
+  .ms-text{font-size:0.81rem;line-height:1.4;flex:1;}
+  .ms-item.achieved .ms-text{color:var(--green);text-decoration:line-through;opacity:.7;}
+  .ms-item.cascade-achieved .ms-text{color:var(--green);text-decoration:line-through;opacity:.6;}
+  .ms-item.flagged .ms-text{color:var(--red);font-weight:600;}
+  .ms-item.warned .ms-text{color:var(--orange);font-weight:500;}
+  .ms-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+  .flag-pill{font-size:0.6rem;padding:1px 7px;border-radius:10px;font-weight:700;white-space:nowrap;}
+  .flag-pill.urgent{background:var(--red);color:white;}
+  .flag-pill.soon{background:var(--orange);color:white;}
+  .flag-pill.routine{background:var(--yellow);color:#5d4037;}
+  .flag-pill.implied{background:var(--green-mid);color:var(--green);font-size:0.57rem;}
+  .flag-pill.standalone{background:#e8e8e8;color:#666;font-size:0.57rem;}
+  .ms-note{font-size:0.68rem;color:var(--grey);font-style:italic;margin-top:1px;}
+
+  .hidden{display:none!important;}
+
+  /* RESULTS */
+  .status-banner{padding:11px 14px;border-radius:var(--radius);display:flex;align-items:center;gap:10px;}
+  .status-banner.all-clear{background:var(--green-light);border:2px solid var(--green-mid);color:var(--green);}
+  .status-banner.concerns{background:var(--orange-light);border:2px solid var(--orange-mid);color:var(--orange);}
+  .status-banner.urgent-banner{background:var(--red-light);border:2px solid var(--red-mid);color:var(--red);}
+  .status-banner.empty-banner{background:var(--grey-light);border:2px solid var(--grey-mid);color:var(--grey);}
+  .status-icon{font-size:1.6rem;}
+  .status-text h3{font-size:0.88rem;font-weight:800;}
+  .status-text p{font-size:0.74rem;margin-top:2px;opacity:.85;}
+  .ref-card{border-radius:var(--radius);overflow:hidden;border:2px solid;margin-bottom:0;}
+  .ref-card.urgent{border-color:var(--red-mid);}
+  .ref-card.soon{border-color:var(--orange-mid);}
+  .ref-card.routine{border-color:var(--yellow-mid);}
+  .ref-hd{padding:9px 13px;display:flex;align-items:center;gap:9px;}
+  .ref-card.urgent .ref-hd{background:var(--red-light);}
+  .ref-card.soon .ref-hd{background:var(--orange-light);}
+  .ref-card.routine .ref-hd{background:var(--yellow-light);}
+  .ref-org{font-weight:800;font-size:0.85rem;}
+  .ref-urgency{font-size:0.65rem;padding:2px 7px;border-radius:20px;font-weight:700;}
+  .ref-card.urgent .ref-urgency{background:var(--red);color:white;}
+  .ref-card.soon .ref-urgency{background:var(--orange);color:white;}
+  .ref-card.routine .ref-urgency{background:var(--yellow);color:#5d4037;}
+  .ref-body{padding:8px 13px 11px;background:white;}
+  .ref-trigger{font-size:0.77rem;padding:3px 0;border-bottom:1px solid var(--grey-light);display:flex;align-items:flex-start;gap:5px;}
+  .ref-trigger:last-of-type{border-bottom:none;}
+  .tdot{font-size:0.55rem;margin-top:4px;flex-shrink:0;}
+  .ref-note-box{font-size:0.71rem;color:var(--grey);background:var(--grey-light);padding:5px 9px;border-radius:5px;margin-top:6px;line-height:1.4;}
+  .domain-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;}
+  .ds-chip{padding:7px 10px;border-radius:7px;text-align:center;border:1px solid;}
+  .ds-chip .dn{font-size:0.65rem;font-weight:700;text-transform:uppercase;}
+  .ds-chip .dv{font-size:1rem;font-weight:800;margin-top:1px;}
+  .ds-chip.ok{background:var(--green-light);border-color:var(--green-mid);color:var(--green);}
+  .ds-chip.flag{background:var(--red-light);border-color:var(--red-mid);color:var(--red);}
+  .ds-chip.grey{background:var(--grey-light);border-color:var(--grey-mid);color:var(--grey);}
+  .sec-lbl{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);margin:4px 0 6px;}
+  .empty-state{text-align:center;padding:30px 16px;color:var(--grey);}
+  .empty-state .ei{font-size:2.2rem;margin-bottom:8px;}
+  .empty-state p{font-size:0.82rem;}
+  .footer{text-align:center;font-size:0.67rem;color:var(--grey);padding:10px;border-top:1px solid var(--grey-mid);background:white;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🩺 Developmental Milestone Red Flag Screener</h1>
+    <p>Southampton General Hospital · Paediatrics</p>
+  </div>
+</div>
+<div class="disclaimer">
+  ⚠️ <strong>Clinical tool only.</strong> Use with full history, examination and parental concern. Always use corrected age for prematurity. Referral decisions should follow local trust pathways.
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-hd" style="background:var(--blue-light);color:var(--blue);">👶 Child Age</div>
+      <div class="card-bd">
+        <div class="age-big" id="ageDisplay">–</div>
+        <div class="age-sub" id="ageLabel">Enter age below</div>
+        <input type="range" class="age-slider" id="ageSlider" min="0" max="72" value="0" step="1" oninput="syncSlider()">
+        <div class="row" style="margin-top:4px;">
+          <input type="number" class="age-in" id="ageIn" min="0" max="72" placeholder="0" oninput="syncInput()">
+          <button class="ubtn active" id="btn-m" onclick="setUnit('m')">Mo</button>
+          <button class="ubtn" id="btn-y" onclick="setUnit('y')">Yr</button>
+          <button class="ubtn" id="btn-w" onclick="setUnit('w')">Wk</button>
+        </div>
+        <div class="tog" onclick="toggleCorrected()">
+          <input type="checkbox" id="corrCk">
+          <span>Use <strong>corrected age</strong> (preterm)</span>
+        </div>
+        <div id="gestRow" class="gest-row hidden">
+          <span style="font-size:.75rem;white-space:nowrap;color:var(--grey);font-weight:600;">Born at</span>
+          <input type="number" id="gestWks" min="23" max="36" placeholder="e.g. 32" oninput="calcCorrected()">
+          <span style="font-size:.75rem;color:var(--grey);font-weight:600;">weeks</span>
+        </div>
+        <div id="corrNote" class="corr-note hidden"></div>
+        <div class="reg-box">
+          <label><input type="checkbox" id="regCk" onchange="updateResults()">Skill regression noted</label>
+          <div class="sub">Loss of words, motor skills, social engagement</div>
+        </div>
+        <button class="btn-run" onclick="runAssessment()">▶ Run Milestone Screen</button>
+        <button class="btn-clr" onclick="clearAll()">✕ Clear All</button>
+        <div class="stat-row" id="statRow" style="display:none;margin-top:8px;">
+          <div class="sc bl"><div class="n" id="stTotal">0</div><div class="l">Shown</div></div>
+          <div class="sc or"><div class="n" id="stFlags">0</div><div class="l">Flagged</div></div>
+          <div class="sc gn"><div class="n" id="stAchieved">0</div><div class="l">Achieved</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip blue"><div class="tip-title">Corrected Age</div>Use corrected age for premature infants until at least 12–18 months (&lt;32 weeks → longer).</div>
+    <div class="tip orange"><div class="tip-title">OT Threshold</div>Refer if fine motor / functional skills ≥3 months behind expected (DBTH NHS).</div>
+    <div class="tip purple"><div class="tip-title">Multi-Domain Delay</div>Flags in ≥2 domains → Community Paeds urgently. Consider GDD, CP, chromosomal, metabolic.</div>
+    <div class="tip red"><div class="tip-title">Regression = Urgent</div>Any regression at any age → urgent paeds. Consider neurodegenerative, epileptic, metabolic, safeguarding.</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-area">
+
+    <!-- CHECKLIST -->
+    <div class="checklist-col" id="checklistCol">
+      <div class="empty-state" id="noMsMsg">
+        <div class="ei">👶</div>
+        <p>Enter the child's age and click <strong>Run Milestone Screen</strong> to generate the domain-based checklist.<br><br>Checking a later milestone will automatically mark all earlier milestones in that domain as achieved.</p>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-col">
+      <div class="empty-state" id="noResMsg">
+        <div class="ei">📋</div>
+        <p>Referral recommendations will appear here once you complete the milestone screen.</p>
+      </div>
+      <div id="resultsArea" class="hidden"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  Built for Southampton General Hospital. Based on NHS/RCPCH developmental guidance & Oxford Handbook of Paediatrics (2nd ed.). Not a substitute for clinical judgement. v2.0 — 2026.
+</div>
+
+<script>
+// ─── MILESTONE DATA ──────────────────────────────────────────────────────────
+// noCascade: true = standalone check (not part of a progression sequence)
+// urgency: urgent | soon | routine
+// referrals: salt | ot | physio | paeds | ophthalmology | audiology
+const MILESTONES = [
+  // ── GROSS MOTOR ──────────────────────────────────────────────────────────
+  {id:'gm01',domain:'gross_motor',expectedAge:1.5,redFlagAge:3,
+   text:'Lifts head briefly when prone',urgency:'urgent',referrals:['paeds','physio']},
+  {id:'gm02',domain:'gross_motor',expectedAge:1.5,redFlagAge:3,
+   text:'Reduced head lag when pulled to sit',urgency:'urgent',referrals:['paeds','physio'],
+   note:'Significant head lag at 4m → urgent paeds'},
+  {id:'gm03',domain:'gross_motor',expectedAge:1.5,redFlagAge:2,noCascade:true,
+   text:'Symmetrical limb movements (no asymmetry)',urgency:'urgent',referrals:['paeds'],
+   note:'Asymmetric spontaneous movement → refer urgently; consider birth injury, hemiplegia'},
+  {id:'gm04',domain:'gross_motor',expectedAge:3,redFlagAge:4,
+   text:'Lifts head & chest when prone (head at 90°)',urgency:'urgent',referrals:['paeds','physio']},
+  {id:'gm05',domain:'gross_motor',expectedAge:6,redFlagAge:7,
+   text:'Sits with support (tripod sit)',urgency:'soon',referrals:['paeds','physio']},
+  {id:'gm06',domain:'gross_motor',expectedAge:6,redFlagAge:8,
+   text:'Rolls front-to-back',urgency:'routine',referrals:['physio']},
+  {id:'gm07',domain:'gross_motor',expectedAge:9,redFlagAge:10,
+   text:'Sits unsupported',urgency:'urgent',referrals:['paeds','physio'],
+   note:'Not sitting by 9–10m = urgent paeds. Check CK if hypotonic.'},
+  {id:'gm08',domain:'gross_motor',expectedAge:9,redFlagAge:12,
+   text:'Commando crawls / crawls / bottom shuffles',urgency:'soon',referrals:['physio','paeds']},
+  {id:'gm09',domain:'gross_motor',expectedAge:12,redFlagAge:14,
+   text:'Cruises furniture; may take 1–2 independent steps',urgency:'soon',referrals:['physio','paeds']},
+  {id:'gm10',domain:'gross_motor',expectedAge:18,redFlagAge:18,
+   text:'Walks independently',urgency:'urgent',referrals:['paeds','physio'],
+   note:'Not walking by 18m = urgent paeds. Check CK (DMD). Consider CP, hypotonia.'},
+  {id:'gm11',domain:'gross_motor',expectedAge:18,redFlagAge:21,
+   text:'Walks up stairs with hand held',urgency:'routine',referrals:['physio']},
+  {id:'gm12',domain:'gross_motor',expectedAge:24,redFlagAge:30,
+   text:'Runs well (avoiding obstacles)',urgency:'soon',referrals:['paeds','physio']},
+  {id:'gm13',domain:'gross_motor',expectedAge:24,redFlagAge:28,
+   text:'Kicks a ball',urgency:'routine',referrals:['physio']},
+  {id:'gm14',domain:'gross_motor',expectedAge:36,redFlagAge:42,
+   text:'Climbs stairs with alternating feet',urgency:'routine',referrals:['physio']},
+  {id:'gm15',domain:'gross_motor',expectedAge:36,redFlagAge:42,
+   text:'Stands on one foot briefly',urgency:'routine',referrals:['physio']},
+  {id:'gm16',domain:'gross_motor',expectedAge:36,redFlagAge:30,noCascade:true,
+   text:'No persistent toe-walking (resolved by ~2 years)',urgency:'soon',referrals:['paeds','physio'],
+   note:'Persistent toe-walking after 2y → assess for CP, tight TA, ASD'},
+  {id:'gm17',domain:'gross_motor',expectedAge:48,redFlagAge:54,
+   text:'Hops on one foot; catches ball reliably',urgency:'routine',referrals:['physio']},
+  {id:'gm18',domain:'gross_motor',expectedAge:60,redFlagAge:66,
+   text:'Skips; walks on a line; mature gait',urgency:'routine',referrals:['physio']},
+
+  // ── FINE MOTOR ───────────────────────────────────────────────────────────
+  {id:'fm01',domain:'fine_motor',expectedAge:1.5,redFlagAge:3,
+   text:'Grasp reflex present; hands predominantly fisted',urgency:'soon',referrals:['paeds']},
+  {id:'fm02',domain:'fine_motor',expectedAge:3,redFlagAge:5,
+   text:'Hands open; brings hands together at midline',urgency:'soon',referrals:['ot','paeds']},
+  {id:'fm03',domain:'fine_motor',expectedAge:6,redFlagAge:6,
+   text:'Reaches for and grasps objects (palmar grasp)',urgency:'urgent',referrals:['ot','paeds'],
+   note:'Not reaching by 6m = urgent paeds referral'},
+  {id:'fm04',domain:'fine_motor',expectedAge:6,redFlagAge:8,
+   text:'Transfers object hand-to-hand',urgency:'soon',referrals:['ot']},
+  {id:'fm05',domain:'fine_motor',expectedAge:9,redFlagAge:9,
+   text:'Inferior pincer grip developing; pokes with index finger',urgency:'soon',referrals:['ot']},
+  {id:'fm06',domain:'fine_motor',expectedAge:12,redFlagAge:12,
+   text:'Mature pincer grip (thumb-tip to index-tip)',urgency:'urgent',referrals:['ot','paeds'],
+   note:'No pincer grip by 12m → urgent OT/paeds'},
+  {id:'fm07',domain:'fine_motor',expectedAge:12,redFlagAge:15,
+   text:'Releases objects voluntarily; bangs objects together',urgency:'routine',referrals:['ot']},
+  {id:'fm08',domain:'fine_motor',expectedAge:15,redFlagAge:18,
+   text:'Builds 2-block tower; scribbles; throws ball',urgency:'routine',referrals:['ot']},
+  {id:'fm09',domain:'fine_motor',expectedAge:18,redFlagAge:21,
+   text:'Builds 3-block tower; turns 2–3 pages at a time',urgency:'routine',referrals:['ot']},
+  {id:'fm10',domain:'fine_motor',expectedAge:18,redFlagAge:21,
+   text:'Removes shoes/socks independently',urgency:'routine',referrals:['ot']},
+  {id:'fm11',domain:'fine_motor',expectedAge:24,redFlagAge:27,
+   text:'Builds 6-block tower; imitates circular scribble',urgency:'routine',referrals:['ot']},
+  {id:'fm12',domain:'fine_motor',expectedAge:24,redFlagAge:27,
+   text:'Uses spoon and fork (with some spillage)',urgency:'routine',referrals:['ot']},
+  {id:'fm13',domain:'fine_motor',expectedAge:36,redFlagAge:42,
+   text:'Builds 9-block tower; copies a circle',urgency:'routine',referrals:['ot']},
+  {id:'fm14',domain:'fine_motor',expectedAge:36,redFlagAge:42,
+   text:'Uses scissors with assistance',urgency:'routine',referrals:['ot']},
+  {id:'fm15',domain:'fine_motor',expectedAge:48,redFlagAge:54,
+   text:'Copies cross and square; dresses independently (exc. laces)',urgency:'routine',referrals:['ot']},
+  {id:'fm16',domain:'fine_motor',expectedAge:60,redFlagAge:66,
+   text:'Copies triangle; uses knife and fork together; writes name',urgency:'routine',referrals:['ot']},
+
+  // ── COMMUNICATION ────────────────────────────────────────────────────────
+  {id:'sp01',domain:'communication',expectedAge:1.5,redFlagAge:1.5,
+   text:'Startles / alerts to loud sounds',urgency:'urgent',referrals:['audiology','paeds'],
+   note:'Absent startle response → urgent audiology referral'},
+  {id:'sp02',domain:'communication',expectedAge:3,redFlagAge:5,
+   text:'Coos and vocalises reciprocally',urgency:'routine',referrals:['salt']},
+  {id:'sp03',domain:'communication',expectedAge:6,redFlagAge:9,
+   text:'Babbles with consonant-vowel strings (ba-ba, da-da)',urgency:'soon',referrals:['salt','audiology']},
+  {id:'sp04',domain:'communication',expectedAge:6,redFlagAge:8,
+   text:'Laughs and squeals',urgency:'routine',referrals:['salt']},
+  {id:'sp05',domain:'communication',expectedAge:9,redFlagAge:12,
+   text:'Babbles with intonation (mama/dada non-specifically)',urgency:'soon',referrals:['salt','audiology']},
+  {id:'sp06',domain:'communication',expectedAge:9,redFlagAge:12,
+   text:'Turns to own name consistently',urgency:'soon',referrals:['salt','audiology']},
+  {id:'sp07',domain:'communication',expectedAge:12,redFlagAge:12,
+   text:'Babbling present by 12 months',urgency:'urgent',referrals:['salt','audiology','paeds'],
+   note:'No babbling by 12m = absolute red flag: ASD / hearing loss'},
+  {id:'sp08',domain:'communication',expectedAge:12,redFlagAge:15,
+   text:'Understands "no" and simple commands with gesture',urgency:'soon',referrals:['salt','audiology']},
+  {id:'sp09',domain:'communication',expectedAge:15,redFlagAge:18,
+   text:'3–6 words used appropriately; follows 1-step command without gesture',urgency:'soon',referrals:['salt']},
+  {id:'sp10',domain:'communication',expectedAge:18,redFlagAge:18,
+   text:'At least 1 clear meaningful word',urgency:'urgent',referrals:['salt','audiology','paeds'],
+   note:'No words by 18m = urgent SALT + audiology + paeds'},
+  {id:'sp11',domain:'communication',expectedAge:18,redFlagAge:24,
+   text:'10+ words; echoes last word heard',urgency:'soon',referrals:['salt']},
+  {id:'sp12',domain:'communication',expectedAge:24,redFlagAge:24,
+   text:'2-word phrases used spontaneously',urgency:'urgent',referrals:['salt','paeds'],
+   note:'No 2-word combinations by 24m = urgent SALT + paeds'},
+  {id:'sp13',domain:'communication',expectedAge:24,redFlagAge:24,
+   text:'50+ words in vocabulary',urgency:'urgent',referrals:['salt','audiology'],
+   note:'Fewer than 50 words at 24m → urgent SALT + audiology'},
+  {id:'sp14',domain:'communication',expectedAge:24,redFlagAge:30,
+   text:'Follows 2-step instructions without gesture',urgency:'soon',referrals:['salt','audiology']},
+  {id:'sp15',domain:'communication',expectedAge:36,redFlagAge:36,
+   text:'3-word sentences (subject-verb-object)',urgency:'urgent',referrals:['salt'],
+   note:'No 3-word sentences by 3y = urgent SALT'},
+  {id:'sp16',domain:'communication',expectedAge:36,redFlagAge:36,
+   text:'75% intelligible to unfamiliar listeners',urgency:'urgent',referrals:['salt'],
+   note:'<75% intelligible to strangers at 3y = urgent SALT'},
+  {id:'sp17',domain:'communication',expectedAge:36,redFlagAge:42,
+   text:'Asks "what" and "where" questions',urgency:'routine',referrals:['salt']},
+  {id:'sp18',domain:'communication',expectedAge:48,redFlagAge:48,
+   text:'Fully intelligible to unfamiliar listeners',urgency:'urgent',referrals:['salt'],
+   note:'Not fully intelligible by 4y = urgent SALT'},
+  {id:'sp19',domain:'communication',expectedAge:48,redFlagAge:54,
+   text:'4+ word sentences; asks "why"/"how"; tells stories',urgency:'routine',referrals:['salt']},
+  {id:'sp20',domain:'communication',expectedAge:60,redFlagAge:66,
+   text:'Fluent speech; complex sentences; fully age-appropriate',urgency:'routine',referrals:['salt']},
+
+  // ── SOCIAL / EMOTIONAL ───────────────────────────────────────────────────
+  {id:'so01',domain:'social',expectedAge:1.5,redFlagAge:2.5,
+   text:'Social smile (6–8 weeks)',urgency:'urgent',referrals:['paeds'],
+   note:'No social smile by 10 weeks = urgent paeds referral'},
+  {id:'so02',domain:'social',expectedAge:1.5,redFlagAge:1.5,
+   text:'Fixes and follows a face',urgency:'urgent',referrals:['ophthalmology','paeds'],
+   note:'Not fixing/following → urgent ophthalmology referral'},
+  {id:'so03',domain:'social',expectedAge:3,redFlagAge:3,
+   text:'Social smile well established',urgency:'urgent',referrals:['paeds']},
+  {id:'so04',domain:'social',expectedAge:3,redFlagAge:4,
+   text:'Follows moving object 180°',urgency:'urgent',referrals:['ophthalmology','paeds']},
+  {id:'so05',domain:'social',expectedAge:6,redFlagAge:8,
+   text:'Recognises familiar faces; stranger awareness emerging',urgency:'soon',referrals:['paeds']},
+  {id:'so06',domain:'social',expectedAge:9,redFlagAge:12,
+   text:'Waves bye-bye; plays peek-a-boo',urgency:'routine',referrals:['paeds']},
+  {id:'so07',domain:'social',expectedAge:9,redFlagAge:12,
+   text:'Stranger anxiety present',urgency:'routine',referrals:['paeds']},
+  {id:'so08',domain:'social',expectedAge:9,redFlagAge:9,noCascade:true,
+   text:'No early unilateral hand preference (<12 months)',urgency:'urgent',referrals:['paeds'],
+   note:'Early consistent hand preference <12m = hemiplegia until proven otherwise'},
+  {id:'so09',domain:'social',expectedAge:12,redFlagAge:18,
+   text:'Proto-declarative pointing (to share interest)',urgency:'soon',referrals:['paeds'],
+   note:'No pointing by 18m = refer for ASD assessment'},
+  {id:'so10',domain:'social',expectedAge:12,redFlagAge:15,
+   text:'Joint attention (follows point / shared gaze)',urgency:'soon',referrals:['paeds']},
+  {id:'so11',domain:'social',expectedAge:15,redFlagAge:18,
+   text:'Functional play (using objects correctly: cup, spoon)',urgency:'routine',referrals:['paeds']},
+  {id:'so12',domain:'social',expectedAge:18,redFlagAge:18,noCascade:true,
+   text:'Pointing present at 18 months',urgency:'urgent',referrals:['paeds'],
+   note:'No pointing at 18m is a red flag for ASD'},
+  {id:'so13',domain:'social',expectedAge:18,redFlagAge:24,
+   text:'Symbolic play (feeding doll; pretend phone)',urgency:'soon',referrals:['paeds']},
+  {id:'so14',domain:'social',expectedAge:18,redFlagAge:24,
+   text:'Points to 2–3 named body parts',urgency:'soon',referrals:['salt']},
+  {id:'so15',domain:'social',expectedAge:24,redFlagAge:30,
+   text:'Parallel play with other children',urgency:'routine',referrals:['paeds']},
+  {id:'so16',domain:'social',expectedAge:24,redFlagAge:24,noCascade:true,
+   text:'Declarative pointing present at 2 years',urgency:'urgent',referrals:['paeds'],
+   note:'No declarative pointing by 2y = ASD red flag'},
+  {id:'so17',domain:'social',expectedAge:24,redFlagAge:28,
+   text:'Imaginative / pretend play (cooking, shopping)',urgency:'soon',referrals:['paeds']},
+  {id:'so18',domain:'social',expectedAge:36,redFlagAge:36,
+   text:'Interactive / cooperative play with peers',urgency:'soon',referrals:['paeds'],
+   note:'No interactive play by 3y → ASD screening / paeds referral'},
+  {id:'so19',domain:'social',expectedAge:36,redFlagAge:42,
+   text:'Knows full name and age; can share with prompting',urgency:'routine',referrals:['paeds']},
+  {id:'so20',domain:'social',expectedAge:48,redFlagAge:54,
+   text:'Cooperative play; understands rules of games; separates easily',urgency:'routine',referrals:['paeds']},
+  {id:'so21',domain:'social',expectedAge:60,redFlagAge:66,
+   text:'Established friendships; follows complex game rules',urgency:'routine',referrals:['paeds']},
+];
+
+const DOMAIN_CFG = {
+  gross_motor:   {label:'Gross Motor',      icon:'🏃', color:'#1a56a0', bg:'#e8f0fb'},
+  fine_motor:    {label:'Fine Motor',       icon:'✋', color:'#6c3483', bg:'#f5eef8'},
+  communication: {label:'Speech & Language',icon:'💬', color:'#117a65', bg:'#e8f8f5'},
+  social:        {label:'Social & Emotional',icon:'❤️', color:'#c0392b', bg:'#fdecea'},
+};
+
+const REF_CFG = {
+  salt:         {label:'SALT',            full:'Speech & Language Therapy', icon:'💬'},
+  ot:           {label:'OT',              full:'Occupational Therapy',       icon:'✋'},
+  physio:       {label:'Physiotherapy',   full:'Community Physiotherapy',    icon:'🏃'},
+  paeds:        {label:'Community Paeds', full:'Community Paediatrics',      icon:'🩺'},
+  ophthalmology:{label:'Ophthalmology',   full:'Paediatric Ophthalmology',   icon:'👁️'},
+  audiology:    {label:'Audiology',       full:'Paediatric Audiology',       icon:'👂'},
+};
+
+const SERVICE_ORDER = ['paeds','salt','audiology','physio','ot','ophthalmology'];
+
+let currentAge = 0;
+let checkedDirect = new Set();  // IDs directly clicked by user
+let checkedAll = new Set();     // includes cascade
+let unit = 'm';
+let assessed = false;
+
+// ─── Age helpers ─────────────────────────────────────────────────────────────
+function setUnit(u) {
+  unit = u;
+  ['m','y','w'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===u));
+  syncInput();
+}
+function syncSlider() {
+  const v = +document.getElementById('ageSlider').value;
+  document.getElementById('ageIn').value = v;
+  currentAge = v; renderAgeDisplay(v);
+}
+function syncInput() {
+  let v = parseFloat(document.getElementById('ageIn').value)||0;
+  if (unit==='y') v = v*12;
+  if (unit==='w') v = v/4.33;
+  v = Math.round(Math.min(72, Math.max(0, v)));
+  document.getElementById('ageSlider').value = v;
+  currentAge = v; renderAgeDisplay(v);
+}
+function renderAgeDisplay(m) {
+  const el = document.getElementById('ageDisplay'), lb = document.getElementById('ageLabel');
+  if (!m && m!==0) { el.textContent='–'; lb.textContent='Enter age below'; return; }
+  if (m < 3) { el.textContent=Math.round(m*4.33)+'w'; lb.textContent=m.toFixed(1)+' months'; }
+  else if (m < 24) { el.textContent=m+'m'; const y=Math.floor(m/12),mo=m%12; lb.textContent=y>0?y+'yr '+mo+'mo':m+' months'; }
+  else { const y=Math.floor(m/12),mo=m%12; el.textContent=y+'yr'+(mo?' '+mo+'m':''); lb.textContent=m+' months'; }
+  calcCorrected();
+}
+function toggleCorrected() {
+  const c = document.getElementById('corrCk'); c.checked=!c.checked;
+  document.getElementById('gestRow').classList.toggle('hidden',!c.checked);
+  calcCorrected();
+}
+function calcCorrected() {
+  const note = document.getElementById('corrNote');
+  if (!document.getElementById('corrCk').checked) { note.classList.add('hidden'); return; }
+  const g = parseInt(document.getElementById('gestWks').value)||0;
+  if (!g) { note.classList.remove('hidden'); note.textContent='Enter gestation to calculate corrected age.'; return; }
+  const pw = 40-g, ca = Math.max(0, currentAge-(pw/4.33));
+  note.classList.remove('hidden');
+  note.textContent = `Corrected age ≈ ${ca.toFixed(1)} months (${pw}w premature). Milestones based on corrected age.`;
+}
+function getEffectiveAge() {
+  if (!document.getElementById('corrCk').checked) return currentAge;
+  const g = parseInt(document.getElementById('gestWks').value)||40;
+  return Math.max(0, currentAge-((40-g)/4.33));
+}
+function ageLabel(m) {
+  if (m <= 2) return Math.round(m*4.33)+'w';
+  if (m < 24) return m+'m';
+  return Math.floor(m/12)+'yr'+(m%12?' '+m%12+'m':'');
+}
+
+// ─── Assessment ───────────────────────────────────────────────────────────────
+function runAssessment() {
+  assessed = true;
+  checkedDirect.clear(); checkedAll.clear();
+  renderChecklist();
+  updateResults();
+}
+
+function domainMilestonesSorted(domain, excludeNoCascade=false) {
+  return MILESTONES
+    .filter(m => m.domain===domain && (excludeNoCascade ? !m.noCascade : true) && m.expectedAge <= Math.max(getEffectiveAge()+3, 3))
+    .sort((a,b) => a.expectedAge - b.expectedAge);
+}
+
+function toggleMilestone(id) {
+  const ms = MILESTONES.find(m => m.id===id);
+  if (!ms || !assessed) return;
+  const age = getEffectiveAge();
+
+  if (ms.noCascade) {
+    if (checkedAll.has(id)) { checkedAll.delete(id); checkedDirect.delete(id); }
+    else { checkedAll.add(id); checkedDirect.add(id); }
+    refreshItemUI(id);
+  } else {
+    const seq = domainMilestonesSorted(ms.domain, true);
+    const idx = seq.findIndex(m => m.id===id);
+    if (checkedAll.has(id)) {
+      // Uncheck this + all later in sequence
+      for (let i=idx; i<seq.length; i++) {
+        checkedAll.delete(seq[i].id);
+        checkedDirect.delete(seq[i].id);
+        refreshItemUI(seq[i].id);
+      }
+    } else {
+      // Check this + all earlier in sequence (cascade)
+      for (let i=0; i<=idx; i++) {
+        checkedAll.add(seq[i].id);
+        if (i===idx) checkedDirect.add(seq[i].id);
+        else checkedDirect.delete(seq[i].id); // mark as cascade not direct
+        refreshItemUI(seq[i].id);
+      }
+    }
+  }
+  updateResults();
+}
+
+function refreshItemUI(id) {
+  const ms = MILESTONES.find(m=>m.id===id);
+  const el = document.getElementById('ms-'+id);
+  if (!el) return;
+  const cb = document.getElementById('cb-'+id);
+  const dot = document.getElementById('dot-'+id);
+  const age = getEffectiveAge();
+  const isAchieved = checkedAll.has(id);
+  const isDirect = checkedDirect.has(id);
+  const isCascade = isAchieved && !isDirect && !ms.noCascade;
+  const isOverdue = !isAchieved && !ms.noCascade && ms.redFlagAge <= age;
+  const isWarn = !isAchieved && !ms.noCascade && ms.redFlagAge > age && ms.expectedAge <= age;
+
+  el.className = 'ms-item' + (isDirect?' achieved':isCascade?' cascade-achieved':isOverdue?' flagged':isWarn?' warned':'');
+  if (cb) cb.checked = isAchieved;
+  if (dot) dot.className = 'dot' + (isDirect?' achieved':isCascade?' cascade':isOverdue?' flagged':isWarn?' warned':'');
+
+  const pillEl = document.getElementById('pill-'+id);
+  if (pillEl) {
+    if (isCascade) { pillEl.className='flag-pill implied'; pillEl.textContent='implied'; }
+    else if (isAchieved) { pillEl.className='flag-pill implied'; pillEl.textContent='✓'; }
+    else if (isOverdue) { pillEl.className=`flag-pill ${ms.urgency}`; pillEl.textContent=ms.urgency.toUpperCase(); }
+    else { pillEl.className='flag-pill'; pillEl.textContent=''; }
+  }
+  if (ms.noCascade) {
+    const sEl = document.getElementById('pill-'+id);
+    if (sEl && !isAchieved && ms.redFlagAge <= age) { sEl.className=`flag-pill ${ms.urgency}`; sEl.textContent=ms.urgency.toUpperCase(); }
+  }
+}
+
+function renderChecklist() {
+  const age = getEffectiveAge();
+  const col = document.getElementById('checklistCol');
+  document.getElementById('noMsMsg').classList.add('hidden');
+  col.innerHTML = '';
+
+  const domains = ['gross_motor','fine_motor','communication','social'];
+  domains.forEach(domain => {
+    const cfg = DOMAIN_CFG[domain];
+    const dms = MILESTONES.filter(m => m.domain===domain && m.expectedAge <= Math.max(age+3, 3))
+                          .sort((a,b) => a.expectedAge - b.expectedAge);
+    if (!dms.length) return;
+
+    const card = document.createElement('div');
+    card.className = 'domain-card';
+    card.id = 'dcard-'+domain;
+
+    const hd = document.createElement('div');
+    hd.className = 'domain-hd';
+    hd.style.background = cfg.bg;
+    hd.innerHTML = `<span class="domain-icon-big">${cfg.icon}</span>
+      <span class="domain-title" style="color:${cfg.color}">${cfg.label}</span>
+      <span class="domain-badges" id="dbadges-${domain}"><span class="dbadge empty">–</span></span>
+      <span class="collapse-arrow open" id="darr-${domain}">▼</span>`;
+    hd.onclick = () => toggleDomain(domain);
+    card.appendChild(hd);
+
+    const list = document.createElement('div');
+    list.className = 'milestone-list';
+    list.id = 'dlist-'+domain;
+
+    dms.forEach(m => {
+      const isOverdue = m.redFlagAge <= age && !m.noCascade;
+      const isWarn = m.redFlagAge > age && m.expectedAge <= age && !m.noCascade;
+      const chipClass = isOverdue ? 'overdue' : (Math.abs(m.expectedAge - age) < 3 ? 'current' : '');
+
+      const row = document.createElement('div');
+      row.className = 'ms-item' + (isOverdue?' flagged': isWarn?' warned':'');
+      row.id = 'ms-'+m.id;
+
+      row.innerHTML = `
+        <div class="ms-age"><span class="age-chip ${chipClass}">${ageLabel(m.expectedAge)}</span></div>
+        <div class="ms-dot"><div class="dot ${isOverdue?'flagged':isWarn?'warned':''}" id="dot-${m.id}"></div></div>
+        <div class="ms-content" onclick="toggleMilestone('${m.id}')">
+          <input type="checkbox" class="ms-cb" id="cb-${m.id}" onclick="event.stopPropagation();toggleMilestone('${m.id}')">
+          <div style="flex:1">
+            <div class="ms-text">${m.text}</div>
+            ${m.note ? `<div class="ms-note">${m.note}</div>` : ''}
+          </div>
+          <div class="ms-right">
+            <span class="flag-pill ${isOverdue?m.urgency:''}" id="pill-${m.id}">${isOverdue?m.urgency.toUpperCase():''}</span>
+            ${m.noCascade ? '<span class="flag-pill standalone">standalone</span>' : ''}
+          </div>
+        </div>`;
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    col.appendChild(card);
+  });
+}
+
+function toggleDomain(domain) {
+  const list = document.getElementById('dlist-'+domain);
+  const arr = document.getElementById('darr-'+domain);
+  const hidden = list.style.display === 'none';
+  list.style.display = hidden ? '' : 'none';
+  arr.classList.toggle('open', hidden);
+}
+
+function updateDomainBadges() {
+  const age = getEffectiveAge();
+  const domains = ['gross_motor','fine_motor','communication','social'];
+  domains.forEach(domain => {
+    const dms = MILESTONES.filter(m => m.domain===domain && m.expectedAge <= Math.max(age+3, 3));
+    const flags = dms.filter(m => !checkedAll.has(m.id) && m.redFlagAge <= age);
+    const badgesEl = document.getElementById('dbadges-'+domain);
+    const card = document.getElementById('dcard-'+domain);
+    if (!badgesEl || !card) return;
+    if (flags.length === 0) {
+      badgesEl.innerHTML = '<span class="dbadge ok">✓ No flags</span>';
+      card.classList.remove('has-flags','has-warns');
+    } else {
+      const hasU = flags.some(f=>f.urgency==='urgent');
+      badgesEl.innerHTML = `<span class="dbadge ${hasU?'flag':'warn'}">${flags.length} flag${flags.length>1?'s':''}</span>`;
+      card.classList.toggle('has-flags', hasU);
+      card.classList.toggle('has-warns', !hasU);
+    }
+  });
+}
+
+// ─── Results ─────────────────────────────────────────────────────────────────
+function updateResults() {
+  if (!assessed) return;
+  const age = getEffectiveAge();
+  const regression = document.getElementById('regCk').checked;
+
+  const relevant = MILESTONES.filter(m => m.expectedAge <= Math.max(age+3, 3));
+  const total = relevant.length;
+  const achieved = relevant.filter(m => checkedAll.has(m.id)).length;
+  const triggers = relevant.filter(m => !checkedAll.has(m.id) && m.redFlagAge <= age);
+
+  document.getElementById('statRow').style.display = 'flex';
+  document.getElementById('stTotal').textContent = total;
+  document.getElementById('stFlags').textContent = triggers.length + (regression?1:0);
+  document.getElementById('stAchieved').textContent = achieved;
+
+  updateDomainBadges();
+
+  // Build referral map
+  const refMap = {};
+  triggers.forEach(m => {
+    m.referrals.forEach(r => {
+      if (!refMap[r]) refMap[r] = {urgent:[],soon:[],routine:[]};
+      refMap[r][m.urgency].push(m);
+    });
+  });
+  if (regression) {
+    if (!refMap['paeds']) refMap['paeds'] = {urgent:[],soon:[],routine:[]};
+    refMap['paeds'].urgent.push({text:'Skill regression reported',urgency:'urgent',note:'Requires urgent paediatric review — consider neurodegenerative, metabolic, epileptic, safeguarding'});
+  }
+
+  const domainFlags = {};
+  triggers.forEach(m => { domainFlags[m.domain]=(domainFlags[m.domain]||0)+1; });
+  const numFlagDomains = Object.keys(domainFlags).length;
+  if (numFlagDomains >= 2 && !refMap['paeds']) refMap['paeds']={urgent:[],soon:[],routine:[]};
+
+  const area = document.getElementById('resultsArea');
+  document.getElementById('noResMsg').classList.add('hidden');
+  area.classList.remove('hidden');
+
+  const hasAny = Object.keys(refMap).length > 0 || regression;
+  if (!hasAny) {
+    area.innerHTML = `
+      <div class="status-banner all-clear"><div class="status-icon">✅</div>
+        <div class="status-text"><h3>No Red Flags</h3><p>All assessed milestones achieved. Continue routine surveillance.</p></div>
+      </div>
+      <div class="tip blue" style="margin-top:4px;"><strong>Safety-net:</strong> Always take parental concern seriously. Review if concerns persist.</div>`;
+    return;
+  }
+
+  const hasUrgent = regression || triggers.some(t=>t.urgency==='urgent');
+  const statusClass = hasUrgent ? 'urgent-banner' : 'concerns';
+  const statusIcon = hasUrgent ? '🚨' : '⚠️';
+  const statusTitle = hasUrgent ? 'Urgent Referral(s) Indicated' : 'Concerns — Referral Recommended';
+  const statusDesc = `${triggers.length} milestone(s) not achieved.${numFlagDomains>=2?' ⚠️ '+numFlagDomains+' domains affected — consider GDD.':''}`;
+
+  let html = `<div class="status-banner ${statusClass}">
+    <div class="status-icon">${statusIcon}</div>
+    <div class="status-text"><h3>${statusTitle}</h3><p>${statusDesc}</p></div>
+  </div>`;
+
+  if (numFlagDomains >= 2) {
+    html += `<div class="tip red"><strong>Multi-domain delay (${numFlagDomains} domains):</strong> Refer Community Paediatrics urgently. Consider: chromosomal microarray, metabolic screen, neuroimaging, formal hearing/vision assessment.</div>`;
+  }
+
+  // Domain summary
+  html += `<div class="sec-lbl">Domain Summary</div><div class="domain-summary">`;
+  Object.entries(DOMAIN_CFG).forEach(([domain,cfg]) => {
+    const n = domainFlags[domain]||0;
+    const hasDomainMs = MILESTONES.some(m=>m.domain===domain && m.expectedAge<=Math.max(age+3,3));
+    const chipClass = n>0 ? 'flag' : hasDomainMs ? 'ok' : 'grey';
+    html += `<div class="ds-chip ${chipClass}"><div class="dn">${cfg.icon} ${cfg.label}</div><div class="dv">${n>0?n+' flag'+(n>1?'s':''):'✓ OK'}</div></div>`;
+  });
+  html += '</div>';
+
+  html += `<div class="sec-lbl">Referral Actions</div>`;
+
+  const refNotes = {
+    salt:'Follow local SALT pathway. Confirm newborn hearing screen status. For bilingual children: expressive delay may be 3–6m but receptive delay is always significant.',
+    ot:'Refer if fine motor / functional skills ≥3 months behind expected age (DBTH NHS). Note concerns with self-care, feeding, and pencil grip.',
+    physio:'Include gross motor trajectory. If not walking by 18m: check CK to screen for Duchenne muscular dystrophy.',
+    paeds:'Refer Community Paediatrics. Consider same-day paeds if regression, no head control, or suspected hemiplegia. Document birth history, family history, parental concern.',
+    ophthalmology:'Refer paediatric ophthalmology. Check red reflex. Urgent if absent red reflex or squint.',
+    audiology:'Refer paediatric audiology. Confirm newborn hearing screen result. Consider tympanometry (glue ear).',
+  };
+
+  SERVICE_ORDER.forEach(svc => {
+    if (!refMap[svc]) return;
+    const cfg = REF_CFG[svc];
+    const uItems=[...refMap[svc].urgent], sItems=[...refMap[svc].soon], rItems=[...refMap[svc].routine];
+    const allItems = [...uItems,...sItems,...rItems];
+    if (!allItems.length) return;
+    const topU = uItems.length?'urgent':sItems.length?'soon':'routine';
+    const urgLabel = topU==='urgent'?'🔴 URGENT — Same day / within 48h':topU==='soon'?'🟠 SOON — Within 2–4 weeks':'🟡 ROUTINE — Standard pathway';
+
+    html += `<div class="ref-card ${topU}">
+      <div class="ref-hd">
+        <span style="font-size:1.2rem">${cfg.icon}</span>
+        <div style="flex:1"><div class="ref-org">${cfg.label} — ${cfg.full}</div>
+          <div class="ref-urgency">${urgLabel}</div></div>
+      </div>
+      <div class="ref-body">`;
+    allItems.forEach(m => {
+      html += `<div class="ref-trigger">
+        <span class="tdot" style="color:${topU==='urgent'?'var(--red)':topU==='soon'?'var(--orange)':'var(--yellow)'}">●</span>
+        <div><div>${m.text}</div>${m.note?`<div style="font-size:.7rem;color:var(--grey);margin-top:1px">${m.note}</div>`:''}</div>
+      </div>`;
+    });
+    if (refNotes[svc]) html += `<div class="ref-note-box">📝 ${refNotes[svc]}</div>`;
+    html += '</div></div>';
+  });
+
+  html += `<div class="tip blue" style="margin-top:4px;"><strong>Safety-net:</strong> Parental concern warrants referral even without meeting strict thresholds. Document and review.</div>`;
+  area.innerHTML = html;
+}
+
+function clearAll() {
+  checkedDirect.clear(); checkedAll.clear(); assessed = false;
+  currentAge = 0;
+  document.getElementById('ageIn').value='';
+  document.getElementById('ageSlider').value=0;
+  document.getElementById('ageDisplay').textContent='–';
+  document.getElementById('ageLabel').textContent='Enter age below';
+  document.getElementById('regCk').checked=false;
+  document.getElementById('corrCk').checked=false;
+  document.getElementById('gestRow').classList.add('hidden');
+  document.getElementById('corrNote').classList.add('hidden');
+  document.getElementById('statRow').style.display='none';
+  document.getElementById('checklistCol').innerHTML='<div class="empty-state" id="noMsMsg"><div class="ei">👶</div><p>Enter the child\'s age and click <strong>Run Milestone Screen</strong> to generate the domain-based checklist.<br><br>Checking a later milestone will automatically mark all earlier milestones in that domain as achieved.</p></div>';
+  document.getElementById('noResMsg').classList.remove('hidden');
+  document.getElementById('resultsArea').classList.add('hidden');
+  document.getElementById('resultsArea').innerHTML='';
+}
+</script>
+</body>
+</html>

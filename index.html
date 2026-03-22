@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paediatric Tools</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      color: #1a2e44;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a2e44 0%, #2563a8 100%);
+      color: white;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 1rem;
+      opacity: 0.75;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(37, 99, 168, 0.15);
+      border-color: #93c5fd;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .card .arrow {
+      margin-top: auto;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2563a8;
+      letter-spacing: 0.3px;
+    }
+
+    /* Colour themes per card */
+    .blue   .card-icon { background: #dbeafe; }
+    .teal   .card-icon { background: #ccfbf1; }
+    .purple .card-icon { background: #ede9fe; }
+    .red    .card-icon { background: #fee2e2; }
+    .green  .card-icon { background: #dcfce7; }
+    .orange .card-icon { background: #ffedd5; }
+    .pink   .card-icon { background: #fce7f3; }
+
+    .blue   h2 { color: #1e40af; }
+    .teal   h2 { color: #0f766e; }
+    .purple h2 { color: #6d28d9; }
+    .red    h2 { color: #b91c1c; }
+    .green  h2 { color: #15803d; }
+    .orange h2 { color: #c2410c; }
+    .pink   h2 { color: #be185d; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🩺 Paediatric Clinical Tools</h1>
+    <p>Quick-access calculators and decision aids for clinical use</p>
+  </header>
+
+  <main>
+    <div class="grid">
+
+      <a href="/fluid-calculator/" class="card blue">
+        <div class="card-icon">💧</div>
+        <h2>Fluid Calculator</h2>
+        <p>Holliday-Segar maintenance fluid calculation by weight.</p>
+        <span class="arrow">Open tool →</span>
+      </a>
+
+      <a href="/renal-fluid-calculator/" class="card teal">
+        <div class="card-icon">🫘</div>
+        <h2>Renal Fluid Calculator</h2>
+        <p>Fluid management adjusted for renal impairment and restriction.</p>
+        <span class="arrow">Open tool →</span>
+      </a>
+
+      <a href="/qtc-calculator/" class="card purple">
+        <div class="card-icon">❤️</div>
+        <h2>QTc Calculator</h2>
+        <p>Corrected QT interval using Bazett and Fridericia formulae.</p>
+        <span class="arrow">Open tool →</span>
+      </a>
+
+      <a href="/safeguarding-calculator/" class="card red">
+        <div class="card-icon">🛡️</div>
+        <h2>Safeguarding Calculator</h2>
+        <p>Age and date calculations for safeguarding assessments.</p>
+        <span class="arrow">Open tool →</span>
+      </a>
+
+      <a href="/developmental-milestones/" class="card green">
+        <div class="card-icon">🧒</div>
+        <h2>Developmental Milestones</h2>
+        <p>Age-appropriate milestone reference across all developmental domains.</p>
+        <span class="arrow">Open tool →</span>
+      </a>
+
+      <a href="/seizure-timer/" class="card orange">
+        <div class="card-icon">⏱️</div>
+        <h2>Seizure Timer</h2>
+        <p>Timed seizure protocol with escalation prompts and logging.</p>
+        <span class="arrow">Open tool →</span>
+      </a>
+
+      <a href="/sbar-generator/" class="card pink">
+        <div class="card-icon">📋</div>
+        <h2>SBAR Generator</h2>
+        <p>Structured handover and referral communication builder.</p>
+        <span class="arrow">Open tool →</span>
+      </a>
+
+    </div>
+  </main>
+
+  <footer>
+    For clinical decision support only — always apply clinical judgement.
+  </footer>
+
+</body>
+</html>

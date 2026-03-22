@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAI Fracture Red Flag Checker</title>
+<style>
+  :root {
+    --red: #c0392b;
+    --amber: #e67e22;
+    --green: #27ae60;
+    --red-bg: #fdf2f2;
+    --amber-bg: #fef9f0;
+    --green-bg: #f0faf4;
+    --border: #dde3ea;
+    --text: #1a2330;
+    --muted: #6b7c93;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --primary: #1a56db;
+    --primary-light: #ebf0ff;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  header {
+    background: #0e2a5c;
+    color: white;
+    padding: 18px 24px 16px;
+    border-bottom: 4px solid #1a56db;
+  }
+  header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+  header p { font-size: 0.82rem; opacity: 0.75; margin-top: 2px; }
+  .warning-banner {
+    background: #fff3cd;
+    border-left: 4px solid #f59e0b;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    color: #7c4a00;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .warning-banner span { flex-shrink: 0; font-size: 1rem; }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 12px 18px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header .step {
+    width: 26px; height: 26px;
+    background: #0e2a5c;
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .card-header h2 { font-size: 0.95rem; font-weight: 600; }
+  .card-body { padding: 16px 18px; }
+
+  /* Form elements */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group:last-child { margin-bottom: 0; }
+  label.field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  input[type="number"], select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  .select-wrapper { position: relative; }
+  .select-wrapper::after {
+    content: '▾';
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted); pointer-events: none;
+    font-size: 0.8rem;
+  }
+  .radio-group, .toggle-group {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .radio-btn {
+    padding: 7px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    background: white;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+  .radio-btn.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .toggle-btn {
+    padding: 7px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    background: white;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .toggle-btn.yes.selected { border-color: var(--red); background: var(--red-bg); color: var(--red); font-weight: 600; }
+  .toggle-btn.no.selected { border-color: var(--green); background: var(--green-bg); color: var(--green); font-weight: 600; }
+
+  /* Fracture items */
+  .fracture-tier { margin-bottom: 14px; }
+  .tier-label {
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tier-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  .tier-high .tier-dot { background: var(--red); }
+  .tier-moderate .tier-dot { background: var(--amber); }
+  .tier-lower .tier-dot { background: var(--green); }
+  .tier-high .tier-label { color: var(--red); }
+  .tier-moderate .tier-label { color: var(--amber); }
+  .tier-lower .tier-label { color: #2e7d52; }
+
+  .fracture-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+  .fracture-item:hover { border-color: #a0aec0; }
+  .fracture-item.selected.high { border-color: var(--red); background: var(--red-bg); }
+  .fracture-item.selected.moderate { border-color: var(--amber); background: var(--amber-bg); }
+  .fracture-item.selected.lower { border-color: var(--green); background: var(--green-bg); }
+  .fracture-item input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--primary); }
+  .fracture-name { font-size: 0.88rem; font-weight: 600; }
+  .fracture-note { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  /* Checkbox flags */
+  .flag-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+  .flag-item:hover { border-color: #a0aec0; }
+  .flag-item.selected { border-color: var(--amber); background: var(--amber-bg); }
+  .flag-item input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--amber); }
+  .flag-item span { font-size: 0.88rem; }
+
+  .assoc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+  .assoc-item:hover { border-color: #a0aec0; }
+  .assoc-item.selected { border-color: var(--red); background: var(--red-bg); }
+  .assoc-item input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--red); }
+  .assoc-item span { font-size: 0.88rem; }
+
+  /* Action button */
+  .btn-assess {
+    width: 100%;
+    padding: 14px;
+    background: #0e2a5c;
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s;
+    margin-top: 4px;
+  }
+  .btn-assess:hover { background: #1a3e7c; }
+
+  /* Output */
+  #output { display: none; }
+  .result-banner {
+    border-radius: 10px 10px 0 0;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .result-banner.lower { background: var(--green-bg); border-bottom: 3px solid var(--green); }
+  .result-banner.moderate { background: var(--amber-bg); border-bottom: 3px solid var(--amber); }
+  .result-banner.high { background: var(--red-bg); border-bottom: 3px solid var(--red); }
+  .result-banner.very-high { background: #2d0a0a; border-bottom: 3px solid #7b0000; }
+  .result-banner.very-high .result-title { color: #ff6b6b; }
+  .result-banner.very-high .result-subtitle { color: #ffb3b3; }
+  .result-icon { font-size: 2.2rem; }
+  .result-title { font-size: 1.1rem; font-weight: 700; }
+  .result-subtitle { font-size: 0.85rem; margin-top: 2px; opacity: 0.85; }
+
+  .output-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .output-section:last-child { border-bottom: none; }
+  .output-section h3 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 10px; }
+  .flag-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin: 3px;
+  }
+  .flag-tag.red { background: var(--red-bg); color: var(--red); border: 1px solid #f5c6c6; }
+  .flag-tag.amber { background: var(--amber-bg); color: #a05a00; border: 1px solid #f5ddb3; }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .action-item:last-child { border-bottom: none; }
+  .action-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .caveat-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 14px 18px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .copy-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🦴 NAI Fracture Red Flag Checker</h1>
+  <p>Non-Accidental Injury Risk Stratification Tool — Paediatric Emergency Department</p>
+</header>
+
+<div class="warning-banner">
+  <span>⚠️</span>
+  <div><strong>Clinical decision support only.</strong> This tool does not diagnose NAI. Output must be interpreted alongside full clinical assessment, senior review, and local safeguarding pathways. All sessions are stateless — no patient data is stored.</div>
+</div>
+
+<main>
+
+  <!-- SECTION 1: Patient Context -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step">1</div>
+      <h2>Patient Context</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Age (months)</label>
+          <input type="number" id="age" min="0" max="216" placeholder="e.g. 6">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Known bone fragility condition?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn no selected" data-group="boneFragility" data-value="no" onclick="selectToggle(this)">No</div>
+            <div class="toggle-btn yes" data-group="boneFragility" data-value="yes" onclick="selectToggle(this)">Yes (OI / rickets / metabolic)</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Developmental mobility</label>
+        <div class="radio-group" id="mobilityGroup">
+          <div class="radio-btn" data-value="not_rolling" onclick="selectRadio(this, 'mobilityGroup')">Not yet rolling</div>
+          <div class="radio-btn" data-value="rolling" onclick="selectRadio(this, 'mobilityGroup')">Rolling</div>
+          <div class="radio-btn" data-value="crawling" onclick="selectRadio(this, 'mobilityGroup')">Crawling</div>
+          <div class="radio-btn" data-value="cruising" onclick="selectRadio(this, 'mobilityGroup')">Cruising</div>
+          <div class="radio-btn" data-value="walking" onclick="selectRadio(this, 'mobilityGroup')">Walking</div>
+          <div class="radio-btn" data-value="running" onclick="selectRadio(this, 'mobilityGroup')">Running</div>
+          <div class="radio-btn" data-value="unknown" onclick="selectRadio(this, 'mobilityGroup')">Unknown / not assessed</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Recent CPR performed?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn no selected" data-group="cpr" data-value="no" onclick="selectToggle(this)">No</div>
+            <div class="toggle-btn yes" data-group="cpr" data-value="yes" onclick="selectToggle(this)">Yes</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Fracture found incidentally?</label>
+          <div class="toggle-group">
+            <div class="toggle-btn no selected" data-group="incidental" data-value="no" onclick="selectToggle(this)">No</div>
+            <div class="toggle-btn yes" data-group="incidental" data-value="yes" onclick="selectToggle(this)">Yes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Fracture Type -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step">2</div>
+      <h2>Fracture Type(s) Present</h2>
+    </div>
+    <div class="card-body">
+      <div class="fracture-tier tier-high">
+        <div class="tier-label"><div class="tier-dot"></div>High Specificity for Abuse</div>
+        <div class="fracture-item high" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="high" data-key="cml">
+          <div><div class="fracture-name">Classic metaphyseal lesion (CML) / bucket-handle fracture</div><div class="fracture-note">Corner/bucket-handle appearance at metaphysis. High specificity for inflicted injury in infants.</div></div>
+        </div>
+        <div class="fracture-item high" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="high" data-key="posterior_rib">
+          <div><div class="fracture-name">Posterior rib fracture</div><div class="fracture-note">Caused by forceful anteroposterior thoracic compression. Generally considered a hallmark of NAI in infants.</div></div>
+        </div>
+        <div class="fracture-item high" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="high" data-key="spinous_process">
+          <div><div class="fracture-name">Spinous process fracture</div><div class="fracture-note">Rare; high association with inflicted injury. Often identified on skeletal survey.</div></div>
+        </div>
+        <div class="fracture-item high" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="high" data-key="scapula">
+          <div><div class="fracture-name">Scapular / sternal fracture</div><div class="fracture-note">Require significant force; rare accidental causes in infants.</div></div>
+        </div>
+      </div>
+
+      <div class="fracture-tier tier-moderate">
+        <div class="tier-label"><div class="tier-dot"></div>Moderate Specificity — Context Dependent</div>
+        <div class="fracture-item moderate" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="moderate" data-key="multi_age">
+          <div><div class="fracture-name">Multiple fractures at different stages of healing</div><div class="fracture-note">Implies repeated injury episodes. Requires correlation with history.</div></div>
+        </div>
+        <div class="fracture-item moderate" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="moderate" data-key="bilateral">
+          <div><div class="fracture-name">Bilateral long bone fractures</div><div class="fracture-note">Bilateral symmetrical injuries without plausible accidental mechanism.</div></div>
+        </div>
+        <div class="fracture-item moderate" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="moderate" data-key="epiphyseal">
+          <div><div class="fracture-name">Epiphyseal separation</div><div class="fracture-note">Traction/twisting mechanism. Requires significant force in young children.</div></div>
+        </div>
+        <div class="fracture-item moderate" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="moderate" data-key="femur_non_walker">
+          <div><div class="fracture-name">Femoral fracture in a non-ambulant child</div><div class="fracture-note">A femoral fracture without a plausible mechanism in a pre-walking child is concerning.</div></div>
+        </div>
+        <div class="fracture-item moderate" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="moderate" data-key="lateral_rib">
+          <div><div class="fracture-name">Multiple rib fractures (lateral/anterior)</div><div class="fracture-note">Less specific than posterior ribs, but multiple rib fractures without major trauma are suspicious.</div></div>
+        </div>
+      </div>
+
+      <div class="fracture-tier tier-lower">
+        <div class="tier-label"><div class="tier-dot"></div>Lower Specificity — Highly Context Dependent</div>
+        <div class="fracture-item lower" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="lower" data-key="skull">
+          <div><div class="fracture-name">Skull fracture</div><div class="fracture-note">Can occur accidentally. Complex, bilateral, or depressed pattern raises concern. Correlate with mechanism.</div></div>
+        </div>
+        <div class="fracture-item lower" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="lower" data-key="spiral_long_bone">
+          <div><div class="fracture-name">Spiral / transverse long bone fracture</div><div class="fracture-note">Toddler's fracture is a common accidental injury. Assess mechanism and developmental stage carefully.</div></div>
+        </div>
+        <div class="fracture-item lower" onclick="toggleFracture(this)">
+          <input type="checkbox" data-tier="lower" data-key="clavicle">
+          <div><div class="fracture-name">Clavicle fracture</div><div class="fracture-note">Common accidental injury; rarely alone raises concern. Context important.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: History Flags -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step">3</div>
+      <h2>History Assessment</h2>
+    </div>
+    <div class="card-body">
+      <div class="flag-item" onclick="toggleFlag(this)">
+        <input type="checkbox" data-key="no_history">
+        <span>History is absent, vague, or no explanation given for the fracture</span>
+      </div>
+      <div class="flag-item" onclick="toggleFlag(this)">
+        <input type="checkbox" data-key="changing_history">
+        <span>History has changed between accounts or between different carers</span>
+      </div>
+      <div class="flag-item" onclick="toggleFlag(this)">
+        <input type="checkbox" data-key="implausible_mechanism">
+        <span>Described mechanism is biomechanically implausible for the fracture type</span>
+      </div>
+      <div class="flag-item" onclick="toggleFlag(this)">
+        <input type="checkbox" data-key="dev_inconsistent">
+        <span>Mechanism is inconsistent with the child's developmental stage (e.g. "fell off sofa" in a 2-month-old)</span>
+      </div>
+      <div class="flag-item" onclick="toggleFlag(this)">
+        <input type="checkbox" data-key="delayed_presentation">
+        <span>Unexplained delay in seeking medical attention</span>
+      </div>
+      <div class="flag-item" onclick="toggleFlag(this)">
+        <input type="checkbox" data-key="different_histories">
+        <span>Different accounts given to different professionals (ED, GP, ambulance)</span>
+      </div>
+      <div class="flag-item" onclick="toggleFlag(this)">
+        <input type="checkbox" data-key="carer_blamed_child">
+        <span>Injury attributed to another child or the child themselves in an implausible way</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Associated Injuries -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step">4</div>
+      <h2>Associated Injuries & Features</h2>
+    </div>
+    <div class="card-body">
+      <div class="assoc-item" onclick="toggleAssoc(this)">
+        <input type="checkbox" data-key="bruising_non_mobile">
+        <span>Bruising in a non-mobile infant ("those who don't cruise, don't bruise")</span>
+      </div>
+      <div class="assoc-item" onclick="toggleAssoc(this)">
+        <input type="checkbox" data-key="retinal_haem">
+        <span>Retinal haemorrhages present or suspected</span>
+      </div>
+      <div class="assoc-item" onclick="toggleAssoc(this)">
+        <input type="checkbox" data-key="intracranial">
+        <span>Intracranial injury / subdural haematoma</span>
+      </div>
+      <div class="assoc-item" onclick="toggleAssoc(this)">
+        <input type="checkbox" data-key="intra_abdominal">
+        <span>Unexplained intra-abdominal injury</span>
+      </div>
+      <div class="assoc-item" onclick="toggleAssoc(this)">
+        <input type="checkbox" data-key="thermal">
+        <span>Unexplained thermal injury (scalds, burns)</span>
+      </div>
+      <div class="assoc-item" onclick="toggleAssoc(this)">
+        <input type="checkbox" data-key="old_fractures">
+        <span>Evidence of older fractures on imaging (different stages of healing)</span>
+      </div>
+      <div class="assoc-item" onclick="toggleAssoc(this)">
+        <input type="checkbox" data-key="prior_concerns">
+        <span>Prior child protection concerns / previous ED attendances for injuries</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-assess" onclick="assess()">▶ Generate Risk Assessment</button>
+
+  <!-- OUTPUT -->
+  <div class="card" id="output">
+    <div id="resultBanner" class="result-banner">
+      <div id="resultIcon" class="result-icon"></div>
+      <div>
+        <div id="resultTitle" class="result-title"></div>
+        <div id="resultSubtitle" class="result-subtitle"></div>
+      </div>
+    </div>
+
+    <div class="output-section" id="flagsSection">
+      <h3>🚩 Active Flags</h3>
+      <div id="flagsContainer"></div>
+    </div>
+
+    <div class="output-section" id="actionsSection">
+      <h3>✅ Recommended Actions</h3>
+      <div id="actionsContainer"></div>
+    </div>
+
+    <div class="caveat-box">
+      <strong>⚖️ Important:</strong> This tool supports clinical decision-making — it does not diagnose non-accidental injury. 
+      High-specificity fractures (e.g. CML, posterior ribs) can rarely occur in osteogenesis imperfecta, metabolic bone disease, and birth trauma — these conditions must be considered and excluded. 
+      All concerns must be escalated to a senior paediatrician and managed through your local safeguarding / MASH pathway. Document your reasoning fully in the clinical notes.
+      <button class="copy-btn" id="copyBtn" onclick="copyNotes()">📋 Copy clinical note to clipboard</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const state = {
+    age: null,
+    mobility: null,
+    boneFragility: 'no',
+    cpr: 'no',
+    incidental: 'no',
+    fractures: {},
+    historyFlags: {},
+    assocFlags: {}
+  };
+
+  function selectRadio(el, groupId) {
+    document.querySelectorAll(`#${groupId} .radio-btn`).forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    state.mobility = el.dataset.value;
+  }
+
+  function selectToggle(el) {
+    const group = el.dataset.group;
+    document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    state[group] = el.dataset.value;
+  }
+
+  function toggleFracture(item) {
+    const cb = item.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    item.classList.toggle('selected', cb.checked);
+    state.fractures[cb.dataset.key] = { checked: cb.checked, tier: cb.dataset.tier };
+  }
+
+  function toggleFlag(item) {
+    const cb = item.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    item.classList.toggle('selected', cb.checked);
+    state.historyFlags[cb.dataset.key] = cb.checked;
+  }
+
+  function toggleAssoc(item) {
+    const cb = item.querySelector('input[type="checkbox"]');
+    cb.checked = !cb.checked;
+    item.classList.toggle('selected', cb.checked);
+    state.assocFlags[cb.dataset.key] = cb.checked;
+  }
+
+  const fractureLabels = {
+    cml: 'Classic metaphyseal lesion / bucket-handle fracture',
+    posterior_rib: 'Posterior rib fracture',
+    spinous_process: 'Spinous process fracture',
+    scapula: 'Scapular / sternal fracture',
+    multi_age: 'Multiple fractures at different stages of healing',
+    bilateral: 'Bilateral long bone fractures',
+    epiphyseal: 'Epiphyseal separation',
+    femur_non_walker: 'Femoral fracture in a non-ambulant child',
+    lateral_rib: 'Multiple rib fractures (lateral/anterior)',
+    skull: 'Skull fracture',
+    spiral_long_bone: 'Spiral/transverse long bone fracture',
+    clavicle: 'Clavicle fracture'
+  };
+
+  const historyLabels = {
+    no_history: 'Absent or vague history',
+    changing_history: 'Changing history between accounts',
+    implausible_mechanism: 'Biomechanically implausible mechanism',
+    dev_inconsistent: 'Mechanism inconsistent with developmental stage',
+    delayed_presentation: 'Unexplained delay in presentation',
+    different_histories: 'Different accounts to different professionals',
+    carer_blamed_child: 'Injury implausibly attributed to another child/self'
+  };
+
+  const assocLabels = {
+    bruising_non_mobile: 'Bruising in a non-mobile infant',
+    retinal_haem: 'Retinal haemorrhages',
+    intracranial: 'Intracranial injury / subdural haematoma',
+    intra_abdominal: 'Unexplained intra-abdominal injury',
+    thermal: 'Unexplained thermal injury',
+    old_fractures: 'Older fractures on imaging',
+    prior_concerns: 'Prior child protection concerns'
+  };
+
+  function assess() {
+    state.age = parseInt(document.getElementById('age').value) || null;
+
+    const highFractures = Object.entries(state.fractures).filter(([k,v]) => v.checked && v.tier === 'high');
+    const modFractures = Object.entries(state.fractures).filter(([k,v]) => v.checked && v.tier === 'moderate');
+    const lowFractures = Object.entries(state.fractures).filter(([k,v]) => v.checked && v.tier === 'lower');
+    const historyCount = Object.values(state.historyFlags).filter(Boolean).length;
+    const assocCount = Object.values(state.assocFlags).filter(Boolean).length;
+    const youngChild = state.age !== null && state.age < 18;
+    const nonMobile = ['not_rolling','rolling'].includes(state.mobility);
+
+    // Scoring logic
+    let score = 0;
+    score += highFractures.length * 4;
+    score += modFractures.length * 2;
+    score += lowFractures.length * 0.5;
+    score += historyCount * 2;
+    score += assocCount * 3;
+    if (youngChild) score += 2;
+    if (nonMobile && (highFractures.length > 0 || modFractures.length > 0)) score += 2;
+    if (state.incidental === 'yes') score += 2;
+
+    const anyFracture = highFractures.length + modFractures.length + lowFractures.length > 0;
+    const otherFlags = historyCount + assocCount;
+    const criticalAssoc = state.assocFlags.retinal_haem || state.assocFlags.intracranial || state.assocFlags.bruising_non_mobile;
+
+    let level, icon, title, subtitle;
+
+    // VERY HIGH: high-specificity fracture + any associated injury/history flag,
+    //            OR multiple high-specificity fractures, OR critical associated features with any fracture
+    if (
+      (highFractures.length >= 2) ||
+      (highFractures.length >= 1 && otherFlags >= 1) ||
+      (anyFracture && criticalAssoc) ||
+      (highFractures.length >= 1 && assocCount >= 1) ||
+      (score >= 14)
+    ) {
+      level = 'very-high';
+      icon = '🚨';
+      title = 'Very High Index of Suspicion — Immediate Senior Escalation Required';
+      subtitle = 'High-specificity fracture(s) combined with significant contextual flags. Senior consultant and safeguarding review must happen now — do not discharge.';
+
+    // HIGH: any single high-specificity fracture (without other flags),
+    //       OR moderate fracture + 3+ flags, OR 3+ associated features
+    } else if (
+      (highFractures.length >= 1) ||
+      (modFractures.length >= 1 && otherFlags >= 3) ||
+      (assocCount >= 3) ||
+      (score >= 9)
+    ) {
+      level = 'high';
+      icon = '🔴';
+      title = 'High Index of Suspicion — Urgent Safeguarding Review Required';
+      subtitle = 'High-specificity fracture or multiple significant flags present. Escalate to senior paediatrician before any discharge decision.';
+
+    // MODERATE: any fracture + 2 or more other flags (history or associated)
+    } else if (
+      (anyFracture && otherFlags >= 2) ||
+      (modFractures.length >= 2 && otherFlags >= 1) ||
+      (score >= 5)
+    ) {
+      level = 'moderate';
+      icon = '🟡';
+      title = 'Moderate Concern — Senior Review and Safeguarding Discussion Required';
+      subtitle = 'Fracture present alongside contextual flags. Formal senior review and consideration of skeletal survey required.';
+
+    // LOWER: fracture with fewer than 2 flags, or no fracture
+    } else {
+      level = 'lower';
+      icon = '🟢';
+      title = 'Lower Concern — Assess Further and Safety-Net';
+      subtitle = 'Insufficient flags to raise formal concern at this time. Continue clinical assessment; discuss with senior if any uncertainty remains.';
+    }
+
+    // Render output
+    const banner = document.getElementById('resultBanner');
+    banner.className = `result-banner ${level}`;
+    document.getElementById('resultIcon').textContent = icon;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultSubtitle').textContent = subtitle;
+
+    // Flags
+    let flagsHTML = '';
+    highFractures.forEach(([k]) => flagsHTML += `<span class="flag-tag red">🦴 ${fractureLabels[k]}</span>`);
+    modFractures.forEach(([k]) => flagsHTML += `<span class="flag-tag amber">🦴 ${fractureLabels[k]}</span>`);
+    lowFractures.forEach(([k]) => flagsHTML += `<span class="flag-tag amber" style="opacity:0.75">🦴 ${fractureLabels[k]}</span>`);
+    Object.entries(state.historyFlags).filter(([,v])=>v).forEach(([k]) => flagsHTML += `<span class="flag-tag amber">⚠️ ${historyLabels[k]}</span>`);
+    Object.entries(state.assocFlags).filter(([,v])=>v).forEach(([k]) => flagsHTML += `<span class="flag-tag red">🚨 ${assocLabels[k]}</span>`);
+    if (state.age !== null && state.age < 18) flagsHTML += `<span class="flag-tag amber">👶 Age under 18 months (${state.age}mo)</span>`;
+    if (nonMobile && state.mobility) flagsHTML += `<span class="flag-tag amber">🚶 Non-ambulant: ${state.mobility.replace('_',' ')}</span>`;
+    if (state.incidental === 'yes') flagsHTML += `<span class="flag-tag amber">🔍 Fracture found incidentally</span>`;
+    if (state.boneFragility === 'yes') flagsHTML += `<span class="flag-tag" style="background:#e8f0fe;color:#1a56db;border:1px solid #b3c6f7">ℹ️ Bone fragility condition noted — does not exclude NAI</span>`;
+    if (state.cpr === 'yes') flagsHTML += `<span class="flag-tag" style="background:#e8f0fe;color:#1a56db;border:1px solid #b3c6f7">ℹ️ Recent CPR — note: rarely causes rib fractures in children</span>`;
+    if (!flagsHTML) flagsHTML = '<span style="color:var(--muted);font-size:0.85rem">No specific flags triggered.</span>';
+    document.getElementById('flagsContainer').innerHTML = flagsHTML;
+
+    // Actions
+    const actions = [];
+
+    if (level === 'very-high') {
+      actions.push({ icon: '🚨', text: '<strong>Immediate consultant paediatrician review</strong> — this should happen now, not at the next opportunity' });
+      actions.push({ icon: '🛡️', text: '<strong>Immediate safeguarding referral via local MASH/children's social care pathway</strong> — do not delay for investigation results' });
+      actions.push({ icon: '🏠', text: '<strong>Do not discharge</strong> — child must remain in a safe environment until safeguarding plan in place' });
+    } else if (level === 'high') {
+      actions.push({ icon: '👨‍⚕️', text: '<strong>Urgent senior/consultant paediatrician review</strong> before any discharge decision' });
+      actions.push({ icon: '🛡️', text: '<strong>Safeguarding referral via local MASH pathway</strong> — do not delay pending investigation results' });
+      actions.push({ icon: '🏠', text: 'Do not discharge until senior review and safeguarding plan in place' });
+    } else if (level === 'moderate') {
+      actions.push({ icon: '👨‍⚕️', text: 'Senior/registrar review required — discuss safeguarding concern formally before discharge' });
+      actions.push({ icon: '🛡️', text: 'Consider safeguarding referral — discuss with your named safeguarding doctor' });
+    } else {
+      actions.push({ icon: '👨‍⚕️', text: 'Discuss with senior paediatrician or registrar if any clinical uncertainty remains' });
+      actions.push({ icon: '📞', text: 'Safety-net parents/carers with clear return instructions and document reasoning for discharge' });
+    }
+
+    if (level === 'very-high' || level === 'high' || level === 'moderate') {
+      if (state.age !== null && state.age <= 24) actions.push({ icon: '🩻', text: '<strong>Skeletal survey to RCR standards</strong> (if not already performed) — standard of care under age 2' });
+      if (state.age !== null && state.age > 24 && state.age <= 60) actions.push({ icon: '🩻', text: 'Consider skeletal survey — discuss with radiology and safeguarding team for age 2–5' });
+      if (highFractures.length > 0 || modFractures.find(([k]) => k === 'multi_age')) actions.push({ icon: '📅', text: 'Repeat skeletal survey at <strong>10–14 days</strong> to identify occult/healing fractures' });
+    }
+
+    if (state.assocFlags.retinal_haem || state.assocFlags.intracranial) actions.push({ icon: '👁️', text: 'Urgent <strong>ophthalmology review</strong> for formal retinal haemorrhage assessment' });
+    if (state.assocFlags.intracranial) actions.push({ icon: '🧠', text: 'Neurosurgery/neurology review for intracranial injury — consider CT/MRI head if not already done' });
+
+    actions.push({ icon: '📝', text: 'Document full history (verbatim where possible), examination findings, and clinical reasoning clearly in the notes' });
+    if (state.boneFragility === 'yes') actions.push({ icon: 'ℹ️', text: 'Consider metabolic bone disease workup (Ca, PO4, ALP, PTH, Vit D) — bone fragility does not exclude inflicted injury' });
+    actions.push({ icon: '📞', text: 'Contact your named/designated safeguarding doctor if unsure — it is always better to discuss' });
+
+    document.getElementById('actionsContainer').innerHTML = actions.map(a => `<div class="action-item"><div class="action-icon">${a.icon}</div><div>${a.text}</div></div>`).join('');
+
+    const outputEl = document.getElementById('output');
+    outputEl.style.display = 'block';
+    setTimeout(() => outputEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  }
+
+  function copyNotes() {
+    const age = state.age ? `${state.age} months` : 'not specified';
+    const mobility = state.mobility ? state.mobility.replace(/_/g,' ') : 'not assessed';
+    const highF = Object.entries(state.fractures).filter(([k,v])=>v.checked&&v.tier==='high').map(([k])=>fractureLabels[k]);
+    const modF = Object.entries(state.fractures).filter(([k,v])=>v.checked&&v.tier==='moderate').map(([k])=>fractureLabels[k]);
+    const lowF = Object.entries(state.fractures).filter(([k,v])=>v.checked&&v.tier==='lower').map(([k])=>fractureLabels[k]);
+    const hFlags = Object.entries(state.historyFlags).filter(([,v])=>v).map(([k])=>historyLabels[k]);
+    const aFlags = Object.entries(state.assocFlags).filter(([,v])=>v).map(([k])=>assocLabels[k]);
+    const resultTitle = document.getElementById('resultTitle').textContent;
+
+    let note = `NAI FRACTURE RISK STRATIFICATION (clinical decision support tool)
+`;
+    note += `Date/time: ${new Date().toLocaleString('en-GB')}
+
+`;
+    note += `Patient context: Age ${age}, mobility ${mobility}.
+`;
+    note += `Bone fragility condition: ${state.boneFragility}. Recent CPR: ${state.cpr}. Incidental fracture: ${state.incidental}.
+
+`;
+    if (highF.length) note += `High-specificity fractures: ${highF.join('; ')}.
+`;
+    if (modF.length) note += `Moderate-specificity fractures: ${modF.join('; ')}.
+`;
+    if (lowF.length) note += `Lower-specificity fractures: ${lowF.join('; ')}.
+`;
+    if (hFlags.length) note += `History flags: ${hFlags.join('; ')}.
+`;
+    if (aFlags.length) note += `Associated features: ${aFlags.join('; ')}.
+`;
+    note += `
+Risk stratification output: ${resultTitle}
+`;
+    note += `
+This tool provides clinical decision support only and does not constitute a diagnosis of non-accidental injury.`;
+
+    navigator.clipboard.writeText(note).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✅ Copied to clipboard';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy clinical note to clipboard'; btn.classList.remove('copied'); }, 2500);
+    });
+  }
+</script>
+</body>
+</html>
