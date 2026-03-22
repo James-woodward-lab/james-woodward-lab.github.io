@@ -7,24 +7,34 @@
   <title>James Woodward Lab</title>
   <link rel="stylesheet" href="css/app-theme.css">
   <style>
-    .index-links { list-style: none; padding: 0; margin: 0; }
-    .index-links li { margin-bottom: 8px; }
-    .index-links li:last-child { margin-bottom: 0; }
-    .index-links a {
-      display: block;
-      padding: 12px 14px;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 500;
-      transition: border-color 0.2s, background 0.2s;
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
     }
-    .index-links a:hover {
-      border-color: var(--accent);
-      background: rgba(32, 178, 170, 0.08);
-      color: var(--accent2);
+    .app-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 20px;
+      background: var(--accent);
+      color: #0f1117;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border-radius: var(--radius);
+      border: none;
+      transition: background 0.2s, transform 0.15s;
+      min-height: 52px;
+    }
+    .app-btn:hover {
+      background: var(--accent2);
+      transform: translateY(-2px);
+    }
+    @media (max-width: 500px) {
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -36,15 +46,15 @@
   </header>
   <div class="card">
     <h2>Tools</h2>
-    <ul class="index-links">
-      <li><a href="developmental-milestones/index.html">Developmental Milestones</a></li>
-      <li><a href="fluid-calculator/index.html">Fluid Calculator</a></li>
-      <li><a href="qtc-calculator/index.html">Qtc Calculator</a></li>
-      <li><a href="renal-fluid-calculator/index.html">Renal Fluid Calculator</a></li>
-      <li><a href="safeguarding-calculator/index.html">Safeguarding Calculator</a></li>
-      <li><a href="sbar-generator/index.html">Sbar Generator</a></li>
-      <li><a href="seizure-timer/index.html">Seizure Timer</a></li>
-    </ul>
+    <div class="app-grid">
+      <a href="developmental-milestones/index.html" class="app-btn">Developmental Milestones</a>
+      <a href="fluid-calculator/index.html" class="app-btn">Fluid Calculator</a>
+      <a href="qtc-calculator/index.html" class="app-btn">QTc Calculator</a>
+      <a href="renal-fluid-calculator/index.html" class="app-btn">Renal Fluid Calculator</a>
+      <a href="safeguarding-calculator/index.html" class="app-btn">Safeguarding Calculator</a>
+      <a href="sbar-generator/index.html" class="app-btn">SBAR Generator</a>
+      <a href="seizure-timer/index.html" class="app-btn">Seizure Timer</a>
+    </div>
   </div>
   <footer class="app-footer">
     For clinical decision support only. Always verify against local guidelines.
