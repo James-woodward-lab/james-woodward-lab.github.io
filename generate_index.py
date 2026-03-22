@@ -1,35 +1,220 @@
 import os
 
-# Folders to ignore
-IGNORE = {'.git', '.github', '__pycache__', 'css'}
+# Folders to ignore (not user-facing app directories)
+IGNORE = {".git", ".github", "__pycache__", "css"}
+
+# Optional: icon, colour class, short description — used when a folder matches
+TOOL_METADATA = {
+    "fluid-calculator": (
+        "💧",
+        "blue",
+        "Holliday-Segar maintenance fluid calculation by weight.",
+    ),
+    "renal-fluid-calculator": (
+        "🫘",
+        "teal",
+        "Fluid management adjusted for renal impairment and restriction.",
+    ),
+    "qtc-calculator": (
+        "❤️",
+        "purple",
+        "Corrected QT interval using Bazett and Fridericia formulae.",
+    ),
+    "safeguarding-calculator": (
+        "🛡️",
+        "red",
+        "Age and date calculations for safeguarding assessments.",
+    ),
+    "developmental-milestones": (
+        "🧒",
+        "green",
+        "Age-appropriate milestone reference across all developmental domains.",
+    ),
+}
+
+CARD_COLORS = ("blue", "teal", "purple", "red", "green", "orange", "pink")
+
+# Overrides for .title() (e.g. acronyms)
+DISPLAY_TITLE = {
+    "qtc-calculator": "QTc Calculator",
+}
+
+# Inline CSS so the homepage stays styled on GitHub Pages without extra asset paths
+STYLE_BLOCK = """  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      color: #1a2e44;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a2e44 0%, #2563a8 100%);
+      color: white;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 1rem;
+      opacity: 0.75;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(37, 99, 168, 0.15);
+      border-color: #93c5fd;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .card .arrow {
+      margin-top: auto;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2563a8;
+      letter-spacing: 0.3px;
+    }
+
+    .blue   .card-icon { background: #dbeafe; }
+    .teal   .card-icon { background: #ccfbf1; }
+    .purple .card-icon { background: #ede9fe; }
+    .red    .card-icon { background: #fee2e2; }
+    .green  .card-icon { background: #dcfce7; }
+    .orange .card-icon { background: #ffedd5; }
+    .pink   .card-icon { background: #fce7f3; }
+
+    .blue   h2 { color: #1e40af; }
+    .teal   h2 { color: #0f766e; }
+    .purple h2 { color: #6d28d9; }
+    .red    h2 { color: #b91c1c; }
+    .green  h2 { color: #15803d; }
+    .orange h2 { color: #c2410c; }
+    .pink   h2 { color: #be185d; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+  </style>"""
+
+
+def card_html(folder: str, index: int) -> str:
+    title = DISPLAY_TITLE.get(folder, folder.replace("-", " ").title())
+    if folder in TOOL_METADATA:
+        icon, color, desc = TOOL_METADATA[folder]
+    else:
+        icon = "📋"
+        color = CARD_COLORS[index % len(CARD_COLORS)]
+        desc = "Quick-access clinical tool."
+    return f"""  <a href="{folder}/index.html" class="card {color}">
+    <div class="card-icon">{icon}</div>
+    <h2>{title}</h2>
+    <p>{desc}</p>
+    <span class="arrow">Open tool →</span>
+  </a>
+"""
+
 
 subfolders = [
-    f for f in os.listdir('.')
-    if os.path.isdir(f) and f not in IGNORE and not f.startswith('.')
+    f
+    for f in os.listdir(".")
+    if os.path.isdir(f) and f not in IGNORE and not f.startswith(".")
 ]
 subfolders.sort()
 
-links = "\n".join(
-    f'    <li><a href="{folder}/">{folder.replace("-", " ").title()}</a></li>'
-    for folder in subfolders
-)
+cards = "\n\n".join(card_html(folder, i) for i, folder in enumerate(subfolders))
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Site</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paediatric Tools</title>
+{STYLE_BLOCK}
 </head>
 <body>
-  <h1>My Site</h1>
-  <ul>
-{links}
-  </ul>
+
+  <header>
+    <h1>🩺 Paediatric Clinical Tools</h1>
+    <p>Quick-access calculators and decision aids for clinical use</p>
+  </header>
+
+  <main>
+   <div class="grid">
+
+{cards}
+
+</div>
+  </main>
+
+  <footer>
+    For clinical decision support only — always apply clinical judgement.
+  </footer>
+
 </body>
 </html>
 """
 
-with open("index.html", "w") as f:
+with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
 
 print(f"Generated index.html with {len(subfolders)} subfolder(s): {subfolders}")
