@@ -574,6 +574,28 @@ function togCause(el) {
 var ecgAnswers = {};
 var TOTAL_Q = 13;
 
+function renderQ12Buttons(ageYr) {
+  var wrap = document.getElementById('q12btns');
+  wrap.innerHTML = '';
+  var yes = document.createElement('button');
+  var no = document.createElement('button');
+  yes.type = 'button';
+  no.type = 'button';
+  yes.className = 'eqb yb';
+  no.className = 'eqb nb';
+  if (ageYr < 8) {
+    yes.innerHTML = '&#10003; YES &mdash; T negative in V1 (normal &lt;8 yrs)';
+    no.innerHTML = '&#10007; NO &mdash; T positive in V1 (abnormal &lt;8 yrs)';
+  } else {
+    yes.innerHTML = '&#10003; YES &mdash; T upright in V1 (normal ≥8 yrs)';
+    no.innerHTML = '&#10007; NO &mdash; T inverted in V1 (abnormal)';
+  }
+  yes.addEventListener('click', function () { ansQ('eq12', 'yes', this); });
+  no.addEventListener('click', function () { ansQ('eq12', 'no', this); });
+  wrap.appendChild(yes);
+  wrap.appendChild(no);
+}
+
 function onAgeChange() {
   var ageYr = parseFloat(document.getElementById('ecgAge').value);
   if (isNaN(ageYr) || ageYr < 0) {
@@ -599,14 +621,12 @@ function onAgeChange() {
   }
 
   var q12note = document.getElementById('q12note');
-  var q12btns = document.getElementById('q12btns');
   if (ageYr < 8) {
     q12note.textContent = 'Age <8 years: a NEGATIVE T-wave in V1 is NORMAL. Answer YES if T is negative in V1.';
-    q12btns.innerHTML = '<button class="eqb yb" onclick="ansQ(\'eq12\',\'yes\',this)">&#10003; YES &mdash; T negative in V1 (normal &lt;8 yrs)</button><button class="eqb nb" onclick="ansQ(\'eq12\',\'no\',this)">&#10007; NO &mdash; T positive in V1 (abnormal)</button>';
   } else {
     q12note.textContent = 'Age ≥8 years: T-wave in V1 should be upright. A persistently negative T-wave after age 8 may be abnormal.';
-    q12btns.innerHTML = '<button class="eqb yb" onclick="ansQ(\'eq12\',\'yes\',this)">&#10003; YES &mdash; T upright in V1 (normal ≥8 yrs)</button><button class="eqb nb" onclick="ansQ(\'eq12\',\'no\',this)">&#10007; NO &mdash; T inverted in V1 (abnormal)</button>';
   }
+  renderQ12Buttons(ageYr);
 
   var note = document.getElementById('ageNote');
   note.style.display = 'block';
