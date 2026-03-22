@@ -1,445 +1,448 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Paediatric ECG Tool</title>
+
 <style>
-:root {
-  --red:#c0392b; --red-bg:#fdf2f2; --red-bd:#f5c6c6;
-  --amb:#e67e22; --amb-bg:#fef9f0; --amb-bd:#f5ddb3;
-  --grn:#27ae60; --grn-bg:#f0faf4; --grn-bd:#a8dbb9;
-  --blu:#1a56db; --blu-bg:#ebf0ff; --blu-bd:#b3c6f7;
-  --nav:#0e2a5c; --bdr:#dde3ea; --txt:#1a2330; --mut:#6b7c93;
-  --bg:#f4f6f9; --card:#fff; --rad:10px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6;}
-header{background:var(--nav);color:#fff;padding:16px 22px 12px;border-bottom:4px solid var(--blu);}
-header h1{font-size:1.2rem;font-weight:700;}
-header p{font-size:0.78rem;opacity:.7;margin-top:2px;}
+  :root {
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#242736; --border:#2e3246;
+    --accent:#20b2aa; --accent2:#4ecdc4; --warn:#f59e0b; --danger:#ef4444;
+    --success:#22c55e; --text:#e2e8f0; --muted:#8892a4;
+    --radius:12px; --tab-h:64px;
+    --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    min-height:100%;padding-bottom:calc(var(--tab-h) + var(--safe-b) + 8px);
+    padding-top:var(--safe-t);font-size:16px;}
 
-/* TABS */
-.tabs{display:flex;background:#0b2050;border-bottom:1px solid #1a3a7a;}
-.tab-btn{padding:11px 26px;color:rgba(255,255,255,.55);font-size:.86rem;font-weight:600;cursor:pointer;border:none;background:transparent;border-bottom:3px solid transparent;transition:all .15s;letter-spacing:.02em;}
-.tab-btn:hover{color:#fff;}
-.tab-btn.active{color:#fff;border-bottom-color:#60a5fa;}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
+  .page{display:none;padding:14px 14px 8px;max-width:780px;margin:0 auto;}
+  .page.active{display:block;}
 
-main{max-width:900px;margin:0 auto;padding:18px 14px 60px;display:grid;gap:14px;}
+  /* BOTTOM TAB BAR (mobile) */
+  .tab-bar{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-h) + var(--safe-b));
+    background:rgba(26,29,39,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-around;
+    padding-top:6px;padding-bottom:var(--safe-b);z-index:100;}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:none;border:none;cursor:pointer;padding:6px 4px;
+    color:var(--muted);font-size:0.68rem;font-weight:500;letter-spacing:0.3px;
+    transition:color 0.15s;min-height:44px;}
+  .tab-btn.active{color:var(--accent);}
+  .tab-btn svg{width:24px;height:24px;stroke-width:1.8;}
+  .tab-btn .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity 0.15s;margin-top:1px;}
+  .tab-btn.active .dot{opacity:1;}
 
-/* CARDS */
-.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rad);overflow:hidden;}
-.card-hd{padding:11px 16px;background:#f8fafc;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:9px;}
-.step{width:24px;height:24px;background:var(--nav);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;}
-.card-hd h2{font-size:.92rem;font-weight:600;}
-.card-bd{padding:16px;}
+  /* DESKTOP NAV (top, sticky) */
+  .desktop-nav{display:none;position:sticky;top:0;z-index:50;
+    background:rgba(15,17,23,0.95);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);justify-content:center;gap:4px;padding:10px 20px;}
+  .dnb{background:none;border:none;color:var(--muted);font-size:0.85rem;font-weight:600;
+    padding:8px 20px;border-radius:8px;cursor:pointer;transition:background 0.15s,color 0.15s;}
+  .dnb:hover{background:var(--surface2);color:var(--text);}
+  .dnb.active{background:var(--surface);color:var(--accent);}
 
-/* FORM */
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-.fg{margin-bottom:13px;}
-.fg:last-child{margin-bottom:0;}
-.fl{display:block;font-size:.75rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;}
-input[type=number],select{width:100%;padding:8px 11px;border:1.5px solid var(--bdr);border-radius:7px;font-size:.9rem;color:var(--txt);background:#fff;transition:border-color .15s;-webkit-appearance:none;}
-input[type=number]:focus,select:focus{outline:none;border-color:var(--blu);}
-.sw{position:relative;}
-.sw::after{content:'\25BE';position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none;font-size:.78rem;}
+  .page-header{padding:6px 0 16px;}
+  .page-header h1{font-size:1.25rem;font-weight:700;color:var(--accent);}
+  .page-header p{font-size:0.77rem;color:var(--muted);margin-top:3px;}
 
-/* UNIT TOGGLE */
-.utog{display:flex;border:1.5px solid var(--bdr);border-radius:7px;overflow:hidden;}
-.ubtn{flex:1;padding:8px;text-align:center;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--mut);border:none;background:#fff;transition:all .15s;}
-.ubtn.active{background:var(--nav);color:#fff;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+  .card-title{font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
 
-/* FORMULA CARDS */
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
-.fc{padding:12px 14px;border-radius:8px;border:2px solid var(--bdr);background:#fff;}
-.fc.def{border-color:var(--blu);background:var(--blu-bg);}
-.fc.flag{border-color:var(--red);background:var(--red-bg);}
-.fc.ok{border-color:var(--grn);background:var(--grn-bg);}
-.fn{font-size:.72rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;}
-.fv{font-size:1.45rem;font-weight:800;margin:3px 0 2px;}
-.fv.flag{color:var(--red);}
-.fv.ok{color:var(--grn);}
-.fnote{font-size:.73rem;color:var(--mut);}
-.ftag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700;margin-top:3px;}
-.tdef{background:var(--blu-bg);color:var(--blu);}
-.tflag{background:var(--red-bg);color:var(--red);}
-.tok{background:var(--grn-bg);color:var(--grn);}
+  /* FIELDS */
+  .field{margin-bottom:13px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:0.79rem;color:var(--muted);margin-bottom:6px;font-weight:500;}
+  .field input,.field select{width:100%;background:var(--surface2);border:1.5px solid var(--border);
+    border-radius:10px;padding:12px 14px;color:var(--text);font-size:1rem;
+    transition:border-color 0.2s;-webkit-appearance:none;appearance:none;}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+  .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892a4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+  .hint{font-size:0.72rem;color:var(--muted);margin-top:5px;line-height:1.4;}
 
-/* RESULT BOX */
-.rbox{padding:13px 15px;border-radius:8px;margin-top:12px;display:flex;align-items:flex-start;gap:11px;}
-.rbox.grn{background:var(--grn-bg);border:1.5px solid var(--grn-bd);}
-.rbox.amb{background:var(--amb-bg);border:1.5px solid var(--amb-bd);}
-.rbox.red{background:var(--red-bg);border:1.5px solid var(--red-bd);}
-.rbox .ri{font-size:1.3rem;flex-shrink:0;}
-.rbox strong{display:block;font-size:.92rem;margin-bottom:2px;}
-.rbox p{font-size:.8rem;opacity:.88;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:420px){.row2{grid-template-columns:1fr;}}
 
-/* DRUG ITEMS */
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:4px;}
-.di{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border:1.5px solid var(--bdr);border-radius:7px;cursor:pointer;transition:all .15s;user-select:none;}
-.di:hover{border-color:#a0aec0;}
-.di.sel{border-color:var(--amb);background:var(--amb-bg);}
-.di.sel-red{border-color:var(--red);background:var(--red-bg);}
-.chk{width:15px;height:15px;border:2px solid var(--bdr);border-radius:3px;flex-shrink:0;margin-top:3px;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;}
-.di.sel .chk{background:var(--amb);border-color:var(--amb);color:#fff;}
-.di.sel-red .chk{background:var(--red);border-color:var(--red);color:#fff;}
-.dn{font-size:.83rem;font-weight:600;}
-.ds{font-size:.73rem;color:var(--mut);}
-.sl{font-size:.75rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--bdr);}
+  /* UNIT TOGGLE (radio-based) */
+  .unit-tog{display:flex;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);}
+  .unit-tog input[type=radio]{display:none;}
+  .unit-tog label{flex:1;text-align:center;padding:12px 6px;font-size:0.86rem;color:var(--muted);
+    background:var(--surface2);cursor:pointer;transition:background 0.15s,color 0.15s;
+    border-right:1px solid var(--border);min-height:44px;display:flex;align-items:center;justify-content:center;}
+  .unit-tog label:last-of-type{border-right:none;}
+  .unit-tog input[type=radio]:checked + label{background:var(--accent);color:#0f1117;font-weight:700;}
 
-/* HR REF */
-.hrref{font-size:.78rem;color:var(--mut);background:#f8fafc;border:1px solid var(--bdr);border-radius:7px;padding:9px 12px;margin-top:7px;}
+  /* STAT CARDS */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .stat{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px;}
+  .stat.hi{border-color:var(--accent);background:rgba(32,178,170,0.08);}
+  .stat.pos{border-color:var(--success);background:rgba(34,197,94,0.06);}
+  .stat.neg{border-color:var(--danger);background:rgba(239,68,68,0.07);}
+  .stat .lbl{font-size:0.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;}
+  .stat .val{font-size:1.35rem;font-weight:700;color:var(--text);margin-top:4px;line-height:1.1;}
+  .stat .val.ok{color:var(--success);}
+  .stat .val.flag{color:var(--danger);}
+  .stat .sub{font-size:0.67rem;color:var(--muted);margin-top:3px;line-height:1.3;}
+  .stag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.67rem;font-weight:700;margin-top:4px;}
+  .stag-def{background:rgba(32,178,170,0.15);color:var(--accent);}
+  .stag-ok{background:rgba(34,197,94,0.12);color:var(--success);}
+  .stag-flag{background:rgba(239,68,68,0.12);color:var(--danger);}
 
-/* CALC BUTTON */
-.bcalc{width:100%;padding:12px;background:var(--nav);color:#fff;border:none;border-radius:var(--rad);font-size:.93rem;font-weight:700;cursor:pointer;transition:background .15s;margin-top:6px;}
-.bcalc:hover{background:#1a3e7c;}
+  /* ALERTS */
+  .alert{padding:12px 14px;border-radius:10px;font-size:0.82rem;line-height:1.55;margin-top:10px;}
+  .alert-ok{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);color:var(--success);}
+  .alert-danger{background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.3);color:var(--danger);}
+  .alert-warn{background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.3);color:var(--warn);}
+  .alert strong{display:block;font-size:0.88rem;margin-bottom:3px;}
+  .alert p{opacity:.88;}
 
-/* CONV NOTE */
-.conv{font-size:.76rem;color:var(--mut);margin-top:4px;min-height:15px;}
+  /* CAUSE ITEMS */
+  .cause-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:4px;}
+  @media(max-width:500px){.cause-grid{grid-template-columns:1fr;}}
+  .ci{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border:1.5px solid var(--border);
+    border-radius:10px;cursor:pointer;transition:all .15s;background:var(--surface2);user-select:none;}
+  .ci:hover{border-color:var(--muted);}
+  .ci.sel{border-color:var(--warn);background:rgba(245,158,11,0.08);}
+  .chk{width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;flex-shrink:0;
+    margin-top:3px;display:flex;align-items:center;justify-content:center;
+    font-size:9px;color:transparent;transition:all .15s;}
+  .ci.sel .chk{background:var(--warn);border-color:var(--warn);color:#0f1117;}
+  .dn{font-size:0.81rem;font-weight:600;color:var(--text);}
+  .ds{font-size:0.71rem;color:var(--muted);}
 
-/* BADGE */
-.badge{padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700;margin-left:auto;}
-.badge-ok{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd);}
-.badge-flag{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+  /* SECTION LABEL */
+  .sl{font-size:0.69rem;font-weight:700;color:var(--accent2);text-transform:uppercase;
+    letter-spacing:0.05em;margin:16px 0 9px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+  .sl:first-child{margin-top:0;}
 
-/* ECG CHECKLIST */
-.age-note{font-size:.8rem;color:var(--mut);padding:10px;background:#f8fafc;border:1px solid var(--bdr);border-radius:7px;}
-.prog-wrap{height:5px;background:var(--bdr);border-radius:3px;margin:-6px 0 10px;overflow:hidden;}
-.prog-fill{height:100%;background:var(--blu);border-radius:3px;transition:width .3s;}
-.hint{font-size:.8rem;color:var(--mut);margin-bottom:8px;}
-.hint strong{color:var(--txt);}
+  /* PRIMARY BUTTON */
+  .btn-primary{width:100%;padding:14px;background:var(--accent);color:#0f1117;border:none;
+    border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;
+    transition:background .15s;min-height:44px;margin-top:8px;}
+  .btn-primary:hover{background:var(--accent2);}
 
-.eq{border:1.5px solid var(--bdr);border-radius:9px;overflow:hidden;margin-bottom:8px;transition:border-color .2s;}
-.eq.ans-yes{border-color:var(--grn-bd);}
-.eq.ans-no{border-color:var(--red-bd);}
-.eq-hd{padding:11px 13px;display:flex;align-items:flex-start;gap:10px;}
-.ecat{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--nav);padding:2px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:3px;}
-.eq-q{font-size:.87rem;font-weight:600;}
-.eq-note{font-size:.76rem;color:var(--mut);margin-top:2px;font-style:italic;}
-.eq-btns{display:flex;gap:7px;padding:0 13px 11px;}
-.eqb{flex:1;padding:7px;border-radius:6px;border:1.5px solid var(--bdr);font-size:.84rem;font-weight:700;cursor:pointer;transition:all .15s;background:#fff;}
-.eqb.yb.active{background:var(--grn-bg);border-color:var(--grn);color:var(--grn);}
-.eqb.nb.active{background:var(--red-bg);border-color:var(--red);color:var(--red);}
-.eqb.yb:hover{border-color:var(--grn);color:var(--grn);}
-.eqb.nb:hover{border-color:var(--red);color:var(--red);}
-.eq-flag{display:none;margin:0 13px 11px;padding:8px 11px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:6px;font-size:.79rem;color:var(--red);}
-.eq.ans-no .eq-flag{display:block;}
-.eq-na{padding:6px 13px 10px;font-size:.77rem;color:var(--mut);background:#f8fafc;font-style:italic;}
+  /* HR REF PILL */
+  .hr-ref{display:none;font-size:0.77rem;color:var(--text);background:rgba(32,178,170,0.08);
+    border:1px solid rgba(32,178,170,0.2);border-radius:8px;padding:8px 12px;margin-top:8px;}
 
-/* CHECKLIST RESULT */
-.cr{border-radius:var(--rad);overflow:hidden;display:none;}
-.cr.show{display:block;}
-.cr-top{padding:17px 19px;display:flex;align-items:flex-start;gap:13px;}
-.cr-top.all-yes{background:var(--grn-bg);border-bottom:3px solid var(--grn);}
-.cr-top.has-no{background:var(--red-bg);border-bottom:3px solid var(--red);}
-.cr-icon{font-size:2rem;flex-shrink:0;}
-.cr-title{font-size:.98rem;font-weight:700;}
-.cr-sub{font-size:.82rem;margin-top:2px;opacity:.85;}
-.cr-bd{padding:14px 17px;}
-.cr-item{padding:7px 0;border-bottom:1px solid var(--bdr);display:flex;gap:8px;align-items:flex-start;font-size:.83rem;}
-.cr-item:last-child{border-bottom:none;}
+  /* PROGRESS */
+  .prog-wrap{height:3px;background:var(--surface2);border-radius:2px;margin-bottom:12px;overflow:hidden;}
+  .prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+  .hint-text{font-size:0.78rem;color:var(--muted);margin-bottom:10px;}
+  .hint-text strong{color:var(--text);}
 
-@media(max-width:600px){.row2,.row3,.fgrid,.dgrid{grid-template-columns:1fr;}}
+  /* ECG QUESTIONS */
+  .eq{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;
+    margin-bottom:9px;overflow:hidden;transition:border-color .2s,background .2s;}
+  .eq.ans-yes{border-color:rgba(34,197,94,0.5);}
+  .eq.ans-no{border-color:rgba(239,68,68,0.6);}
+  .eq-hd{padding:12px 13px;display:flex;align-items:flex-start;gap:10px;}
+  .ecat{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;
+    color:#0f1117;background:var(--accent);padding:2px 7px;border-radius:4px;
+    white-space:nowrap;flex-shrink:0;margin-top:2px;}
+  .eq-q{font-size:0.85rem;font-weight:600;color:var(--text);}
+  .eq-note{font-size:0.73rem;color:var(--muted);margin-top:2px;font-style:italic;line-height:1.4;}
+  .eq-btns{display:flex;gap:7px;padding:0 13px 11px;}
+  .eqb{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);
+    font-size:0.82rem;font-weight:700;cursor:pointer;background:var(--surface2);
+    color:var(--muted);transition:all .15s;min-height:44px;}
+  .eqb.yb:hover{border-color:var(--success);color:var(--success);}
+  .eqb.nb:hover{border-color:var(--danger);color:var(--danger);}
+  .eqb.yb.active{background:rgba(34,197,94,0.1);border-color:var(--success);color:var(--success);}
+  .eqb.nb.active{background:rgba(239,68,68,0.1);border-color:var(--danger);color:var(--danger);}
+  .eq-flag{display:none;margin:0 13px 11px;padding:10px 12px;
+    background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);
+    border-radius:8px;font-size:0.78rem;color:var(--danger);line-height:1.5;}
+  .eq.ans-no .eq-flag{display:block;}
+
+  /* CHECKLIST RESULT */
+  .cr{border-radius:var(--radius);overflow:hidden;display:none;}
+  .cr.show{display:block;}
+  .cr-top{padding:16px 17px;display:flex;align-items:flex-start;gap:12px;}
+  .cr-top.all-yes{background:rgba(34,197,94,0.08);border-bottom:2px solid rgba(34,197,94,0.4);}
+  .cr-top.has-no{background:rgba(239,68,68,0.08);border-bottom:2px solid rgba(239,68,68,0.4);}
+  .cr-icon{font-size:1.8rem;flex-shrink:0;}
+  .cr-title{font-size:0.95rem;font-weight:700;}
+  .cr-sub{font-size:0.79rem;margin-top:2px;color:var(--muted);}
+  .cr-bd{padding:13px 16px;}
+  .cr-item{padding:7px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start;font-size:0.81rem;}
+  .cr-item:last-child{border-bottom:none;}
+
+  .divider{height:1px;background:var(--border);margin:14px 0;}
+
+  @media(min-width:640px){
+    body{padding-bottom:20px;font-size:15px;}
+    .tab-bar{display:none;}
+    .desktop-nav{display:flex;}
+    .page{padding:18px 20px 8px;}
+  }
 </style>
+
 </head>
 <body>
-<header>
-  <h1>&#9889; Paediatric ECG Tool</h1>
-  <p>QTc Calculator + Glasgow Paediatric ECG Checklist &mdash; Paediatric Emergency Department</p>
-</header>
 
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchTab(this,'qtc')">&#128208; QTc Calculator</button>
-  <button class="tab-btn" onclick="switchTab(this,'ecg')">&#9989; ECG Checklist</button>
-</div>
+<!-- DESKTOP NAV -->
+<nav class="desktop-nav">
+  <button class="dnb active" data-page="qtc" onclick="switchPage('qtc')">&#9889; QTc Calculator</button>
+  <button class="dnb" data-page="ecg" onclick="switchPage('ecg')">&#10003; ECG Checklist</button>
+</nav>
 
-<!-- ===== TAB 1: QTc CALCULATOR ===== -->
-<div class="tab-panel active" id="tab-qtc">
-<main>
+<!-- ======================================================= PAGE 1: QTc CALCULATOR -->
+<div class="page active" id="page-qtc">
+  <div class="page-header">
+    <h1>&#9889; QTc Calculator</h1>
+    <p>Paediatric QT interval correction &mdash; all four validated formulae</p>
+  </div>
 
   <div class="card">
-    <div class="card-hd"><div class="step">1</div><h2>Patient &amp; Measurements</h2></div>
-    <div class="card-bd">
-      <div class="row2">
-        <div class="fg">
-          <label class="fl">Patient Age Group</label>
-          <div class="sw">
-            <select id="ageGroup" onchange="showHrRef()">
-              <option value="">Select age group</option>
-              <option value="0,1,100,180">Newborn (0&ndash;1 month)</option>
-              <option value="1,12,100,160">Infant (1&ndash;12 months)</option>
-              <option value="12,24,90,150">Toddler (1&ndash;2 years)</option>
-              <option value="24,60,80,140">Preschool (2&ndash;5 years)</option>
-              <option value="60,144,70,120">School age (5&ndash;12 years)</option>
-              <option value="144,999,60,100">Adolescent (&gt;12 years)</option>
-            </select>
-          </div>
-        </div>
-        <div class="fg">
-          <label class="fl">Heart Rate (bpm)</label>
-          <input type="number" id="hr" placeholder="e.g. 95" min="30" max="300">
-        </div>
+    <div class="card-title">Patient &amp; Measurements</div>
+    <div class="row2">
+      <div class="field">
+        <label>Age Group</label>
+        <select id="ageGroup" onchange="showHrRef()">
+          <option value="">Select age group</option>
+          <option value="100,180">Newborn (0&ndash;1 month)</option>
+          <option value="100,160">Infant (1&ndash;12 months)</option>
+          <option value="90,150">Toddler (1&ndash;2 years)</option>
+          <option value="80,140">Preschool (2&ndash;5 years)</option>
+          <option value="70,120">School age (5&ndash;12 years)</option>
+          <option value="60,100">Adolescent (&gt;12 years)</option>
+        </select>
       </div>
-      <div id="hrRefBox" class="hrref" style="display:none;"></div>
-
-      <div class="fg" style="margin-top:12px;">
-        <label class="fl">QT Interval Unit</label>
-        <div class="utog">
-          <button class="ubtn active" id="ubtn-ms" onclick="setUnit('ms')">Milliseconds (ms)</button>
-          <button class="ubtn" id="ubtn-sq" onclick="setUnit('sq')">Small Squares (25 mm/s)</button>
-        </div>
+      <div class="field">
+        <label>Heart Rate (bpm)</label>
+        <input type="number" id="hr" placeholder="e.g. 95" min="30" max="300">
       </div>
-
-      <div class="row2">
-        <div class="fg">
-          <label class="fl" id="qt-lbl">QT Interval (ms)</label>
-          <input type="number" id="qt" placeholder="e.g. 340" min="100" max="800" oninput="updateConv()">
-          <div class="conv" id="conv-note"></div>
-        </div>
-        <div class="fg">
-          <label class="fl">Primary Formula</label>
-          <div class="sw">
-            <select id="defFormula">
-              <option value="bazett">Bazett (default &mdash; most widely used)</option>
-              <option value="fridericia">Fridericia (better at high HR)</option>
-              <option value="framingham">Framingham</option>
-              <option value="hodges">Hodges</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <button class="bcalc" onclick="calcQTc()">&#9654; Calculate QTc</button>
     </div>
+    <div id="hrRefBox" class="hr-ref"></div>
+
+    <div class="field" style="margin-top:4px;">
+      <label>QT Interval Unit</label>
+      <div class="unit-tog">
+        <input type="radio" name="unit" id="u-sq" value="sq" checked onchange="setUnit('sq')">
+        <label for="u-sq">Small Squares (25 mm/s)</label>
+        <input type="radio" name="unit" id="u-ms" value="ms" onchange="setUnit('ms')">
+        <label for="u-ms">Milliseconds (ms)</label>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label id="qt-lbl">QT Interval (small squares)</label>
+        <input type="number" id="qt" placeholder="e.g. 8.5" min="1" max="20" step="0.1" oninput="updateConv()">
+        <div class="hint" id="conv-note"></div>
+      </div>
+      <div class="field">
+        <label>Primary Formula</label>
+        <select id="defFormula">
+          <option value="bazett">Bazett (default &mdash; most widely used)</option>
+          <option value="fridericia">Fridericia (better at high HR)</option>
+          <option value="framingham">Framingham</option>
+          <option value="hodges">Hodges</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="calcQTc()">Calculate QTc</button>
   </div>
 
   <div class="card" id="qtcOut" style="display:none;">
-    <div class="card-hd">
-      <div class="step">2</div>
-      <h2>Results &mdash; All Formulae</h2>
-      <span class="badge" id="qtcBadge"></span>
-    </div>
-    <div class="card-bd">
-      <div class="fgrid" id="fgrid"></div>
-      <div id="qtcMsg"></div>
-    </div>
+    <div class="card-title">QTc Results &mdash; All Formulae</div>
+    <div class="stat-grid" id="fgrid"></div>
+    <div id="qtcMsg"></div>
   </div>
 
   <div class="card">
-    <div class="card-hd"><div class="step">3</div><h2>QT-Prolonging Causes Checklist</h2></div>
-    <div class="card-bd">
-      <p style="font-size:.82rem;color:var(--mut);margin-bottom:12px;">Tick all potential contributing causes. This does not affect the QTc calculation &mdash; it is a reference aid.</p>
+    <div class="card-title">QT-Prolonging Causes Checklist</div>
+    <p style="font-size:0.79rem;color:var(--muted);margin-bottom:14px;">Tick all potential contributing causes. Reference aid only &mdash; does not affect the calculation.</p>
 
-      <div class="sl">&#128138; Drugs</div>
-      <div class="dgrid">
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Ondansetron</div><div class="ds">5-HT&#8323; antagonist &mdash; common in ED</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Amiodarone</div><div class="ds">Class III antiarrhythmic</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Sotalol</div><div class="ds">Class II/III antiarrhythmic</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Macrolides</div><div class="ds">Erythromycin, azithromycin, clarithromycin</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Fluconazole / Azoles</div><div class="ds">Dose-dependent QT effect</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Quinolones</div><div class="ds">Ciprofloxacin, levofloxacin</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Domperidone</div><div class="ds">Prokinetic &mdash; commonly prescribed in paeds</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Antipsychotics</div><div class="ds">Haloperidol, quetiapine, olanzapine</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Tricyclic antidepressants</div><div class="ds">Amitriptyline, imipramine</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Methadone</div><div class="ds">Opioid &mdash; significant QT prolongation</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Chloroquine / Hydroxychloroquine</div><div class="ds">Antimalarial</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Trimethoprim / Co-trimoxazole</div><div class="ds">Antibiotic &mdash; mild effect</div></div></div>
-      </div>
+    <div class="sl">Drugs</div>
+    <div class="cause-grid">
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Ondansetron</div><div class="ds">5-HT&#8323; antagonist &mdash; common in ED</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Amiodarone</div><div class="ds">Class III antiarrhythmic</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Sotalol</div><div class="ds">Class II/III antiarrhythmic</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Macrolides</div><div class="ds">Erythromycin, azithromycin, clarithromycin</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Fluconazole / Azoles</div><div class="ds">Dose-dependent QT effect</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Quinolones</div><div class="ds">Ciprofloxacin, levofloxacin</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Domperidone</div><div class="ds">Prokinetic &mdash; common in paediatrics</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Antipsychotics</div><div class="ds">Haloperidol, quetiapine, olanzapine</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Tricyclic antidepressants</div><div class="ds">Amitriptyline, imipramine</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Methadone</div><div class="ds">Opioid &mdash; significant QT effect</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Chloroquine / Hydroxychloroquine</div><div class="ds">Antimalarial</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Trimethoprim / Co-trimoxazole</div><div class="ds">Mild effect</div></div></div>
+    </div>
 
-      <div class="sl">&#129516; Electrolytes &amp; Metabolic</div>
-      <div class="dgrid">
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypokalaemia</div><div class="ds">K&#8314; &lt;3.5 mmol/L</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypomagnesaemia</div><div class="ds">Mg&#178;&#8314; &lt;0.7 mmol/L</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypocalcaemia</div><div class="ds">Corrected Ca&#178;&#8314; &lt;2.1 mmol/L</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypothyroidism</div><div class="ds">Metabolic cause of QT prolongation</div></div></div>
-      </div>
+    <div class="sl">Electrolytes &amp; Metabolic</div>
+    <div class="cause-grid">
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypokalaemia</div><div class="ds">K&#8314; &lt;3.5 mmol/L</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypomagnesaemia</div><div class="ds">Mg&#178;&#8314; &lt;0.7 mmol/L</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypocalcaemia</div><div class="ds">Corrected Ca&#178;&#8314; &lt;2.1 mmol/L</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Hypothyroidism</div><div class="ds">Metabolic cause of QT prolongation</div></div></div>
+    </div>
 
-      <div class="sl">&#129516; Congenital &amp; Structural</div>
-      <div class="dgrid">
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Long QT Syndrome (LQTS)</div><div class="ds">Romano-Ward (AD) or Jervell-Lange-Nielsen (AR + deafness)</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Family history of LQTS / sudden death</div><div class="ds">First-degree relative &lt;40 years</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Congenital heart disease</div><div class="ds">Including post-surgical</div></div></div>
-        <div class="di" onclick="togDrug(this)"><div class="chk">&#10003;</div><div><div class="dn">Myocarditis / Cardiomyopathy</div><div class="ds">Acquired structural cause</div></div></div>
-      </div>
+    <div class="sl">Congenital &amp; Structural</div>
+    <div class="cause-grid">
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Long QT Syndrome (LQTS)</div><div class="ds">Romano-Ward (AD) / Jervell-Lange-Nielsen (AR)</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Family Hx LQTS / sudden death</div><div class="ds">1st-degree relative under 40 years</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Congenital heart disease</div><div class="ds">Including post-surgical</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Myocarditis / Cardiomyopathy</div><div class="ds">Acquired structural cause</div></div></div>
+    </div>
 
-      <div id="drugMsg" style="display:none;margin-top:12px;">
-        <div class="rbox amb"><div class="ri">&#9888;</div><div><strong>Potential contributing causes identified</strong><p id="drugList"></p></div></div>
+    <div id="causeMsg" style="display:none;">
+      <div class="alert alert-warn" style="margin-top:12px;">
+        <strong>Potential contributing causes identified</strong>
+        <p id="causeList"></p>
       </div>
     </div>
   </div>
-
-</main>
 </div>
 
-<!-- ===== TAB 2: ECG CHECKLIST ===== -->
-<div class="tab-panel" id="tab-ecg">
-<main>
+<!-- ======================================================= PAGE 2: ECG CHECKLIST -->
+<div class="page" id="page-ecg">
+  <div class="page-header">
+    <h1>&#10003; ECG Checklist</h1>
+    <p>Glasgow Paediatric ECG Systematic Review &mdash; answer YES if finding is normal</p>
+  </div>
 
   <div class="card">
-    <div class="card-hd"><div class="step">i</div><h2>Patient Age</h2></div>
-    <div class="card-bd">
-      <div class="row2">
-        <div class="fg">
-          <label class="fl">Age (years)</label>
-          <input type="number" id="ecgAge" placeholder="e.g. 4" min="0" max="18" oninput="onAgeChange()">
-        </div>
-        <div class="fg" style="display:flex;align-items:flex-end;">
-          <div id="ageNote" class="age-note" style="display:none;width:100%;"></div>
-        </div>
+    <div class="card-title">Patient Context</div>
+    <div class="row2">
+      <div class="field">
+        <label>Patient Age (years)</label>
+        <input type="number" id="ecgAge" placeholder="e.g. 4" min="0" max="18" step="0.5" oninput="onAgeChange()">
+      </div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:1px;">
+        <div id="ageNote" style="display:none;font-size:0.77rem;color:var(--accent2);background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.2);border-radius:8px;padding:8px 11px;width:100%;line-height:1.4;"></div>
       </div>
     </div>
   </div>
 
-  <div class="hint"><strong>YES = normal finding.</strong> NO = abnormal &mdash; requires discussion with senior / cardiology.</div>
+  <div class="hint-text"><strong>YES = normal.</strong> NO = abnormal &mdash; discuss with senior / cardiology.</div>
   <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
 
   <div class="eq" id="eq1">
-    <div class="eq-hd"><span class="ecat">Rate</span><div><div class="eq-q">Is the heart rate <strong>appropriate for the age</strong> of the child?</div><div class="eq-note" id="hrNorm">Enter patient age above to see normal HR range.</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq1','yes',this)">&#10003; YES &mdash; Normal for age</button>
-      <button class="eqb nb" onclick="ansQ('eq1','no',this)">&#10007; NO &mdash; Abnormal for age</button>
-    </div>
-    <div class="eq-flag">&#9888; Rate abnormal for age. Causes: sinus tachycardia (fever, pain, shock, SVT), sinus bradycardia (raised ICP, complete heart block, hypothyroidism, medication). Discuss with senior / cardiology.</div>
+    <div class="eq-hd"><span class="ecat">Rate</span><div><div class="eq-q">Is the heart rate <strong>appropriate for the age</strong> of the child?</div><div class="eq-note" id="hrNorm">Enter patient age above to see the normal HR range.</div></div></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq1','yes',this)">&#10003; YES &mdash; Normal for age</button><button class="eqb nb" onclick="ansQ('eq1','no',this)">&#10007; NO &mdash; Abnormal rate</button></div>
+    <div class="eq-flag">Rate abnormal for age. Consider: sinus tachycardia (fever, pain, shock, SVT), sinus bradycardia (raised ICP, heart block, hypothyroidism, medication). Discuss with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq2">
     <div class="eq-hd"><span class="ecat">Rhythm</span><div><div class="eq-q">Is there a <strong>P-wave preceding every QRS</strong> complex?</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq2','yes',this)">&#10003; YES</button>
-      <button class="eqb nb" onclick="ansQ('eq2','no',this)">&#10007; NO</button>
-    </div>
-    <div class="eq-flag">&#9888; Absent or dissociated P-waves suggest junctional rhythm, complete heart block, SVT, or VT. Urgent senior / cardiology review.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq2','yes',this)">&#10003; YES</button><button class="eqb nb" onclick="ansQ('eq2','no',this)">&#10007; NO</button></div>
+    <div class="eq-flag">Absent or dissociated P-waves suggest junctional rhythm, complete heart block, SVT, or VT. Urgent senior / cardiology review.</div>
   </div>
 
   <div class="eq" id="eq3">
     <div class="eq-hd"><span class="ecat">P-Waves</span><div><div class="eq-q">Is the P-wave amplitude <strong>less than 3 small boxes</strong>?</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq3','yes',this)">&#10003; YES &mdash; &lt;3 boxes</button>
-      <button class="eqb nb" onclick="ansQ('eq3','no',this)">&#10007; NO &mdash; Tall P-waves (&ge;3 boxes)</button>
-    </div>
-    <div class="eq-flag">&#9888; Tall P-waves (&gt;3 small boxes / &gt;0.25 mV) suggest right atrial hypertrophy (P pulmonale). Associated with pulmonary hypertension or right heart disease. Discuss with cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq3','yes',this)">&#10003; YES &mdash; &lt;3 boxes</button><button class="eqb nb" onclick="ansQ('eq3','no',this)">&#10007; NO &mdash; Tall P-waves (&ge;3 boxes)</button></div>
+    <div class="eq-flag">Tall P-waves (&gt;3 small boxes / &gt;0.25 mV) suggest right atrial hypertrophy (P pulmonale). Associated with pulmonary hypertension or right heart disease. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq4">
     <div class="eq-hd"><span class="ecat">Axis</span><div><div class="eq-q">Is the QRS complex <strong>positive in both leads I and aVF</strong>?</div><div class="eq-note" id="axisNote">Normal axis = positive in leads I and aVF.</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq4','yes',this)">&#10003; YES &mdash; Normal axis</button>
-      <button class="eqb nb" onclick="ansQ('eq4','no',this)">&#10007; NO &mdash; Axis deviation present</button>
-    </div>
-    <div class="eq-flag" id="axisFlag">&#9888; Abnormal axis. Left axis deviation may indicate LBBB, LVH, or inferior MI pattern. Right axis deviation (after age 1) may indicate RVH, RBBB, or pulmonary disease. Discuss with senior / cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq4','yes',this)">&#10003; YES &mdash; Normal axis</button><button class="eqb nb" onclick="ansQ('eq4','no',this)">&#10007; NO &mdash; Axis deviation</button></div>
+    <div class="eq-flag" id="axisFlag">Abnormal axis. Left axis deviation may indicate LBBB, LVH, or inferior MI pattern. Right axis deviation (after age 1) may indicate RVH, RBBB, or pulmonary disease. Discuss with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq5">
-    <div class="eq-hd"><span class="ecat">PR Interval</span><div><div class="eq-q">Is the PR interval <strong>more than 2 but less than 4 small boxes</strong>? <span style="font-weight:400;color:var(--mut)">(80&ndash;200 ms)</span></div><div class="eq-note">If shorter than 2 boxes: check for delta wave and broad QRS &mdash; possible WPW.</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq5','yes',this)">&#10003; YES &mdash; Normal PR</button>
-      <button class="eqb nb" onclick="ansQ('eq5','no',this)">&#10007; NO &mdash; Short or long PR</button>
-    </div>
-    <div class="eq-flag">&#9888; Short PR (&lt;80 ms) with delta wave and broad QRS &rarr; consider WPW &mdash; urgent cardiology referral. Long PR (&gt;200 ms) &rarr; consider 1st, 2nd, or 3rd degree heart block. Discuss with senior / cardiology.</div>
+    <div class="eq-hd"><span class="ecat">PR Interval</span><div><div class="eq-q">Is the PR interval <strong>more than 2 but less than 4 small boxes?</strong> <span style="font-weight:400;color:var(--muted)">(80&ndash;200 ms)</span></div><div class="eq-note">If shorter than 2 boxes: check for delta wave and broad QRS &mdash; possible WPW.</div></div></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq5','yes',this)">&#10003; YES &mdash; Normal PR</button><button class="eqb nb" onclick="ansQ('eq5','no',this)">&#10007; NO &mdash; Short or long PR</button></div>
+    <div class="eq-flag">Short PR (&lt;80 ms) with delta wave and broad QRS &rarr; consider WPW &mdash; urgent cardiology referral. Long PR (&gt;200 ms) &rarr; consider 1st, 2nd, or 3rd degree heart block. Discuss with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq6">
-    <div class="eq-hd"><span class="ecat">QRS Interval</span><div><div class="eq-q">Are the QRS complexes <strong>less than 2 small boxes</strong> in duration? <span style="font-weight:400;color:var(--mut)">(&lt;80 ms)</span></div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq6','yes',this)">&#10003; YES &mdash; Narrow QRS</button>
-      <button class="eqb nb" onclick="ansQ('eq6','no',this)">&#10007; NO &mdash; Broad QRS (&ge;2 boxes)</button>
-    </div>
-    <div class="eq-flag">&#9888; Broad QRS indicates bundle branch block, ventricular rhythm, accessory pathway (WPW), hyperkalaemia, or sodium channel toxicity. Discuss urgently with senior / cardiology.</div>
+    <div class="eq-hd"><span class="ecat">QRS Interval</span><div><div class="eq-q">Are the QRS complexes <strong>less than 2 small boxes</strong> in duration? <span style="font-weight:400;color:var(--muted)">(&lt;80 ms)</span></div></div></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq6','yes',this)">&#10003; YES &mdash; Narrow QRS</button><button class="eqb nb" onclick="ansQ('eq6','no',this)">&#10007; NO &mdash; Broad QRS (&ge;2 boxes)</button></div>
+    <div class="eq-flag">Broad QRS indicates bundle branch block, ventricular rhythm, accessory pathway (WPW), hyperkalaemia, or sodium channel toxicity. Discuss urgently with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq7">
-    <div class="eq-hd"><span class="ecat">QT Interval</span><div><div class="eq-q">Is the QTc <strong>less than 460 ms</strong>?</div><div class="eq-note">Corrected QT = QT &divide; &radic;RR (Bazett). Use the QTc Calculator tab for full analysis.</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq7','yes',this)">&#10003; YES &mdash; QTc &lt;460 ms</button>
-      <button class="eqb nb" onclick="ansQ('eq7','no',this)">&#10007; NO &mdash; QTc &ge;460 ms</button>
-    </div>
-    <div class="eq-flag">&#9888; Prolonged QTc &ge;460 ms &mdash; risk of torsades de pointes and VF. Review drug chart, electrolytes, and family history. Use QTc Calculator tab for full analysis. Discuss with senior / cardiology.</div>
+    <div class="eq-hd"><span class="ecat">QT Interval</span><div><div class="eq-q">Is the QTc <strong>less than 460 ms</strong>?</div><div class="eq-note">Corrected QT = QT &divide; &radic;RR (Bazett). Use the QTc Calculator for full analysis.</div></div></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq7','yes',this)">&#10003; YES &mdash; QTc &lt;460 ms</button><button class="eqb nb" onclick="ansQ('eq7','no',this)">&#10007; NO &mdash; QTc &ge;460 ms</button></div>
+    <div class="eq-flag">Prolonged QTc &ge;460 ms &mdash; risk of torsades de pointes and VF. Review drug chart, electrolytes, and family history. Use the QTc Calculator for full analysis. Discuss with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq8">
     <div class="eq-hd"><span class="ecat">VH &mdash; V1</span><div><div class="eq-q">Is the <strong>R wave smaller than the S wave in V1</strong>?</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq8','yes',this)">&#10003; YES &mdash; R &lt; S in V1 (normal)</button>
-      <button class="eqb nb" onclick="ansQ('eq8','no',this)">&#10007; NO &mdash; Dominant R in V1</button>
-    </div>
-    <div class="eq-flag">&#9888; Dominant R wave in V1 suggests right ventricular hypertrophy (RVH). Associated with pulmonary hypertension, pulmonary stenosis, ASD, or Ebstein&apos;s anomaly. Discuss with cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq8','yes',this)">&#10003; YES &mdash; R &lt; S in V1 (normal)</button><button class="eqb nb" onclick="ansQ('eq8','no',this)">&#10007; NO &mdash; Dominant R in V1</button></div>
+    <div class="eq-flag">Dominant R wave in V1 suggests right ventricular hypertrophy (RVH). Associated with pulmonary hypertension, pulmonary stenosis, ASD, or Ebstein&apos;s anomaly. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq9">
     <div class="eq-hd"><span class="ecat">VH &mdash; V5/V6</span><div><div class="eq-q">Is there <strong>separation with no overlap</strong> between the R-wave of V6 and the S-wave of V5?</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq9','yes',this)">&#10003; YES &mdash; No overlap (normal)</button>
-      <button class="eqb nb" onclick="ansQ('eq9','no',this)">&#10007; NO &mdash; Overlap present</button>
-    </div>
-    <div class="eq-flag">&#9888; Overlap between R(V6) and S(V5) may indicate biventricular or left ventricular hypertrophy. Discuss with cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq9','yes',this)">&#10003; YES &mdash; No overlap (normal)</button><button class="eqb nb" onclick="ansQ('eq9','no',this)">&#10007; NO &mdash; Overlap present</button></div>
+    <div class="eq-flag">Overlap between R(V6) and S(V5) may indicate biventricular or left ventricular hypertrophy. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq10">
     <div class="eq-hd"><span class="ecat">Q-Waves</span><div><div class="eq-q">Are the Q-waves <strong>less than 4 small boxes deep</strong> in all leads?</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq10','yes',this)">&#10003; YES &mdash; Q-waves &lt;4 boxes</button>
-      <button class="eqb nb" onclick="ansQ('eq10','no',this)">&#10007; NO &mdash; Deep Q-waves (&ge;4 boxes)</button>
-    </div>
-    <div class="eq-flag">&#9888; Deep Q-waves (&gt;4 mm) may suggest hypertrophic cardiomyopathy (HOCM), myocardial infarction pattern, or infiltrative disease. Important finding in a child &mdash; discuss with cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq10','yes',this)">&#10003; YES &mdash; Q-waves &lt;4 boxes</button><button class="eqb nb" onclick="ansQ('eq10','no',this)">&#10007; NO &mdash; Deep Q-waves (&ge;4 boxes)</button></div>
+    <div class="eq-flag">Deep Q-waves (&gt;4 mm) may suggest hypertrophic cardiomyopathy (HOCM), myocardial infarction pattern, or infiltrative disease. Important finding in a child &mdash; discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq11">
     <div class="eq-hd"><span class="ecat">T-Waves V5/V6</span><div><div class="eq-q">Are the <strong>T-waves positive in V5 and V6</strong>?</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq11','yes',this)">&#10003; YES &mdash; Upright T-waves</button>
-      <button class="eqb nb" onclick="ansQ('eq11','no',this)">&#10007; NO &mdash; T-waves inverted in V5/V6</button>
-    </div>
-    <div class="eq-flag">&#9888; T-wave inversion in V5/V6 is abnormal at any age. Consider LVH with strain, myocarditis, or ischaemia. Discuss with cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq11','yes',this)">&#10003; YES &mdash; Upright T-waves</button><button class="eqb nb" onclick="ansQ('eq11','no',this)">&#10007; NO &mdash; T-waves inverted</button></div>
+    <div class="eq-flag">T-wave inversion in V5/V6 is abnormal at any age. Consider LVH with strain, myocarditis, or ischaemia. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq12">
-    <div class="eq-hd"><span class="ecat">T-Wave V1</span><div><div class="eq-q" id="q12q">In patients <strong>&lt;8 years old</strong>, is the T-wave <strong>negative in V1</strong>?</div><div class="eq-note" id="q12note">A negative T-wave in V1 is normal in children under 8. In children &ge;8 years, the T-wave in V1 should become upright.</div></div></div>
+    <div class="eq-hd"><span class="ecat">T-Wave V1</span><div><div class="eq-q" id="q12q">In patients <strong>&lt;8 years</strong>, is the T-wave <strong>negative in V1</strong>?</div><div class="eq-note" id="q12note">A negative T-wave in V1 is normal in children under 8. After age 8 the T-wave in V1 should become upright.</div></div></div>
     <div class="eq-btns" id="q12btns">
       <button class="eqb yb" onclick="ansQ('eq12','yes',this)">&#10003; YES &mdash; T negative in V1 (normal &lt;8 yrs)</button>
       <button class="eqb nb" onclick="ansQ('eq12','no',this)">&#10007; NO &mdash; T positive in V1 (abnormal &lt;8 yrs)</button>
     </div>
-    <div class="eq-flag">&#9888; Positive T-wave in V1 in a child under 8 years is abnormal. Consider RVH or posterior ischaemic pattern. Discuss with cardiology.</div>
+    <div class="eq-flag">Positive T-wave in V1 in a child under 8 years is abnormal. Consider RVH or posterior ischaemic pattern. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq13">
     <div class="eq-hd"><span class="ecat">ST Segment</span><div><div class="eq-q">If ST elevation is present: is it raised by <strong>less than 2 small boxes</strong>?</div><div class="eq-note">If there is no ST elevation at all, answer YES.</div></div></div>
-    <div class="eq-btns">
-      <button class="eqb yb" onclick="ansQ('eq13','yes',this)">&#10003; YES &mdash; No elevation, or &lt;2 boxes</button>
-      <button class="eqb nb" onclick="ansQ('eq13','no',this)">&#10007; NO &mdash; ST elevation &ge;2 boxes</button>
-    </div>
-    <div class="eq-flag">&#9888; Significant ST elevation &ge;2 boxes may indicate myocarditis, pericarditis, Kawasaki disease, or ischaemia. Urgent senior / cardiology review required.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq13','yes',this)">&#10003; YES &mdash; None, or &lt;2 boxes</button><button class="eqb nb" onclick="ansQ('eq13','no',this)">&#10007; NO &mdash; ST elevation &ge;2 boxes</button></div>
+    <div class="eq-flag">Significant ST elevation &ge;2 boxes may indicate myocarditis, pericarditis, Kawasaki disease, or ischaemia. Urgent senior / cardiology review required.</div>
   </div>
 
   <div class="cr card" id="crPanel">
     <div id="crTop" class="cr-top"><div id="crIcon" class="cr-icon"></div><div><div id="crTitle" class="cr-title"></div><div id="crSub" class="cr-sub"></div></div></div>
     <div class="cr-bd" id="crBd"></div>
   </div>
-
-</main>
 </div>
 
+<!-- MOBILE TAB BAR -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-page="qtc" onclick="switchPage('qtc')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="2,12 6,4 10,18 14,8 18,14 22,12"/></svg>
+    <span>QTc Calc</span><div class="dot"></div>
+  </button>
+  <button class="tab-btn" data-page="ecg" onclick="switchPage('ecg')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/><polyline points="7,17 10,17"/></svg>
+    <span>ECG Check</span><div class="dot"></div>
+  </button>
+</nav>
+
 <script>
-// ── TABS ──────────────────────────────────────────────────────
-function switchTab(btn, name) {
-  var btns = document.querySelectorAll('.tab-btn');
-  var panels = document.querySelectorAll('.tab-panel');
-  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-  for (var i = 0; i < panels.length; i++) panels[i].classList.remove('active');
-  btn.classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
+// ── PAGE SWITCHING ────────────────────────────────────────────
+function switchPage(name) {
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+  document.getElementById('page-' + name).classList.add('active');
+  var btns = document.querySelectorAll('[data-page]');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('active', btns[i].getAttribute('data-page') === name);
+  }
+  window.scrollTo(0, 0);
 }
 
 // ── UNIT TOGGLE ───────────────────────────────────────────────
-var qtUnit = 'ms';
+var qtUnit = 'sq';
 function setUnit(u) {
   qtUnit = u;
-  document.getElementById('ubtn-ms').classList.toggle('active', u === 'ms');
-  document.getElementById('ubtn-sq').classList.toggle('active', u === 'sq');
-  document.getElementById('qt-lbl').textContent = u === 'ms' ? 'QT Interval (ms)' : 'QT Interval (small squares)';
-  document.getElementById('qt').placeholder = u === 'ms' ? 'e.g. 340' : 'e.g. 8.5';
+  document.getElementById('qt-lbl').textContent = u === 'sq' ? 'QT Interval (small squares)' : 'QT Interval (ms)';
+  document.getElementById('qt').placeholder = u === 'sq' ? 'e.g. 8.5' : 'e.g. 340';
+  document.getElementById('qt').step = u === 'sq' ? '0.1' : '1';
   updateConv();
 }
 function updateConv() {
@@ -447,94 +450,91 @@ function updateConv() {
   var el = document.getElementById('conv-note');
   if (isNaN(val) || val <= 0) { el.textContent = ''; return; }
   if (qtUnit === 'sq') {
-    el.textContent = '= ' + (val * 40).toFixed(0) + ' ms  (at standard 25 mm/s paper speed)';
+    el.textContent = '= ' + (val * 40).toFixed(0) + ' ms  (standard 25 mm/s paper speed)';
   } else {
     el.textContent = '= ' + (val / 40).toFixed(2) + ' small squares';
   }
 }
 
 // ── HR REFERENCE ──────────────────────────────────────────────
+var hrRangeData = {
+  '100,180': 'Newborn (0-1 month): Normal HR 100-180 bpm',
+  '100,160': 'Infant (1-12 months): Normal HR 100-160 bpm',
+  '90,150':  'Toddler (1-2 years): Normal HR 90-150 bpm',
+  '80,140':  'Preschool (2-5 years): Normal HR 80-140 bpm',
+  '70,120':  'School age (5-12 years): Normal HR 70-120 bpm',
+  '60,100':  'Adolescent (>12 years): Normal HR 60-100 bpm'
+};
 function showHrRef() {
-  var sel = document.getElementById('ageGroup');
+  var v = document.getElementById('ageGroup').value;
   var box = document.getElementById('hrRefBox');
-  if (!sel.value) { box.style.display = 'none'; return; }
-  var parts = sel.value.split(',');
-  var label = sel.options[sel.selectedIndex].text;
-  box.style.display = 'block';
-  box.innerHTML = '<strong>' + label + '</strong> &mdash; Normal HR: <strong>' + parts[2] + '&ndash;' + parts[3] + ' bpm</strong>';
+  if (v && hrRangeData[v]) {
+    box.style.display = 'block';
+    box.innerHTML = hrRangeData[v];
+  } else {
+    box.style.display = 'none';
+  }
 }
 
 // ── QTC CALCULATOR ────────────────────────────────────────────
 function calcQTc() {
   var hr = parseFloat(document.getElementById('hr').value);
   var qtRaw = parseFloat(document.getElementById('qt').value);
-  if (isNaN(hr) || hr <= 0 || isNaN(qtRaw) || qtRaw <= 0) {
-    alert('Please enter a valid heart rate and QT interval before calculating.');
-    return;
-  }
+  if (isNaN(hr) || hr <= 0) { alert('Please enter a valid heart rate.'); return; }
+  if (isNaN(qtRaw) || qtRaw <= 0) { alert('Please enter a valid QT interval.'); return; }
   var qtMs = qtUnit === 'sq' ? qtRaw * 40 : qtRaw;
+  if (qtMs < 100 || qtMs > 800) { alert('QT interval seems outside expected range (' + qtMs.toFixed(0) + ' ms). Please check your input.'); return; }
   var qtS = qtMs / 1000;
   var RR = 60 / hr;
   var defF = document.getElementById('defFormula').value;
 
   var formulas = [
-    { key: 'bazett',     name: 'Bazett',      val: qtS / Math.sqrt(RR),          note: 'QT &divide; &radic;RR &mdash; most widely used; less accurate at HR extremes',           tag: 'Most used' },
-    { key: 'fridericia', name: 'Fridericia',  val: qtS / Math.pow(RR, 1/3),      note: 'QT &divide; RR&frac13; &mdash; more accurate at high HR; preferred in paeds tachycardia', tag: 'Better at high HR' },
-    { key: 'framingham', name: 'Framingham',  val: qtS + 0.154 * (1 - RR),       note: 'QT + 0.154(1&minus;RR) &mdash; linear correction; good at mid-range HR',                tag: 'Linear' },
-    { key: 'hodges',     name: 'Hodges',      val: qtS + 0.00175 * (hr - 60),    note: 'QT + 1.75(HR&minus;60)/1000 &mdash; HR-based linear correction',                         tag: 'HR-linear' }
+    { key:'bazett',     name:'Bazett',     ms: Math.round((qtS / Math.sqrt(RR)) * 1000),       note:'QT / sqrt(RR) &mdash; most widely used' },
+    { key:'fridericia', name:'Fridericia', ms: Math.round((qtS / Math.pow(RR, 1/3)) * 1000),   note:'QT / RR^(1/3) &mdash; better at high HR' },
+    { key:'framingham', name:'Framingham', ms: Math.round((qtS + 0.154 * (1 - RR)) * 1000),    note:'QT + 0.154(1-RR)' },
+    { key:'hodges',     name:'Hodges',     ms: Math.round((qtS + 0.00175 * (hr - 60)) * 1000), note:'QT + 1.75(HR-60)/1000' }
   ];
 
   var anyFlag = false;
-  var defQtc = 0;
-  var html = '';
+  var grid = document.getElementById('fgrid');
+  grid.innerHTML = '';
   for (var i = 0; i < formulas.length; i++) {
     var f = formulas[i];
-    var ms = Math.round(f.val * 1000);
-    var flagged = ms >= 460;
+    var flagged = f.ms >= 460;
     if (flagged) anyFlag = true;
-    if (f.key === defF) defQtc = ms;
     var isDefault = f.key === defF;
-    var cardClass = (isDefault ? 'fc def' : 'fc') + (flagged ? ' flag' : ' ok');
-    var valClass = flagged ? 'fv flag' : 'fv ok';
-    var tagClass = flagged ? 'ftag tflag' : 'ftag tok';
-    var tagText = flagged ? '&#9888; QTc &ge;460 ms' : '&#10003; QTc &lt;460 ms';
-    html += '<div class="' + cardClass + '">';
-    html += '<div class="fn">' + f.name + (isDefault ? ' <span class="ftag tdef">PRIMARY</span>' : '') + '</div>';
-    html += '<div class="' + valClass + '">' + ms + ' ms</div>';
-    html += '<div class="fnote">' + f.note + '</div>';
-    html += '<span class="' + tagClass + '">' + tagText + '</span>';
-    html += '</div>';
+    var cardClass = flagged ? 'stat neg' : (isDefault ? 'stat hi' : 'stat pos');
+    var valClass = flagged ? 'val flag' : 'val ok';
+    var tagHtml = '';
+    if (isDefault) tagHtml += '<span class="stag stag-def">Primary</span> ';
+    tagHtml += flagged ? '<span class="stag stag-flag">&#9888; QTc &ge;460ms</span>' : '<span class="stag stag-ok">&#10003; QTc &lt;460ms</span>';
+    var card = document.createElement('div');
+    card.className = cardClass;
+    card.innerHTML = '<div class="lbl">' + f.name + '</div><div class="' + valClass + '">' + f.ms + '<span>ms</span></div><div class="sub">' + f.note + '</div>' + tagHtml;
+    grid.appendChild(card);
   }
-  document.getElementById('fgrid').innerHTML = html;
 
-  var badge = document.getElementById('qtcBadge');
   var msg = document.getElementById('qtcMsg');
   if (anyFlag) {
-    badge.className = 'badge badge-flag';
-    badge.textContent = 'QTc PROLONGED';
-    msg.innerHTML = '<div class="rbox red"><div class="ri">&#128680;</div><div><strong>QTc &ge;460 ms &mdash; Prolonged</strong><p>One or more formulae indicate a prolonged QTc. Review the drug chart and electrolytes using the checklist below. Discuss with a senior and consider cardiology referral. Avoid prescribing further QT-prolonging agents.</p></div></div>';
+    msg.innerHTML = '<div class="alert alert-danger" style="margin-top:12px;"><strong>&#9888; QTc &ge;460 ms &mdash; Prolonged</strong><p>One or more formulae indicate a prolonged QTc. Review the drug chart and electrolytes using the checklist below. Discuss with a senior and consider cardiology referral. Avoid prescribing further QT-prolonging agents.</p></div>';
   } else {
-    badge.className = 'badge badge-ok';
-    badge.textContent = 'QTc Normal';
-    msg.innerHTML = '<div class="rbox grn"><div class="ri">&#9989;</div><div><strong>QTc &lt;460 ms across all formulae</strong><p>QT interval is within normal limits by all four formulae. If clinical concern remains (syncope, family history of sudden death, symptoms), discuss with senior regardless of this result.</p></div></div>';
+    msg.innerHTML = '<div class="alert alert-ok" style="margin-top:12px;"><strong>&#10003; QTc &lt;460 ms across all formulae</strong><p>QT interval is within normal limits. If clinical concern remains (syncope, palpitations, family history of sudden death), discuss with senior regardless of this result.</p></div>';
   }
-  var outEl = document.getElementById('qtcOut');
-  outEl.style.display = 'block';
-  outEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  var out = document.getElementById('qtcOut');
+  out.style.display = 'block';
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── DRUG CHECKLIST ────────────────────────────────────────────
-function togDrug(el) {
+// ── CAUSE CHECKLIST ───────────────────────────────────────────
+function togCause(el) {
   el.classList.toggle('sel');
-  var selected = document.querySelectorAll('.di.sel');
-  var msgEl = document.getElementById('drugMsg');
-  var listEl = document.getElementById('drugList');
+  var selected = document.querySelectorAll('.ci.sel');
+  var msgEl = document.getElementById('causeMsg');
+  var listEl = document.getElementById('causeList');
   if (selected.length > 0) {
     var names = [];
-    for (var i = 0; i < selected.length; i++) {
-      names.push(selected[i].querySelector('.dn').textContent);
-    }
-    listEl.textContent = names.join(', ') + '. These may be contributing to QT prolongation &mdash; review with senior and consider specialist input.';
+    for (var i = 0; i < selected.length; i++) names.push(selected[i].querySelector('.dn').textContent);
+    listEl.textContent = names.join(', ') + '. Review with senior and consider specialist input.';
     msgEl.style.display = 'block';
   } else {
     msgEl.style.display = 'none';
@@ -545,58 +545,43 @@ function togDrug(el) {
 var ecgAnswers = {};
 var TOTAL_Q = 13;
 
-var hrRanges = [
-  [0, 1, '100–80'],
-  [1, 12, '100–160'],
-  [12, 24, '90–150'],
-  [24, 60, '80–140'],
-  [60, 144, '70–120'],
-  [144, 999, '60–100']
-];
-
 function onAgeChange() {
   var ageYr = parseFloat(document.getElementById('ecgAge').value);
-  var hrEl = document.getElementById('hrNorm');
-  var axEl = document.getElementById('axisNote');
-    var axFl = document.getElementById('axisFlag');
-  var q12note = document.getElementById('q12note');
-  var q12btns = document.getElementById('q12btns');
-  var ageNote = document.getElementById('ageNote');
-
   if (isNaN(ageYr) || ageYr < 0) {
-    ageNote.style.display = 'none';
-    hrEl.textContent = 'Enter patient age above to see normal HR range.';
+    document.getElementById('ageNote').style.display = 'none';
     return;
   }
-
   var ageM = ageYr * 12;
-  var hrText = '';
-  for (var i = 0; i < hrRanges.length; i++) {
-    if (ageM >= hrRanges[i][0] && ageM < hrRanges[i][1]) {
-      hrText = 'Normal HR for this age: ' + hrRanges[i][2] + ' bpm';
-      break;
-    }
+  var ranges = [[0,1,'100-180'],[1,12,'100-160'],[12,24,'90-150'],[24,60,'80-140'],[60,144,'70-120'],[144,999,'60-100']];
+  var hrTxt = 'Check age-appropriate reference.';
+  for (var i = 0; i < ranges.length; i++) {
+    if (ageM >= ranges[i][0] && ageM < ranges[i][1]) { hrTxt = 'Normal HR: ' + ranges[i][2] + ' bpm'; break; }
   }
-  hrEl.textContent = hrText || 'Check age-appropriate HR reference.';
+  document.getElementById('hrNorm').textContent = hrTxt;
 
+  var axNote = document.getElementById('axisNote');
+  var axFlag = document.getElementById('axisFlag');
   if (ageYr < 1) {
-    axEl.textContent = 'Note: Right axis deviation (positive aVF, negative lead I) is NORMAL in children under 1 year.';
-    axFl.textContent = '\u26A0 Axis abnormal. Note: right axis deviation IS normal under 1 year. If left axis deviation or other pattern, discuss with senior / cardiology.';
+    axNote.textContent = 'Under 1 year: right axis deviation (positive aVF, negative I) is NORMAL.';
+    axFlag.textContent = 'Axis abnormal. Note: right axis deviation IS normal under 1 year. Any other deviation, discuss with senior / cardiology.';
   } else {
-    axEl.textContent = 'Normal axis = QRS positive in both lead I and aVF.';
-    axFl.textContent = '\u26A0 Abnormal axis. Left axis deviation may indicate LBBB, LVH, or inferior MI pattern. Right axis deviation (after age 1) may indicate RVH, RBBB, or pulmonary disease. Discuss with senior / cardiology.';
+    axNote.textContent = 'Normal axis = QRS positive in both leads I and aVF.';
+    axFlag.textContent = 'Abnormal axis. Left axis deviation: consider LBBB, LVH, inferior MI pattern. Right axis deviation (after age 1): consider RVH, RBBB, pulmonary disease. Discuss with senior / cardiology.';
   }
 
+  var q12note = document.getElementById('q12note');
+  var q12btns = document.getElementById('q12btns');
   if (ageYr < 8) {
-    q12note.textContent = 'For age <8 years: a NEGATIVE T-wave in V1 is NORMAL. Answer YES if T is negative in V1.';
-    q12btns.innerHTML = '<button class="eqb yb" onclick="ansQ(\'eq12\',\'yes\',this)">\u2713 YES \u2014 T negative in V1 (normal <8 yrs)</button><button class="eqb nb" onclick="ansQ(\'eq12\',\'no\',this)">\u2717 NO \u2014 T positive in V1 (abnormal <8 yrs)</button>';
+    q12note.textContent = 'Age <8 years: a NEGATIVE T-wave in V1 is NORMAL. Answer YES if T is negative in V1.';
+    q12btns.innerHTML = '<button class="eqb yb" onclick="ansQ('eq12','yes',this)">&#10003; YES &mdash; T negative in V1 (normal &lt;8 yrs)</button><button class="eqb nb" onclick="ansQ('eq12','no',this)">&#10007; NO &mdash; T positive in V1 (abnormal)</button>';
   } else {
-    q12note.textContent = 'For age \u22658 years: the T-wave in V1 should be upright. A persistently negative T-wave in V1 after age 8 may indicate RVH or posterior ischaemia.';
-    q12btns.innerHTML = '<button class="eqb yb" onclick="ansQ(\'eq12\',\'yes\',this)">\u2713 YES \u2014 T upright in V1 (normal \u22658 yrs)</button><button class="eqb nb" onclick="ansQ(\'eq12\',\'no\',this)">\u2717 NO \u2014 T inverted in V1 (abnormal \u22658 yrs)</button>';
+    q12note.textContent = 'Age ≥8 years: T-wave in V1 should be upright. A persistently negative T-wave after age 8 may be abnormal.';
+    q12btns.innerHTML = '<button class="eqb yb" onclick="ansQ('eq12','yes',this)">&#10003; YES &mdash; T upright in V1 (normal ≥8 yrs)</button><button class="eqb nb" onclick="ansQ('eq12','no',this)">&#10007; NO &mdash; T inverted in V1 (abnormal)</button>';
   }
 
-  ageNote.style.display = 'block';
-  ageNote.innerHTML = '<strong>Age-related context active.</strong> Questions 1 (Rate), 4 (Axis), and 12 (T-wave V1) are adjusted for age ' + ageYr.toFixed(1) + ' years.';
+  var note = document.getElementById('ageNote');
+  note.style.display = 'block';
+  note.textContent = 'Age ' + ageYr.toFixed(1) + ' yr — ' + hrTxt + '. Q4 axis and Q12 T-wave thresholds adjusted.';
   delete ecgAnswers['eq12'];
   updateResult();
 }
@@ -613,39 +598,14 @@ function ansQ(id, answer, btn) {
   updateResult();
 }
 
-var catMap = {
-  eq1:'Rate', eq2:'Rhythm', eq3:'P-Waves', eq4:'Axis',
-  eq5:'PR Interval', eq6:'QRS Interval', eq7:'QT Interval',
-  eq8:'Ventricular Hypertrophy (V1)', eq9:'Ventricular Hypertrophy (V5/V6)',
-  eq10:'Q-Waves', eq11:'T-Waves (V5/V6)', eq12:'T-Waves (V1)', eq13:'ST Segment'
-};
-var flagMsgs = {
-  eq1:'Rate abnormal for age. Consider arrhythmia, SVT, heart block, or physiological cause.',
-  eq2:'Absent or dissociated P-waves. Possible junctional rhythm, complete heart block, or VT.',
-  eq3:'Tall P-waves. Consider right atrial hypertrophy.',
-  eq4:'Abnormal axis. Consider BBB, hypertrophy, or structural disease (see age-specific note above).',
-  eq5:'Abnormal PR interval. Consider WPW (short), or 1st/2nd/3rd degree heart block (long).',
-  eq6:'Broad QRS. Consider BBB, ventricular rhythm, hyperkalaemia, or toxidrome.',
-  eq7:'Prolonged QTc. Use the QTc Calculator tab for full analysis.',
-  eq8:'Dominant R in V1. Consider right ventricular hypertrophy.',
-  eq9:'Overlap between R(V6) and S(V5). Consider biventricular or LV hypertrophy.',
-  eq10:'Deep Q-waves. Consider HOCM or ischaemic pattern.',
-  eq11:'T-wave inversion in V5/V6. Consider LVH strain or myocarditis.',
-  eq12:'Abnormal T-wave in V1 for this age group. Consider RVH or posterior ischaemia.',
-  eq13:'Significant ST elevation. Consider myocarditis, pericarditis, or Kawasaki disease.'
-};
+var catMap = { eq1:'Rate', eq2:'Rhythm', eq3:'P-Waves', eq4:'Axis', eq5:'PR Interval', eq6:'QRS Interval', eq7:'QT Interval', eq8:'VH (V1)', eq9:'VH (V5/V6)', eq10:'Q-Waves', eq11:'T-Waves (V5/V6)', eq12:'T-Waves (V1)', eq13:'ST Segment' };
+var flagMsg = { eq1:'Rate abnormal for age. Consider arrhythmia, SVT, or heart block.', eq2:'Absent / dissociated P-waves. Consider junctional rhythm, complete heart block, or VT.', eq3:'Tall P-waves. Consider right atrial hypertrophy.', eq4:'Abnormal axis. See age-specific note above.', eq5:'Abnormal PR. Consider WPW (short) or heart block (long).', eq6:'Broad QRS. Consider BBB, ventricular rhythm, hyperkalaemia, or toxidrome.', eq7:'Prolonged QTc. Use QTc Calculator for full analysis.', eq8:'Dominant R in V1. Consider right ventricular hypertrophy.', eq9:'Overlap R(V6)/S(V5). Consider biventricular or LV hypertrophy.', eq10:'Deep Q-waves. Consider HOCM or ischaemic pattern.', eq11:'T-wave inversion in V5/V6. Consider LVH strain or myocarditis.', eq12:'Abnormal T-wave in V1 for this age. Consider RVH or posterior ischaemia.', eq13:'Significant ST elevation. Consider myocarditis, pericarditis, or Kawasaki disease.' };
 
 function updateResult() {
   var done = Object.keys(ecgAnswers).length;
-  if (done < TOTAL_Q) {
-    document.getElementById('crPanel').classList.remove('show');
-    return;
-  }
+  if (done < TOTAL_Q) { document.getElementById('crPanel').classList.remove('show'); return; }
   var nos = [];
-  var keys = Object.keys(ecgAnswers);
-  for (var i = 0; i < keys.length; i++) {
-    if (ecgAnswers[keys[i]] === 'no') nos.push(keys[i]);
-  }
+  for (var k in ecgAnswers) { if (ecgAnswers[k] === 'no') nos.push(k); }
   var panel = document.getElementById('crPanel');
   panel.classList.add('show');
   var top = document.getElementById('crTop');
@@ -656,20 +616,20 @@ function updateResult() {
 
   if (nos.length === 0) {
     top.className = 'cr-top all-yes';
-    icon.textContent = '\u2705';
-    title.textContent = 'All criteria met \u2014 ECG appears normal';
-    sub.textContent = 'All 13 checklist items answered YES. No red flag features identified. Patient may be suitable for e-vetting discharge if clinically appropriate.';
-    bd.innerHTML = '<p style="font-size:.83rem;color:var(--mut);">Always correlate with the clinical presentation. If any uncertainty remains, discuss with a senior before discharge.</p>';
+    icon.textContent = '✅';
+    title.textContent = 'All criteria met — ECG appears normal';
+    sub.textContent = 'All 13 items answered YES. No red flag features identified. Patient may be suitable for e-vetting discharge if clinically appropriate.';
+    bd.innerHTML = '<p style="font-size:0.8rem;color:var(--muted);">Always correlate with the clinical presentation. If any uncertainty remains, discuss with a senior before discharge.</p>';
   } else {
     top.className = 'cr-top has-no';
-    icon.textContent = '\uD83D\uDD34';
-    title.textContent = nos.length + ' abnormal finding' + (nos.length > 1 ? 's' : '') + ' \u2014 Senior / Cardiology Review Required';
+    icon.textContent = '🔴';
+    title.textContent = nos.length + ' abnormal finding' + (nos.length > 1 ? 's' : '') + ' — Senior / Cardiology Review Required';
     sub.textContent = 'One or more ECG parameters are outside normal limits. Do not discharge without senior review.';
-    var html = '<div class="cr-item" style="font-weight:700;color:var(--red);border-bottom:2px solid var(--red-bd);margin-bottom:4px;">Abnormal findings:</div>';
+    var html = '';
     for (var i = 0; i < nos.length; i++) {
-      html += '<div class="cr-item"><span style="font-size:.95rem;flex-shrink:0">\u26A0\uFE0F</span><div><strong>' + catMap[nos[i]] + '</strong><br><span style="font-size:.79rem;color:var(--mut)">' + flagMsgs[nos[i]] + '</span></div></div>';
+      html += '<div class="cr-item"><span style="color:var(--danger);font-size:0.9rem;flex-shrink:0;">⚠</span><div><strong style="color:var(--text);">' + catMap[nos[i]] + '</strong><br><span style="color:var(--muted);">' + flagMsg[nos[i]] + '</span></div></div>';
     }
-    html += '<div class="rbox red" style="margin-top:12px;"><div class="ri">\uD83D\uDCDE</div><div><strong>Action required</strong><p>Discuss these findings with your registrar or consultant before any discharge decision. If the child is symptomatic (syncope, chest pain, palpitations) or haemodynamically compromised, escalate immediately.</p></div></div>';
+    html += '<div class="alert alert-danger" style="margin-top:12px;"><strong>Action required</strong><p>Discuss with your registrar or consultant before any discharge decision. If the child is symptomatic (syncope, chest pain, palpitations) or haemodynamically compromised, escalate immediately.</p></div>';
     bd.innerHTML = html;
   }
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
