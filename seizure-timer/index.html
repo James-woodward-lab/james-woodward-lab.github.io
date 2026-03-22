@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="color-scheme" content="dark light">
+<title>Paediatric Seizure Timer</title>
+<link rel="stylesheet" href="../css/app-theme.css">
+<script src="../js/theme-toggle.js"></script>
+<link rel="stylesheet" href="../css/seizure-timer.css">
+</head>
+<body class="seizure-timer-app">
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+
+<div class="container">
+  <header class="app-header-center">
+    <h1>⏱️ Paediatric Seizure Timer</h1>
+    <p>Status epilepticus escalation prompts — clinical decision support</p>
+  </header>
+
+  <div class="warning-banner seizure-warn">
+    <span>⚠️</span>
+    <div><strong>Clinical decision support only.</strong> Based on Resuscitation Council UK paediatric status epilepticus algorithm (Mar 2022). Follow local protocols. Dosing must be verified against BNFc. No patient data is stored.</div>
+  </div>
+
+  <a href="https://www.resus.org.uk/sites/default/files/2022-03/RCUK%20Paediatric%20emergency%20algorithms%20and%20resources%20Mar%2022%20V1.pdf" target="_blank" rel="noopener" class="rcuk-link">
+    📄 View RCUK Paediatric Emergency Algorithms (PDF)
+  </a>
+
+  <!-- Initial state: big start button -->
+  <div class="card start-card" id="startCard">
+    <button type="button" class="btn-start" id="btnStart" onclick="startTimer()">
+      <span class="btn-start-icon">▶</span>
+      <span class="btn-start-label">Start timer</span>
+      <span class="btn-start-hint">Press when seizure begins</span>
+    </button>
+  </div>
+
+  <!-- Running state: timer + prompts + administered buttons -->
+  <div class="timer-running" id="timerRunning" style="display:none;">
+    <div class="card timer-card">
+      <div class="timer-display" id="timerDisplay">0:00</div>
+      <div class="timer-mins" id="timerMins">0 min</div>
+    </div>
+
+    <div class="card prompt-card" id="promptCard">
+      <div class="prompt-content" id="promptContent"></div>
+      <div class="prompt-level" id="promptLevel"></div>
+    </div>
+
+    <div class="card dose-buttons-card">
+      <div class="card-title">Mark dose administered</div>
+      <p class="dose-hint">Tap when each intervention has been given — this will update the prompts accordingly.</p>
+      <div class="dose-btn-row">
+        <button type="button" class="dose-btn" id="dose1Btn" onclick="markDose(1)" disabled>
+          <span class="dose-btn-icon">💉</span>
+          <span>1st benzodiazepine</span>
+        </button>
+        <button type="button" class="dose-btn" id="dose2Btn" onclick="markDose(2)" disabled>
+          <span class="dose-btn-icon">💉</span>
+          <span>2nd benzodiazepine</span>
+        </button>
+        <button type="button" class="dose-btn" id="dose3Btn" onclick="markDose(3)" disabled>
+          <span class="dose-btn-icon">💊</span>
+          <span>2nd line agent</span>
+        </button>
+      </div>
+    </div>
+
+    <button type="button" class="btn-reset" onclick="resetTimer()">Reset timer</button>
+  </div>
+</div>
+
+<section class="references" style="padding:16px 20px 24px;font-size:0.75rem;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);background:var(--surface);">
+  <h3 style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:8px;">Reference</h3>
+  <p>Resuscitation Council UK. <em>Paediatric emergency algorithms &amp; resources</em>. March 2022. <a href="https://www.resus.org.uk/sites/default/files/2022-03/RCUK%20Paediatric%20emergency%20algorithms%20and%20resources%20Mar%2022%20V1.pdf" target="_blank" rel="noopener">View PDF (RCUK)</a></p>
+</section>
+
+<footer class="app-footer">
+  For clinical decision support only. Always verify against local guidelines.
+</footer>
+
+<script>
+(function() {
+  let startTime = null;
+  let intervalId = null;
+  let dose1Given = false;
+  let dose2Given = false;
+  let dose3Given = false;
+
+  // Aligned with RCUK "Treating convulsive status epilepticus in children" (Mar 2022)
+  const PROMPTS = {
+    dose1: {
+      gentle: 'Consider preparing lorazepam. CSE is defined as seizure > 5 min; treatment usually starts at 5 min.',
+      firmPrep: 'Prepare lorazepam 0.1 mg/kg IV (or IO). Give at 5 min if seizure continues.',
+      firmGive: 'Give lorazepam 0.1 mg/kg IV/IO. Reconfirm epileptic seizure. Prepare second-line agent for next step.'
+    },
+    dose2: {
+      gentle: 'Consider preparing second dose of lorazepam. Can be repeated after 10 min if no response.',
+      firmPrep: 'Prepare second dose of lorazepam 0.1 mg/kg IV/IO.',
+      firmGive: 'Give second dose of lorazepam if seizure continues. Prepare second-line agent (levetiracetam, phenytoin or phenobarbital). Call anaesthetist and PICU.'
+    },
+    dose3: {
+      gentle: 'Prepare second-line agent: levetiracetam 30–60 mg/kg, phenytoin 20 mg/kg, or phenobarbital 20 mg/kg. Call anaesthetist and PICU.',
+      firm: 'Give second-line agent. Call anaesthetist and PICU. If preparation for RSI complete, consider thiopentone/propofol/ketamine.'
+    }
+  };
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function formatElapsed(ms) {
+    const sec = Math.floor(ms / 1000);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ':' + pad(s);
+  }
+
+  function getElapsedMins() {
+    if (!startTime) return 0;
+    return (Date.now() - startTime) / 60000;
+  }
+
+  function updateDisplay() {
+    const elapsed = Date.now() - startTime;
+    document.getElementById('timerDisplay').textContent = formatElapsed(elapsed);
+    const mins = Math.floor(elapsed / 60000);
+    document.getElementById('timerMins').textContent = mins + ' min';
+  }
+
+  function getCurrentPrompt() {
+    const m = getElapsedMins();
+
+    // First benzodiazepine (RCUK: 5 min)
+    if (!dose1Given) {
+      if (m < 4) return { text: PROMPTS.dose1.gentle, level: 'gentle' };
+      if (m < 5) return { text: PROMPTS.dose1.firmPrep, level: 'firm' };
+      return { text: PROMPTS.dose1.firmGive, level: 'urgent' };
+    }
+
+    // Second benzodiazepine (RCUK: lorazepam can repeat after 10 min)
+    if (!dose2Given) {
+      if (m < 9) return { text: PROMPTS.dose2.gentle, level: 'gentle' };
+      if (m < 10) return { text: PROMPTS.dose2.firmPrep, level: 'firm' };
+      return { text: PROMPTS.dose2.firmGive, level: 'urgent' };
+    }
+
+    // Second-line agents (RCUK: 10–15 min) + RSI (15–35 min)
+    if (!dose3Given) {
+      if (m < 15) return { text: PROMPTS.dose3.gentle, level: 'gentle' };
+      return { text: PROMPTS.dose3.firm, level: 'urgent' };
+    }
+
+    return { text: 'All interventions administered. Continue supportive care. Consider ongoing discussion with PICU/anaesthetics if seizure persists.', level: 'info' };
+  }
+
+  function updatePrompt() {
+    const p = getCurrentPrompt();
+    const content = document.getElementById('promptContent');
+    const levelEl = document.getElementById('promptLevel');
+    const card = document.getElementById('promptCard');
+    content.textContent = p.text;
+    content.className = 'prompt-content prompt-' + p.level;
+    levelEl.textContent = p.level === 'gentle' ? 'Consider' : p.level === 'firm' ? 'Prepare' : p.level === 'urgent' ? 'Action' : 'Info';
+    levelEl.className = 'prompt-level prompt-' + p.level;
+    card.className = 'card prompt-card prompt-' + p.level;
+  }
+
+  function updateDoseButtons() {
+    const m = getElapsedMins();
+    document.getElementById('dose1Btn').disabled = false;
+    document.getElementById('dose2Btn').disabled = !dose1Given;
+    document.getElementById('dose3Btn').disabled = !dose2Given;
+  }
+
+  function tick() {
+    updateDisplay();
+    updatePrompt();
+    updateDoseButtons();
+  }
+
+  window.startTimer = function() {
+    startTime = Date.now();
+    dose1Given = false;
+    dose2Given = false;
+    dose3Given = false;
+    document.getElementById('startCard').style.display = 'none';
+    document.getElementById('timerRunning').style.display = 'block';
+    tick();
+    intervalId = setInterval(tick, 500);
+  };
+
+  window.markDose = function(n) {
+    if (n === 1) dose1Given = true;
+    else if (n === 2) dose2Given = true;
+    else if (n === 3) dose3Given = true;
+    const btn = document.getElementById('dose' + n + 'Btn');
+    btn.classList.add('administered');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="dose-btn-icon">✓</span><span>Administered</span>';
+    updatePrompt();
+    updateDoseButtons();
+  };
+
+  window.resetTimer = function() {
+    if (intervalId) clearInterval(intervalId);
+    intervalId = null;
+    startTime = null;
+    dose1Given = false;
+    dose2Given = false;
+    dose3Given = false;
+    document.getElementById('startCard').style.display = 'block';
+    document.getElementById('timerRunning').style.display = 'none';
+    document.getElementById('dose1Btn').classList.remove('administered');
+    document.getElementById('dose1Btn').disabled = false;
+    document.getElementById('dose1Btn').innerHTML = '<span class="dose-btn-icon">💉</span><span>1st benzodiazepine</span>';
+    document.getElementById('dose2Btn').classList.remove('administered');
+    document.getElementById('dose2Btn').disabled = true;
+    document.getElementById('dose2Btn').innerHTML = '<span class="dose-btn-icon">💉</span><span>2nd benzodiazepine</span>';
+    document.getElementById('dose3Btn').classList.remove('administered');
+    document.getElementById('dose3Btn').disabled = true;
+    document.getElementById('dose3Btn').innerHTML = '<span class="dose-btn-icon">💊</span><span>2nd line agent</span>';
+  };
+})();
+</script>
+</body>
+</html>

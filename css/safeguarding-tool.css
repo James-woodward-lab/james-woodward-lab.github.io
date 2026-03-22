@@ -310,6 +310,7 @@ body.safeguarding-app {
   width: 16px;
   height: 16px;
   accent-color: var(--accent);
+  pointer-events: none;
 }
 
 .safeguarding-app .fracture-name {
@@ -359,6 +360,7 @@ body.safeguarding-app {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
+  pointer-events: none;
 }
 
 .safeguarding-app .flag-item input[type="checkbox"] {

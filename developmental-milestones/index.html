@@ -26,7 +26,8 @@
   .header{background:var(--surface);color:var(--text);border-bottom:1px solid var(--border);padding:14px 22px;display:flex;align-items:center;gap:12px;}
   .header h1{font-size:1.15rem;font-weight:700;color:var(--accent);}
   .header p{font-size:0.75rem;opacity:0.9;margin-top:2px;color:var(--muted);}
-  .disclaimer{background:rgba(245,158,11,0.12);border-left:4px solid var(--warn);padding:7px 16px;font-size:0.72rem;color:var(--warn);}
+  .disclaimer{background:rgba(245,158,11,0.18);border-left:4px solid var(--warn);padding:10px 18px;font-size:0.82rem;line-height:1.5;color:var(--text);}
+  .disclaimer strong{color:var(--warn);}
   .layout{display:grid;grid-template-columns:300px 1fr;gap:0;align-items:start;}
   @media(max-width:900px){.layout{grid-template-columns:1fr;}}
   .sidebar{background:var(--surface);border-right:1px solid var(--grey-mid);padding:14px;display:flex;flex-direction:column;gap:10px;position:sticky;top:0;max-height:100vh;overflow-y:auto;}
@@ -37,61 +38,68 @@
 
   /* INPUT */
   .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--grey-mid);overflow:hidden;}
-  .card-hd{padding:9px 14px;font-weight:700;font-size:0.82rem;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--grey-mid);}
+  .card-hd{padding:10px 14px;font-weight:700;font-size:0.85rem;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--grey-mid);color:var(--text);}
   .card-bd{padding:12px 14px;}
-  .age-big{font-size:2rem;font-weight:800;color:var(--blue);text-align:center;line-height:1;}
-  .age-sub{font-size:0.72rem;color:var(--grey);text-align:center;margin-top:2px;}
-  .age-slider{width:100%;accent-color:var(--blue);margin:7px 0;cursor:pointer;}
+  .age-big{font-size:2rem;font-weight:800;color:var(--accent);text-align:center;line-height:1;}
+  .age-sub{font-size:0.8rem;color:var(--muted);text-align:center;margin-top:2px;}
   .row{display:flex;gap:6px;align-items:center;}
-  .age-in{width:64px;padding:5px 8px;border:2px solid var(--grey-mid);border-radius:6px;font-size:0.95rem;text-align:center;font-weight:700;}
-  .age-in:focus{outline:none;border-color:var(--blue);}
-  .ubtn{flex:1;padding:6px 4px;border:2px solid var(--grey-mid);border-radius:6px;background:var(--surface2);cursor:pointer;font-size:0.75rem;font-weight:700;color:var(--grey);transition:all .15s;}
-  .ubtn.active{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
-  .tog{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--grey-light);border-radius:6px;cursor:pointer;margin-top:6px;}
-  .tog input{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;}
-  .tog span{font-size:0.78rem;font-weight:500;}
+  .age-in{width:64px;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:0.95rem;text-align:center;font-weight:700;background:var(--surface2);color:var(--text);}
+  .age-in:focus{outline:none;border-color:var(--accent);}
+  #dobIn{background:var(--surface2);border:2px solid var(--border);border-radius:8px;color:var(--text);}
+  #dobIn:focus{outline:none;border-color:var(--accent);}
+  .ubtn{flex:1;padding:8px 6px;border:2px solid var(--border);border-radius:6px;background:var(--surface2);cursor:pointer;font-size:0.8rem;font-weight:700;color:var(--muted);transition:all .15s;}
+  .ubtn.active{border-color:var(--accent);background:var(--blue-light);color:var(--accent);}
+  .link-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.78rem;text-decoration:underline;padding:0;}
+  .link-btn:hover{color:var(--accent2);}
+  .tog{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--grey-light);border-radius:6px;cursor:pointer;margin-top:6px;}
+  .tog input{accent-color:var(--blue);width:18px;height:18px;cursor:pointer;}
+  .tog span{font-size:0.82rem;font-weight:500;color:var(--text);}
   .gest-row{display:flex;gap:6px;align-items:center;margin-top:6px;}
-  .gest-row input{flex:1;padding:5px 8px;border:2px solid var(--grey-mid);border-radius:6px;font-size:0.85rem;}
-  .gest-row input:focus{outline:none;border-color:var(--blue);}
-  .corr-note{font-size:0.72rem;color:var(--teal);background:var(--teal-light);padding:4px 8px;border-radius:5px;margin-top:5px;font-weight:500;}
-  .reg-box{background:var(--red-light);border:2px solid var(--red-mid);border-radius:7px;padding:9px 11px;margin-top:8px;}
-  .reg-box label{font-size:0.8rem;font-weight:700;color:var(--red);display:flex;align-items:center;gap:7px;cursor:pointer;}
-  .reg-box input{accent-color:var(--red);width:16px;height:16px;cursor:pointer;}
-  .reg-box .sub{font-size:0.7rem;color:var(--red);margin-top:3px;margin-left:23px;}
+  .gest-row input{flex:1;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:0.9rem;background:var(--surface2);color:var(--text);}
+  .gest-row input:focus{outline:none;border-color:var(--accent);}
+  .corr-note{font-size:0.8rem;color:var(--text);background:var(--teal-light);padding:8px 10px;border-radius:6px;margin-top:6px;font-weight:500;line-height:1.4;}
+  .reg-box{background:var(--red-light);border:2px solid var(--red);border-radius:8px;padding:10px 12px;margin-top:8px;}
+  .reg-box label{font-size:0.85rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;cursor:pointer;}
+  .reg-box input{accent-color:var(--red);width:18px;height:18px;cursor:pointer;}
+  .reg-box .sub{font-size:0.75rem;color:var(--muted);margin-top:3px;margin-left:26px;}
   .btn-run{width:100%;padding:10px;background:var(--accent);color:#0f1117;border:none;border-radius:7px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:8px;}
   .btn-run:hover{background:#1448a0;}
-  .btn-clr{width:100%;padding:7px;background:var(--surface2);color:var(--grey);border:2px solid var(--grey-mid);border-radius:7px;font-size:0.8rem;font-weight:600;cursor:pointer;margin-top:5px;}
+  .btn-clr{width:100%;padding:10px;background:var(--surface2);color:var(--text);border:2px solid var(--border);border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:8px;}
   .btn-clr:hover{border-color:var(--red);color:var(--red);}
   .stat-row{display:flex;gap:6px;}
   .sc{flex:1;text-align:center;padding:7px 4px;border-radius:7px;border:1px solid;}
-  .sc .n{font-size:1.2rem;font-weight:800;}
-  .sc .l{font-size:0.62rem;font-weight:700;text-transform:uppercase;}
-  .sc.bl{background:var(--blue-light);border-color:var(--blue-mid);color:var(--blue);}
-  .sc.or{background:var(--orange-light);border-color:var(--orange-mid);color:var(--orange);}
-  .sc.gn{background:var(--green-light);border-color:var(--green-mid);color:var(--green);}
+  .sc .n{font-size:1.25rem;font-weight:800;color:inherit;}
+  .sc .l{font-size:0.68rem;font-weight:700;text-transform:uppercase;opacity:.95;}
+  .sc.bl{background:var(--blue-light);border-color:var(--blue);color:var(--text);}
+  .sc.or{background:var(--orange-light);border-color:var(--orange);color:var(--text);}
+  .sc.gn{background:var(--green-light);border-color:var(--green-mid);color:var(--text);}
 
-  /* TIP BOXES */
-  .tip{padding:8px 12px;border-left:3px solid;border-radius:0 6px 6px 0;font-size:0.74rem;line-height:1.45;}
-  .tip.blue{background:var(--blue-light);border-color:var(--blue);color:#1a3a6b;}
-  .tip.orange{background:var(--orange-light);border-color:var(--orange);color:#7d3c00;}
-  .tip.red{background:var(--red-light);border-color:var(--red);color:#7b241c;}
-  .tip.purple{background:var(--purple-light);border-color:var(--purple);color:#4a235a;}
-  .tip-title{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+  /* TIP BOXES — high contrast text */
+  .tip{padding:10px 14px;border-left:4px solid;border-radius:0 8px 8px 0;font-size:0.82rem;line-height:1.5;}
+  .tip.blue{background:var(--blue-light);border-color:var(--blue);color:var(--text);}
+  .tip.orange{background:var(--orange-light);border-color:var(--orange);color:var(--text);}
+  .tip.red{background:var(--red-light);border-color:var(--red);color:var(--text);}
+  .tip.purple{background:var(--purple-light);border-color:var(--purple);color:var(--text);}
+  html.theme-light .tip.blue{color:#0f4c5c;}
+  html.theme-light .tip.orange{color:#7d3c00;}
+  html.theme-light .tip.red{color:#7b241c;}
+  html.theme-light .tip.purple{color:#4a235a;}
+  .tip-title{font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;color:inherit;}
 
   /* DOMAIN CARDS */
   .domain-card{background:var(--surface);border-radius:var(--radius);border:2px solid var(--grey-mid);overflow:visible;transition:border-color .2s;}
   .domain-card.has-flags{border-color:var(--red-mid);}
   .domain-card.has-warns{border-color:var(--orange-mid);}
-  .domain-hd{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .domain-hd{padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
   .domain-hd:hover{filter:brightness(.97);}
   .domain-icon-big{font-size:1.3rem;}
-  .domain-title{font-weight:800;font-size:0.92rem;flex:1;}
+  .domain-title{font-weight:800;font-size:0.95rem;flex:1;color:var(--text)!important;}
   .domain-badges{display:flex;gap:5px;align-items:center;}
-  .dbadge{font-size:0.65rem;padding:2px 8px;border-radius:20px;font-weight:700;}
-  .dbadge.flag{background:var(--red);color:white;}
-  .dbadge.warn{background:var(--orange);color:white;}
-  .dbadge.ok{background:var(--green-mid);color:var(--green);}
-  .dbadge.empty{background:var(--grey-mid);color:var(--grey);}
+  .dbadge{font-size:0.7rem;padding:3px 9px;border-radius:20px;font-weight:700;}
+  .dbadge.flag{background:var(--red);color:#fff;}
+  .dbadge.warn{background:var(--orange);color:#fff;}
+  .dbadge.ok{background:var(--green-mid);color:var(--text);}
+  .dbadge.empty{background:var(--grey-mid);color:var(--text);}
   .collapse-arrow{font-size:0.7rem;color:var(--grey);transition:transform .2s;}
   .collapse-arrow.open{transform:rotate(180deg);}
 
@@ -100,10 +108,10 @@
   .milestone-list::before{content:'';position:absolute;left:29px;top:8px;bottom:8px;width:2px;background:var(--grey-light);}
   .ms-item{display:flex;align-items:flex-start;gap:0;margin-bottom:2px;position:relative;}
   .ms-age{width:44px;flex-shrink:0;padding-top:7px;}
-  .age-chip{font-size:0.62rem;font-weight:800;padding:2px 5px;border-radius:10px;background:var(--grey-light);color:var(--grey);text-align:center;white-space:nowrap;}
-  .age-chip.overdue{background:var(--red-mid);color:var(--red);}
-  .age-chip.current{background:var(--blue-mid);color:var(--blue);}
-  .age-chip.ok{background:var(--green-mid);color:var(--green);}
+  .age-chip{font-size:0.7rem;font-weight:800;padding:3px 6px;border-radius:10px;background:var(--grey-light);color:var(--text);text-align:center;white-space:nowrap;}
+  .age-chip.overdue{background:var(--red);color:#fff;}
+  .age-chip.current{background:var(--blue);color:#fff;}
+  .age-chip.ok{background:var(--green-mid);color:var(--text);}
   .ms-dot{width:18px;flex-shrink:0;display:flex;justify-content:center;padding-top:9px;position:relative;z-index:1;}
   .dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--grey-mid);background:var(--surface2);transition:all .15s;}
   .dot.achieved{background:var(--green);border-color:var(--green);}
@@ -119,12 +127,12 @@
   .ms-item.flagged .ms-text{color:var(--red);font-weight:600;}
   .ms-item.warned .ms-text{color:var(--orange);font-weight:500;}
   .ms-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
-  .flag-pill{font-size:0.6rem;padding:1px 7px;border-radius:10px;font-weight:700;white-space:nowrap;}
-  .flag-pill.urgent{background:var(--red);color:white;}
-  .flag-pill.soon{background:var(--orange);color:white;}
-  .flag-pill.routine{background:var(--yellow);color:#5d4037;}
-  .flag-pill.implied{background:var(--green-mid);color:var(--green);font-size:0.57rem;}
-  .flag-pill.standalone{background:var(--surface2);color:var(--muted);font-size:0.57rem;}
+  .flag-pill{font-size:0.68rem;padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap;}
+  .flag-pill.urgent{background:var(--red);color:#fff;}
+  .flag-pill.soon{background:var(--orange);color:#fff;}
+  .flag-pill.routine{background:var(--yellow);color:#1a1a1a;}
+  .flag-pill.implied{background:var(--green-mid);color:var(--text);font-size:0.65rem;}
+  .flag-pill.standalone{background:var(--surface2);color:var(--text);font-size:0.65rem;}
   .ms-note{font-size:0.68rem;color:var(--grey);font-style:italic;margin-top:1px;}
 
   .hidden{display:none!important;}
@@ -146,28 +154,28 @@
   .ref-card.urgent .ref-hd{background:var(--red-light);}
   .ref-card.soon .ref-hd{background:var(--orange-light);}
   .ref-card.routine .ref-hd{background:var(--yellow-light);}
-  .ref-org{font-weight:800;font-size:0.85rem;}
+  .ref-org{font-weight:800;font-size:0.88rem;color:var(--text);}
   .ref-urgency{font-size:0.65rem;padding:2px 7px;border-radius:20px;font-weight:700;}
-  .ref-card.urgent .ref-urgency{background:var(--red);color:white;}
-  .ref-card.soon .ref-urgency{background:var(--orange);color:white;}
-  .ref-card.routine .ref-urgency{background:var(--yellow);color:#5d4037;}
+  .ref-card.urgent .ref-urgency{background:var(--red);color:#fff;}
+  .ref-card.soon .ref-urgency{background:var(--orange);color:#fff;}
+  .ref-card.routine .ref-urgency{background:var(--yellow);color:#1a1a1a;}
   .ref-body{padding:8px 13px 11px;background:var(--surface2);}
-  .ref-trigger{font-size:0.77rem;padding:3px 0;border-bottom:1px solid var(--grey-light);display:flex;align-items:flex-start;gap:5px;}
+  .ref-trigger{font-size:0.85rem;padding:6px 0;border-bottom:1px solid var(--grey-light);display:flex;align-items:flex-start;gap:6px;color:var(--text);}
   .ref-trigger:last-of-type{border-bottom:none;}
   .tdot{font-size:0.55rem;margin-top:4px;flex-shrink:0;}
-  .ref-note-box{font-size:0.71rem;color:var(--grey);background:var(--grey-light);padding:5px 9px;border-radius:5px;margin-top:6px;line-height:1.4;}
+  .ref-note-box{font-size:0.8rem;color:var(--muted);background:var(--grey-light);padding:8px 12px;border-radius:6px;margin-top:8px;line-height:1.5;}
   .domain-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;}
   .ds-chip{padding:7px 10px;border-radius:7px;text-align:center;border:1px solid;}
-  .ds-chip .dn{font-size:0.65rem;font-weight:700;text-transform:uppercase;}
-  .ds-chip .dv{font-size:1rem;font-weight:800;margin-top:1px;}
-  .ds-chip.ok{background:var(--green-light);border-color:var(--green-mid);color:var(--green);}
-  .ds-chip.flag{background:var(--red-light);border-color:var(--red-mid);color:var(--red);}
-  .ds-chip.grey{background:var(--grey-light);border-color:var(--grey-mid);color:var(--grey);}
+  .ds-chip .dn{font-size:0.7rem;font-weight:700;text-transform:uppercase;}
+  .ds-chip .dv{font-size:1.05rem;font-weight:800;margin-top:2px;}
+  .ds-chip.ok{background:var(--green-light);border-color:var(--green-mid);color:var(--text);}
+  .ds-chip.flag{background:var(--red-light);border-color:var(--red);color:var(--text);}
+  .ds-chip.grey{background:var(--grey-light);border-color:var(--grey-mid);color:var(--muted);}
   .sec-lbl{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);margin:4px 0 6px;}
-  .empty-state{text-align:center;padding:30px 16px;color:var(--grey);}
-  .empty-state .ei{font-size:2.2rem;margin-bottom:8px;}
-  .empty-state p{font-size:0.82rem;}
-  .footer{text-align:center;font-size:0.67rem;color:var(--grey);padding:10px;border-top:1px solid var(--grey-mid);background:var(--surface);}
+  .empty-state{text-align:center;padding:32px 20px;color:var(--muted);}
+  .empty-state .ei{font-size:2.5rem;margin-bottom:12px;opacity:0.8;}
+  .empty-state p{font-size:0.9rem;line-height:1.6;}
+  .footer{text-align:center;font-size:0.75rem;color:var(--muted);padding:12px;border-top:1px solid var(--grey-mid);background:var(--surface);line-height:1.5;}
 </style>
 </head>
 <body>
@@ -190,13 +198,22 @@
       <div class="card-hd" style="background:var(--blue-light);color:var(--blue);">👶 Child Age</div>
       <div class="card-bd">
         <div class="age-big" id="ageDisplay">–</div>
-        <div class="age-sub" id="ageLabel">Enter age below</div>
-        <input type="range" class="age-slider" id="ageSlider" min="0" max="72" value="0" step="1" oninput="syncSlider()">
-        <div class="row" style="margin-top:4px;">
-          <input type="number" class="age-in" id="ageIn" min="0" max="72" placeholder="0" oninput="syncInput()">
-          <button class="ubtn active" id="btn-m" onclick="setUnit('m')">Mo</button>
-          <button class="ubtn" id="btn-y" onclick="setUnit('y')">Yr</button>
-          <button class="ubtn" id="btn-w" onclick="setUnit('w')">Wk</button>
+        <div class="age-sub" id="ageLabel">Enter date of birth</div>
+        <div class="field" style="margin-top:6px;">
+          <label for="dobIn" style="font-size:0.78rem;">Date of birth</label>
+          <input type="date" id="dobIn" style="width:100%;padding:10px 12px;font-size:0.95rem;" onchange="onDobChange()" oninput="onDobChange()" max="">
+        </div>
+        <div class="custom-age-toggle" style="margin-top:10px;">
+          <button type="button" class="link-btn" id="customAgeBtn" onclick="toggleCustomAge()">Or enter age manually</button>
+        </div>
+        <div id="customAgeRow" class="hidden" style="margin-top:8px;">
+          <div class="row">
+            <input type="number" class="age-in" id="ageIn" min="0" max="72" placeholder="0" oninput="onCustomAgeInput()">
+            <button class="ubtn active" id="btn-m" onclick="setUnit('m')">Mo</button>
+            <button class="ubtn" id="btn-y" onclick="setUnit('y')">Yr</button>
+            <button class="ubtn" id="btn-w" onclick="setUnit('w')">Wk</button>
+          </div>
+          <p class="hint" style="font-size:0.75rem;margin-top:6px;color:var(--muted);">Using custom age — switch back above to use DOB</p>
         </div>
         <div class="tog" onclick="toggleCorrected()">
           <input type="checkbox" id="corrCk">
@@ -212,7 +229,6 @@
           <label><input type="checkbox" id="regCk" onchange="updateResults()">Skill regression noted</label>
           <div class="sub">Loss of words, motor skills, social engagement</div>
         </div>
-        <button class="btn-run" onclick="runAssessment()">▶ Run Milestone Screen</button>
         <button class="btn-clr" onclick="clearAll()">✕ Clear All</button>
         <div class="stat-row" id="statRow" style="display:none;margin-top:8px;">
           <div class="sc bl"><div class="n" id="stTotal">0</div><div class="l">Shown</div></div>
@@ -235,7 +251,7 @@
     <div class="checklist-col" id="checklistCol">
       <div class="empty-state" id="noMsMsg">
         <div class="ei">👶</div>
-        <p>Enter the child's age and click <strong>Run Milestone Screen</strong> to generate the domain-based checklist.<br><br>Checking a later milestone will automatically mark all earlier milestones in that domain as achieved.</p>
+        <p>Enter the child's <strong>date of birth</strong> to generate the milestone checklist. Age is calculated automatically.<br><br>Checking a later milestone will automatically mark all earlier milestones in that domain as achieved.</p>
       </div>
     </div>
 
@@ -252,8 +268,18 @@
 </div>
 
 <div class="footer">
-  Built for Southampton General Hospital. Based on NHS/RCPCH developmental guidance & Oxford Handbook of Paediatrics (2nd ed.). Not a substitute for clinical judgement. v2.0 — 2026.
+  Built for Southampton General Hospital. Not a substitute for clinical judgement. v2.0 — 2026.
 </div>
+
+<section class="references" style="padding:16px 22px 24px;background:var(--surface);border-top:1px solid var(--grey-mid);font-size:0.75rem;color:var(--muted);line-height:1.6;">
+  <h3 style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:8px;">References</h3>
+  <ol style="margin:0;padding-left:18px;">
+    <li>RCPCH. <em>Developmental Medicine &amp; Child Neurology – Developmental Assessment.</em> RCPCH; 2024.</li>
+    <li>Gardner F, Johnson A, eds. <em>Oxford Handbook of Paediatrics</em>. 3rd ed. Oxford University Press; 2021.</li>
+    <li>NHS. Healthy Child Programme: 0–5. Developmental milestones. Gov.uk.</li>
+    <li>DBTH NHS Foundation Trust. Occupational Therapy referral criteria – fine motor/functional skills ≥3 months behind expected.</li>
+  </ol>
+</section>
 
 <script>
 // ─── MILESTONE DATA ──────────────────────────────────────────────────────────
@@ -461,38 +487,89 @@ const REF_CFG = {
 const SERVICE_ORDER = ['paeds','salt','audiology','physio','ot','ophthalmology'];
 
 let currentAge = 0;
-let checkedDirect = new Set();  // IDs directly clicked by user
-let checkedAll = new Set();     // includes cascade
+let checkedDirect = new Set();
+let checkedAll = new Set();
 let unit = 'm';
 let assessed = false;
+let useCustomAge = false;
 
 // ─── Age helpers ─────────────────────────────────────────────────────────────
+function dobToAgeMonths(dobStr) {
+  if (!dobStr) return null;
+  const dob = new Date(dobStr + 'T12:00:00');
+  const today = new Date();
+  if (dob > today) return 0;
+  const months = (today.getFullYear() - dob.getFullYear()) * 12 + (today.getMonth() - dob.getMonth());
+  const days = (today.getDate() - dob.getDate()) / 30;
+  let age = months + days;
+  return Math.max(0, Math.min(72, age));
+}
+function onDobChange() {
+  if (useCustomAge) return;
+  const dobStr = document.getElementById('dobIn').value;
+  const age = dobToAgeMonths(dobStr);
+  if (age !== null) {
+    currentAge = Math.round(age * 10) / 10;
+    renderAgeDisplay(currentAge);
+    scheduleAssessment();
+  } else {
+    currentAge = 0;
+    renderAgeDisplay(0);
+    if (assessed) scheduleAssessment();
+  }
+}
+function toggleCustomAge() {
+  useCustomAge = !useCustomAge;
+  const row = document.getElementById('customAgeRow');
+  const btn = document.getElementById('customAgeBtn');
+  row.classList.toggle('hidden', !useCustomAge);
+  btn.textContent = useCustomAge ? 'Use date of birth instead' : 'Or enter age manually';
+  if (useCustomAge) {
+    const ageIn = document.getElementById('ageIn');
+    if (unit === 'm') ageIn.value = currentAge ? Math.round(currentAge * 10) / 10 : '';
+    else if (unit === 'y') ageIn.value = currentAge ? (currentAge / 12).toFixed(1) : '';
+    else ageIn.value = currentAge ? Math.round(currentAge * 4.33) : '';
+    ageIn.focus();
+    onCustomAgeInput();
+  } else {
+    document.getElementById('dobIn').value = '';
+    document.getElementById('ageIn').value = '';
+    onDobChange();
+  }
+}
+function onCustomAgeInput() {
+  if (!useCustomAge) return;
+  let v = parseFloat(document.getElementById('ageIn').value) || 0;
+  if (unit === 'y') v = v * 12;
+  if (unit === 'w') v = v / 4.33;
+  v = Math.round(Math.min(72, Math.max(0, v)) * 10) / 10;
+  currentAge = v;
+  renderAgeDisplay(v);
+  scheduleAssessment();
+}
 function setUnit(u) {
   unit = u;
   ['m','y','w'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===u));
-  syncInput();
-}
-function syncSlider() {
-  const v = +document.getElementById('ageSlider').value;
-  document.getElementById('ageIn').value = v;
-  currentAge = v; renderAgeDisplay(v);
-}
-function syncInput() {
-  let v = parseFloat(document.getElementById('ageIn').value)||0;
-  if (unit==='y') v = v*12;
-  if (unit==='w') v = v/4.33;
-  v = Math.round(Math.min(72, Math.max(0, v)));
-  document.getElementById('ageSlider').value = v;
-  currentAge = v; renderAgeDisplay(v);
+  if (useCustomAge) onCustomAgeInput();
 }
 function renderAgeDisplay(m) {
   const el = document.getElementById('ageDisplay'), lb = document.getElementById('ageLabel');
-  if (!m && m!==0) { el.textContent='–'; lb.textContent='Enter age below'; return; }
-  if (m < 3) { el.textContent=Math.round(m*4.33)+'w'; lb.textContent=m.toFixed(1)+' months'; }
-  else if (m < 24) { el.textContent=m+'m'; const y=Math.floor(m/12),mo=m%12; lb.textContent=y>0?y+'yr '+mo+'mo':m+' months'; }
-  else { const y=Math.floor(m/12),mo=m%12; el.textContent=y+'yr'+(mo?' '+mo+'m':''); lb.textContent=m+' months'; }
+  if (!m && m!==0) { el.textContent='–'; lb.textContent=useCustomAge?'Enter age' : 'Enter date of birth'; return; }
+  if (m < 3) { el.textContent=Math.round(m*4.33)+'w'; lb.textContent=m.toFixed(1)+' months'+(useCustomAge?' (manual)':''); }
+  else if (m < 24) { el.textContent=m+'m'; const y=Math.floor(m/12),mo=m%12; lb.textContent=(y>0?y+'yr '+mo+'mo':m+' months')+(useCustomAge?' (manual)':''); }
+  else { const y=Math.floor(m/12),mo=m%12; el.textContent=y+'yr'+(mo?' '+mo+'m':''); lb.textContent=m+' months'+(useCustomAge?' (manual)':''); }
   calcCorrected();
 }
+
+let assessTimer;
+function scheduleAssessment() {
+  clearTimeout(assessTimer);
+  assessTimer = setTimeout(runAssessment, 150);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('dobIn').max = new Date().toISOString().slice(0, 10);
+});
 function toggleCorrected() {
   const c = document.getElementById('corrCk'); c.checked=!c.checked;
   document.getElementById('gestRow').classList.toggle('hidden',!c.checked);
@@ -500,12 +577,13 @@ function toggleCorrected() {
 }
 function calcCorrected() {
   const note = document.getElementById('corrNote');
-  if (!document.getElementById('corrCk').checked) { note.classList.add('hidden'); return; }
+  if (!document.getElementById('corrCk').checked) { note.classList.add('hidden'); if (assessed) scheduleAssessment(); return; }
   const g = parseInt(document.getElementById('gestWks').value)||0;
   if (!g) { note.classList.remove('hidden'); note.textContent='Enter gestation to calculate corrected age.'; return; }
   const pw = 40-g, ca = Math.max(0, currentAge-(pw/4.33));
   note.classList.remove('hidden');
   note.textContent = `Corrected age ≈ ${ca.toFixed(1)} months (${pw}w premature). Milestones based on corrected age.`;
+  if (assessed) scheduleAssessment();
 }
 function getEffectiveAge() {
   if (!document.getElementById('corrCk').checked) return currentAge;
@@ -535,7 +613,6 @@ function domainMilestonesSorted(domain, excludeNoCascade=false) {
 function toggleMilestone(id) {
   const ms = MILESTONES.find(m => m.id===id);
   if (!ms || !assessed) return;
-  const age = getEffectiveAge();
 
   if (ms.noCascade) {
     if (checkedAll.has(id)) { checkedAll.delete(id); checkedDirect.delete(id); }
@@ -545,18 +622,16 @@ function toggleMilestone(id) {
     const seq = domainMilestonesSorted(ms.domain, true);
     const idx = seq.findIndex(m => m.id===id);
     if (checkedAll.has(id)) {
-      // Uncheck this + all later in sequence
-      for (let i=idx; i<seq.length; i++) {
-        checkedAll.delete(seq[i].id);
-        checkedDirect.delete(seq[i].id);
-        refreshItemUI(seq[i].id);
-      }
+      // Uncheck only this milestone — never cascade uncheck to older (later) ones
+      checkedAll.delete(id);
+      checkedDirect.delete(id);
+      refreshItemUI(id);
     } else {
       // Check this + all earlier in sequence (cascade)
       for (let i=0; i<=idx; i++) {
         checkedAll.add(seq[i].id);
         if (i===idx) checkedDirect.add(seq[i].id);
-        else checkedDirect.delete(seq[i].id); // mark as cascade not direct
+        else checkedDirect.delete(seq[i].id);
         refreshItemUI(seq[i].id);
       }
     }
@@ -613,7 +688,8 @@ function renderChecklist() {
 
     const hd = document.createElement('div');
     hd.className = 'domain-hd';
-    hd.style.background = cfg.bg;
+    hd.style.background = 'var(--surface2)';
+    hd.style.borderLeft = '4px solid ' + cfg.color;
     hd.innerHTML = `<span class="domain-icon-big">${cfg.icon}</span>
       <span class="domain-title" style="color:${cfg.color}">${cfg.label}</span>
       <span class="domain-badges" id="dbadges-${domain}"><span class="dbadge empty">–</span></span>
@@ -803,19 +879,22 @@ function updateResults() {
 function clearAll() {
   checkedDirect.clear(); checkedAll.clear(); assessed = false;
   currentAge = 0;
-  document.getElementById('ageIn').value='';
-  document.getElementById('ageSlider').value=0;
-  document.getElementById('ageDisplay').textContent='–';
-  document.getElementById('ageLabel').textContent='Enter age below';
-  document.getElementById('regCk').checked=false;
-  document.getElementById('corrCk').checked=false;
+  useCustomAge = false;
+  document.getElementById('dobIn').value = '';
+  document.getElementById('ageIn').value = '';
+  document.getElementById('ageDisplay').textContent = '–';
+  document.getElementById('ageLabel').textContent = 'Enter date of birth';
+  document.getElementById('customAgeRow').classList.add('hidden');
+  document.getElementById('customAgeBtn').textContent = 'Or enter age manually';
+  document.getElementById('regCk').checked = false;
+  document.getElementById('corrCk').checked = false;
   document.getElementById('gestRow').classList.add('hidden');
   document.getElementById('corrNote').classList.add('hidden');
-  document.getElementById('statRow').style.display='none';
-  document.getElementById('checklistCol').innerHTML='<div class="empty-state" id="noMsMsg"><div class="ei">👶</div><p>Enter the child\'s age and click <strong>Run Milestone Screen</strong> to generate the domain-based checklist.<br><br>Checking a later milestone will automatically mark all earlier milestones in that domain as achieved.</p></div>';
+  document.getElementById('statRow').style.display = 'none';
+  document.getElementById('checklistCol').innerHTML = '<div class="empty-state" id="noMsMsg"><div class="ei">👶</div><p>Enter the child\'s <strong>date of birth</strong> to generate the milestone checklist. Age is calculated automatically.<br><br>Checking a later milestone will automatically mark all earlier milestones in that domain as achieved.</p></div>';
   document.getElementById('noResMsg').classList.remove('hidden');
   document.getElementById('resultsArea').classList.add('hidden');
-  document.getElementById('resultsArea').innerHTML='';
+  document.getElementById('resultsArea').innerHTML = '';
 }
 </script>
 </body>
