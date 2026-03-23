@@ -24,6 +24,63 @@
     <div><strong>Clinical decision support only.</strong> Based on Resuscitation Council UK paediatric status epilepticus algorithm (Mar 2022). Follow local protocols. Dosing must be verified against BNFc. No patient data is stored.</div>
   </div>
 
+  <!-- Timer: start button or running display -->
+  <div class="card start-card" id="startCard">
+    <div class="prehospital-row">
+      <label for="startMins" class="prehospital-label">Pre-hospital:</label>
+      <select id="startMins" class="prehospital-select" aria-label="Start timer from (minutes)">
+        <option value="0">Start from 0</option>
+        <option value="5">5 min</option>
+        <option value="10">10 min</option>
+        <option value="15">15 min</option>
+        <option value="20">20 min</option>
+        <option value="25">25 min</option>
+        <option value="30">30 min</option>
+        <option value="35">35 min</option>
+        <option value="40">40 min</option>
+        <option value="45">45 min</option>
+        <option value="50">50 min</option>
+        <option value="55">55 min</option>
+        <option value="60">60 min</option>
+      </select>
+    </div>
+    <button type="button" class="btn-start" id="btnStart" onclick="startTimer()">
+      <span class="btn-start-icon">▶</span>
+      <span class="btn-start-label">Start timer</span>
+      <span class="btn-start-hint">Press when seizure begins</span>
+    </button>
+  </div>
+
+  <div class="timer-running" id="timerRunning" style="display:none;">
+    <div class="card timer-card">
+      <div class="timer-display" id="timerDisplay">0:00</div>
+      <div class="timer-mins" id="timerMins">0 min</div>
+    </div>
+    <div class="card prompt-card" id="promptCard">
+      <div class="prompt-content" id="promptContent"></div>
+      <div class="prompt-level" id="promptLevel"></div>
+    </div>
+    <div class="card dose-buttons-card">
+      <div class="card-title">Mark dose administered</div>
+      <p class="dose-hint">Tap when each intervention has been given — this will update the prompts accordingly.</p>
+      <div class="dose-btn-row">
+        <button type="button" class="dose-btn" id="dose1Btn" onclick="markDose(1)" disabled>
+          <span class="dose-btn-icon">💉</span>
+          <span>1st benzodiazepine</span>
+        </button>
+        <button type="button" class="dose-btn" id="dose2Btn" onclick="markDose(2)" disabled>
+          <span class="dose-btn-icon">💉</span>
+          <span>2nd benzodiazepine</span>
+        </button>
+        <button type="button" class="dose-btn" id="dose3Btn" onclick="markDose(3)" disabled>
+          <span class="dose-btn-icon">💊</span>
+          <span>2nd line agent</span>
+        </button>
+      </div>
+    </div>
+    <button type="button" class="btn-reset" onclick="resetTimer()">Reset timer</button>
+  </div>
+
   <a href="https://www.resus.org.uk/sites/default/files/2022-03/RCUK%20Paediatric%20emergency%20algorithms%20and%20resources%20Mar%2022%20V1.pdf" target="_blank" rel="noopener" class="rcuk-link">
     📄 View RCUK Paediatric Emergency Algorithms (PDF)
   </a>
@@ -31,9 +88,15 @@
   <!-- Weight-based dose calculator -->
   <div class="card dose-calc-card">
     <div class="card-title">Weight-based dose calculator</div>
-    <div class="field">
-      <label>Weight (kg)</label>
-      <input type="number" id="doseWeight" inputmode="decimal" min="2" max="150" step="0.1" placeholder="e.g. 15" oninput="calcDoses()">
+    <div class="dose-input-row">
+      <div class="field">
+        <label>Weight (kg)</label>
+        <input type="number" id="doseWeight" inputmode="decimal" min="2" max="150" step="0.1" placeholder="e.g. 15" oninput="calcDoses()">
+      </div>
+      <div class="field">
+        <label>Age (months)</label>
+        <input type="number" id="doseAge" inputmode="numeric" min="0" max="216" placeholder="e.g. 24" oninput="calcDoses()">
+      </div>
     </div>
     <div class="dose-results" id="doseResults">
       <div class="dose-section">
@@ -43,6 +106,11 @@
             <div class="dose-drug">Buccal midazolam</div>
             <div class="dose-value" id="doseBuccalMidaz">—</div>
             <div class="dose-note">0.5 mg/kg, max 10 mg</div>
+          </div>
+          <div class="dose-item">
+            <div class="dose-drug">Buccolam (age-band)</div>
+            <div class="dose-value" id="doseBuccolam">—</div>
+            <div class="dose-note">Buccolam SPC. 3–6 mo: hospital only</div>
           </div>
           <div class="dose-item">
             <div class="dose-drug">IV Lorazepam</div>
@@ -72,50 +140,7 @@
         </div>
       </div>
     </div>
-    <p class="dose-calc-hint">Verify all doses against BNFc and local protocols. Buccolam has age-band dosing — see SPC if using pre-filled syringes.</p>
-  </div>
-
-  <!-- Initial state: big start button -->
-  <div class="card start-card" id="startCard">
-    <button type="button" class="btn-start" id="btnStart" onclick="startTimer()">
-      <span class="btn-start-icon">▶</span>
-      <span class="btn-start-label">Start timer</span>
-      <span class="btn-start-hint">Press when seizure begins</span>
-    </button>
-  </div>
-
-  <!-- Running state: timer + prompts + administered buttons -->
-  <div class="timer-running" id="timerRunning" style="display:none;">
-    <div class="card timer-card">
-      <div class="timer-display" id="timerDisplay">0:00</div>
-      <div class="timer-mins" id="timerMins">0 min</div>
-    </div>
-
-    <div class="card prompt-card" id="promptCard">
-      <div class="prompt-content" id="promptContent"></div>
-      <div class="prompt-level" id="promptLevel"></div>
-    </div>
-
-    <div class="card dose-buttons-card">
-      <div class="card-title">Mark dose administered</div>
-      <p class="dose-hint">Tap when each intervention has been given — this will update the prompts accordingly.</p>
-      <div class="dose-btn-row">
-        <button type="button" class="dose-btn" id="dose1Btn" onclick="markDose(1)" disabled>
-          <span class="dose-btn-icon">💉</span>
-          <span>1st benzodiazepine</span>
-        </button>
-        <button type="button" class="dose-btn" id="dose2Btn" onclick="markDose(2)" disabled>
-          <span class="dose-btn-icon">💉</span>
-          <span>2nd benzodiazepine</span>
-        </button>
-        <button type="button" class="dose-btn" id="dose3Btn" onclick="markDose(3)" disabled>
-          <span class="dose-btn-icon">💊</span>
-          <span>2nd line agent</span>
-        </button>
-      </div>
-    </div>
-
-    <button type="button" class="btn-reset" onclick="resetTimer()">Reset timer</button>
+    <p class="dose-calc-hint">Verify all doses against BNFc and local protocols. Buccolam (age-band): 3–6 mo 2.5 mg hospital only; 6–12 mo 2.5 mg; 1–5 yr 5 mg; 5–10 yr 7.5 mg; 10–18 yr 10 mg.</p>
   </div>
 </div>
 
@@ -134,24 +159,48 @@
 
   window.calcDoses = function() {
     const w = parseFloat(document.getElementById('doseWeight').value);
-    if (!w || w < 2) {
+    const ageMo = parseInt(document.getElementById('doseAge').value, 10);
+    const hasWeight = w && w >= 2;
+    const hasAge = !isNaN(ageMo) && ageMo >= 0;
+    if (!hasWeight && !hasAge) {
       document.getElementById('doseBuccalMidaz').textContent = '—';
+      document.getElementById('doseBuccolam').textContent = '—';
       document.getElementById('doseLorazepam').textContent = '—';
       document.getElementById('dosePRDiazepam').textContent = '—';
       document.getElementById('doseLevetiracetam').textContent = '—';
       document.getElementById('dosePhenytoin').textContent = '—';
       return;
     }
-    const buccalMidaz = Math.min(w * 0.5, 10);
-    const lorazepam = Math.min(w * 0.1, 4);
-    const prDiazepam = Math.min(w * 0.5, 10);
-    const levetiracetam = Math.min(w * 40, 3000);
-    const phenytoin = w * 20;
-    document.getElementById('doseBuccalMidaz').textContent = buccalMidaz % 1 ? buccalMidaz.toFixed(1) + ' mg' : buccalMidaz + ' mg';
-    document.getElementById('doseLorazepam').textContent = lorazepam % 1 ? lorazepam.toFixed(1) + ' mg' : lorazepam + ' mg';
-    document.getElementById('dosePRDiazepam').textContent = prDiazepam % 1 ? prDiazepam.toFixed(1) + ' mg' : prDiazepam + ' mg';
-    document.getElementById('doseLevetiracetam').textContent = levetiracetam >= 1000 ? (levetiracetam / 1000).toFixed(1) + ' g' : levetiracetam + ' mg';
-    document.getElementById('dosePhenytoin').textContent = phenytoin >= 1000 ? (phenytoin / 1000).toFixed(1) + ' g' : phenytoin + ' mg';
+    if (hasWeight) {
+      const buccalMidaz = Math.min(w * 0.5, 10);
+      const lorazepam = Math.min(w * 0.1, 4);
+      const prDiazepam = Math.min(w * 0.5, 10);
+      const levetiracetam = Math.min(w * 40, 3000);
+      const phenytoin = w * 20;
+      document.getElementById('doseBuccalMidaz').textContent = buccalMidaz % 1 ? buccalMidaz.toFixed(1) + ' mg' : buccalMidaz + ' mg';
+      document.getElementById('doseLorazepam').textContent = lorazepam % 1 ? lorazepam.toFixed(1) + ' mg' : lorazepam + ' mg';
+      document.getElementById('dosePRDiazepam').textContent = prDiazepam % 1 ? prDiazepam.toFixed(1) + ' mg' : prDiazepam + ' mg';
+      document.getElementById('doseLevetiracetam').textContent = levetiracetam >= 1000 ? (levetiracetam / 1000).toFixed(1) + ' g' : levetiracetam + ' mg';
+      document.getElementById('dosePhenytoin').textContent = phenytoin >= 1000 ? (phenytoin / 1000).toFixed(1) + ' g' : phenytoin + ' mg';
+    } else {
+      document.getElementById('doseBuccalMidaz').textContent = '—';
+      document.getElementById('doseLorazepam').textContent = '—';
+      document.getElementById('dosePRDiazepam').textContent = '—';
+      document.getElementById('doseLevetiracetam').textContent = '—';
+      document.getElementById('dosePhenytoin').textContent = '—';
+    }
+    if (hasAge) {
+      let buccolam;
+      if (ageMo < 3) buccolam = null;
+      else if (ageMo < 6) buccolam = 2.5;
+      else if (ageMo < 12) buccolam = 2.5;
+      else if (ageMo < 60) buccolam = 5;
+      else if (ageMo < 120) buccolam = 7.5;
+      else buccolam = 10;
+      document.getElementById('doseBuccolam').textContent = buccolam !== null ? buccolam + ' mg' : '<3 mo';
+    } else {
+      document.getElementById('doseBuccolam').textContent = '—';
+    }
   };
 
   let intervalId = null;
@@ -250,7 +299,8 @@
   }
 
   window.startTimer = function() {
-    startTime = Date.now();
+    const startMins = parseInt(document.getElementById('startMins').value, 10) || 0;
+    startTime = Date.now() - (startMins * 60000);
     dose1Given = false;
     dose2Given = false;
     dose3Given = false;
@@ -276,6 +326,7 @@
     if (intervalId) clearInterval(intervalId);
     intervalId = null;
     startTime = null;
+    document.getElementById('startMins').value = '0';
     dose1Given = false;
     dose2Given = false;
     dose3Given = false;

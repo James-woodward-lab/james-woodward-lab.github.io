@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="color-scheme" content="dark light">
+<title>SBAR Referral Generator</title>
+<link rel="stylesheet" href="../css/app-theme.css">
+<script src="../js/theme-toggle.js"></script>
+<style>
+.sbar-container{max-width:780px;margin:0 auto;padding:0 calc(20px + var(--safe-r)) 40px calc(20px + var(--safe-l));}
+@media(max-width:600px){.sbar-container{padding:0 calc(16px + var(--safe-r)) 32px calc(16px + var(--safe-l));}}
+
+/* Sticky header */
+.sticky-hdr{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+@media(max-width:600px){.sticky-hdr{padding:10px 16px;}}
+.sticky-hdr h1{font-size:1.1rem;font-weight:700;color:var(--accent);margin:0;white-space:nowrap;}
+.hdr-actions{display:flex;gap:8px;align-items:center;}
+.hdr-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);font-size:0.8rem;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s;min-height:36px;display:flex;align-items:center;gap:4px;}
+.hdr-btn:hover{border-color:var(--accent);color:var(--accent);}
+.hdr-btn.danger:hover{border-color:var(--danger);color:var(--danger);}
+
+/* Section indicators */
+.sec-ind{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.sec-ltr{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:#fff;flex-shrink:0;}
+.ltr-s{background:#3b82f6;}.ltr-b{background:#8b5cf6;}.ltr-a{background:#f59e0b;}.ltr-r{background:#22c55e;}
+.sec-meta h2{font-size:0.95rem;font-weight:700;color:var(--text);margin:0;text-transform:none;letter-spacing:0;}
+.sec-meta p{font-size:0.75rem;color:var(--muted);margin:2px 0 0;}
+
+/* Urgency pills */
+.urgency-pills{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);}
+.urg-pill{flex:1;padding:10px 6px;text-align:center;font-size:0.78rem;font-weight:600;cursor:pointer;background:var(--surface2);border:none;color:var(--muted);transition:background .2s,color .2s;}
+.urg-pill.active.pill-red{background:rgba(239,68,68,.15);color:var(--danger);}
+.urg-pill.active.pill-amber{background:rgba(245,158,11,.15);color:var(--warn);}
+.urg-pill.active.pill-green{background:rgba(34,197,94,.15);color:var(--success);}
+
+/* Tag inputs */
+.tag-wrap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;min-height:44px;cursor:text;}
+.tag-wrap:focus-within{border-color:var(--accent);}
+.tag-input{flex:1;min-width:100px;background:transparent;border:none;color:var(--text);font-size:0.88rem;outline:none;padding:4px 0;}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(32,178,170,.12);border:1px solid rgba(32,178,170,.25);border-radius:6px;font-size:0.8rem;color:var(--accent2);}
+.tag-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:0 2px;line-height:1;}
+.tag-x:hover{color:var(--danger);}
+
+/* Chip suggestions */
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.chip{display:inline-block;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:0.76rem;color:var(--muted);cursor:pointer;transition:border-color .2s,color .2s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Investigation rows */
+.invest-row{display:grid;grid-template-columns:2fr 2fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;}
+.invest-row input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:0.84rem;min-height:36px;}
+.invest-row input:focus{outline:none;border-color:var(--accent);}
+.invest-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;padding:4px 8px;}
+.invest-x:hover{color:var(--danger);}
+@media(max-width:520px){.invest-row{grid-template-columns:1fr 1fr;}.invest-row input:nth-child(3){grid-column:1/-1;}}
+
+/* Specialty-specific background fields */
+.specialty-bg{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+
+/* Obs grid */
+.obs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+.obs-field label{display:block;font-size:0.76rem;color:var(--muted);margin-bottom:4px;font-weight:500;}
+.obs-field input,.obs-field select{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:0.88rem;min-height:36px;appearance:none;-webkit-appearance:none;}
+.obs-field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892a4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+.obs-field input:focus,.obs-field select:focus{outline:none;border-color:var(--accent);}
+.obs-hint{font-size:0.68rem;color:var(--muted);margin-top:3px;line-height:1.3;}
+.obs-hint.warn-hint{color:var(--danger);}
+
+/* AVPU pills */
+.avpu-row{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+.avpu-opt{flex:1;padding:8px 4px;text-align:center;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;border:none;border-right:1px solid var(--border);color:var(--muted);}
+.avpu-opt:last-child{border-right:none;}
+.avpu-opt.active{background:var(--accent);color:var(--accent-on);}
+
+/* GCS fields */
+.gcs-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;}
+.gcs-row .obs-field{margin:0;}
+.gcs-total{font-size:1.1rem;font-weight:700;color:var(--accent);padding-bottom:10px;text-align:center;min-width:50px;}
+
+/* Consciousness toggle */
+.c-toggle{display:inline-flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:10px;}
+.c-toggle button{padding:6px 14px;background:transparent;border:none;color:var(--muted);font-size:0.78rem;font-weight:600;cursor:pointer;}
+.c-toggle button.active{background:var(--accent);color:var(--accent-on);}
+
+/* NKDA button */
+.nkda-btn{display:inline-block;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:0.76rem;color:var(--muted);cursor:pointer;margin-left:8px;vertical-align:middle;}
+.nkda-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Differential toggle */
+.diff-toggle{display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--muted);cursor:pointer;margin-top:6px;}
+.diff-toggle input{accent-color:var(--accent);width:16px;height:16px;}
+
+/* Disposition radios */
+.disp-row{display:flex;flex-wrap:wrap;gap:8px;}
+.disp-opt{padding:8px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;color:var(--muted);transition:border-color .2s,color .2s;}
+.disp-opt.active{border-color:var(--accent);color:var(--accent);background:rgba(32,178,170,.08);}
+
+/* Specific asks */
+.asks-grid{display:grid;gap:6px;}
+.ask-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.85rem;color:var(--text);cursor:pointer;}
+.ask-item input{accent-color:var(--accent);width:18px;height:18px;flex-shrink:0;}
+
+/* Template bar */
+.template-bar{display:none;align-items:center;gap:10px;padding:10px 14px;background:rgba(32,178,170,.08);border:1px solid rgba(32,178,170,.2);border-radius:var(--radius);margin-bottom:14px;font-size:0.84rem;color:var(--text);}
+.template-bar.show{display:flex;}
+.template-bar span{flex:1;}
+.tpl-btn{padding:6px 14px;background:var(--accent);color:var(--accent-on);border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tpl-dismiss{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px 6px;}
+
+/* Output panel */
+.output-card{border-left:4px solid var(--accent);transition:border-color .3s;}
+.output-card.urg-red{border-left-color:var(--danger);}
+.output-card.urg-amber{border-left-color:var(--warn);}
+.output-card.urg-green{border-left-color:var(--success);}
+
+.fmt-toggle{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px;width:fit-content;}
+.fmt-btn{padding:7px 16px;background:transparent;border:none;color:var(--muted);font-size:0.78rem;font-weight:600;cursor:pointer;}
+.fmt-btn.active{background:var(--accent);color:var(--accent-on);}
+
+.output-body{font-size:0.9rem;line-height:1.65;color:var(--text);min-height:60px;}
+.output-empty{text-align:center;padding:20px 0;color:var(--muted);font-size:0.88rem;}
+
+/* Spoken format */
+.output-body.fmt-spoken .out-hdr{display:none;}
+.output-body.fmt-spoken .out-sec{display:inline;}
+.output-body.fmt-spoken .out-sep{display:inline;}
+
+/* Written format */
+.output-body.fmt-written .out-hdr{display:block;font-weight:700;color:var(--accent);margin-top:14px;margin-bottom:2px;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px;}
+.output-body.fmt-written .out-hdr:first-child{margin-top:0;}
+.output-body.fmt-written .out-sec{display:block;margin-bottom:4px;}
+.output-body.fmt-written .out-sep{display:none;}
+
+.flagged{color:var(--danger);font-weight:600;}
+.out-ts{margin-top:14px;font-size:0.72rem;color:var(--muted);font-style:italic;}
+
+.copy-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:var(--accent);color:var(--accent-on);border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:14px;transition:background .2s;min-height:44px;}
+.copy-btn:hover{background:var(--accent2);}
+.copy-btn.copied{background:var(--success);}
+
+/* Settings panel */
+.settings-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:199;display:none;}
+.settings-backdrop.open{display:block;}
+.settings-panel{position:fixed;top:0;right:-340px;width:320px;height:100%;background:var(--surface);border-left:1px solid var(--border);z-index:200;transition:right .3s ease;overflow-y:auto;padding:20px;}
+.settings-panel.open{right:0;}
+@media(max-width:400px){.settings-panel{width:100%;right:-100%;}}
+.settings-panel h2{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:16px;}
+.settings-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;}
+.settings-close:hover{color:var(--text);}
+
+/* Age unit toggle */
+.age-unit-toggle{display:inline-flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-left:8px;}
+.age-unit-toggle button{padding:6px 12px;background:transparent;border:none;color:var(--muted);font-size:0.78rem;font-weight:600;cursor:pointer;}
+.age-unit-toggle button.active{background:var(--accent);color:var(--accent-on);}
+
+/* Sex radios */
+.sex-row{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+.sex-opt{flex:1;padding:8px;text-align:center;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;border:none;border-right:1px solid var(--border);color:var(--muted);}
+.sex-opt:last-child{border-right:none;}
+.sex-opt.active{background:var(--accent);color:var(--accent-on);}
+
+/* Add button */
+.add-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:0.8rem;font-weight:600;color:var(--muted);cursor:pointer;margin-top:4px;}
+.add-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Allergy row */
+.allergy-row{display:flex;gap:8px;align-items:center;}
+.allergy-row input{flex:1;}
+</style>
+</head>
+<body>
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">&#9728;&#65039;</button>
+
+<!-- Settings backdrop -->
+<div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
+<!-- Settings panel -->
+<div class="settings-panel" id="settingsPanel">
+  <button type="button" class="settings-close" onclick="closeSettings()">&times;</button>
+  <h2>Settings</h2>
+  <div class="field"><label>Your name</label><input type="text" id="setName" onchange="saveSettings()"></div>
+  <div class="field"><label>Your grade</label>
+    <select id="setGrade" onchange="saveSettings()">
+      <option value="">Select</option>
+      <option>FY1</option><option>FY2</option><option>CMT</option>
+      <option>ST1</option><option>ST2</option><option>ST3</option><option>ST4</option><option>ST5</option><option>ST6</option><option>ST7</option><option>ST8</option>
+      <option>SHO</option><option>Registrar</option><option>ACCS</option><option>PA</option><option>Other</option>
+    </select>
+  </div>
+  <div class="field"><label>Hospital name</label><input type="text" id="setHospital" onchange="saveSettings()"></div>
+  <div class="field"><label>Default referring specialty</label><input type="text" id="setDefaultRef" onchange="saveSettings()"></div>
+  <div class="field"><label>PEWS flag threshold</label><input type="number" id="setPewsThreshold" min="1" max="10" value="4" onchange="saveSettings()"></div>
+  <p style="font-size:0.75rem;color:var(--muted);margin-top:16px;">Settings are saved in your browser and persist between sessions. No data is sent to any server.</p>
+</div>
+
+<!-- Sticky header -->
+<div class="sticky-hdr">
+  <h1>SBAR Referral Generator</h1>
+  <div class="hdr-actions">
+    <button type="button" class="hdr-btn" onclick="openSettings()" title="Settings">&#9881; Settings</button>
+    <button type="button" class="hdr-btn danger" onclick="clearAll()" title="Clear all fields">&#10005; Clear All</button>
+  </div>
+</div>
+
+<div class="sbar-container">
+
+  <!-- ======================== SECTION 0: REFERRAL SETUP ======================== -->
+  <div class="card">
+    <div class="card-title">Referral Setup</div>
+    <div class="row2">
+      <div class="field">
+        <label>Referring specialty</label>
+        <input type="text" id="referringSpecialty" value="Paediatric Emergency Department" oninput="generateOutput()">
+      </div>
+      <div class="field">
+        <label>Receiving specialty</label>
+        <select id="receivingSpecialty" onchange="onSpecialtyChange()">
+          <option value="">Select receiving specialty</option>
+          <option value="general-paeds">General Paediatrics / Paediatric Medicine</option>
+          <option value="surgery">Paediatric Surgery</option>
+          <option value="cardiology">Paediatric Cardiology</option>
+          <option value="neurology">Paediatric Neurology</option>
+          <option value="orthopaedics">Paediatric Orthopaedics</option>
+          <option value="respiratory">Paediatric Respiratory</option>
+          <option value="picu">PICU / HDU</option>
+          <option value="neonatology">Neonatology / NICU</option>
+          <option value="ent">ENT</option>
+          <option value="ophthalmology">Ophthalmology</option>
+          <option value="haemonc">Haematology / Oncology</option>
+          <option value="renal">Renal</option>
+          <option value="endocrinology">Endocrinology</option>
+          <option value="safeguarding">Safeguarding / Social Care</option>
+          <option value="general-surgery">General Surgery (adult)</option>
+          <option value="other">Other (free text)</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" id="otherSpecialtyField" style="display:none;">
+      <label>Specify specialty</label>
+      <input type="text" id="otherSpecialtyText" oninput="generateOutput()" placeholder="Enter receiving specialty">
+    </div>
+    <div class="field">
+      <label>Urgency</label>
+      <div class="urgency-pills">
+        <button type="button" class="urg-pill pill-red" onclick="setUrgency('immediate',this)">&#128308; Immediate</button>
+        <button type="button" class="urg-pill pill-amber" onclick="setUrgency('urgent',this)">&#128993; Urgent</button>
+        <button type="button" class="urg-pill pill-green" onclick="setUrgency('routine',this)">&#128994; Routine</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template prompt -->
+  <div class="template-bar" id="templateBar">
+    <span id="templateMsg">Load suggested fields for this referral?</span>
+    <button type="button" class="tpl-btn" onclick="loadTemplate()">Load template</button>
+    <button type="button" class="tpl-dismiss" onclick="dismissTemplate()">&times;</button>
+  </div>
+
+  <!-- ======================== SECTION S: SITUATION ======================== -->
+  <div class="card">
+    <div class="sec-ind">
+      <div class="sec-ltr ltr-s">S</div>
+      <div class="sec-meta"><h2>Situation</h2><p>Who is this patient, why are you calling, what do you need</p></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Patient age <span class="age-unit-toggle" id="ageUnitToggle"><button type="button" class="active" onclick="setAgeUnit('months',this)">Months</button><button type="button" onclick="setAgeUnit('years',this)">Years</button></span></label>
+        <input type="number" id="patientAge" placeholder="e.g. 4" min="0" step="0.5" oninput="onAgeChange();generateOutput()">
+      </div>
+      <div class="field">
+        <label>Sex</label>
+        <div class="sex-row">
+          <button type="button" class="sex-opt" onclick="setSex('Male',this)">Male</button>
+          <button type="button" class="sex-opt" onclick="setSex('Female',this)">Female</button>
+          <button type="button" class="sex-opt" onclick="setSex('Not specified',this)">Not specified</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Presenting complaint</label>
+      <input type="text" id="presentingComplaint" oninput="generateOutput()" placeholder="e.g. 3-day history of worsening respiratory distress">
+    </div>
+    <div class="field">
+      <label>Reason for referral</label>
+      <input type="text" id="reasonReferral" oninput="generateOutput()" placeholder="What specifically are you asking for?">
+      <div class="chip-row" id="reasonChips"></div>
+    </div>
+    <div class="field">
+      <label>Current location</label>
+      <select id="currentLocation" onchange="generateOutput()">
+        <option value="">Select location</option>
+        <option>Resus</option>
+        <option>Majors</option>
+        <option>Minors</option>
+        <option>Paediatric Assessment Unit</option>
+        <option>Other</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ======================== SECTION B: BACKGROUND ======================== -->
+  <div class="card">
+    <div class="sec-ind">
+      <div class="sec-ltr ltr-b">B</div>
+      <div class="sec-meta"><h2>Background</h2><p>Clinical context the receiving clinician needs</p></div>
+    </div>
+    <div class="field">
+      <label>PMH / Background</label>
+      <textarea id="pmh" rows="3" oninput="generateOutput()" placeholder="Relevant past medical history, known conditions, previous admissions..." style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:1rem;resize:vertical;font-family:inherit;"></textarea>
+    </div>
+    <div class="field">
+      <label>Regular medications</label>
+      <div class="tag-wrap" onclick="document.getElementById('medsInput').focus()">
+        <div id="medsTags" style="display:contents;"></div>
+        <input type="text" class="tag-input" id="medsInput" placeholder="Type medication, press Enter" onkeydown="handleTagKey(event,'medsTags','medsInput')">
+      </div>
+    </div>
+    <div class="field">
+      <label>Allergies <button type="button" class="nkda-btn" onclick="setNkda()">NKDA</button></label>
+      <input type="text" id="allergies" oninput="generateOutput()" placeholder="Known drug allergies">
+    </div>
+    <div class="field">
+      <label>Relevant recent investigations</label>
+      <div id="investContainer"></div>
+      <button type="button" class="add-btn" onclick="addInvestRow('','','')">+ Add investigation</button>
+      <div class="chip-row" id="investChips"></div>
+    </div>
+
+    <!-- Specialty-specific background fields -->
+    <div class="specialty-bg" data-specialty="surgery">
+      <div class="card-title">Surgical Assessment</div>
+      <div class="row2">
+        <div class="field"><label>Bowel habit</label><input type="text" id="bgBowelHabit" oninput="generateOutput()" placeholder="Normal / constipated / diarrhoea"></div>
+        <div class="field"><label>Last meal/drink (NBM)</label><input type="text" id="bgNbmTime" oninput="generateOutput()" placeholder="e.g. 4 hours ago"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Vomiting onset</label><input type="text" id="bgVomitingOnset" oninput="generateOutput()" placeholder="Duration, bilious, frequency"></div>
+        <div class="field"><label>Guarding / rigidity</label><input type="text" id="bgGuardingRigidity" oninput="generateOutput()" placeholder="Present / absent / localised"></div>
+      </div>
+    </div>
+    <div class="specialty-bg" data-specialty="cardiology">
+      <div class="card-title">Cardiology History</div>
+      <div class="row2">
+        <div class="field"><label>Murmur history</label><input type="text" id="bgMurmurHistory" oninput="generateOutput()" placeholder="Known murmur, previous echo findings"></div>
+        <div class="field"><label>Family Hx sudden death</label><input type="text" id="bgFamilyHxSD" oninput="generateOutput()" placeholder="1st-degree relatives, age &lt;40"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Syncope episodes</label><input type="text" id="bgSyncope" oninput="generateOutput()" placeholder="Frequency, triggers, prodrome"></div>
+        <div class="field"><label>Palpitations description</label><input type="text" id="bgPalpitations" oninput="generateOutput()" placeholder="Duration, frequency, associated symptoms"></div>
+      </div>
+    </div>
+    <div class="specialty-bg" data-specialty="neurology">
+      <div class="card-title">Neurology History</div>
+      <div class="field"><label>Seizure description</label><textarea id="bgSeizureDesc" rows="2" oninput="generateOutput()" placeholder="Duration, type, post-ictal state" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:0.95rem;resize:vertical;font-family:inherit;"></textarea></div>
+      <div class="row2">
+        <div class="field"><label>Developmental history</label><input type="text" id="bgDevHistory" oninput="generateOutput()" placeholder="Milestones, regression, concerns"></div>
+        <div class="field"><label>Vaccination status</label><input type="text" id="bgVaccStatus" oninput="generateOutput()" placeholder="Up to date / incomplete / unknown"></div>
+      </div>
+    </div>
+    <div class="specialty-bg" data-specialty="respiratory">
+      <div class="card-title">Respiratory History</div>
+      <div class="row2">
+        <div class="field"><label>Prematurity / BPD history</label><input type="text" id="bgPrematurity" oninput="generateOutput()" placeholder="Gestation, CLD/BPD, home O2"></div>
+        <div class="field"><label>Inhaler use</label><input type="text" id="bgInhalerUse" oninput="generateOutput()" placeholder="Type, frequency, compliance"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Last nebuliser given</label><input type="text" id="bgLastNeb" oninput="generateOutput()" placeholder="Drug, dose, time"></div>
+        <div class="field"><label>O&#8322; requirement history</label><input type="text" id="bgO2History" oninput="generateOutput()" placeholder="Previous CPAP, home O2, NIV"></div>
+      </div>
+    </div>
+    <div class="specialty-bg" data-specialty="orthopaedics">
+      <div class="card-title">Orthopaedic Assessment</div>
+      <div class="row2">
+        <div class="field"><label>Mechanism of injury</label><input type="text" id="bgMechanism" oninput="generateOutput()" placeholder="Fall, RTC, sport, non-accidental"></div>
+        <div class="field"><label>Time of injury</label><input type="text" id="bgTimeInjury" oninput="generateOutput()" placeholder="e.g. 2 hours ago"></div>
+      </div>
+      <div class="field"><label>Neurovascular status distal</label><input type="text" id="bgNeurovascular" oninput="generateOutput()" placeholder="Pulses, sensation, movement, colour"></div>
+    </div>
+    <div class="specialty-bg" data-specialty="haemonc">
+      <div class="card-title">Haematology / Oncology</div>
+      <div class="row2">
+        <div class="field"><label>Current protocol / cycle</label><input type="text" id="bgProtocol" oninput="generateOutput()" placeholder="Treatment protocol, cycle number"></div>
+        <div class="field"><label>Last counts</label><input type="text" id="bgLastCounts" oninput="generateOutput()" placeholder="Hb, WCC, Plt, neutrophils"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Transfusion history</label><input type="text" id="bgTransfusion" oninput="generateOutput()" placeholder="Recent transfusions, reactions"></div>
+        <div class="field"><label>Line in situ</label><input type="text" id="bgLineInSitu" oninput="generateOutput()" placeholder="Hickman, PICC, port, peripheral"></div>
+      </div>
+    </div>
+    <div class="specialty-bg" data-specialty="picu">
+      <div class="card-title">PICU / HDU</div>
+      <div class="row2">
+        <div class="field"><label>Fluid balance</label><input type="text" id="bgFluidBalance" oninput="generateOutput()" placeholder="Input, output, balance"></div>
+        <div class="field"><label>Ventilatory support</label><input type="text" id="bgVentSupport" oninput="generateOutput()" placeholder="NIV, HFNC, intubated, settings"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Current access</label><input type="text" id="bgAccess" oninput="generateOutput()" placeholder="IV sites, IO, central line"></div>
+        <div class="field"><label>Last blood gas</label><input type="text" id="bgLastGas" oninput="generateOutput()" placeholder="pH, pCO2, BE, lactate"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== SECTION A: ASSESSMENT ======================== -->
+  <div class="card">
+    <div class="sec-ind">
+      <div class="sec-ltr ltr-a">A</div>
+      <div class="sec-meta"><h2>Assessment</h2><p>What you think is going on and how unwell the patient is</p></div>
+    </div>
+
+    <div class="field">
+      <label>Working diagnosis / impression</label>
+      <input type="text" id="workingDiagnosis" oninput="generateOutput()" placeholder="Your clinical impression">
+      <label class="diff-toggle"><input type="checkbox" id="showDiff" onchange="toggleDiff()"> Show differentials</label>
+    </div>
+    <div class="field" id="diffField" style="display:none;">
+      <label>Differentials to consider</label>
+      <input type="text" id="differentials" oninput="generateOutput()" placeholder="Other diagnoses being considered">
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:0.85rem;color:var(--muted);margin-bottom:8px;font-weight:500;">Observations</label>
+      <div class="obs-grid">
+        <div class="obs-field"><label>HR (bpm)</label><input type="number" id="obsHR" min="30" max="300" oninput="updateObsHints();generateOutput()"><div class="obs-hint" id="hintHR"></div></div>
+        <div class="obs-field"><label>RR (/min)</label><input type="number" id="obsRR" min="5" max="100" oninput="updateObsHints();generateOutput()"><div class="obs-hint" id="hintRR"></div></div>
+        <div class="obs-field"><label>SpO&#8322; (%)</label><input type="number" id="obsSpO2" min="50" max="100" oninput="updateObsHints();generateOutput()"><div class="obs-hint" id="hintSpO2"></div></div>
+        <div class="obs-field"><label>BP systolic</label><input type="number" id="obsBP" min="40" max="250" oninput="generateOutput()" placeholder="Optional"></div>
+        <div class="obs-field"><label>Temp (&deg;C)</label><input type="number" id="obsTemp" min="30" max="43" step="0.1" oninput="generateOutput()"></div>
+        <div class="obs-field">
+          <label>CRT</label>
+          <select id="obsCRT" onchange="generateOutput()">
+            <option value="">--</option>
+            <option>&lt;2s</option>
+            <option>2-3s</option>
+            <option>&gt;3s</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Consciousness</label>
+      <div class="c-toggle">
+        <button type="button" class="active" onclick="setConsciousnessMode('avpu',this)">AVPU</button>
+        <button type="button" onclick="setConsciousnessMode('gcs',this)">GCS</button>
+      </div>
+      <div id="avpuPanel">
+        <div class="avpu-row">
+          <button type="button" class="avpu-opt" onclick="setAvpu('A',this)">A</button>
+          <button type="button" class="avpu-opt" onclick="setAvpu('V',this)">V</button>
+          <button type="button" class="avpu-opt" onclick="setAvpu('P',this)">P</button>
+          <button type="button" class="avpu-opt" onclick="setAvpu('U',this)">U</button>
+        </div>
+      </div>
+      <div id="gcsPanel" style="display:none;">
+        <div class="gcs-row">
+          <div class="obs-field"><label>Eyes (1-4)</label><input type="number" id="gcsE" min="1" max="4" oninput="updateGcsTotal();generateOutput()"></div>
+          <div class="obs-field"><label>Verbal (1-5)</label><input type="number" id="gcsV" min="1" max="5" oninput="updateGcsTotal();generateOutput()"></div>
+          <div class="obs-field"><label>Motor (1-6)</label><input type="number" id="gcsM" min="1" max="6" oninput="updateGcsTotal();generateOutput()"></div>
+          <div class="gcs-total" id="gcsTotal">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Weight (kg)</label>
+        <input type="number" id="obsWeight" min="0.5" max="200" step="0.1" oninput="generateOutput()" placeholder="Important for dosing context">
+      </div>
+      <div class="field">
+        <label>PEWS / early warning score</label>
+        <input type="number" id="pewsScore" min="0" max="20" oninput="updatePewsHint();generateOutput()">
+        <div class="obs-hint" id="hintPews"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Clinical concern &mdash; &quot;I am concerned because...&quot;</label>
+      <textarea id="clinicalConcern" rows="2" oninput="generateOutput()" placeholder="What specifically concerns you about this patient" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:1rem;resize:vertical;font-family:inherit;"></textarea>
+    </div>
+    <div class="field">
+      <label>Immediate management already given</label>
+      <div class="tag-wrap" onclick="document.getElementById('mgmtInput').focus()">
+        <div id="mgmtTags" style="display:contents;"></div>
+        <input type="text" class="tag-input" id="mgmtInput" placeholder="e.g. IV access, bloods, paracetamol. Press Enter" onkeydown="handleTagKey(event,'mgmtTags','mgmtInput')">
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== SECTION R: RECOMMENDATION ======================== -->
+  <div class="card">
+    <div class="sec-ind">
+      <div class="sec-ltr ltr-r">R</div>
+      <div class="sec-meta"><h2>Recommendation</h2><p>What you are specifically asking the receiving team to do</p></div>
+    </div>
+    <div class="field">
+      <label>Primary request</label>
+      <input type="text" id="primaryRequest" oninput="generateOutput()" placeholder="Auto-fills from reason for referral">
+    </div>
+    <div class="field">
+      <label>Specific asks</label>
+      <div class="asks-grid" id="specificAsks"></div>
+    </div>
+    <div class="field">
+      <label>Proposed disposition</label>
+      <div class="disp-row">
+        <button type="button" class="disp-opt" onclick="setDisposition('Admit',this)">Admit</button>
+        <button type="button" class="disp-opt" onclick="setDisposition('Discharge with plan',this)">Discharge with plan</button>
+        <button type="button" class="disp-opt" onclick="setDisposition('Await senior review',this)">Await senior review</button>
+        <button type="button" class="disp-opt" onclick="setDisposition('Transfer',this)">Transfer</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Timeframe expectation</label>
+      <input type="text" id="timeframe" oninput="generateOutput()" placeholder="I would like a response within...">
+    </div>
+    <div class="row2">
+      <div class="field"><label>Your name</label><input type="text" id="clinicianName" oninput="generateOutput()"></div>
+      <div class="field"><label>Your grade</label><input type="text" id="clinicianGrade" oninput="generateOutput()"></div>
+    </div>
+  </div>
+
+  <!-- ======================== OUTPUT PANEL ======================== -->
+  <div class="card output-card" id="outputCard">
+    <div class="card-title">SBAR Output</div>
+    <div class="fmt-toggle">
+      <button type="button" class="fmt-btn active" onclick="setFormat('spoken',this)">Spoken</button>
+      <button type="button" class="fmt-btn" onclick="setFormat('written',this)">Written</button>
+    </div>
+    <div class="output-body fmt-spoken" id="outputBody">
+      <div class="output-empty" id="outputEmpty">Start filling in the form to see your SBAR output here.</div>
+    </div>
+    <button type="button" class="copy-btn" id="copyBtn" onclick="copyOutput()" style="display:none;">Copy to clipboard</button>
+  </div>
+
+  <footer class="app-footer">
+    For clinical decision support only. Always verify against local guidelines.
+  </footer>
+</div>
+
+<script>
+/* ===============================================================
+   SBAR Referral Generator
+   =============================================================== */
+
+/* ── Specialty configuration ─────────────────────────────────── */
+var SPEC = {
+  'general-paeds': {
+    name: 'General Paediatrics',
+    chips: ['Paediatric review', 'Admission under paediatrics', 'Advice on management'],
+    invSuggest: ['FBC', 'CRP', 'U&E', 'Blood cultures', 'Urinalysis'],
+    asks: ['Please review in ED', 'Please arrange admission', 'Advise on management', 'Outpatient follow-up'],
+    bg: []
+  },
+  'surgery': {
+    name: 'Paediatric Surgery',
+    chips: ['Surgical review', 'Admission under surgical team', 'Theatre assessment'],
+    invSuggest: ['FBC', 'CRP', 'U&E', 'AXR', 'USS abdomen', 'Group & Save'],
+    asks: ['Surgical review in ED', 'Admission under surgical team', 'Consent for theatre', 'USS abdomen arranged \u2014 please review when available'],
+    bg: ['surgery']
+  },
+  'cardiology': {
+    name: 'Paediatric Cardiology',
+    chips: ['ECG interpretation', 'Echocardiogram', 'Inpatient cardiology review'],
+    invSuggest: ['ECG', 'Troponin', 'Echo', 'CXR', 'BNP'],
+    asks: ['ECG review', 'Echocardiogram request', 'Holter monitor arrangement', 'Cardiology outpatient follow-up'],
+    bg: ['cardiology']
+  },
+  'neurology': {
+    name: 'Paediatric Neurology',
+    chips: ['Neurology review', 'EEG request', 'Advice on seizure management'],
+    invSuggest: ['CT head', 'LP results', 'Glucose', 'Lactate', 'EEG', 'MRI brain'],
+    asks: ['Neurology review in ED', 'EEG request', 'MRI brain request', 'Neurology outpatient follow-up'],
+    bg: ['neurology']
+  },
+  'orthopaedics': {
+    name: 'Paediatric Orthopaedics',
+    chips: ['Orthopaedic review', 'Fracture management', 'Manipulation under anaesthesia'],
+    invSuggest: ['X-ray', 'CT', 'MRI'],
+    asks: ['Orthopaedic review in ED', 'Fracture clinic follow-up', 'MUA required', 'Theatre for fixation'],
+    bg: ['orthopaedics']
+  },
+  'respiratory': {
+    name: 'Paediatric Respiratory',
+    chips: ['Respiratory review', 'Advice on escalation', 'Inpatient respiratory review'],
+    invSuggest: ['CXR', 'Blood gas', 'FBC', 'CRP', 'NPA/viral swab', 'Sputum MC&S'],
+    asks: ['Respiratory review in ED', 'Advice on ventilatory support', 'Arrange admission', 'Outpatient follow-up'],
+    bg: ['respiratory']
+  },
+  'picu': {
+    name: 'PICU / HDU',
+    chips: ['PICU review', 'HDU bed request', 'Advice on escalation'],
+    invSuggest: ['Blood gas', 'FBC', 'U&E', 'LFT', 'Coag', 'Lactate', 'Blood cultures', 'CXR'],
+    asks: ['PICU review for possible admission', 'HDU bed required', 'Advice on ventilatory support', 'Advice on inotrope support'],
+    bg: ['picu']
+  },
+  'neonatology': {
+    name: 'Neonatology / NICU',
+    chips: ['Neonatal review', 'NICU admission', 'Advice on neonatal management'],
+    invSuggest: ['Blood gas', 'FBC', 'CRP', 'Blood cultures', 'Glucose', 'Bilirubin'],
+    asks: ['Neonatal review in ED', 'NICU admission', 'Advice on feeding', 'Advice on jaundice management'],
+    bg: []
+  },
+  'ent': {
+    name: 'ENT',
+    chips: ['ENT review', 'Airway assessment', 'Foreign body removal'],
+    invSuggest: ['Lateral soft tissue neck X-ray', 'FBC', 'CRP'],
+    asks: ['ENT review in ED', 'Theatre for foreign body', 'Outpatient ENT follow-up', 'Advice on management'],
+    bg: []
+  },
+  'ophthalmology': {
+    name: 'Ophthalmology',
+    chips: ['Ophthalmology review', 'Slit lamp examination', 'Fundoscopy'],
+    invSuggest: [],
+    asks: ['Ophthalmology review in ED', 'Slit lamp assessment', 'Outpatient ophthalmology follow-up'],
+    bg: []
+  },
+  'haemonc': {
+    name: 'Haematology / Oncology',
+    chips: ['Haem/Onc review', 'Febrile neutropenia protocol', 'Advice on management'],
+    invSuggest: ['FBC', 'Blood film', 'CRP', 'Blood cultures', 'Coag', 'LDH', 'Urate'],
+    asks: ['Haem/Onc review in ED', 'Admission under Haem/Onc', 'Febrile neutropenia protocol', 'Transfusion advice'],
+    bg: ['haemonc']
+  },
+  'renal': {
+    name: 'Renal',
+    chips: ['Renal review', 'Advice on fluid management', 'Dialysis assessment'],
+    invSuggest: ['U&E', 'Creatinine', 'eGFR', 'Urinalysis', 'Urine MC&S', 'USS renal tract'],
+    asks: ['Renal review in ED', 'Admission under renal', 'Dialysis assessment', 'Advice on fluid management'],
+    bg: []
+  },
+  'endocrinology': {
+    name: 'Endocrinology',
+    chips: ['Endocrine review', 'DKA management advice', 'Insulin advice'],
+    invSuggest: ['Glucose', 'Blood gas', 'HbA1c', 'TFTs', 'Cortisol', 'U&E'],
+    asks: ['Endocrine review in ED', 'DKA management advice', 'New diagnosis diabetes management', 'Outpatient endocrine follow-up'],
+    bg: []
+  },
+  'safeguarding': {
+    name: 'Safeguarding / Social Care',
+    chips: ['Safeguarding review', 'Social care referral', 'Strategy discussion'],
+    invSuggest: ['Skeletal survey', 'CT head', 'Ophthalmology review', 'Photography'],
+    asks: ['Safeguarding team review', 'Social care referral', 'Strategy discussion required', 'Place of safety assessment'],
+    bg: []
+  },
+  'general-surgery': {
+    name: 'General Surgery',
+    chips: ['Surgical review', 'Surgical admission', 'Theatre assessment'],
+    invSuggest: ['FBC', 'CRP', 'U&E', 'Amylase', 'LFT', 'AXR', 'CT abdomen'],
+    asks: ['Surgical review in ED', 'Admission under surgical team', 'CT abdomen request', 'Theatre assessment'],
+    bg: ['surgery']
+  },
+  'other': {
+    name: 'Other',
+    chips: ['Specialist review', 'Advice on management', 'Admission'],
+    invSuggest: ['FBC', 'CRP', 'U&E'],
+    asks: ['Please review in ED', 'Please advise on management', 'Please arrange admission', 'Advise re: safe discharge'],
+    bg: []
+  }
+};
+
+var GENERIC_ASKS = ['Please advise on management', 'Please arrange admission', 'Advise re: safe discharge'];
+
+/* ── Vital sign ranges by age ────────────────────────────────── */
+function getVitalRanges(ageVal, ageUnit) {
+  if (ageVal === '' || ageVal === null || isNaN(ageVal)) return null;
+  var mo = (ageUnit === 'years') ? ageVal * 12 : ageVal;
+  if (mo < 1) return {hr:[100,180],rr:[30,60],label:'Newborn'};
+  if (mo < 12) return {hr:[100,160],rr:[25,50],label:'Infant'};
+  if (mo < 24) return {hr:[90,150],rr:[20,40],label:'Toddler'};
+  if (mo < 60) return {hr:[80,140],rr:[20,30],label:'Preschool'};
+  if (mo < 144) return {hr:[70,120],rr:[15,25],label:'School age'};
+  return {hr:[60,100],rr:[12,20],label:'Adolescent'};
+}
+
+/* ── State ───────────────────────────────────────────────────── */
+var state = {
+  ageUnit: 'months',
+  sex: '',
+  urgency: '',
+  avpu: '',
+  consciousnessMode: 'avpu',
+  disposition: '',
+  format: 'spoken'
+};
+
+/* ── Escape HTML helper ──────────────────────────────────────── */
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Settings ────────────────────────────────────────────────── */
+function loadSettings() {
+  var n = localStorage.getItem('sbar-name') || '';
+  var g = localStorage.getItem('sbar-grade') || '';
+  var h = localStorage.getItem('sbar-hospital') || '';
+  var dr = localStorage.getItem('sbar-default-ref') || '';
+  var pt = localStorage.getItem('sbar-pews-threshold') || '4';
+  document.getElementById('setName').value = n;
+  document.getElementById('setGrade').value = g;
+  document.getElementById('setHospital').value = h;
+  document.getElementById('setDefaultRef').value = dr;
+  document.getElementById('setPewsThreshold').value = pt;
+  if (n) document.getElementById('clinicianName').value = n;
+  if (g) document.getElementById('clinicianGrade').value = g;
+  if (dr) document.getElementById('referringSpecialty').value = dr;
+}
+
+function saveSettings() {
+  localStorage.setItem('sbar-name', document.getElementById('setName').value);
+  localStorage.setItem('sbar-grade', document.getElementById('setGrade').value);
+  localStorage.setItem('sbar-hospital', document.getElementById('setHospital').value);
+  localStorage.setItem('sbar-default-ref', document.getElementById('setDefaultRef').value);
+  localStorage.setItem('sbar-pews-threshold', document.getElementById('setPewsThreshold').value);
+}
+
+function openSettings() {
+  document.getElementById('settingsPanel').classList.add('open');
+  document.getElementById('settingsBackdrop').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsPanel').classList.remove('open');
+  document.getElementById('settingsBackdrop').classList.remove('open');
+}
+
+/* ── Age unit toggle ─────────────────────────────────────────── */
+function setAgeUnit(unit, btn) {
+  state.ageUnit = unit;
+  var btns = btn.parentElement.querySelectorAll('button');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  onAgeChange();
+  generateOutput();
+}
+
+/* ── Sex selector ────────────────────────────────────────────── */
+function setSex(val, btn) {
+  state.sex = val;
+  var btns = btn.parentElement.querySelectorAll('.sex-opt');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  generateOutput();
+}
+
+/* ── Urgency selector ────────────────────────────────────────── */
+function setUrgency(val, btn) {
+  state.urgency = val;
+  var btns = btn.parentElement.querySelectorAll('.urg-pill');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  var card = document.getElementById('outputCard');
+  card.classList.remove('urg-red', 'urg-amber', 'urg-green');
+  if (val === 'immediate') card.classList.add('urg-red');
+  else if (val === 'urgent') card.classList.add('urg-amber');
+  else if (val === 'routine') card.classList.add('urg-green');
+  var tfEl = document.getElementById('timeframe');
+  if (!tfEl.value) {
+    if (val === 'immediate') tfEl.value = 'Immediate attendance required';
+    else if (val === 'urgent') tfEl.value = 'Review within 1-4 hours';
+    else if (val === 'routine') tfEl.value = 'Next available slot';
+  }
+  generateOutput();
+}
+
+/* ── Disposition selector ────────────────────────────────────── */
+function setDisposition(val, btn) {
+  state.disposition = val;
+  var btns = btn.parentElement.querySelectorAll('.disp-opt');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  generateOutput();
+}
+
+/* ── Consciousness mode ──────────────────────────────────────── */
+function setConsciousnessMode(mode, btn) {
+  state.consciousnessMode = mode;
+  var btns = btn.parentElement.querySelectorAll('button');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  document.getElementById('avpuPanel').style.display = mode === 'avpu' ? 'block' : 'none';
+  document.getElementById('gcsPanel').style.display = mode === 'gcs' ? 'block' : 'none';
+  generateOutput();
+}
+
+function setAvpu(val, btn) {
+  state.avpu = val;
+  var btns = btn.parentElement.querySelectorAll('.avpu-opt');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  generateOutput();
+}
+
+function updateGcsTotal() {
+  var e = parseInt(document.getElementById('gcsE').value) || 0;
+  var v = parseInt(document.getElementById('gcsV').value) || 0;
+  var m = parseInt(document.getElementById('gcsM').value) || 0;
+  var total = e + v + m;
+  document.getElementById('gcsTotal').textContent = (total > 0) ? total + '/15' : '--';
+}
+
+/* ── Format toggle ───────────────────────────────────────────── */
+function setFormat(fmt, btn) {
+  state.format = fmt;
+  var btns = btn.parentElement.querySelectorAll('.fmt-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  var body = document.getElementById('outputBody');
+  body.classList.remove('fmt-spoken', 'fmt-written');
+  body.classList.add('fmt-' + fmt);
+}
+
+/* ── NKDA button ─────────────────────────────────────────────── */
+function setNkda() {
+  document.getElementById('allergies').value = 'No known drug allergies';
+  generateOutput();
+}
+
+/* ── Differential toggle ─────────────────────────────────────── */
+function toggleDiff() {
+  var show = document.getElementById('showDiff').checked;
+  document.getElementById('diffField').style.display = show ? 'block' : 'none';
+}
+
+/* ── Tag input handlers ──────────────────────────────────────── */
+function handleTagKey(e, containerId, inputId) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addTag(containerId, inputId);
+  }
+}
+
+function addTag(containerId, inputId) {
+  var input = document.getElementById(inputId);
+  var val = input.value.trim();
+  if (!val) return;
+  var container = document.getElementById(containerId);
+  var tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.setAttribute('data-value', val);
+  tag.appendChild(document.createTextNode(val + ' '));
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'tag-x';
+  btn.textContent = '\u00d7';
+  btn.onclick = function() { tag.remove(); generateOutput(); };
+  tag.appendChild(btn);
+  container.appendChild(tag);
+  input.value = '';
+  generateOutput();
+}
+
+function getTagValues(containerId) {
+  var tags = document.getElementById(containerId).querySelectorAll('.tag');
+  var vals = [];
+  for (var i = 0; i < tags.length; i++) vals.push(tags[i].getAttribute('data-value'));
+  return vals;
+}
+
+/* ── Investigation repeater ──────────────────────────────────── */
+function addInvestRow(testName, result, date) {
+  var container = document.getElementById('investContainer');
+  var row = document.createElement('div');
+  row.className = 'invest-row';
+  var t = document.createElement('input');
+  t.type = 'text'; t.placeholder = 'Test name'; t.value = testName || '';
+  t.oninput = generateOutput;
+  var r = document.createElement('input');
+  r.type = 'text'; r.placeholder = 'Result'; r.value = result || '';
+  r.oninput = generateOutput;
+  var d = document.createElement('input');
+  d.type = 'text'; d.placeholder = 'Date/time'; d.value = date || '';
+  d.oninput = generateOutput;
+  var x = document.createElement('button');
+  x.type = 'button'; x.className = 'invest-x'; x.textContent = '\u00d7';
+  x.onclick = function() { row.remove(); generateOutput(); };
+  row.appendChild(t); row.appendChild(r); row.appendChild(d); row.appendChild(x);
+  container.appendChild(row);
+}
+
+function getInvestigations() {
+  var rows = document.querySelectorAll('.invest-row');
+  var results = [];
+  for (var i = 0; i < rows.length; i++) {
+    var inputs = rows[i].querySelectorAll('input');
+    var test = inputs[0].value.trim();
+    var result = inputs[1].value.trim();
+    var date = inputs[2].value.trim();
+    if (test) results.push({test: test, result: result, date: date});
+  }
+  return results;
+}
+
+/* ── Specialty change handling ───────────────────────────────── */
+function onSpecialtyChange() {
+  var val = document.getElementById('receivingSpecialty').value;
+  document.getElementById('otherSpecialtyField').style.display = (val === 'other') ? 'block' : 'none';
+  updateSpecialtyFields(val);
+  var tf = document.getElementById('templateBar');
+  if (val && SPEC[val]) {
+    document.getElementById('templateMsg').textContent = 'Load suggested fields for ' + SPEC[val].name + ' referral?';
+    tf.classList.add('show');
+  } else {
+    tf.classList.remove('show');
+  }
+  syncPrimaryRequest();
+  generateOutput();
+}
+
+function updateSpecialtyFields(specialty) {
+  var config = SPEC[specialty] || {chips:[], invSuggest:[], asks:[], bg:[]};
+
+  /* Show/hide specialty-specific background fields */
+  var allBg = document.querySelectorAll('.specialty-bg');
+  for (var i = 0; i < allBg.length; i++) {
+    var ds = allBg[i].getAttribute('data-specialty');
+    allBg[i].style.display = (config.bg.indexOf(ds) !== -1) ? 'block' : 'none';
+  }
+
+  /* Populate reason-for-referral chips */
+  var chipContainer = document.getElementById('reasonChips');
+  chipContainer.innerHTML = '';
+  for (var i = 0; i < config.chips.length; i++) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = config.chips[i];
+    chip.onclick = (function(text) {
+      return function() {
+        document.getElementById('reasonReferral').value = text;
+        syncPrimaryRequest();
+        generateOutput();
+      };
+    })(config.chips[i]);
+    chipContainer.appendChild(chip);
+  }
+
+  /* Populate investigation suggestion chips */
+  var invChipContainer = document.getElementById('investChips');
+  invChipContainer.innerHTML = '';
+  for (var i = 0; i < config.invSuggest.length; i++) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = '+ ' + config.invSuggest[i];
+    chip.onclick = (function(name) {
+      return function() { addInvestRow(name, '', ''); };
+    })(config.invSuggest[i]);
+    invChipContainer.appendChild(chip);
+  }
+
+  /* Populate specific asks checkboxes */
+  var asksContainer = document.getElementById('specificAsks');
+  asksContainer.innerHTML = '';
+  var allAsks = config.asks.slice();
+  for (var i = 0; i < GENERIC_ASKS.length; i++) {
+    if (allAsks.indexOf(GENERIC_ASKS[i]) === -1) allAsks.push(GENERIC_ASKS[i]);
+  }
+  for (var i = 0; i < allAsks.length; i++) {
+    var label = document.createElement('label');
+    label.className = 'ask-item';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = allAsks[i];
+    cb.onchange = generateOutput;
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(allAsks[i]));
+    asksContainer.appendChild(label);
+  }
+}
+
+function syncPrimaryRequest() {
+  var reason = document.getElementById('reasonReferral').value;
+  var primary = document.getElementById('primaryRequest');
+  if (!primary.dataset.edited) primary.value = reason;
+}
+
+/* ── Template loading ────────────────────────────────────────── */
+function loadTemplate() {
+  var specialty = document.getElementById('receivingSpecialty').value;
+  var config = SPEC[specialty];
+  if (!config) return;
+
+  /* Pre-populate investigation rows */
+  for (var i = 0; i < config.invSuggest.length && i < 4; i++) {
+    addInvestRow(config.invSuggest[i], '', '');
+  }
+
+  /* Set a default chip as reason for referral */
+  if (config.chips.length > 0 && !document.getElementById('reasonReferral').value) {
+    document.getElementById('reasonReferral').value = config.chips[0];
+    syncPrimaryRequest();
+  }
+
+  dismissTemplate();
+  generateOutput();
+}
+
+function dismissTemplate() {
+  document.getElementById('templateBar').classList.remove('show');
+}
+
+/* ── Age change → update vital sign hints ────────────────────── */
+function onAgeChange() {
+  updateObsHints();
+}
+
+function updateObsHints() {
+  var ageVal = parseFloat(document.getElementById('patientAge').value);
+  var ranges = getVitalRanges(ageVal, state.ageUnit);
+  var hintHR = document.getElementById('hintHR');
+  var hintRR = document.getElementById('hintRR');
+  var hintSpO2 = document.getElementById('hintSpO2');
+
+  if (ranges) {
+    hintHR.textContent = 'Normal ' + ranges.label + ': ' + ranges.hr[0] + '-' + ranges.hr[1] + ' bpm';
+    hintRR.textContent = 'Normal ' + ranges.label + ': ' + ranges.rr[0] + '-' + ranges.rr[1] + '/min';
+    var hr = parseInt(document.getElementById('obsHR').value);
+    if (hr && (hr < ranges.hr[0] || hr > ranges.hr[1])) {
+      hintHR.className = 'obs-hint warn-hint';
+    } else {
+      hintHR.className = 'obs-hint';
+    }
+    var rr = parseInt(document.getElementById('obsRR').value);
+    if (rr && (rr < ranges.rr[0] || rr > ranges.rr[1])) {
+      hintRR.className = 'obs-hint warn-hint';
+    } else {
+      hintRR.className = 'obs-hint';
+    }
+  } else {
+    hintHR.textContent = '';
+    hintRR.textContent = '';
+    hintHR.className = 'obs-hint';
+    hintRR.className = 'obs-hint';
+  }
+
+  var spo2 = parseInt(document.getElementById('obsSpO2').value);
+  if (spo2 && spo2 < 94) {
+    hintSpO2.textContent = 'SpO\u2082 < 94% — abnormal';
+    hintSpO2.className = 'obs-hint warn-hint';
+  } else {
+    hintSpO2.textContent = '';
+    hintSpO2.className = 'obs-hint';
+  }
+}
+
+function updatePewsHint() {
+  var pews = parseInt(document.getElementById('pewsScore').value);
+  var threshold = parseInt(localStorage.getItem('sbar-pews-threshold')) || 4;
+  var hint = document.getElementById('hintPews');
+  if (pews >= threshold) {
+    hint.textContent = 'PEWS \u2265' + threshold + ' \u2014 escalation threshold met';
+    hint.className = 'obs-hint warn-hint';
+  } else {
+    hint.textContent = '';
+    hint.className = 'obs-hint';
+  }
+}
+
+/* ── Get receiving specialty display name ────────────────────── */
+function getReceivingName() {
+  var val = document.getElementById('receivingSpecialty').value;
+  if (val === 'other') return document.getElementById('otherSpecialtyText').value || 'the receiving team';
+  var sel = document.getElementById('receivingSpecialty');
+  if (sel.selectedIndex > 0) return sel.options[sel.selectedIndex].text;
+  return 'the receiving team';
+}
+
+/* ── Build specialty-specific background text ────────────────── */
+function getSpecialtyBgText() {
+  var specialty = document.getElementById('receivingSpecialty').value;
+  var parts = [];
+  var fields;
+  if (specialty === 'surgery' || specialty === 'general-surgery') {
+    fields = [
+      ['bgBowelHabit', 'Bowel habit'],
+      ['bgNbmTime', 'NBM'],
+      ['bgVomitingOnset', 'Vomiting'],
+      ['bgGuardingRigidity', 'Guarding/rigidity']
+    ];
+  } else if (specialty === 'cardiology') {
+    fields = [
+      ['bgMurmurHistory', 'Murmur history'],
+      ['bgFamilyHxSD', 'Family Hx sudden death'],
+      ['bgSyncope', 'Syncope'],
+      ['bgPalpitations', 'Palpitations']
+    ];
+  } else if (specialty === 'neurology') {
+    fields = [
+      ['bgSeizureDesc', 'Seizure'],
+      ['bgDevHistory', 'Development'],
+      ['bgVaccStatus', 'Vaccinations']
+    ];
+  } else if (specialty === 'respiratory') {
+    fields = [
+      ['bgPrematurity', 'Prematurity/BPD'],
+      ['bgInhalerUse', 'Inhalers'],
+      ['bgLastNeb', 'Last nebuliser'],
+      ['bgO2History', 'O\u2082 history']
+    ];
+  } else if (specialty === 'orthopaedics') {
+    fields = [
+      ['bgMechanism', 'Mechanism'],
+      ['bgTimeInjury', 'Time of injury'],
+      ['bgNeurovascular', 'Neurovascular status']
+    ];
+  } else if (specialty === 'haemonc') {
+    fields = [
+      ['bgProtocol', 'Protocol/cycle'],
+      ['bgLastCounts', 'Last counts'],
+      ['bgTransfusion', 'Transfusion history'],
+      ['bgLineInSitu', 'Line in situ']
+    ];
+  } else if (specialty === 'picu') {
+    fields = [
+      ['bgFluidBalance', 'Fluid balance'],
+      ['bgVentSupport', 'Ventilatory support'],
+      ['bgAccess', 'Access'],
+      ['bgLastGas', 'Last blood gas']
+    ];
+  } else {
+    return '';
+  }
+  for (var i = 0; i < fields.length; i++) {
+    var el = document.getElementById(fields[i][0]);
+    if (el) {
+      var v = el.value.trim();
+      if (v) parts.push(fields[i][1] + ': ' + v);
+    }
+  }
+  return parts.join('. ');
+}
+
+/* ── Get checked specific asks ───────────────────────────────── */
+function getCheckedAsks() {
+  var cbs = document.querySelectorAll('#specificAsks input[type="checkbox"]:checked');
+  var vals = [];
+  for (var i = 0; i < cbs.length; i++) vals.push(cbs[i].value);
+  return vals;
+}
+
+/* ── Age display string ──────────────────────────────────────── */
+function getAgeString() {
+  var val = document.getElementById('patientAge').value;
+  if (!val) return '';
+  var n = parseFloat(val);
+  if (isNaN(n)) return '';
+  if (state.ageUnit === 'months') {
+    if (n >= 24) return Math.floor(n / 12) + ' year old';
+    return n + ' month old';
+  }
+  return n + ' year old';
+}
+
+/* ── Urgency phrase ──────────────────────────────────────────── */
+function getUrgencyPhrase() {
+  if (state.urgency === 'immediate') return 'This is an immediate referral \u2014 life-threatening, needs to attend now';
+  if (state.urgency === 'urgent') return 'This is an urgent referral \u2014 needs review within 1\u20134 hours';
+  if (state.urgency === 'routine') return 'This is a routine referral \u2014 next available slot';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   OUTPUT GENERATION
+   ══════════════════════════════════════════════════════════════ */
+function generateOutput() {
+  var body = document.getElementById('outputBody');
+  var emptyMsg = document.getElementById('outputEmpty');
+  var copyBtn = document.getElementById('copyBtn');
+
+  var name = document.getElementById('clinicianName').value.trim();
+  var grade = document.getElementById('clinicianGrade').value.trim();
+  var hospital = localStorage.getItem('sbar-hospital') || '';
+  var refFrom = document.getElementById('referringSpecialty').value.trim();
+  var ageStr = getAgeString();
+  var sex = state.sex;
+  var complaint = document.getElementById('presentingComplaint').value.trim();
+  var reason = document.getElementById('reasonReferral').value.trim();
+  var location = document.getElementById('currentLocation').value;
+  var urgPhrase = getUrgencyPhrase();
+
+  var pmh = document.getElementById('pmh').value.trim();
+  var meds = getTagValues('medsTags');
+  var allergies = document.getElementById('allergies').value.trim();
+  var invests = getInvestigations();
+  var specBg = getSpecialtyBgText();
+
+  var dx = document.getElementById('workingDiagnosis').value.trim();
+  var diffs = document.getElementById('showDiff').checked ? document.getElementById('differentials').value.trim() : '';
+  var hr = document.getElementById('obsHR').value.trim();
+  var rr = document.getElementById('obsRR').value.trim();
+  var spo2 = document.getElementById('obsSpO2').value.trim();
+  var bp = document.getElementById('obsBP').value.trim();
+  var temp = document.getElementById('obsTemp').value.trim();
+  var crt = document.getElementById('obsCRT').value;
+  var weight = document.getElementById('obsWeight').value.trim();
+  var pews = document.getElementById('pewsScore').value.trim();
+  var concern = document.getElementById('clinicalConcern').value.trim();
+  var mgmt = getTagValues('mgmtTags');
+
+  var primaryReq = document.getElementById('primaryRequest').value.trim();
+  var asks = getCheckedAsks();
+  var disp = state.disposition;
+  var timeframe = document.getElementById('timeframe').value.trim();
+
+  var consciousness = '';
+  if (state.consciousnessMode === 'avpu' && state.avpu) {
+    consciousness = 'AVPU: ' + state.avpu;
+  } else if (state.consciousnessMode === 'gcs') {
+    var e = document.getElementById('gcsE').value;
+    var v = document.getElementById('gcsV').value;
+    var m = document.getElementById('gcsM').value;
+    if (e || v || m) {
+      var total = (parseInt(e)||0) + (parseInt(v)||0) + (parseInt(m)||0);
+      consciousness = 'GCS ' + total + '/15 (E' + (e||'?') + ' V' + (v||'?') + ' M' + (m||'?') + ')';
+    }
+  }
+
+  /* Check if anything has been entered */
+  var hasContent = name || ageStr || complaint || reason || pmh || dx || hr || rr || primaryReq || concern;
+  if (!hasContent) {
+    if (emptyMsg) emptyMsg.style.display = 'block';
+    var existingSections = body.querySelectorAll('.out-sec,.out-hdr,.out-sep,.out-ts');
+    for (var i = 0; i < existingSections.length; i++) existingSections[i].remove();
+    copyBtn.style.display = 'none';
+    return;
+  }
+  if (emptyMsg) emptyMsg.style.display = 'none';
+  copyBtn.style.display = 'flex';
+
+  /* Get vital sign ranges for flagging */
+  var ageVal = parseFloat(document.getElementById('patientAge').value);
+  var ranges = getVitalRanges(ageVal, state.ageUnit);
+  var pewsThreshold = parseInt(localStorage.getItem('sbar-pews-threshold')) || 4;
+
+  /* ── Build Situation text ── */
+  var sParts = [];
+  if (name || grade) {
+    var intro = 'Hello, this is';
+    if (name) intro += ' ' + esc(name);
+    if (grade) intro += ', ' + esc(grade);
+    intro += ', calling from ' + esc(refFrom || 'the Paediatric Emergency Department');
+    if (hospital) intro += ' at ' + esc(hospital);
+    sParts.push(intro + '.');
+  }
+  if (ageStr || sex || complaint) {
+    var ref = 'I am referring';
+    if (ageStr) ref += ' a ' + esc(ageStr);
+    if (sex && sex !== 'Not specified') ref += ' ' + esc(sex.toLowerCase());
+    if (complaint) ref += ' with ' + esc(complaint);
+    ref += '.';
+    sParts.push(ref);
+  }
+  if (reason) sParts.push('Reason for referral: ' + esc(reason) + '.');
+  if (urgPhrase) sParts.push(esc(urgPhrase) + '.');
+  if (location) sParts.push('The patient is currently in ' + esc(location) + '.');
+
+  /* ── Build Background text ── */
+  var bParts = [];
+  if (pmh) bParts.push('PMH: ' + esc(pmh) + '.');
+  if (meds.length > 0) bParts.push('Medications: ' + esc(meds.join(', ')) + '.');
+  if (allergies) bParts.push('Allergies: ' + esc(allergies) + '.');
+  if (invests.length > 0) {
+    var invStrs = [];
+    for (var i = 0; i < invests.length; i++) {
+      var s = esc(invests[i].test);
+      if (invests[i].result) s += ' ' + esc(invests[i].result);
+      if (invests[i].date) s += ' (' + esc(invests[i].date) + ')';
+      invStrs.push(s);
+    }
+    bParts.push('Investigations: ' + invStrs.join(', ') + '.');
+  }
+  if (specBg) bParts.push(esc(specBg) + '.');
+
+  /* ── Build Assessment text ── */
+  var aParts = [];
+  if (dx) {
+    var dxStr = 'My working diagnosis is ' + esc(dx) + '.';
+    if (diffs) dxStr += ' Differentials include ' + esc(diffs) + '.';
+    aParts.push(dxStr);
+  }
+  var obsParts = [];
+  if (hr) {
+    var hrFlagged = ranges && (parseInt(hr) < ranges.hr[0] || parseInt(hr) > ranges.hr[1]);
+    var hrStr = 'HR ' + esc(hr);
+    if (ranges) hrStr += ' (normal ' + ranges.hr[0] + '-' + ranges.hr[1] + ')';
+    if (hrFlagged) hrStr = '<span class="flagged">' + hrStr + '</span>';
+    obsParts.push(hrStr);
+  }
+  if (rr) {
+    var rrFlagged = ranges && (parseInt(rr) < ranges.rr[0] || parseInt(rr) > ranges.rr[1]);
+    var rrStr = 'RR ' + esc(rr);
+    if (ranges) rrStr += ' (normal ' + ranges.rr[0] + '-' + ranges.rr[1] + ')';
+    if (rrFlagged) rrStr = '<span class="flagged">' + rrStr + '</span>';
+    obsParts.push(rrStr);
+  }
+  if (spo2) {
+    var spo2Flagged = parseInt(spo2) < 94;
+    var spo2Str = 'SpO\u2082 ' + esc(spo2) + '%';
+    if (spo2Flagged) spo2Str = '<span class="flagged">' + spo2Str + '</span>';
+    obsParts.push(spo2Str);
+  }
+  if (bp) obsParts.push('BP ' + esc(bp) + ' systolic');
+  if (temp) obsParts.push('Temp ' + esc(temp) + '\u00b0C');
+  if (crt) {
+    var crtFlagged = crt === '>3s';
+    var crtStr = 'CRT ' + esc(crt);
+    if (crtFlagged) crtStr = '<span class="flagged">' + crtStr + '</span>';
+    obsParts.push(crtStr);
+  }
+  if (consciousness) obsParts.push(esc(consciousness));
+  if (obsParts.length > 0) aParts.push('Observations: ' + obsParts.join(', ') + '.');
+  if (weight) aParts.push('Weight: ' + esc(weight) + ' kg.');
+  if (pews) {
+    var pewsFlagged = parseInt(pews) >= pewsThreshold;
+    var pewsStr = 'PEWS: ' + esc(pews);
+    if (pewsFlagged) pewsStr = '<span class="flagged">' + pewsStr + ' (\u2265' + pewsThreshold + ' threshold)</span>';
+    aParts.push(pewsStr + '.');
+  }
+  if (concern) aParts.push('I am concerned because ' + esc(concern) + '.');
+  if (mgmt.length > 0) aParts.push('Management so far: ' + esc(mgmt.join(', ')) + '.');
+
+  /* ── Build Recommendation text ── */
+  var rParts = [];
+  if (primaryReq) rParts.push('I am requesting ' + esc(primaryReq) + '.');
+  if (asks.length > 0) rParts.push('Specifically: ' + esc(asks.join('; ')) + '.');
+  if (disp) rParts.push('Proposed disposition: ' + esc(disp) + '.');
+  if (timeframe) rParts.push('I would like ' + esc(timeframe) + '.');
+  rParts.push('Thank you.');
+
+  /* ── Render output ── */
+  var existing = body.querySelectorAll('.out-sec,.out-hdr,.out-sep,.out-ts');
+  for (var i = 0; i < existing.length; i++) existing[i].remove();
+
+  var sections = [
+    {hdr: 'SITUATION', text: sParts.join(' ')},
+    {hdr: 'BACKGROUND', text: bParts.join(' ')},
+    {hdr: 'ASSESSMENT', text: aParts.join(' ')},
+    {hdr: 'RECOMMENDATION', text: rParts.join(' ')}
+  ];
+
+  for (var i = 0; i < sections.length; i++) {
+    if (!sections[i].text || sections[i].text === 'Thank you.') {
+      if (sections[i].hdr !== 'RECOMMENDATION' || sections[i].text) {
+        /* skip empty non-recommendation sections */
+      }
+      if (sections[i].hdr !== 'RECOMMENDATION' && !sections[i].text) continue;
+    }
+    var hdr = document.createElement('span');
+    hdr.className = 'out-hdr';
+    hdr.textContent = sections[i].hdr;
+    body.appendChild(hdr);
+
+    var sec = document.createElement('span');
+    sec.className = 'out-sec';
+    sec.innerHTML = sections[i].text;
+    body.appendChild(sec);
+
+    if (i < sections.length - 1) {
+      var sep = document.createElement('span');
+      sep.className = 'out-sep';
+      sep.textContent = ' \u2014 ';
+      body.appendChild(sep);
+    }
+  }
+
+  /* Timestamp */
+  var now = new Date();
+  var ts = document.createElement('div');
+  ts.className = 'out-ts';
+  ts.textContent = 'SBAR referral generated ' + now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  body.appendChild(ts);
+}
+
+/* ── Copy to clipboard ───────────────────────────────────────── */
+function copyOutput() {
+  var body = document.getElementById('outputBody');
+  var sections = body.querySelectorAll('.out-hdr');
+  var textParts = [];
+  for (var i = 0; i < sections.length; i++) {
+    var hdr = sections[i];
+    var sec = hdr.nextElementSibling;
+    if (sec && sec.classList.contains('out-sec')) {
+      textParts.push(hdr.textContent + '\n' + sec.textContent);
+    }
+  }
+  var tsEl = body.querySelector('.out-ts');
+  var tsText = tsEl ? tsEl.textContent : '';
+  var fullText = textParts.join('\n\n');
+  if (tsText) fullText += '\n\n' + tsText;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fullText).then(function() {
+      showCopied();
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = fullText;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showCopied();
+  }
+}
+
+function showCopied() {
+  var btn = document.getElementById('copyBtn');
+  btn.textContent = 'Copied \u2713';
+  btn.classList.add('copied');
+  setTimeout(function() {
+    btn.textContent = 'Copy to clipboard';
+    btn.classList.remove('copied');
+  }, 2000);
+}
+
+/* ── Clear all ───────────────────────────────────────────────── */
+function clearAll() {
+  if (!confirm('Are you sure you want to clear all fields? This cannot be undone.')) return;
+  var inputs = document.querySelectorAll('.sbar-container input[type="text"], .sbar-container input[type="number"], .sbar-container textarea');
+  for (var i = 0; i < inputs.length; i++) {
+    if (inputs[i].id !== 'referringSpecialty') inputs[i].value = '';
+  }
+  var selects = document.querySelectorAll('.sbar-container select');
+  for (var i = 0; i < selects.length; i++) selects[i].selectedIndex = 0;
+
+  /* Clear tags */
+  document.getElementById('medsTags').innerHTML = '';
+  document.getElementById('mgmtTags').innerHTML = '';
+
+  /* Clear investigations */
+  document.getElementById('investContainer').innerHTML = '';
+
+  /* Clear pill/radio selections */
+  state.sex = '';
+  state.urgency = '';
+  state.avpu = '';
+  state.disposition = '';
+  var allActive = document.querySelectorAll('.urg-pill.active, .sex-opt.active, .avpu-opt.active, .disp-opt.active');
+  for (var i = 0; i < allActive.length; i++) allActive[i].classList.remove('active');
+
+  /* Reset urgency card color */
+  var card = document.getElementById('outputCard');
+  card.classList.remove('urg-red', 'urg-amber', 'urg-green');
+
+  /* Hide specialty fields */
+  var allBg = document.querySelectorAll('.specialty-bg');
+  for (var i = 0; i < allBg.length; i++) allBg[i].style.display = 'none';
+
+  /* Clear chips and asks */
+  document.getElementById('reasonChips').innerHTML = '';
+  document.getElementById('investChips').innerHTML = '';
+  document.getElementById('specificAsks').innerHTML = '';
+
+  /* Reset toggles */
+  document.getElementById('showDiff').checked = false;
+  document.getElementById('diffField').style.display = 'none';
+  document.getElementById('gcsTotal').textContent = '--';
+  document.getElementById('hintHR').textContent = '';
+  document.getElementById('hintRR').textContent = '';
+  document.getElementById('hintSpO2').textContent = '';
+  document.getElementById('hintPews').textContent = '';
+  document.getElementById('templateBar').classList.remove('show');
+  document.getElementById('otherSpecialtyField').style.display = 'none';
+
+  /* Re-fill from settings */
+  var savedName = localStorage.getItem('sbar-name') || '';
+  var savedGrade = localStorage.getItem('sbar-grade') || '';
+  var savedRef = localStorage.getItem('sbar-default-ref') || '';
+  if (savedName) document.getElementById('clinicianName').value = savedName;
+  if (savedGrade) document.getElementById('clinicianGrade').value = savedGrade;
+  if (savedRef) document.getElementById('referringSpecialty').value = savedRef;
+
+  generateOutput();
+}
+
+/* ── Mark primary request as manually edited ─────────────────── */
+(function() {
+  var pr = document.getElementById('primaryRequest');
+  if (pr) {
+    pr.addEventListener('input', function() {
+      pr.dataset.edited = 'true';
+      generateOutput();
+    });
+  }
+})();
+
+/* ── Initialise ──────────────────────────────────────────────── */
+loadSettings();
+generateOutput();
+</script>
+</body>
+</html>
