@@ -90,7 +90,7 @@
 
   <script>
     const paracetamolBands = [
-      { minMonths: 1, maxMonths: 2, doseMin: 30, doseMax: 60, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "1-2 months" },
+      { minMonths: 1, maxMonths: 2, doseMin: 30, doseMax: 60, frequency: "every 8 hours", dosesPerDayMax: 3, note: "1-2 months" },
       { minMonths: 3, maxMonths: 5, doseMin: 60, doseMax: 60, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "3-5 months" },
       { minMonths: 6, maxMonths: 23, doseMin: 120, doseMax: 120, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "6-23 months" },
       { minMonths: 24, maxMonths: 47, doseMin: 180, doseMax: 180, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "2-3 years" },
@@ -174,6 +174,49 @@
       el.textContent = message;
     }
 
+    function roundDose(value) {
+      return Math.round(value * 10) / 10;
+    }
+
+    function getParacetamolSafety(weightKg) {
+      if (!(typeof weightKg === "number" && weightKg > 0)) return null;
+
+      if (weightKg < 10) {
+        const perDoseCap = roundDose(weightKg * 10);
+        const dailyCap = Math.floor(weightKg * 30);
+        return {
+          bandLabel: "<10 kg",
+          mgPerKgPerDose: 10,
+          maxMgPerKgPerDay: 30,
+          perDoseCapMg: perDoseCap,
+          dailyCapMg: dailyCap,
+          includeFourDoseWarning: true
+        };
+      }
+
+      if (weightKg <= 50) {
+        const perDoseCap = roundDose(weightKg * 15);
+        const dailyCap = Math.floor(weightKg * 60);
+        return {
+          bandLabel: "10-50 kg",
+          mgPerKgPerDose: 15,
+          maxMgPerKgPerDay: 60,
+          perDoseCapMg: perDoseCap,
+          dailyCapMg: dailyCap,
+          includeFourDoseWarning: false
+        };
+      }
+
+      return {
+        bandLabel: ">50 kg",
+        mgPerKgPerDose: null,
+        maxMgPerKgPerDay: null,
+        perDoseCapMg: 1000,
+        dailyCapMg: 4000,
+        includeFourDoseWarning: false
+      };
+    }
+
     function recalculate() {
       const ageMonths = getAgeMonths();
       const weight = toNumber(weightEl.value);
@@ -197,6 +240,7 @@
       const band = findBand(ageMonths, paracetamolBands);
       const hasWeight = typeof weightKg === "number" && weightKg > 0;
       const hasAge = ageMonths !== null;
+      const safety = getParacetamolSafety(weightKg);
 
       setBadgeState("para-badge-age", !!band);
       setBadgeState("para-badge-weight", hasWeight);
@@ -216,20 +260,38 @@
       if (band) {
         const bandDoseText = formatDose(band.doseMin, band.doseMax);
         main.textContent = `${bandDoseText} per dose`;
-        sub.textContent = `${band.note} | ${band.frequency} | Max ${band.dosesPerDayMax} doses/day`;
+        if (band.minMonths === 1 && band.maxMonths === 2) {
+          sub.innerHTML = `${band.note} | <strong>every 8 hours</strong> | Max ${band.dosesPerDayMax} doses/day`;
+        } else {
+          sub.textContent = `${band.note} | ${band.frequency} | Max ${band.dosesPerDayMax} doses/day`;
+        }
 
         if (hasWeight) {
           const ageBandDailyMax = band.doseMax * band.dosesPerDayMax;
-          if (ageBandDailyMax > effectiveDailyCap) {
+          const exceedsPerDoseCap = band.doseMax > safety.perDoseCapMg;
+          if (ageBandDailyMax > safety.dailyCapMg || exceedsPerDoseCap) {
+            const warnBits = [];
+            if (ageBandDailyMax > safety.dailyCapMg) {
+              warnBits.push(`age-band maximum (${ageBandDailyMax} mg/day) exceeds weight-band daily cap (${safety.dailyCapMg} mg/day)`);
+            }
+            if (exceedsPerDoseCap) {
+              warnBits.push(`age-band max per dose (${band.doseMax} mg) exceeds weight-band per-dose cap (${safety.perDoseCapMg} mg)`);
+            }
             setAlert(
               "para-alert",
-              `Age-band maximum (${ageBandDailyMax} mg/day) is above weight safety cap (${effectiveDailyCap} mg/day; 60 mg/kg/day). Keep total daily dose at or below ${effectiveDailyCap} mg.`,
+              `Weight safety warning (${safety.bandLabel}): ${warnBits.join("; ")}. Keep within weight-band limits.`,
               "warn"
             );
           } else {
+            let safeMessage = safety.maxMgPerKgPerDay
+              ? `Weight safety check (${safety.bandLabel}) passed. Caps: up to ${safety.perDoseCapMg} mg per dose (${safety.mgPerKgPerDose} mg/kg) and ${safety.dailyCapMg} mg/day (${safety.maxMgPerKgPerDay} mg/kg/day).`
+              : `Weight safety check (${safety.bandLabel}) passed. Caps: up to ${safety.perDoseCapMg} mg per dose and ${safety.dailyCapMg} mg/day.`;
+            if (safety.includeFourDoseWarning) {
+              safeMessage += " Note: at this weight band, 4 doses/day can exceed the 24-hour maximum.";
+            }
             setAlert(
               "para-alert",
-              `Weight safety check passed. Estimated caps: up to ${perDoseCapFromWeight} mg per dose (15 mg/kg) and ${effectiveDailyCap} mg/day (60 mg/kg/day).`,
+              safeMessage,
               ""
             );
           }
@@ -239,7 +301,9 @@
       } else {
         main.textContent = hasWeight ? "No oral age-band dose (age missing/out of range)" : "Age outside configured pediatric band";
         sub.textContent = hasWeight
-          ? `Weight safety caps only: up to ${perDoseCapFromWeight} mg per dose (15 mg/kg), and ${effectiveDailyCap} mg/day (60 mg/kg/day).`
+          ? safety.maxMgPerKgPerDay
+            ? `Weight safety caps only (${safety.bandLabel}): up to ${safety.perDoseCapMg} mg per dose (${safety.mgPerKgPerDose} mg/kg), and ${safety.dailyCapMg} mg/day (${safety.maxMgPerKgPerDay} mg/kg/day).`
+            : `Weight safety caps only (${safety.bandLabel}): up to ${safety.perDoseCapMg} mg per dose, and ${safety.dailyCapMg} mg/day.`
           : "Enter valid pediatric age in months/years.";
         setAlert("para-alert", "BNFc oral age-band dose could not be resolved from age input.", "warn");
       }
@@ -259,6 +323,22 @@
         main.textContent = "Enter age and/or weight";
         sub.textContent = "No dose calculated yet.";
         setAlert("ibu-alert", "", "");
+        return;
+      }
+
+      if (ageMonths !== null && ageMonths >= 1 && ageMonths <= 2) {
+        if (!hasWeight) {
+          main.textContent = "Weight required for 1-2 months";
+          sub.textContent = "Child 1-2 months: ibuprofen is weight-based in this tool.";
+          setAlert("ibu-alert", "Enter weight to calculate ibuprofen dose for age 1-2 months (5 mg/kg, 3 times daily).", "warn");
+          return;
+        }
+
+        const infantDose = roundDose(weightKg * 5);
+        const infantDaily = roundDose(infantDose * 3);
+        main.textContent = `${infantDose} mg per dose`;
+        sub.textContent = "Child 1-2 months | 5 mg/kg | 3 times daily";
+        setAlert("ibu-alert", `Calculated from weight: ${infantDose} mg per dose, 3 times daily (total ${infantDaily} mg/day).`, "");
         return;
       }
 
@@ -305,6 +385,7 @@
       const hasWeight = typeof weightKg === "number" && weightKg > 0;
       const hasAge = ageMonths !== null;
       const ivBand = findBand(ageMonths, paracetamolIvWeightBands);
+      const safety = getParacetamolSafety(weightKg);
 
       setBadgeState("para-badge-age", hasAge && !!ivBand);
       setBadgeState("para-badge-weight", hasWeight);
@@ -323,16 +404,22 @@
         return;
       }
 
-      const perDose = Math.floor((weightKg * ivBand.mgPerKgPerDose) * 10) / 10;
-      const dailyCapByKg = Math.floor(weightKg * ivBand.maxMgPerKgPerDay);
-      const dailyCap = Math.min(dailyCapByKg, 4000);
-      const impliedMaxDoses = Math.floor(dailyCap / perDose);
+      const ivPerDose = roundDose(weightKg * ivBand.mgPerKgPerDose);
+      const perDose = Math.min(ivPerDose, safety.perDoseCapMg);
+      const dailyCap = safety.dailyCapMg;
+      const impliedMaxDoses = perDose > 0 ? Math.floor(dailyCap / perDose) : 0;
 
       main.textContent = `${perDose} mg per dose`;
-      sub.textContent = `${ivBand.note} | Weight-based ${ivBand.mgPerKgPerDose} mg/kg per dose`;
+      sub.textContent = `${ivBand.note} | IV weight dose ${ivBand.mgPerKgPerDose} mg/kg per dose`;
+      let paraWeightNote = safety.maxMgPerKgPerDay
+        ? `Safety band (${safety.bandLabel}): max ${safety.perDoseCapMg} mg/dose and ${safety.dailyCapMg} mg/day (${safety.maxMgPerKgPerDay} mg/kg/day).`
+        : `Safety band (${safety.bandLabel}): max ${safety.perDoseCapMg} mg/dose and ${safety.dailyCapMg} mg/day.`;
+      if (safety.includeFourDoseWarning) {
+        paraWeightNote += " At this band, 4 doses/day can exceed the 24-hour maximum.";
+      }
       setAlert(
         "para-alert",
-        `Daily cap: ${dailyCap} mg/day (${ivBand.maxMgPerKgPerDay} mg/kg/day; absolute max 4000 mg/day). Estimated maximum whole doses/day at this dose: ${impliedMaxDoses}.`,
+        `${paraWeightNote} Estimated maximum whole doses/day at this dose: ${impliedMaxDoses}.`,
         ""
       );
     }
