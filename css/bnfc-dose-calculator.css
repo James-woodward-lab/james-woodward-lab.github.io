@@ -1,0 +1,59 @@
+.dose-app .result-card {
+  padding-top: 16px;
+}
+
+.dose-app .result-main {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--accent2);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.dose-app .result-sub {
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.badge {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.muted-badge {
+  opacity: 0.55;
+}
+
+.source-line {
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+}
+
+.source-line a {
+  color: var(--accent2);
+}
+
+@media (max-width: 600px) {
+  .dose-app .result-main {
+    font-size: 1.45rem;
+  }
+
+  .dose-app .result-sub {
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>BNFc Oral Dose Calculator</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <script src="../js/theme-toggle.js"></script>
+  <link rel="stylesheet" href="../css/bnfc-dose-calculator.css">
+</head>
+<body class="dose-app">
+  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+  <div class="container">
+    <header class="app-header-center">
+      <h1>BNFc Oral Dose Calculator</h1>
+      <p>Paracetamol and ibuprofen doses by age and/or weight</p>
+    </header>
+
+    <section class="card">
+      <div class="card-title">Patient Inputs</div>
+      <div class="field">
+        <label for="age-years">Age (years)</label>
+        <input type="number" id="age-years" min="0" max="17" step="1" inputmode="numeric" placeholder="e.g. 4">
+      </div>
+      <div class="field">
+        <label for="age-months">Additional months (optional)</label>
+        <input type="number" id="age-months" min="0" max="11" step="1" inputmode="numeric" placeholder="e.g. 6">
+      </div>
+      <div class="field">
+        <label for="weight-kg">Weight (kg, optional)</label>
+        <input type="number" id="weight-kg" min="1" max="200" step="0.1" inputmode="decimal" placeholder="e.g. 18.5">
+      </div>
+      <p class="hint">Enter age, weight, or both. If both are entered, age gives the BNFc band dose and weight checks safety limits.</p>
+    </section>
+
+    <section class="card result-card">
+      <div class="card-title">Paracetamol (oral)</div>
+      <div class="result-main" id="para-dose-main">Enter age and/or weight</div>
+      <div class="result-sub" id="para-dose-sub">No dose calculated yet.</div>
+      <div class="badge-row">
+        <span class="badge" id="para-badge-age">Age-based dose</span>
+        <span class="badge" id="para-badge-weight">Weight safety check</span>
+      </div>
+      <div class="alert" id="para-alert" hidden></div>
+    </section>
+
+    <section class="card result-card">
+      <div class="card-title">Ibuprofen (oral)</div>
+      <div class="result-main" id="ibu-dose-main">Enter age and/or weight</div>
+      <div class="result-sub" id="ibu-dose-sub">No dose calculated yet.</div>
+      <div class="badge-row">
+        <span class="badge" id="ibu-badge-age">Age-based dose</span>
+        <span class="badge" id="ibu-badge-weight">Weight safety check</span>
+      </div>
+      <div class="alert" id="ibu-alert" hidden></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">BNFc Source</div>
+      <p class="source-line">Paracetamol: <a href="https://bnfc.nice.org.uk/drugs/paracetamol/" target="_blank" rel="noopener noreferrer">bnfc.nice.org.uk/drugs/paracetamol</a></p>
+      <p class="source-line">Ibuprofen: <a href="https://bnfc.nice.org.uk/drugs/ibuprofen/#indications-and-dose" target="_blank" rel="noopener noreferrer">bnfc.nice.org.uk/drugs/ibuprofen/#indications-and-dose</a></p>
+      <p class="hint">Dose table encoded from BNFc oral age-band guidance. Verify against current BNFc before prescribing.</p>
+      <p class="hint">Table review stamp: 2026-03-23</p>
+    </section>
+
+    <footer class="app-footer">
+      For clinical decision support only. Always verify against local guidelines.
+    </footer>
+  </div>
+
+  <script>
+    const paracetamolBands = [
+      { minMonths: 1, maxMonths: 2, doseMin: 30, doseMax: 60, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "1-2 months" },
+      { minMonths: 3, maxMonths: 5, doseMin: 60, doseMax: 60, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "3-5 months" },
+      { minMonths: 6, maxMonths: 23, doseMin: 120, doseMax: 120, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "6-23 months" },
+      { minMonths: 24, maxMonths: 47, doseMin: 180, doseMax: 180, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "2-3 years" },
+      { minMonths: 48, maxMonths: 71, doseMin: 240, doseMax: 240, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "4-5 years" },
+      { minMonths: 72, maxMonths: 95, doseMin: 240, doseMax: 250, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "6-7 years" },
+      { minMonths: 96, maxMonths: 119, doseMin: 360, doseMax: 375, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "8-9 years" },
+      { minMonths: 120, maxMonths: 143, doseMin: 480, doseMax: 500, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "10-11 years" },
+      { minMonths: 144, maxMonths: 191, doseMin: 480, doseMax: 750, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "12-15 years" },
+      { minMonths: 192, maxMonths: 215, doseMin: 500, doseMax: 1000, frequency: "every 4-6 hours", dosesPerDayMax: 4, note: "16-17 years" }
+    ];
+
+    const ibuprofenBands = [
+      { minMonths: 3, maxMonths: 5, doseMin: 50, doseMax: 50, frequency: "3 times daily", dosesPerDayMin: 3, dosesPerDayMax: 3, note: "3-5 months" },
+      { minMonths: 6, maxMonths: 11, doseMin: 50, doseMax: 50, frequency: "3-4 times daily", dosesPerDayMin: 3, dosesPerDayMax: 4, note: "6-11 months" },
+      { minMonths: 12, maxMonths: 47, doseMin: 100, doseMax: 100, frequency: "3 times daily", dosesPerDayMin: 3, dosesPerDayMax: 3, note: "1-3 years" },
+      { minMonths: 48, maxMonths: 83, doseMin: 150, doseMax: 150, frequency: "3 times daily", dosesPerDayMin: 3, dosesPerDayMax: 3, note: "4-6 years" },
+      { minMonths: 84, maxMonths: 119, doseMin: 200, doseMax: 200, frequency: "3 times daily", dosesPerDayMin: 3, dosesPerDayMax: 3, note: "7-9 years" },
+      { minMonths: 120, maxMonths: 143, doseMin: 300, doseMax: 300, frequency: "3 times daily", dosesPerDayMin: 3, dosesPerDayMax: 3, note: "10-11 years" },
+      { minMonths: 144, maxMonths: 215, doseMin: 300, doseMax: 400, frequency: "3-4 times daily", dosesPerDayMin: 3, dosesPerDayMax: 4, note: "12-17 years" }
+    ];
+
+    const ageYearsEl = document.getElementById("age-years");
+    const ageMonthsEl = document.getElementById("age-months");
+    const weightEl = document.getElementById("weight-kg");
+
+    ageYearsEl.addEventListener("input", recalculate);
+    ageMonthsEl.addEventListener("input", recalculate);
+    weightEl.addEventListener("input", recalculate);
+
+    function toNumber(value) {
+      if (value === "" || value === null || value === undefined) return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function getAgeMonths() {
+      const years = toNumber(ageYearsEl.value);
+      const months = toNumber(ageMonthsEl.value);
+      if (years === null && months === null) return null;
+      const y = years === null ? 0 : years;
+      const m = months === null ? 0 : months;
+      if (y < 0 || m < 0 || m > 11) return null;
+      return Math.round(y * 12 + m);
+    }
+
+    function findBand(ageMonths, bands) {
+      if (ageMonths === null) return null;
+      return bands.find((band) => ageMonths >= band.minMonths && ageMonths <= band.maxMonths) || null;
+    }
+
+    function formatDose(min, max) {
+      return min === max ? `${min} mg` : `${min}-${max} mg`;
+    }
+
+    function setBadgeState(elId, enabled) {
+      const el = document.getElementById(elId);
+      el.classList.toggle("muted-badge", !enabled);
+    }
+
+    function setAlert(elId, message, level) {
+      const el = document.getElementById(elId);
+      if (!message) {
+        el.hidden = true;
+        el.className = "alert";
+        el.textContent = "";
+        return;
+      }
+      el.hidden = false;
+      el.className = level === "warn" ? "alert alert-warn" : "alert";
+      el.textContent = message;
+    }
+
+    function recalculate() {
+      const ageMonths = getAgeMonths();
+      const weight = toNumber(weightEl.value);
+      calculateParacetamol(ageMonths, weight);
+      calculateIbuprofen(ageMonths, weight);
+    }
+
+    function calculateParacetamol(ageMonths, weightKg) {
+      const main = document.getElementById("para-dose-main");
+      const sub = document.getElementById("para-dose-sub");
+      const band = findBand(ageMonths, paracetamolBands);
+      const hasWeight = typeof weightKg === "number" && weightKg > 0;
+      const hasAge = ageMonths !== null;
+
+      setBadgeState("para-badge-age", !!band);
+      setBadgeState("para-badge-weight", hasWeight);
+
+      if (!hasAge && !hasWeight) {
+        main.textContent = "Enter age and/or weight";
+        sub.textContent = "No dose calculated yet.";
+        setAlert("para-alert", "", "");
+        return;
+      }
+
+      const dailyCapByWeight = hasWeight ? Math.floor(weightKg * 60) : null;
+      const absoluteDailyCap = 4000;
+      const effectiveDailyCap = hasWeight ? Math.min(dailyCapByWeight, absoluteDailyCap) : null;
+      const perDoseCapFromWeight = hasWeight ? Math.floor((weightKg * 15) * 10) / 10 : null;
+
+      if (band) {
+        const bandDoseText = formatDose(band.doseMin, band.doseMax);
+        main.textContent = `${bandDoseText} per dose`;
+        sub.textContent = `${band.note} | ${band.frequency} | Max ${band.dosesPerDayMax} doses/day`;
+
+        if (hasWeight) {
+          const ageBandDailyMax = band.doseMax * band.dosesPerDayMax;
+          if (ageBandDailyMax > effectiveDailyCap) {
+            setAlert(
+              "para-alert",
+              `Age-band maximum (${ageBandDailyMax} mg/day) is above weight safety cap (${effectiveDailyCap} mg/day; 60 mg/kg/day). Keep total daily dose at or below ${effectiveDailyCap} mg.`,
+              "warn"
+            );
+          } else {
+            setAlert(
+              "para-alert",
+              `Weight safety check passed. Estimated caps: up to ${perDoseCapFromWeight} mg per dose (15 mg/kg) and ${effectiveDailyCap} mg/day (60 mg/kg/day).`,
+              ""
+            );
+          }
+        } else {
+          setAlert("para-alert", "Weight not entered. Age-band oral dose shown without weight safety cap check.", "warn");
+        }
+      } else {
+        main.textContent = hasWeight ? "No oral age-band dose (age missing/out of range)" : "Age outside configured pediatric band";
+        sub.textContent = hasWeight
+          ? `Weight safety caps only: up to ${perDoseCapFromWeight} mg per dose (15 mg/kg), and ${effectiveDailyCap} mg/day (60 mg/kg/day).`
+          : "Enter valid pediatric age in months/years.";
+        setAlert("para-alert", "BNFc oral age-band dose could not be resolved from age input.", "warn");
+      }
+    }
+
+    function calculateIbuprofen(ageMonths, weightKg) {
+      const main = document.getElementById("ibu-dose-main");
+      const sub = document.getElementById("ibu-dose-sub");
+      const band = findBand(ageMonths, ibuprofenBands);
+      const hasWeight = typeof weightKg === "number" && weightKg > 0;
+      const hasAge = ageMonths !== null;
+
+      setBadgeState("ibu-badge-age", !!band);
+      setBadgeState("ibu-badge-weight", hasWeight);
+
+      if (!hasAge && !hasWeight) {
+        main.textContent = "Enter age and/or weight";
+        sub.textContent = "No dose calculated yet.";
+        setAlert("ibu-alert", "", "");
+        return;
+      }
+
+      const dailyCapByWeight = hasWeight ? Math.floor(weightKg * 30) : null;
+      const absoluteDailyCap = 2400;
+      const effectiveDailyCap = hasWeight ? Math.min(dailyCapByWeight, absoluteDailyCap) : null;
+
+      if (band) {
+        const bandDoseText = formatDose(band.doseMin, band.doseMax);
+        main.textContent = `${bandDoseText} per dose`;
+        sub.textContent = `${band.note} | ${band.frequency} | Max ${band.dosesPerDayMax} doses/day`;
+
+        if (hasWeight) {
+          const ageBandDailyMax = band.doseMax * band.dosesPerDayMax;
+          if (ageBandDailyMax > effectiveDailyCap) {
+            setAlert(
+              "ibu-alert",
+              `Age-band maximum (${ageBandDailyMax} mg/day) is above weight safety cap (${effectiveDailyCap} mg/day; 30 mg/kg/day). Keep total daily dose at or below ${effectiveDailyCap} mg.`,
+              "warn"
+            );
+          } else {
+            const perDoseCapMaxFreq = Math.floor((effectiveDailyCap / band.dosesPerDayMax) * 10) / 10;
+            setAlert(
+              "ibu-alert",
+              `Weight safety check passed. Estimated cap by entered weight: ${effectiveDailyCap} mg/day total (30 mg/kg/day), around ${perDoseCapMaxFreq} mg per dose at ${band.dosesPerDayMax} doses/day.`,
+              ""
+            );
+          }
+        } else {
+          setAlert("ibu-alert", "Weight not entered. Age-band oral dose shown without mg/kg/day safety cap check.", "warn");
+        }
+      } else {
+        main.textContent = hasWeight ? "No oral age-band dose (age missing/out of range)" : "Age outside configured pediatric band";
+        sub.textContent = hasWeight
+          ? `Weight safety cap only: do not exceed ${effectiveDailyCap} mg/day total (30 mg/kg/day; absolute max 2400 mg/day).`
+          : "Enter valid pediatric age in months/years.";
+        setAlert("ibu-alert", "BNFc oral age-band dose could not be resolved from age input.", "warn");
+      }
+    }
+  </script>
+</body>
+</html>
