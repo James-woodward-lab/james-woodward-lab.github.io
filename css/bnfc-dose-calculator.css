@@ -8,6 +8,29 @@
   gap: 14px;
 }
 
+.dose-app .mode-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.dose-app .mode-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.dose-app .mode-option input {
+  accent-color: var(--accent);
+}
+
 .dose-app .input-col {
   background: var(--surface2);
   border: 1px solid var(--border);

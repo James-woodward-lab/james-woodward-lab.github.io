@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f1117">
   <meta name="color-scheme" content="dark light">
-  <title>BNFc Oral Dose Calculator</title>
+  <title>Simple Analgesia Dosing</title>
   <link rel="stylesheet" href="../css/app-theme.css">
   <script src="../js/theme-toggle.js"></script>
   <link rel="stylesheet" href="../css/bnfc-dose-calculator.css">
@@ -14,12 +14,22 @@
   <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
   <div class="container">
     <header class="app-header-center">
-      <h1>BNFc Oral Dose Calculator</h1>
+      <h1>Simple Analgesia Dosing</h1>
       <p>Paracetamol and ibuprofen doses by age and/or weight</p>
     </header>
 
     <section class="card">
       <div class="card-title">Patient Inputs</div>
+      <div class="mode-toggle" role="radiogroup" aria-label="Dosing mode">
+        <label class="mode-option">
+          <input type="radio" name="dosing-mode" id="mode-age" value="age" checked>
+          <span>Age-based (default)</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="dosing-mode" id="mode-weight" value="weight">
+          <span>Pure weight-based</span>
+        </label>
+      </div>
       <div class="input-grid">
         <div class="input-col">
           <h2 class="input-heading">Age Input</h2>
@@ -40,7 +50,7 @@
           </div>
         </div>
       </div>
-      <p class="hint">Enter age, weight, or both. If both are entered, age gives the BNFc band dose and weight checks safety limits.</p>
+      <p class="hint" id="mode-hint">Age-based mode is active. Enter age, weight, or both. If both are entered, age gives the BNFc band dose and weight checks safety limits.</p>
     </section>
 
     <section class="card result-card">
@@ -102,13 +112,24 @@
       { minMonths: 144, maxMonths: 215, doseMin: 300, doseMax: 400, frequency: "3-4 times daily", dosesPerDayMin: 3, dosesPerDayMax: 4, note: "12-17 years" }
     ];
 
+    const paracetamolIvWeightBands = [
+      { minMonths: 1, maxMonths: 11, mgPerKgPerDose: 7.5, maxMgPerKgPerDay: 30, note: "1-11 months (IV weight guidance)" },
+      { minMonths: 12, maxMonths: 143, mgPerKgPerDose: 15, maxMgPerKgPerDay: 60, note: "1-11 years (IV weight guidance)" },
+      { minMonths: 144, maxMonths: 215, mgPerKgPerDose: 15, maxMgPerKgPerDay: 60, note: "12-17 years (IV weight guidance)" }
+    ];
+
     const ageYearsEl = document.getElementById("age-years");
     const ageMonthsEl = document.getElementById("age-months");
     const weightEl = document.getElementById("weight-kg");
+    const modeAgeEl = document.getElementById("mode-age");
+    const modeWeightEl = document.getElementById("mode-weight");
+    const modeHintEl = document.getElementById("mode-hint");
 
     ageYearsEl.addEventListener("input", recalculate);
     ageMonthsEl.addEventListener("input", recalculate);
     weightEl.addEventListener("input", recalculate);
+    modeAgeEl.addEventListener("change", recalculate);
+    modeWeightEl.addEventListener("change", recalculate);
 
     function toNumber(value) {
       if (value === "" || value === null || value === undefined) return null;
@@ -156,11 +177,21 @@
     function recalculate() {
       const ageMonths = getAgeMonths();
       const weight = toNumber(weightEl.value);
-      calculateParacetamol(ageMonths, weight);
-      calculateIbuprofen(ageMonths, weight);
+      const mode = modeWeightEl.checked ? "weight" : "age";
+      modeHintEl.textContent = mode === "age"
+        ? "Age-based mode is active. Enter age, weight, or both. If both are entered, age gives the BNFc band dose and weight checks safety limits."
+        : "Pure weight-based mode is active. Doses are calculated from weight; age is used where required for paracetamol IV age-split bands.";
+
+      if (mode === "age") {
+        calculateParacetamolAgeMode(ageMonths, weight);
+        calculateIbuprofenAgeMode(ageMonths, weight);
+      } else {
+        calculateParacetamolWeightMode(ageMonths, weight);
+        calculateIbuprofenWeightMode(weight);
+      }
     }
 
-    function calculateParacetamol(ageMonths, weightKg) {
+    function calculateParacetamolAgeMode(ageMonths, weightKg) {
       const main = document.getElementById("para-dose-main");
       const sub = document.getElementById("para-dose-sub");
       const band = findBand(ageMonths, paracetamolBands);
@@ -214,7 +245,7 @@
       }
     }
 
-    function calculateIbuprofen(ageMonths, weightKg) {
+    function calculateIbuprofenAgeMode(ageMonths, weightKg) {
       const main = document.getElementById("ibu-dose-main");
       const sub = document.getElementById("ibu-dose-sub");
       const band = findBand(ageMonths, ibuprofenBands);
@@ -267,6 +298,73 @@
         setAlert("ibu-alert", "BNFc oral age-band dose could not be resolved from age input.", "warn");
       }
     }
+
+    function calculateParacetamolWeightMode(ageMonths, weightKg) {
+      const main = document.getElementById("para-dose-main");
+      const sub = document.getElementById("para-dose-sub");
+      const hasWeight = typeof weightKg === "number" && weightKg > 0;
+      const hasAge = ageMonths !== null;
+      const ivBand = findBand(ageMonths, paracetamolIvWeightBands);
+
+      setBadgeState("para-badge-age", hasAge && !!ivBand);
+      setBadgeState("para-badge-weight", hasWeight);
+
+      if (!hasWeight) {
+        main.textContent = "Enter weight for pure weight-based dosing";
+        sub.textContent = "Weight is required in this mode.";
+        setAlert("para-alert", "For paracetamol IV age-split weight dosing, enter age and weight.", "warn");
+        return;
+      }
+
+      if (!hasAge || !ivBand) {
+        main.textContent = "Age needed for IV age-split band";
+        sub.textContent = "Enter age in months/years to select the correct paracetamol IV weight band.";
+        setAlert("para-alert", "Paracetamol pure weight dosing requires age band selection (IV age-split).", "warn");
+        return;
+      }
+
+      const perDose = Math.floor((weightKg * ivBand.mgPerKgPerDose) * 10) / 10;
+      const dailyCapByKg = Math.floor(weightKg * ivBand.maxMgPerKgPerDay);
+      const dailyCap = Math.min(dailyCapByKg, 4000);
+      const impliedMaxDoses = Math.floor(dailyCap / perDose);
+
+      main.textContent = `${perDose} mg per dose`;
+      sub.textContent = `${ivBand.note} | Weight-based ${ivBand.mgPerKgPerDose} mg/kg per dose`;
+      setAlert(
+        "para-alert",
+        `Daily cap: ${dailyCap} mg/day (${ivBand.maxMgPerKgPerDay} mg/kg/day; absolute max 4000 mg/day). Estimated maximum whole doses/day at this dose: ${impliedMaxDoses}.`,
+        ""
+      );
+    }
+
+    function calculateIbuprofenWeightMode(weightKg) {
+      const main = document.getElementById("ibu-dose-main");
+      const sub = document.getElementById("ibu-dose-sub");
+      const hasWeight = typeof weightKg === "number" && weightKg > 0;
+
+      setBadgeState("ibu-badge-age", false);
+      setBadgeState("ibu-badge-weight", hasWeight);
+
+      if (!hasWeight) {
+        main.textContent = "Enter weight for pure weight-based dosing";
+        sub.textContent = "Weight is required in this mode.";
+        setAlert("ibu-alert", "For ibuprofen pure weight dosing, enter a valid weight.", "warn");
+        return;
+      }
+
+      const maxDaily = Math.min(Math.floor(weightKg * 30), 2400);
+      const evenDose = Math.floor((maxDaily / 3) * 10) / 10;
+
+      main.textContent = `${evenDose} mg per dose`;
+      sub.textContent = "Pure weight-based output";
+      setAlert(
+        "ibu-alert",
+        `Max daily dose by weight is ${maxDaily} mg/day (30 mg/kg/day, max 2400 mg/day). This is divided by 3 even doses (${evenDose} mg each).`,
+        "warn"
+      );
+    }
+
+    recalculate();
   </script>
 </body>
 </html>
