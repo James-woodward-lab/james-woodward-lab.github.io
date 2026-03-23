@@ -564,7 +564,7 @@ function renderAgeDisplay(m) {
 let assessTimer;
 function scheduleAssessment() {
   clearTimeout(assessTimer);
-  assessTimer = setTimeout(runAssessment, 150);
+  assessTimer = setTimeout(runAssessment, 500);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -672,7 +672,8 @@ function refreshItemUI(id) {
 function renderChecklist() {
   const age = getEffectiveAge();
   const col = document.getElementById('checklistCol');
-  document.getElementById('noMsMsg').classList.add('hidden');
+  const noMsg = document.getElementById('noMsMsg');
+  if (noMsg) noMsg.classList.add('hidden');
   col.innerHTML = '';
 
   const domains = ['gross_motor','fine_motor','communication','social'];
