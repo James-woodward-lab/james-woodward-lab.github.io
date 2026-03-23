@@ -38,8 +38,8 @@
             <input type="number" id="age-years" min="0" max="17" step="1" inputmode="numeric" placeholder="e.g. 4">
           </div>
           <div class="field">
-            <label for="age-months">Additional months (optional)</label>
-            <input type="number" id="age-months" min="0" max="11" step="1" inputmode="numeric" placeholder="e.g. 6">
+            <label for="age-months">Months (optional, can be total months e.g. 25)</label>
+            <input type="number" id="age-months" min="0" step="1" inputmode="numeric" placeholder="e.g. 6 or 25">
           </div>
         </div>
         <div class="input-col">
@@ -143,7 +143,7 @@
       if (years === null && months === null) return null;
       const y = years === null ? 0 : years;
       const m = months === null ? 0 : months;
-      if (y < 0 || m < 0 || m > 11) return null;
+      if (y < 0 || m < 0) return null;
       return Math.round(y * 12 + m);
     }
 
