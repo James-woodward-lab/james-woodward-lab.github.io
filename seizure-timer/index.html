@@ -52,10 +52,11 @@
   </div>
 
   <div class="timer-running" id="timerRunning" style="display:none;">
-    <div class="card timer-card">
+    <div class="card timer-card" id="timerCard">
       <div class="timer-display" id="timerDisplay">0:00</div>
       <div class="timer-mins" id="timerMins">0 min</div>
-      <button type="button" class="btn-seizure-terminated" onclick="resetTimer()">Seizure terminated</button>
+      <div class="timer-paused-note" id="timerPausedNote" style="display:none;">Seizure terminated — time stopped</div>
+      <button type="button" class="btn-seizure-terminated" id="btnSeizureTerminated" onclick="pauseSeizureTerminated()">Seizure terminated</button>
     </div>
     <div class="card prompt-card" id="promptCard">
       <div class="prompt-content" id="promptContent"></div>
@@ -205,6 +206,8 @@
   };
 
   let intervalId = null;
+  let paused = false;
+  let pausedElapsedMs = 0;
   let dose1Given = false;
   let dose2Given = false;
   let dose3Given = false;
@@ -222,8 +225,10 @@
       firmGive: 'Give second dose of lorazepam if seizure continues. Prepare second-line agent (levetiracetam, phenytoin or phenobarbital). Call anaesthetist and PICU.'
     },
     dose3: {
-      gentle: 'Prepare second-line agent: levetiracetam 30–60 mg/kg, phenytoin 20 mg/kg, or phenobarbital 20 mg/kg. Call anaesthetist and PICU.',
-      firm: 'Give second-line agent. Call anaesthetist and PICU.'
+      prepBefore15: 'Prepare for second-line agent from 15 minutes if seizure continues. Call anaesthetist and PICU.',
+      firm: 'Give second-line agent: levetiracetam 30–60 mg/kg, phenytoin 20 mg/kg, or phenobarbital 20 mg/kg. Call anaesthetist and PICU.',
+      postDose3Monitor: 'Monitor for seizure termination.',
+      postDose3Rsi: 'If seizure not terminated after second-line agent: by 20–40 minutes, if preparation for deeper anaesthesia with intubation and ventilation complete, proceed with RSI. If not ready, consider alternative second-line drug.'
     }
   };
 
@@ -238,17 +243,26 @@
 
   function getElapsedMins() {
     if (!startTime) return 0;
+    if (paused) return pausedElapsedMs / 60000;
     return (Date.now() - startTime) / 60000;
   }
 
   function updateDisplay() {
-    const elapsed = Date.now() - startTime;
+    if (!startTime) return;
+    const elapsed = paused ? pausedElapsedMs : (Date.now() - startTime);
     document.getElementById('timerDisplay').textContent = formatElapsed(elapsed);
     const mins = Math.floor(elapsed / 60000);
     document.getElementById('timerMins').textContent = mins + ' min';
+    document.getElementById('timerPausedNote').style.display = paused ? 'block' : 'none';
+    document.getElementById('btnSeizureTerminated').style.display = paused ? 'none' : 'inline-block';
+    document.getElementById('timerCard').classList.toggle('timer-paused', paused);
   }
 
   function getCurrentPrompt() {
+    if (paused) {
+      return { text: 'Seizure terminated. Total seizure time is shown above.', level: 'info' };
+    }
+
     const m = getElapsedMins();
 
     // First benzodiazepine (RCUK: 5 min)
@@ -265,13 +279,15 @@
       return { text: PROMPTS.dose2.firmGive, level: 'urgent' };
     }
 
-    // Second-line agents (RCUK: 10–15 min) + RSI (15–35 min)
+    // Second-line agents: suggest from 15 minutes
     if (!dose3Given) {
-      if (m < 15) return { text: PROMPTS.dose3.gentle, level: 'gentle' };
+      if (m < 15) return { text: PROMPTS.dose3.prepBefore15, level: 'gentle' };
       return { text: PROMPTS.dose3.firm, level: 'urgent' };
     }
 
-    return { text: 'Consider RSI (thiopentone/propofol/ketamine) and intubation if seizure has not terminated. Call anaesthetist and PICU.', level: 'urgent' };
+    // After second-line agent: 20–40 min window for RSI / alternative 2nd line
+    if (m < 20) return { text: PROMPTS.dose3.postDose3Monitor, level: 'gentle' };
+    return { text: PROMPTS.dose3.postDose3Rsi, level: 'urgent' };
   }
 
   function updatePrompt() {
@@ -287,21 +303,42 @@
   }
 
   function updateDoseButtons() {
-    const m = getElapsedMins();
+    if (paused) {
+      document.getElementById('dose1Btn').disabled = true;
+      document.getElementById('dose2Btn').disabled = true;
+      document.getElementById('dose3Btn').disabled = true;
+      return;
+    }
     document.getElementById('dose1Btn').disabled = false;
     document.getElementById('dose2Btn').disabled = !dose1Given;
     document.getElementById('dose3Btn').disabled = !dose2Given;
   }
 
   function tick() {
+    if (paused) return;
     updateDisplay();
     updatePrompt();
     updateDoseButtons();
   }
 
+  window.pauseSeizureTerminated = function() {
+    if (!startTime || paused) return;
+    pausedElapsedMs = Date.now() - startTime;
+    paused = true;
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+    updateDisplay();
+    updatePrompt();
+    updateDoseButtons();
+  };
+
   window.startTimer = function() {
     const startMins = parseInt(document.getElementById('startMins').value, 10) || 0;
     startTime = Date.now() - (startMins * 60000);
+    paused = false;
+    pausedElapsedMs = 0;
     dose1Given = false;
     dose2Given = false;
     dose3Given = false;
@@ -326,6 +363,8 @@
   window.resetTimer = function() {
     if (intervalId) clearInterval(intervalId);
     intervalId = null;
+    paused = false;
+    pausedElapsedMs = 0;
     startTime = null;
     document.getElementById('startMins').value = '0';
     dose1Given = false;
@@ -342,6 +381,9 @@
     document.getElementById('dose3Btn').classList.remove('administered');
     document.getElementById('dose3Btn').disabled = true;
     document.getElementById('dose3Btn').innerHTML = '<span class="dose-btn-icon">💊</span><span>2nd line agent</span>';
+    document.getElementById('timerPausedNote').style.display = 'none';
+    document.getElementById('btnSeizureTerminated').style.display = 'inline-block';
+    document.getElementById('timerCard').classList.remove('timer-paused');
   };
 })();
 </script>
