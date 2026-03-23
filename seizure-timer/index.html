@@ -55,6 +55,7 @@
     <div class="card timer-card">
       <div class="timer-display" id="timerDisplay">0:00</div>
       <div class="timer-mins" id="timerMins">0 min</div>
+      <button type="button" class="btn-seizure-terminated" onclick="resetTimer()">Seizure terminated</button>
     </div>
     <div class="card prompt-card" id="promptCard">
       <div class="prompt-content" id="promptContent"></div>
@@ -108,9 +109,9 @@
             <div class="dose-note">0.5 mg/kg, max 10 mg</div>
           </div>
           <div class="dose-item">
-            <div class="dose-drug">Buccolam (age-band)</div>
+            <div class="dose-drug">Buccal midazolam (age-band)</div>
             <div class="dose-value" id="doseBuccolam">—</div>
-            <div class="dose-note">Buccolam SPC. 3–6 mo: hospital only</div>
+            <div class="dose-note">Age-band. 3–6 mo: hospital only</div>
           </div>
           <div class="dose-item">
             <div class="dose-drug">IV Lorazepam</div>
@@ -140,7 +141,7 @@
         </div>
       </div>
     </div>
-    <p class="dose-calc-hint">Verify all doses against BNFc and local protocols. Buccolam (age-band): 3–6 mo 2.5 mg hospital only; 6–12 mo 2.5 mg; 1–5 yr 5 mg; 5–10 yr 7.5 mg; 10–18 yr 10 mg.</p>
+    <p class="dose-calc-hint">Verify all doses against BNFc and local protocols. Buccal midazolam (age-band): 3–6 mo 2.5 mg hospital only; 6–12 mo 2.5 mg; 1–5 yr 5 mg; 5–10 yr 7.5 mg; 10–18 yr 10 mg.</p>
   </div>
 </div>
 
@@ -222,7 +223,7 @@
     },
     dose3: {
       gentle: 'Prepare second-line agent: levetiracetam 30–60 mg/kg, phenytoin 20 mg/kg, or phenobarbital 20 mg/kg. Call anaesthetist and PICU.',
-      firm: 'Give second-line agent. Call anaesthetist and PICU. If preparation for RSI complete, consider thiopentone/propofol/ketamine.'
+      firm: 'Give second-line agent. Call anaesthetist and PICU.'
     }
   };
 
@@ -270,7 +271,7 @@
       return { text: PROMPTS.dose3.firm, level: 'urgent' };
     }
 
-    return { text: 'All interventions administered. Continue supportive care. Consider ongoing discussion with PICU/anaesthetics if seizure persists.', level: 'info' };
+    return { text: 'Consider RSI (thiopentone/propofol/ketamine) and intubation if seizure has not terminated. Call anaesthetist and PICU.', level: 'urgent' };
   }
 
   function updatePrompt() {
