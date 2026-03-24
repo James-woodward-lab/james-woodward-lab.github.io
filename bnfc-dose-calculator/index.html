@@ -31,7 +31,7 @@
         </label>
       </div>
       <div class="input-grid">
-        <div class="input-col">
+        <div class="input-col" id="age-input-col">
           <h2 class="input-heading">Age Input</h2>
           <div class="field">
             <label for="age-years">Age in years</label>
@@ -127,6 +127,7 @@
     const paraCardTitleEl = document.getElementById("para-card-title");
     const ibuprofenCardEl = document.getElementById("ibuprofen-card");
     const paraBadgeAgeEl = document.getElementById("para-badge-age");
+    const ageInputColEl = document.getElementById("age-input-col");
 
     ageYearsEl.addEventListener("input", recalculate);
     ageMonthsEl.addEventListener("input", recalculate);
@@ -226,6 +227,7 @@
       const mode = modeIvEl.checked ? "iv" : "age";
       const oralMode = mode === "age";
       ibuprofenCardEl.hidden = !oralMode;
+      ageInputColEl.hidden = !oralMode;
       paraCardTitleEl.textContent = oralMode ? "Paracetamol (oral)" : "Paracetamol (IV)";
       paraBadgeAgeEl.hidden = !oralMode;
       modeHintEl.textContent = oralMode
