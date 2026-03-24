@@ -34,12 +34,12 @@
         <div class="input-col">
           <h2 class="input-heading">Age Input</h2>
           <div class="field">
-            <label for="age-years">Age (years)</label>
-            <input type="number" id="age-years" min="0" max="17" step="1" inputmode="numeric" placeholder="e.g. 4">
+            <label for="age-years">Age in years</label>
+            <input type="number" id="age-years" min="0" max="17" step="1" inputmode="numeric" placeholder="Whole years, e.g. 4">
           </div>
           <div class="field">
-            <label for="age-months">Months (optional, can be total months e.g. 25)</label>
-            <input type="number" id="age-months" min="0" step="1" inputmode="numeric" placeholder="e.g. 6 or 25">
+            <label for="age-months">Additional months (optional; can also enter total months, e.g. 25)</label>
+            <input type="number" id="age-months" min="0" step="1" inputmode="numeric" placeholder="Extra months, e.g. 6 (or total months, e.g. 25)">
           </div>
         </div>
         <div class="input-col">
@@ -126,6 +126,7 @@
     const modeHintEl = document.getElementById("mode-hint");
     const paraCardTitleEl = document.getElementById("para-card-title");
     const ibuprofenCardEl = document.getElementById("ibuprofen-card");
+    const paraBadgeAgeEl = document.getElementById("para-badge-age");
 
     ageYearsEl.addEventListener("input", recalculate);
     ageMonthsEl.addEventListener("input", recalculate);
@@ -226,9 +227,10 @@
       const oralMode = mode === "age";
       ibuprofenCardEl.hidden = !oralMode;
       paraCardTitleEl.textContent = oralMode ? "Paracetamol (oral)" : "Paracetamol (IV)";
+      paraBadgeAgeEl.hidden = !oralMode;
       modeHintEl.textContent = oralMode
         ? "Oral age-based mode is active. Enter age, weight, or both. If both are entered, age gives the BNFc oral band dose and weight checks safety limits."
-        : "IV dosing mode is active. Enter weight to calculate IV paracetamol dose by weight banding.";
+        : "IV dosing mode is active. Enter weight to calculate IV paracetamol dose.";
 
       if (oralMode) {
         calculateParacetamolAgeMode(ageMonths, weight);
@@ -291,16 +293,22 @@
               ? `Weight safety check (${safety.bandLabel}) passed. Caps: up to ${safety.perDoseCapMg} mg per dose (${safety.mgPerKgPerDose} mg/kg) and ${safety.dailyCapMg} mg/day (${safety.maxMgPerKgPerDay} mg/kg/day).`
               : `Weight safety check (${safety.bandLabel}) passed. Caps: up to ${safety.perDoseCapMg} mg per dose and ${safety.dailyCapMg} mg/day.`;
             if (safety.includeFourDoseWarning) {
-              safeMessage += " Note: at this weight band, 4 doses/day can exceed the 24-hour maximum.";
+              safeMessage += " IMPORTANT: 4 doses/day may exceed the 24-hour maximum for this patient.";
+              setAlert(
+                "para-alert",
+                safeMessage,
+                "warn"
+              );
+            } else {
+              setAlert(
+                "para-alert",
+                safeMessage,
+                ""
+              );
             }
-            setAlert(
-              "para-alert",
-              safeMessage,
-              ""
-            );
           }
         } else {
-          setAlert("para-alert", "Weight not entered. Age-band oral dose shown without weight safety cap check.", "warn");
+          setAlert("para-alert", "Weight not entered: age-band oral dose shown without mg/kg safety check.", "");
         }
       } else {
         main.textContent = hasWeight ? "No oral age-band dose (age missing/out of range)" : "Age outside configured pediatric band";
@@ -372,7 +380,7 @@
             );
           }
         } else {
-          setAlert("ibu-alert", "Weight not entered. Age-band oral dose shown without mg/kg/day safety cap check.", "warn");
+          setAlert("ibu-alert", "Weight not entered: age-band oral dose shown without mg/kg/day safety check.", "");
         }
       } else {
         main.textContent = hasWeight ? "No oral age-band dose (age missing/out of range)" : "Age outside configured pediatric band";
@@ -402,19 +410,20 @@
       const perDose = safety.perDoseCapMg;
       const dailyCap = safety.dailyCapMg;
       const impliedMaxDoses = perDose > 0 ? Math.floor(dailyCap / perDose) : 0;
+      const mgPerKgPerDoseText = safety.mgPerKgPerDose ? `${safety.mgPerKgPerDose} mg/kg per dose` : "fixed adult maximum per dose";
 
       main.textContent = `${perDose} mg per dose`;
-      sub.textContent = `IV weight band: ${safety.bandLabel}`;
+      sub.textContent = `IV weight band: ${safety.bandLabel} | ${mgPerKgPerDoseText}`;
       let paraWeightNote = safety.maxMgPerKgPerDay
-        ? `Safety band (${safety.bandLabel}): max ${safety.perDoseCapMg} mg/dose and ${safety.dailyCapMg} mg/day (${safety.maxMgPerKgPerDay} mg/kg/day).`
-        : `Safety band (${safety.bandLabel}): max ${safety.perDoseCapMg} mg/dose and ${safety.dailyCapMg} mg/day.`;
+        ? `Maximum daily dose: ${safety.dailyCapMg} mg/day (${safety.maxMgPerKgPerDay} mg/kg/day).`
+        : `Maximum daily dose: ${safety.dailyCapMg} mg/day.`;
       if (safety.includeFourDoseWarning) {
-        paraWeightNote += " At this band, 4 doses/day can exceed the 24-hour maximum.";
+        paraWeightNote += " IMPORTANT: 4 doses/day may exceed the 24-hour maximum.";
       }
       setAlert(
         "para-alert",
-        `${paraWeightNote} Estimated maximum whole doses/day at this dose: ${impliedMaxDoses}.`,
-        ""
+        `${paraWeightNote} Maximum whole doses/day at this dose: ${impliedMaxDoses}.`,
+        safety.includeFourDoseWarning ? "warn" : ""
       );
     }
 
