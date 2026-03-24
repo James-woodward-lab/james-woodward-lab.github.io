@@ -34,11 +34,11 @@
         <label>Age Group</label>
         <select id="ageGroup" onchange="showHrRef()">
           <option value="">Select age group</option>
-          <option value="100,180">Newborn (0&ndash;1 month)</option>
-          <option value="100,160">Infant (1&ndash;12 months)</option>
-          <option value="90,150">Toddler (1&ndash;2 years)</option>
-          <option value="80,140">Preschool (2&ndash;5 years)</option>
-          <option value="70,120">School age (5&ndash;12 years)</option>
+          <option value="120,170">Newborn (0&ndash;1 month)</option>
+          <option value="110,160">Infant (1&ndash;12 months)</option>
+          <option value="100,150">Toddler (1&ndash;2 years)</option>
+          <option value="95,140">Preschool (2&ndash;5 years)</option>
+          <option value="80,120">School age (5&ndash;12 years)</option>
           <option value="60,100">Adolescent (&gt;12 years)</option>
         </select>
       </div>
@@ -309,14 +309,18 @@ function updateConv() {
 }
 
 // ── HR REFERENCE ──────────────────────────────────────────────
-var hrRangeData = {
-  '100,180': 'Newborn (0-1 month): Normal HR 100-180 bpm',
-  '100,160': 'Infant (1-12 months): Normal HR 100-160 bpm',
-  '90,150':  'Toddler (1-2 years): Normal HR 90-150 bpm',
-  '80,140':  'Preschool (2-5 years): Normal HR 80-140 bpm',
-  '70,120':  'School age (5-12 years): Normal HR 70-120 bpm',
-  '60,100':  'Adolescent (>12 years): Normal HR 60-100 bpm'
-};
+var ageHrRanges = [
+  { minMonths: 0,   maxMonths: 1,   key: '120,170', text: '120-170', label: 'Newborn (0-1 month)' },
+  { minMonths: 1,   maxMonths: 12,  key: '110,160', text: '110-160', label: 'Infant (1-12 months)' },
+  { minMonths: 12,  maxMonths: 24,  key: '100,150', text: '100-150', label: 'Toddler (1-2 years)' },
+  { minMonths: 24,  maxMonths: 60,  key: '95,140',  text: '95-140',  label: 'Preschool (2-5 years)' },
+  { minMonths: 60,  maxMonths: 144, key: '80,120',  text: '80-120',  label: 'School age (5-12 years)' },
+  { minMonths: 144, maxMonths: 999, key: '60,100',  text: '60-100',  label: 'Adolescent (>12 years)' }
+];
+var hrRangeData = {};
+for (var i = 0; i < ageHrRanges.length; i++) {
+  hrRangeData[ageHrRanges[i].key] = ageHrRanges[i].label + ': Normal HR ' + ageHrRanges[i].text + ' bpm';
+}
 function showHrRef() {
   var v = document.getElementById('ageGroup').value;
   var box = document.getElementById('hrRefBox');
@@ -426,10 +430,12 @@ function onAgeChange() {
     return;
   }
   var ageM = ageYr * 12;
-  var ranges = [[0,1,'100-180'],[1,12,'100-160'],[12,24,'90-150'],[24,60,'80-140'],[60,144,'70-120'],[144,999,'60-100']];
   var hrTxt = 'Check age-appropriate reference.';
-  for (var i = 0; i < ranges.length; i++) {
-    if (ageM >= ranges[i][0] && ageM < ranges[i][1]) { hrTxt = 'Normal HR: ' + ranges[i][2] + ' bpm'; break; }
+  for (var i = 0; i < ageHrRanges.length; i++) {
+    if (ageM >= ageHrRanges[i].minMonths && ageM < ageHrRanges[i].maxMonths) {
+      hrTxt = 'Normal HR: ' + ageHrRanges[i].text + ' bpm';
+      break;
+    }
   }
   document.getElementById('hrNorm').textContent = hrTxt;
 
