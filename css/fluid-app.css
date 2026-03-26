@@ -213,6 +213,26 @@ body.fluid-app {
   min-height: 44px;
 }
 
+.fluid-app .feed-entry .unit-toggle {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 10px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-height: 44px;
+  min-width: 72px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.fluid-app .feed-entry .unit-toggle:hover,
+.fluid-app .feed-entry .unit-toggle:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .fluid-app .feed-entry .conv {
   font-size: 0.72rem;
   color: var(--accent2);

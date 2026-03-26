@@ -342,14 +342,23 @@ function spawnFeedEntry() {
   div.innerHTML = `
     <input type="number" id="fe-vol-${id}" inputmode="decimal" min="0" step="0.1" placeholder="Volume"
       oninput="onFeedInput(${id})" onfocus="ensureTrailingEmpty()">
-    <select id="fe-unit-${id}" onchange="updateConv(${id}); calcBalance()">
-      <option value="ml">mL</option>
-      <option value="oz">UK fl oz</option>
-    </select>
+    <button type="button" class="unit-toggle" id="fe-unit-${id}" data-unit="ml"
+      aria-label="Toggle feed unit between mL and UK fluid ounces"
+      onclick="toggleFeedUnit(${id})">mL</button>
     <span class="conv" id="fe-conv-${id}"></span>
     <button class="btn-danger-sm remove-btn" onclick="removeFeedEntry(${id})">✕</button>
   `;
   document.getElementById('feed-entries').appendChild(div);
+}
+
+function toggleFeedUnit(id) {
+  const unitBtn = document.getElementById(`fe-unit-${id}`);
+  if (!unitBtn) return;
+  const nextUnit = unitBtn.dataset.unit === 'oz' ? 'ml' : 'oz';
+  unitBtn.dataset.unit = nextUnit;
+  unitBtn.textContent = nextUnit === 'oz' ? 'UK fl oz' : 'mL';
+  updateConv(id);
+  calcBalance();
 }
 
 function onFeedInput(id) {
@@ -373,7 +382,7 @@ function clearFeeds() {
 
 function updateConv(id) {
   const vol  = parseFloat(document.getElementById(`fe-vol-${id}`)?.value);
-  const unit = document.getElementById(`fe-unit-${id}`)?.value;
+  const unit = document.getElementById(`fe-unit-${id}`)?.dataset?.unit || 'ml';
   const conv = document.getElementById(`fe-conv-${id}`);
   if (!conv) return;
   conv.textContent = (unit === 'oz' && !isNaN(vol) && vol > 0) ? `= ${(vol*UK_OZ).toFixed(1)} mL` : '';
@@ -401,7 +410,7 @@ function calcBalance() {
   entries.forEach(entry => {
     const id   = entry.id.replace('fe-', '');
     const vol  = parseFloat(document.getElementById(`fe-vol-${id}`)?.value);
-    const unit = document.getElementById(`fe-unit-${id}`)?.value;
+    const unit = document.getElementById(`fe-unit-${id}`)?.dataset?.unit || 'ml';
     if (!isNaN(vol) && vol > 0) { totalMl += (unit==='oz') ? vol*UK_OZ : vol; entryCount++; }
   });
 
