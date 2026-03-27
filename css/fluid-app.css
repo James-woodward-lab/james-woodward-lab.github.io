@@ -156,6 +156,7 @@ body.fluid-app {
   text-align: center;
   padding: 12px 6px;
   font-size: 0.88rem;
+  margin-bottom: 0;
   color: var(--muted);
   background: var(--surface2);
   cursor: pointer;
