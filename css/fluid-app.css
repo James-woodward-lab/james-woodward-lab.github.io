@@ -227,6 +227,17 @@ body.fluid-app {
   transition: border-color 0.15s, background 0.15s;
 }
 
+.fluid-app .feed-entry .unit-toggle[data-unit="ml"] {
+  color: var(--text);
+}
+
+.fluid-app .feed-entry .unit-toggle[data-unit="oz"] {
+  border-color: var(--accent);
+  background: rgba(32, 178, 170, 0.14);
+  color: var(--accent2);
+  font-weight: 700;
+}
+
 .fluid-app .feed-entry .unit-toggle:hover,
 .fluid-app .feed-entry .unit-toggle:focus {
   outline: none;
@@ -400,4 +411,168 @@ body.fluid-app {
   .fluid-app .desktop-nav {
     display: flex !important;
   }
+}
+
+/* ---- Visual refresh (no behavior changes) ---- */
+body.fluid-app {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+.fluid-app .page-header h1 {
+  font-family: "Manrope", "Inter", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.fluid-app .page-header p {
+  color: var(--muted);
+}
+
+.fluid-app .card {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.fluid-app .card-title {
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.fluid-app .field label {
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.fluid-app .field input,
+.fluid-app .field select,
+.fluid-app .feed-entry input[type="number"] {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+}
+
+.fluid-app .field input:focus,
+.fluid-app .field select:focus,
+.fluid-app .feed-entry input[type="number"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.fluid-app .hint {
+  color: var(--muted);
+}
+
+.fluid-app .gender-toggle {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+}
+
+.fluid-app .gender-toggle label {
+  background: var(--surface2);
+  color: var(--muted);
+}
+
+.fluid-app .gender-toggle input[type="radio"]:checked + label {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+
+.fluid-app .stat {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+}
+
+.fluid-app .stat.hi {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface2));
+}
+
+.fluid-app .stat .lbl {
+  color: var(--muted);
+}
+
+.fluid-app .stat .val {
+  font-family: "Manrope", "Inter", sans-serif;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.fluid-app .btn-ghost {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.fluid-app .btn-ghost:hover,
+.fluid-app .btn-ghost:focus {
+  border-color: var(--accent);
+  background: var(--surface2);
+}
+
+.fluid-app .feed-entry .unit-toggle {
+  border-color: var(--border);
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.fluid-app .feed-entry .unit-toggle[data-unit="oz"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface2));
+  color: var(--accent2);
+}
+
+.fluid-app .feed-entry .conv {
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+.fluid-app #install-banner {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.fluid-app .install-btn {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+
+.fluid-app .desktop-nav {
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+
+.fluid-app .desktop-nav-btn {
+  color: var(--muted);
+}
+
+.fluid-app .desktop-nav-btn:hover {
+  background: var(--surface2);
+  color: var(--accent);
+}
+
+.fluid-app .tab-bar {
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -10px 28px color-mix(in srgb, var(--bg) 30%, transparent);
+}
+
+.fluid-app .tab-btn {
+  color: var(--muted);
+}
+
+.fluid-app .tab-btn.active {
+  color: var(--accent);
+}
+
+.fluid-app .tab-btn .tab-dot {
+  background: var(--accent2);
 }

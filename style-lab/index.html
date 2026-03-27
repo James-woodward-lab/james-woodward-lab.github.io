@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>Style Lab | James Woodward Lab</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <script src="../js/style-system.js"></script>
+  <script src="../js/theme-toggle.js"></script>
+</head>
+<body>
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+<div class="container">
+  <header class="app-header-center">
+    <h1>🎨 UI Style Lab</h1>
+    <p>Preview theme mode, variants, spacing, and emoji readability.</p>
+  </header>
+
+  <div class="card">
+    <h2>🧪 Controls</h2>
+    <div class="style-lab-panel" data-style-panel>
+      <div class="field">
+        <label for="style-mode">Mode</label>
+        <select id="style-mode" data-style-mode>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="style-variant">Variant</label>
+        <select id="style-variant" data-style-variant>
+          <option value="theme-palette-teal">Teal Slate</option>
+          <option value="theme-palette-original">Original Classic</option>
+          <option value="theme-palette-blue">Clinical Blue</option>
+          <option value="theme-palette-indigo">Indigo Dusk</option>
+          <option value="theme-palette-emerald">Emerald Forest</option>
+          <option value="theme-palette-rose">Rose Graphite</option>
+          <option value="theme-palette-custom">Custom Hex Palette</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="style-density">Density</label>
+        <select id="style-density" data-style-density>
+          <option value="density-comfortable">Comfortable</option>
+          <option value="density-compact">Compact</option>
+        </select>
+      </div>
+    </div>
+    <div class="custom-palette-editor" data-custom-palette hidden aria-hidden="true">
+      <div class="custom-palette-grid">
+        <div class="field">
+          <label for="custom-bg">Background</label>
+          <input id="custom-bg" type="text" placeholder="#0F172A" data-custom-bg>
+        </div>
+        <div class="field">
+          <label for="custom-surface">Surface</label>
+          <input id="custom-surface" type="text" placeholder="#1A2740" data-custom-surface>
+        </div>
+        <div class="field">
+          <label for="custom-border">Border</label>
+          <input id="custom-border" type="text" placeholder="#344966" data-custom-border>
+        </div>
+        <div class="field">
+          <label for="custom-accent">Accent</label>
+          <input id="custom-accent" type="text" placeholder="#14B8A6" data-custom-accent>
+        </div>
+        <div class="field">
+          <label for="custom-text">Text</label>
+          <input id="custom-text" type="text" placeholder="#E2EDF9" data-custom-text>
+        </div>
+      </div>
+      <div class="custom-palette-actions">
+        <button type="button" class="btn btn-primary" data-custom-apply>Apply Custom Palette</button>
+        <button type="button" class="btn btn-reset" data-custom-reset>Reset Custom</button>
+      </div>
+      <div class="custom-palette-error" data-custom-error aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🧭 Buttons</h2>
+      <button class="btn">✅ Primary Action</button>
+      <button class="btn btn-reset">↩️ Secondary Action</button>
+    </div>
+    <div class="card">
+      <h2>📝 Form</h2>
+      <div class="field">
+        <label>Patient Weight</label>
+        <input type="number" placeholder="e.g. 13.5">
+      </div>
+      <div class="field">
+        <label>Care Area</label>
+        <select>
+          <option>Emergency</option>
+          <option>Ward</option>
+          <option>PICU</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Stat Cards</h2>
+    <div class="stat-grid cols3">
+      <div class="stat hi">
+        <div class="lbl">Status</div>
+        <div class="val">Stable</div>
+        <div class="sub">✅ Within expected range</div>
+      </div>
+      <div class="stat warn">
+        <div class="lbl">Hydration</div>
+        <div class="val">Watch</div>
+        <div class="sub">⚠️ Mild intake deficit</div>
+      </div>
+      <div class="stat pos">
+        <div class="lbl">Trend</div>
+        <div class="val">Improving</div>
+        <div class="sub">📈 Positive response</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🚨 Alerts</h2>
+    <div class="alert alert-ok">✅ Plan is in target range.</div>
+    <div class="alert alert-warn">⚠️ Borderline values. Review in 2 hours.</div>
+    <div class="alert alert-danger">🛑 Action required. Please reassess urgently.</div>
+  </div>
+
+  <footer class="app-footer">
+    Compare variants here, then keep your favorite for production pages.
+  </footer>
+</div>
+</body>
+</html>

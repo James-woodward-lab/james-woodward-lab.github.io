@@ -7,6 +7,8 @@
   <meta name="color-scheme" content="dark light">
   <title>James Woodward Lab</title>
   <link rel="stylesheet" href="css/app-theme.css">
+  <link rel="stylesheet" href="css/style-variants.css">
+  <script src="js/style-system.js"></script>
   <script src="js/theme-toggle.js"></script>
   <style>
     .app-grid {
@@ -33,6 +35,40 @@
       background: var(--accent2);
       transform: translateY(-2px);
     }
+    .quick-links-search {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+    .quick-links-search::placeholder {
+      color: var(--muted);
+    }
+    .quick-links-search:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .quick-links-grid .app-btn {
+      justify-content: flex-start;
+      gap: 8px;
+    }
+    .quick-link-emoji {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+    .quick-links-empty {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 2px;
+    }
+    .quick-links-empty[hidden] {
+      display: none;
+    }
     @media (max-width: 500px) {
       .app-grid {
         grid-template-columns: 1fr;
@@ -48,24 +84,104 @@
     <p>Paediatric clinical tools & calculators</p>
   </header>
   <div class="card">
-    <h2>Top Tools</h2>
+    <h2>🚀 Top Tools</h2>
     <div class="app-grid">
-      <a href="fluid-calculator/index.html" class="app-btn">Fluid Calculator</a>
-      <a href="qtc-calculator/index.html" class="app-btn">QTc Calculator</a>
-      <a href="bnfc-dose-calculator/index.html" class="app-btn">Simple Analgesia Dosing</a>
+      <a href="fluid-calculator/index.html" class="app-btn">💧 Fluid Calculator</a>
+      <a href="qtc-calculator/index.html" class="app-btn">🫀 QTc Calculator</a>
+      <a href="bnfc-dose-calculator/index.html" class="app-btn">💊 Simple Analgesia Dosing</a>
     </div>
   </div>
   <div class="card">
+    <h2>🔖 Quick Links</h2>
+    <input
+      id="quick-links-search"
+      class="quick-links-search"
+      type="search"
+      placeholder="Search links..."
+      autocomplete="off"
+      aria-label="Search quick links"
+    >
+    <div id="quick-links-grid" class="app-grid quick-links-grid"></div>
+    <p id="quick-links-empty" class="quick-links-empty" hidden>No links match your search.</p>
+  </div>
+  <div class="card">
     <details>
-      <summary><strong>Works in Progress</strong></summary>
+      <summary><strong>🧪 Works in Progress</strong></summary>
       <div class="app-grid" style="margin-top: 12px;">
-        <a href="chest-xray-review/index.html" class="app-btn">CXR Systematic Review</a>
-        <a href="developmental-milestones/index.html" class="app-btn">Developmental Milestones</a>
-        <a href="renal-fluid-calculator/index.html" class="app-btn">Renal Fluid Calculator</a>
-        <a href="safeguarding-calculator/index.html" class="app-btn">Safeguarding Calculator</a>
-        <a href="sbar-generator/index.html" class="app-btn">SBAR Generator</a>
-        <a href="seizure-timer/index.html" class="app-btn">Seizure Timer</a>
-        <a href="paediatric-poisoning-triage/index.html" class="app-btn">Paediatric Poisoning Triage</a>
+        <a href="chest-xray-review/index.html" class="app-btn">🫁 CXR Systematic Review</a>
+        <a href="developmental-milestones/index.html" class="app-btn">👶 Developmental Milestones</a>
+        <a href="renal-fluid-calculator/index.html" class="app-btn">🧪 Renal Fluid Calculator</a>
+        <a href="safeguarding-calculator/index.html" class="app-btn">🛡️ Safeguarding Calculator</a>
+        <a href="sbar-generator/index.html" class="app-btn">📝 SBAR Generator</a>
+        <a href="seizure-timer/index.html" class="app-btn">⏱️ Seizure Timer</a>
+        <a href="paediatric-poisoning-triage/index.html" class="app-btn">☠️ Paediatric Poisoning Triage</a>
+        <a href="bronchiolitis-severity-grader/index.html" class="app-btn">😮‍💨 Bronchiolitis Severity Grader</a>
+      </div>
+    </details>
+  </div>
+  <div class="card">
+    <details>
+      <summary><strong>🎨 Style Settings</strong></summary>
+      <p class="hint" style="margin-top: 10px;">Hidden by default. These settings apply across apps and are saved on this device.</p>
+      <div style="margin-top: 10px;">
+        <a href="style-lab/index.html" class="app-btn">🧪 Open Style Lab Preview</a>
+      </div>
+      <div class="style-lab-panel" data-style-panel style="margin-top: 12px;">
+        <div class="field">
+          <label for="style-mode">Mode</label>
+          <select id="style-mode" data-style-mode>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="style-variant">Variant</label>
+          <select id="style-variant" data-style-variant>
+            <option value="theme-palette-teal">Teal Slate</option>
+            <option value="theme-palette-original">Original Classic</option>
+            <option value="theme-palette-blue">Clinical Blue</option>
+            <option value="theme-palette-indigo">Indigo Dusk</option>
+            <option value="theme-palette-emerald">Emerald Forest</option>
+            <option value="theme-palette-rose">Rose Graphite</option>
+            <option value="theme-palette-custom">Custom Hex Palette</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="style-density">Density</label>
+          <select id="style-density" data-style-density>
+            <option value="density-comfortable">Comfortable</option>
+            <option value="density-compact">Compact</option>
+          </select>
+        </div>
+      </div>
+      <div class="custom-palette-editor" data-custom-palette hidden aria-hidden="true">
+        <div class="custom-palette-grid">
+          <div class="field">
+            <label for="custom-bg">Background</label>
+            <input id="custom-bg" type="text" placeholder="#0F172A" data-custom-bg>
+          </div>
+          <div class="field">
+            <label for="custom-surface">Surface</label>
+            <input id="custom-surface" type="text" placeholder="#1A2740" data-custom-surface>
+          </div>
+          <div class="field">
+            <label for="custom-border">Border</label>
+            <input id="custom-border" type="text" placeholder="#344966" data-custom-border>
+          </div>
+          <div class="field">
+            <label for="custom-accent">Accent</label>
+            <input id="custom-accent" type="text" placeholder="#14B8A6" data-custom-accent>
+          </div>
+          <div class="field">
+            <label for="custom-text">Text</label>
+            <input id="custom-text" type="text" placeholder="#E2EDF9" data-custom-text>
+          </div>
+        </div>
+        <div class="custom-palette-actions">
+          <button type="button" class="btn btn-primary" data-custom-apply>Apply Custom Palette</button>
+          <button type="button" class="btn btn-reset" data-custom-reset>Reset Custom</button>
+        </div>
+        <div class="custom-palette-error" data-custom-error aria-live="polite"></div>
       </div>
     </details>
   </div>
@@ -73,5 +189,6 @@
     For clinical decision support only. Always verify against local guidelines.
   </footer>
 </div>
+<script src="js/quick-links.js"></script>
 </body>
 </html>

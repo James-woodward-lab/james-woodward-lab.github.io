@@ -27,7 +27,7 @@
       updateMetaColor('#0d9488');
     } else {
       html.classList.remove('theme-light');
-      updateMetaColor('#0f1117');
+      updateMetaColor('#13293d');
     }
     updateToggleIcon();
   }
@@ -69,11 +69,52 @@
     }
   }
 
+  function isHomePage() {
+    // Homepage has unique quick-links container; this is the most reliable signal.
+    if (document.getElementById('quick-links-grid')) return true;
+
+    var path = (window.location && window.location.pathname) || '';
+    if (!path || path === '/') return true;
+    var normalized = path.replace(/\\/g, '/');
+    return /\/index\.html?$/i.test(normalized);
+  }
+
+  function createHomeHref() {
+    var path = (window.location && window.location.pathname) || '';
+    if (!path || path === '/') return './index.html';
+    var normalized = path.replace(/\\/g, '/');
+    var segments = normalized.split('/').filter(Boolean);
+    if (segments.length <= 1) return './index.html';
+    return '../index.html';
+  }
+
+  function initBackHomeControl() {
+    if (isHomePage()) return;
+    if (document.getElementById('back-home-link')) return;
+
+    var link = document.createElement('a');
+    link.id = 'back-home-link';
+    link.className = 'back-home-link';
+    link.href = createHomeHref();
+    link.textContent = 'Home';
+    link.setAttribute('aria-label', 'Back to homepage');
+    link.setAttribute('title', 'Back to homepage');
+
+    var body = document.body;
+    if (body) {
+      body.appendChild(link);
+    }
+  }
+
   applyTheme();
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initToggleButton);
+    document.addEventListener('DOMContentLoaded', function() {
+      initToggleButton();
+      initBackHomeControl();
+    });
   } else {
     initToggleButton();
+    initBackHomeControl();
   }
 
   window.addEventListener('storage', function(e) {

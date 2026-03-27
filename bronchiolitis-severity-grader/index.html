@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>Bronchiolitis Severity Grader</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <script src="../js/style-system.js"></script>
+  <script src="../js/theme-toggle.js"></script>
+  <link rel="stylesheet" href="../css/bronchiolitis-severity-grader.css">
+</head>
+<body class="bronch-app">
+  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+  <div class="container">
+    <header class="app-header-center">
+      <h1>Bronchiolitis Severity Grader</h1>
+      <p>NICE NG9 + RCPCH + Healthy Together pathway informed clinical decision support (under 1 year)</p>
+    </header>
+
+    <section class="card">
+      <div class="card-title">Patient Label (for handover/export)</div>
+      <div class="grid3">
+        <div class="field">
+          <label for="pt-name">Name</label>
+          <input type="text" id="pt-name" placeholder="Child name">
+        </div>
+        <div class="field">
+          <label for="pt-dob">DOB</label>
+          <input type="text" id="pt-dob" placeholder="DD/MM/YYYY">
+        </div>
+        <div class="field">
+          <label for="pt-nhs">NHS number</label>
+          <input type="text" id="pt-nhs" placeholder="Optional">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Assessment Inputs</div>
+      <div class="input-grid">
+        <div class="field">
+          <label for="age-weeks">Age (weeks)</label>
+          <input type="number" id="age-weeks" min="0" max="520" step="1" inputmode="numeric" placeholder="e.g. 8">
+        </div>
+        <div class="field">
+          <label for="spo2">SpO2 (%)</label>
+          <input type="number" id="spo2" min="0" max="100" step="1" inputmode="numeric" placeholder="e.g. 93">
+        </div>
+        <div class="field">
+          <label for="oxygen-context">SpO2 measured on</label>
+          <select id="oxygen-context">
+            <option value="room-air" selected>Room air</option>
+            <option value="oxygen">Oxygen</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rr">Respiratory rate (breaths/min)</label>
+          <input type="number" id="rr" min="0" max="140" step="1" inputmode="numeric" placeholder="e.g. 58">
+          <div class="inline-options single-option">
+            <label><input type="checkbox" id="rr-exhausted"><span>Irregular breathing / exhaustion (treat as life-threatening)</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="wob">Work of breathing</label>
+          <select id="wob">
+            <option value="mild">None / Mild subcostal</option>
+            <option value="moderate">Moderate intercostal + subcostal</option>
+            <option value="severe">Severe with grunting or head bobbing</option>
+            <option value="life">Exhaustion / silent chest</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="feeding">Feeding</label>
+          <select id="feeding">
+            <option value="mild">&gt;75% normal</option>
+            <option value="moderate">50-75%</option>
+            <option value="severe">25-50%</option>
+            <option value="life">&lt;25% or not feeding</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Apnoea</label>
+          <div class="inline-options" id="apnoea-group">
+            <label><input type="radio" name="apnoea" value="mild" checked><span>None</span></label>
+            <label><input type="radio" name="apnoea" value="moderate"><span>Reported by carer</span></label>
+            <label><input type="radio" name="apnoea" value="severe"><span>Witnessed</span></label>
+            <label><input type="radio" name="apnoea" value="life"><span>Frequent</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="pews">PEWS (0-20)</label>
+          <input type="number" id="pews" min="0" max="20" step="1" inputmode="numeric" placeholder="e.g. 5">
+          <p class="hint">PEWS is escalation support only; it does not directly set the base severity band.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Risk Factors</div>
+      <div class="risk-grid">
+        <label class="checkbox-row"><input type="checkbox" value="Prematurity (<37 weeks corrected)">Prematurity (&lt;37 weeks corrected)</label>
+        <label class="checkbox-row"><input type="checkbox" value="Congenital heart disease">Congenital heart disease</label>
+        <label class="checkbox-row"><input type="checkbox" value="Chronic lung disease / BPD">Chronic lung disease / BPD</label>
+        <label class="checkbox-row"><input type="checkbox" value="Immunodeficiency">Immunodeficiency</label>
+        <label class="checkbox-row"><input type="checkbox" value="Neuromuscular disease">Neuromuscular disease</label>
+      </div>
+    </section>
+
+    <section class="card result-card">
+      <div class="card-title">Severity Output</div>
+      <div id="risk-upgrade-banner" class="alert alert-warn" hidden>Risk factor present — severity upgraded.</div>
+      <div id="severity-badge" class="severity-badge sev-mild">Mild</div>
+      <p id="severity-line" class="severity-line">Safe for discharge with safety-net advice</p>
+      <p id="logic-line" class="hint">Worst-feature logic active.</p>
+
+      <div class="callout">
+        <strong>NICE vs local threshold note:</strong> Healthy Together acute pathway uses O2 sats in air bands of <strong>&gt;=92% (green), 90-91% (amber), &lt;90% (red)</strong>. Some trusts use SpO2 &lt;94% as an admission threshold. Always check local policy.
+      </div>
+
+      <h2 class="subheading">Management Checklist</h2>
+      <ul id="management-list" class="mgmt-list"></ul>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Serial Assessment Log</div>
+      <div class="actions-row">
+        <button type="button" class="btn-ghost" id="add-log-btn">Add assessment to timeline</button>
+      </div>
+      <div id="assessment-log" class="timeline">
+        <p class="hint">No assessments logged yet.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Handover Output</div>
+      <div class="actions-row">
+        <button type="button" class="btn-ghost" id="copy-btn">Copy to clipboard</button>
+        <button type="button" class="btn-ghost" id="print-btn">Export PDF / Print</button>
+      </div>
+      <pre id="handover-preview" class="handover-preview"></pre>
+    </section>
+
+    <section class="references card">
+      <div class="card-title">References</div>
+      <ol>
+        <li><a href="https://www.nice.org.uk/guidance/ng9" target="_blank" rel="noopener noreferrer">NICE NG9: Bronchiolitis in children</a>.</li>
+        <li><a href="https://www.rcpch.ac.uk/" target="_blank" rel="noopener noreferrer">RCPCH guidance/resources</a> for bronchiolitis assessment and escalation.</li>
+        <li><a href="https://cdn.prod.website-files.com/672a0d6a2cf17d914ed1eb42/681a1ff5f1408490fa9b5773_CS52646_NHS_Bronchiolitis_Pathway_Acute_Setting_Apr_21v2_1.pdf" target="_blank" rel="noopener noreferrer">Healthy Together Bronchiolitis Pathway (Acute Setting, Apr 2021)</a>.</li>
+      </ol>
+      <p class="hint">Clinical decision support only. Always follow local pathways and senior clinical judgement.</p>
+    </section>
+  </div>
+
+  <script>
+    const BAND_ORDER = ["mild", "moderate", "severe", "life"];
+    const BAND_META = {
+      mild: { label: "Mild", badge: "sev-mild", line: "Safe for discharge with safety-net advice" },
+      moderate: { label: "Moderate", badge: "sev-moderate", line: "Consider admission or senior review" },
+      severe: { label: "Severe", badge: "sev-severe", line: "Admit; escalate to registrar" },
+      life: { label: "Life-threatening", badge: "sev-life", line: "Immediate resuscitation team" }
+    };
+    const MANAGEMENT = {
+      mild: [
+        "Green action / low risk: send home if safe with clear parent/carer advice sheet and safety-netting.",
+        "Confirm carers are comfortable with decisions/advice and know red/amber return triggers.",
+        "No routine blood tests or chest X-ray unless alternative diagnosis is suspected."
+      ],
+      moderate: [
+        "Amber action / intermediate risk: urgent clinician review and consider admission.",
+        "Admit for monitoring if trajectory is concerning, risk factors are present, or feeding/hydration is inadequate.",
+        "If feeding falls below ~50%, consider NG hydration/feeding support and close reassessment."
+      ],
+      severe: [
+        "Red action / high risk: immediate paediatric assessment and senior involvement.",
+        "Give oxygen for sats below local threshold or severe respiratory distress.",
+        "Use oral/NG/IV fluids as clinically indicated (often around two-thirds maintenance in acute pathway context).",
+        "Step up to high-flow oxygen/CPAP per local SORT/escalation guidance."
+      ],
+      life: [
+        "Immediate high-risk response: call resuscitation/emergency team now.",
+        "Move to resuscitation area with immediate senior paediatric support.",
+        "Initiate ABC management, oxygen/ventilatory support, IV/IO access and blood gas.",
+        "Escalate to PICU retrieval pathway without delay."
+      ]
+    };
+
+    const ageWeeksEl = document.getElementById("age-weeks");
+    const spo2El = document.getElementById("spo2");
+    const oxygenContextEl = document.getElementById("oxygen-context");
+    const rrEl = document.getElementById("rr");
+    const rrExhaustedEl = document.getElementById("rr-exhausted");
+    const wobEl = document.getElementById("wob");
+    const feedingEl = document.getElementById("feeding");
+    const pewsEl = document.getElementById("pews");
+    const riskInputs = Array.from(document.querySelectorAll(".risk-grid input[type='checkbox']"));
+    const apnoeaInputs = Array.from(document.querySelectorAll("input[name='apnoea']"));
+    const ptNameEl = document.getElementById("pt-name");
+    const ptDobEl = document.getElementById("pt-dob");
+    const ptNhsEl = document.getElementById("pt-nhs");
+
+    const riskBannerEl = document.getElementById("risk-upgrade-banner");
+    const severityBadgeEl = document.getElementById("severity-badge");
+    const severityLineEl = document.getElementById("severity-line");
+    const logicLineEl = document.getElementById("logic-line");
+    const managementListEl = document.getElementById("management-list");
+    const handoverPreviewEl = document.getElementById("handover-preview");
+    const assessmentLogEl = document.getElementById("assessment-log");
+
+    let currentAssessment = null;
+    const serialLog = [];
+
+    function clampBandIndex(idx) {
+      return Math.max(0, Math.min(BAND_ORDER.length - 1, idx));
+    }
+
+    function getSelectedApnoeaBand() {
+      const selected = apnoeaInputs.find((el) => el.checked);
+      return selected ? selected.value : "mild";
+    }
+
+    function getRiskFactorsSelected() {
+      return riskInputs.filter((el) => el.checked).map((el) => el.value);
+    }
+
+    function classifySpo2(spo2, oxygenContext) {
+      if (typeof spo2 !== "number" || Number.isNaN(spo2)) return { band: "mild", reason: "SpO2 not entered" };
+      if (oxygenContext === "oxygen" && spo2 < 88) return { band: "life", reason: "SpO2 <88% on oxygen" };
+      if (spo2 < 90) return { band: "severe", reason: "SpO2 <90% in air (pathway red)" };
+      if (spo2 <= 91) return { band: "moderate", reason: "SpO2 90-91% in air (pathway amber)" };
+      return { band: "mild", reason: "SpO2 >=92% in air (pathway green)" };
+    }
+
+    function rrUpperNormalByAgeWeeks(ageWeeks) {
+      if (!(typeof ageWeeks === "number") || Number.isNaN(ageWeeks)) return 55;
+      if (ageWeeks < 6) return 60;
+      if (ageWeeks < 52) return 55;
+      return 45;
+    }
+
+    function classifyRespRate(rr, ageWeeks) {
+      if (rrExhaustedEl.checked) return { band: "life", reason: "Irregular breathing/exhaustion present" };
+      if (typeof rr !== "number" || Number.isNaN(rr)) return { band: "mild", reason: "RR not entered" };
+      const upperNormal = rrUpperNormalByAgeWeeks(ageWeeks);
+      if (rr > 70) return { band: "severe", reason: "RR >70/min" };
+      if (rr > upperNormal) return { band: "moderate", reason: `RR above age-expected range (>${upperNormal}/min)` };
+      return { band: "mild", reason: "RR within age-expected range" };
+    }
+
+    function computeAssessment() {
+      const ageWeeks = Number(ageWeeksEl.value);
+      const spo2 = Number(spo2El.value);
+      const oxygenContext = oxygenContextEl.value;
+      const rr = Number(rrEl.value);
+      const wobBand = wobEl.value;
+      const feedingBand = feedingEl.value;
+      const apnoeaBand = getSelectedApnoeaBand();
+      const pews = Number(pewsEl.value);
+      const riskFactors = getRiskFactorsSelected();
+      const hasRisk = riskFactors.length > 0;
+
+      const spo2Class = classifySpo2(spo2, oxygenContext);
+      const rrClass = classifyRespRate(rr, ageWeeks);
+      const wobReason = wobBand === "mild" ? "No/mild WOB" : wobBand === "moderate" ? "Moderate WOB" : wobBand === "severe" ? "Severe WOB with grunting/head bobbing" : "Exhaustion/silent chest";
+      const feedingReason = feedingBand === "mild" ? "Feeding >75%" : feedingBand === "moderate" ? "Feeding 50-75%" : feedingBand === "severe" ? "Feeding 25-50%" : "Feeding <25% or not feeding";
+      const apnoeaReason = apnoeaBand === "mild" ? "No apnoea" : apnoeaBand === "moderate" ? "Apnoea reported by carer" : apnoeaBand === "severe" ? "Apnoea witnessed" : "Frequent apnoea";
+
+      const features = [
+        { feature: "SpO2", band: spo2Class.band, reason: spo2Class.reason },
+        { feature: "Respiratory rate", band: rrClass.band, reason: rrClass.reason },
+        { feature: "Work of breathing", band: wobBand, reason: wobReason },
+        { feature: "Feeding", band: feedingBand, reason: feedingReason },
+        { feature: "Apnoea", band: apnoeaBand, reason: apnoeaReason }
+      ];
+
+      let baseIdx = 0;
+      let worstFeature = features[0];
+      features.forEach((f) => {
+        const idx = BAND_ORDER.indexOf(f.band);
+        if (idx > baseIdx) {
+          baseIdx = idx;
+          worstFeature = f;
+        }
+      });
+
+      let escalationNotes = [];
+      let finalIdx = baseIdx;
+
+      // PEWS is non-primary escalation support only.
+      // Threshold used: PEWS >= 8 upgrades by one band.
+      if (!Number.isNaN(pews) && pews >= 8) {
+        finalIdx = clampBandIndex(finalIdx + 1);
+        escalationNotes.push("PEWS >=8: escalated by one level");
+      }
+
+      if (hasRisk) {
+        finalIdx = clampBandIndex(finalIdx + 1);
+        escalationNotes.push("Risk factor present: escalated by one level");
+      }
+
+      const finalBand = BAND_ORDER[finalIdx];
+      const now = new Date();
+      const timestamp = now.toLocaleString("en-GB");
+
+      return {
+        timestamp,
+        ageWeeks: Number.isNaN(ageWeeks) ? null : ageWeeks,
+        spo2: Number.isNaN(spo2) ? null : spo2,
+        oxygenContext,
+        rr: Number.isNaN(rr) ? null : rr,
+        pews: Number.isNaN(pews) ? null : pews,
+        features,
+        worstFeature,
+        baseBand: BAND_ORDER[baseIdx],
+        finalBand,
+        riskFactors,
+        hasRisk,
+        escalationNotes
+      };
+    }
+
+    function renderAssessment(assessment) {
+      currentAssessment = assessment;
+      const meta = BAND_META[assessment.finalBand];
+      severityBadgeEl.className = `severity-badge ${meta.badge}`;
+      severityBadgeEl.textContent = meta.label;
+      severityLineEl.textContent = meta.line;
+      riskBannerEl.hidden = !assessment.hasRisk;
+
+      const escalationSuffix = assessment.escalationNotes.length
+        ? ` Escalations: ${assessment.escalationNotes.join("; ")}.`
+        : "";
+      logicLineEl.textContent = `Worst feature: ${assessment.worstFeature.feature} (${assessment.worstFeature.reason}) -> base ${BAND_META[assessment.baseBand].label}.${escalationSuffix} Assess with full clinical exam and local pathway criteria.`;
+
+      managementListEl.innerHTML = MANAGEMENT[assessment.finalBand]
+        .map((item) => `<li>${item}</li>`)
+        .join("");
+
+      handoverPreviewEl.textContent = buildHandoverText(assessment);
+    }
+
+    function buildHandoverText(assessment) {
+      const ptName = ptNameEl.value.trim() || "Not provided";
+      const dob = ptDobEl.value.trim() || "Not provided";
+      const nhs = ptNhsEl.value.trim() || "Not provided";
+      const risks = assessment.riskFactors.length ? assessment.riskFactors.join(", ") : "None documented";
+      const mgmt = MANAGEMENT[assessment.finalBand].map((m) => `- ${m}`).join("\n");
+
+      return `Bronchiolitis severity assessment\nTime: ${assessment.timestamp}\n\nPatient:\n- Name: ${ptName}\n- DOB: ${dob}\n- NHS number: ${nhs}\n\nCurrent status:\n- Severity: ${BAND_META[assessment.finalBand].label}\n- Recommendation: ${BAND_META[assessment.finalBand].line}\n- Worst feature: ${assessment.worstFeature.feature} (${assessment.worstFeature.reason})\n- Escalation notes: ${assessment.escalationNotes.length ? assessment.escalationNotes.join("; ") : "None"}\n- Risk factors: ${risks}\n\nManagement plan:\n${mgmt}\n`;
+    }
+
+    function renderTimeline() {
+      if (!serialLog.length) {
+        assessmentLogEl.innerHTML = '<p class="hint">No assessments logged yet.</p>';
+        return;
+      }
+
+      assessmentLogEl.innerHTML = serialLog
+        .map((entry, idx) => {
+          const label = BAND_META[entry.finalBand].label;
+          const prev = serialLog[idx + 1];
+          let trend = "";
+          if (prev) {
+            const nowScore = BAND_ORDER.indexOf(entry.finalBand);
+            const prevScore = BAND_ORDER.indexOf(prev.finalBand);
+            if (nowScore > prevScore) trend = '<span class="trend worse">Deteriorated</span>';
+            else if (nowScore < prevScore) trend = '<span class="trend better">Improved</span>';
+            else trend = '<span class="trend stable">Stable</span>';
+          }
+
+          return `<article class="timeline-item">
+            <div class="timeline-head">
+              <strong>${entry.timestamp}</strong>
+              <span class="mini-badge ${BAND_META[entry.finalBand].badge}">${label}</span>
+              ${trend}
+            </div>
+            <div class="timeline-body">
+              Worst feature: ${entry.worstFeature.feature} (${entry.worstFeature.reason})
+            </div>
+          </article>`;
+        })
+        .join("");
+    }
+
+    function addCurrentToTimeline() {
+      const snapshot = computeAssessment();
+      serialLog.unshift(snapshot);
+      renderAssessment(snapshot);
+      renderTimeline();
+    }
+
+    function recalculate() {
+      const assessment = computeAssessment();
+      renderAssessment(assessment);
+    }
+
+    async function copyToClipboard() {
+      const text = handoverPreviewEl.textContent || "";
+      if (!text.trim()) return;
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copy-btn");
+      const old = btn.textContent;
+      btn.textContent = "Copied";
+      setTimeout(() => {
+        btn.textContent = old;
+      }, 1500);
+    }
+
+    function printSummary() {
+      window.print();
+    }
+
+    [
+      ageWeeksEl, spo2El, oxygenContextEl, rrEl, wobEl, feedingEl, pewsEl,
+      ptNameEl, ptDobEl, ptNhsEl
+    ].forEach((el) => el.addEventListener("input", recalculate));
+    oxygenContextEl.addEventListener("change", recalculate);
+    wobEl.addEventListener("change", recalculate);
+    feedingEl.addEventListener("change", recalculate);
+    rrExhaustedEl.addEventListener("change", recalculate);
+    apnoeaInputs.forEach((el) => el.addEventListener("change", recalculate));
+    riskInputs.forEach((el) => el.addEventListener("change", recalculate));
+    document.getElementById("add-log-btn").addEventListener("click", addCurrentToTimeline);
+    document.getElementById("copy-btn").addEventListener("click", copyToClipboard);
+    document.getElementById("print-btn").addEventListener("click", printSummary);
+
+    recalculate();
+  </script>
+</body>
+</html>

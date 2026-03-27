@@ -1,0 +1,232 @@
+/**
+ * Style palettes for rapid UI testing.
+ * Apply on <html>: theme-palette-*
+ */
+
+/* Palette 1: teal slate */
+html.theme-palette-teal {
+  --bg: #13293d;
+  --bg-elevated: #173247;
+  --surface: #023047;
+  --surface2: #0a3e58;
+  --surface3: #14506c;
+  --border: #176f85;
+  --text: #e2edf9;
+  --text-soft: #c9dced;
+  --muted: #9eb5c9;
+  --accent: #24aacc;
+  --accent2: #5dc0da;
+  --accent-on: #023047;
+  --focus-ring: rgba(36, 170, 204, 0.35);
+  --radius: 12px;
+  --radius-lg: 18px;
+}
+
+/* Palette: original classic */
+html.theme-palette-original {
+  --bg: #0f1117;
+  --bg-elevated: #141827;
+  --surface: #1a1d27;
+  --surface2: #242736;
+  --surface3: #2a2f44;
+  --border: #2e3246;
+  --text: #e2e8f0;
+  --text-soft: #bac3d2;
+  --muted: #8892a4;
+  --accent: #20b2aa;
+  --accent2: #4ecdc4;
+  --accent-on: #0f1117;
+  --focus-ring: rgba(78, 205, 196, 0.35);
+}
+
+html.theme-palette-original.theme-light {
+  --bg: #f1f5f9;
+  --bg-elevated: #e9eff7;
+  --surface: #ffffff;
+  --surface2: #e2e8f0;
+  --surface3: #d8e0ec;
+  --border: #cbd5e1;
+  --text: #1e293b;
+  --text-soft: #334155;
+  --muted: #64748b;
+  --accent: #0d9488;
+  --accent2: #14b8a6;
+  --accent-on: #ffffff;
+  --focus-ring: rgba(13, 148, 136, 0.28);
+}
+
+html.theme-palette-teal.theme-light {
+  --bg: #ecf5f7;
+  --bg-elevated: #e3eff2;
+  --surface: #ffffff;
+  --surface2: #e8f2f5;
+  --surface3: #d9e7eb;
+  --border: #bed1d8;
+  --text: #1f3444;
+  --text-soft: #28485d;
+  --muted: #59798f;
+  --accent: #0f9f92;
+  --accent2: #14b8a6;
+  --focus-ring: rgba(15, 159, 146, 0.28);
+}
+
+/* Palette 2: clinical blue */
+html.theme-palette-blue {
+  --bg: #0c1327;
+  --bg-elevated: #111c33;
+  --surface: #152540;
+  --surface2: #1e2f4d;
+  --surface3: #294063;
+  --border: #365377;
+  --text: #e6eef9;
+  --text-soft: #c6d5ea;
+  --muted: #9db1cc;
+  --accent: #3b82f6;
+  --accent2: #60a5fa;
+  --accent-on: #f8fafc;
+  --focus-ring: rgba(96, 165, 250, 0.34);
+  --radius: 13px;
+  --radius-lg: 21px;
+}
+
+html.theme-palette-blue.theme-light {
+  --bg: #eef3fd;
+  --bg-elevated: #e6eefb;
+  --surface: #ffffff;
+  --surface2: #ebf1fc;
+  --surface3: #dbe7fb;
+  --border: #c2d3ef;
+  --text: #1b2f52;
+  --text-soft: #274169;
+  --muted: #4c6893;
+  --accent: #2563eb;
+  --accent2: #3b82f6;
+  --accent-on: #f8fafc;
+  --focus-ring: rgba(37, 99, 235, 0.27);
+}
+
+/* Palette 3: indigo dusk */
+html.theme-palette-indigo {
+  --bg: #141329;
+  --bg-elevated: #1c1a35;
+  --surface: #232044;
+  --surface2: #2d2a52;
+  --surface3: #383465;
+  --border: #4a4478;
+  --text: #ece9ff;
+  --text-soft: #d3cdf6;
+  --muted: #aba4d8;
+  --accent: #8b5cf6;
+  --accent2: #a78bfa;
+  --accent-on: #f8fafc;
+  --focus-ring: rgba(167, 139, 250, 0.35);
+  --radius: 15px;
+  --radius-lg: 24px;
+}
+
+html.theme-palette-indigo.theme-light {
+  --bg: #f4f1fd;
+  --bg-elevated: #ece7fb;
+  --surface: #ffffff;
+  --surface2: #f0ebfd;
+  --surface3: #e3daf9;
+  --border: #d2c5f1;
+  --text: #32235c;
+  --text-soft: #493478;
+  --muted: #6d5a98;
+  --accent: #7c3aed;
+  --accent2: #8b5cf6;
+  --accent-on: #f8fafc;
+  --focus-ring: rgba(124, 58, 237, 0.27);
+}
+
+/* Palette 4: emerald forest */
+html.theme-palette-emerald {
+  --bg: #0d1e1c;
+  --bg-elevated: #132a27;
+  --surface: #19332f;
+  --surface2: #21413b;
+  --surface3: #2c544c;
+  --border: #3b665c;
+  --text: #e8f6f1;
+  --text-soft: #c7e5da;
+  --muted: #96c3b3;
+  --accent: #10b981;
+  --accent2: #34d399;
+  --accent-on: #06281f;
+  --focus-ring: rgba(52, 211, 153, 0.34);
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+
+html.theme-palette-emerald.theme-light {
+  --bg: #edf7f3;
+  --bg-elevated: #e3f2eb;
+  --surface: #ffffff;
+  --surface2: #e7f5ef;
+  --surface3: #d7ece3;
+  --border: #bfdccf;
+  --text: #1f4a3d;
+  --text-soft: #2f6253;
+  --muted: #5c8c7c;
+  --accent: #0f9a6e;
+  --accent2: #10b981;
+  --accent-on: #f8fafc;
+  --focus-ring: rgba(15, 154, 110, 0.27);
+}
+
+/* Palette 5: rose graphite */
+html.theme-palette-rose {
+  --bg: #23141b;
+  --bg-elevated: #2d1b24;
+  --surface: #37212d;
+  --surface2: #442a38;
+  --surface3: #563447;
+  --border: #6a4257;
+  --text: #fbeaf1;
+  --text-soft: #efd0dd;
+  --muted: #cba3b5;
+  --accent: #f43f5e;
+  --accent2: #fb7185;
+  --accent-on: #fff1f5;
+  --focus-ring: rgba(251, 113, 133, 0.34);
+  --radius: 13px;
+  --radius-lg: 21px;
+}
+
+html.theme-palette-rose.theme-light {
+  --bg: #fdf0f4;
+  --bg-elevated: #fae7ed;
+  --surface: #ffffff;
+  --surface2: #fdeaf0;
+  --surface3: #f8dbe5;
+  --border: #efc5d3;
+  --text: #5d1f34;
+  --text-soft: #7a2f48;
+  --muted: #a05a75;
+  --accent: #e11d48;
+  --accent2: #f43f5e;
+  --accent-on: #fff1f5;
+  --focus-ring: rgba(225, 29, 72, 0.28);
+}
+
+/* Custom palette */
+html.theme-palette-custom {
+  --radius: 12px;
+  --radius-lg: 18px;
+}
+
+/* Optional density testing */
+html.density-compact {
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+
+html.density-compact .container {
+  padding-top: 12px;
+  padding-bottom: 16px;
+}
+
+html.density-compact .card {
+  padding: 14px;
+}

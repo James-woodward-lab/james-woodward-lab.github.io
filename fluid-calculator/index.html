@@ -9,8 +9,13 @@
 <meta name="theme-color" content="#0f1117">
 <meta name="color-scheme" content="dark light">
 <title>Paediatric Fluid &amp; Feed Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="manifest" href='data:application/manifest+json,{"name":"Paediatric Fluid %26 Feed Calculator","short_name":"PaedsFluids","start_url":".","display":"standalone","background_color":"%230f1117","theme_color":"%2320b2aa","description":"Paediatric maintenance fluid, electrolyte and feed volume calculator"}'>
 <link rel="stylesheet" href="../css/app-theme.css">
+<link rel="stylesheet" href="../css/style-variants.css">
+<script src="../js/style-system.js"></script>
 <script src="../js/theme-toggle.js"></script>
 <link rel="stylesheet" href="../css/fluid-app.css">
 </head>
@@ -33,6 +38,68 @@
   <div class="page-header">
     <h1>💧 Maintenance Requirements</h1>
     <p>Holliday-Segar · NICE NG29 · Na⁺ &amp; K⁺ requirements</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎨 Style Testing</div>
+    <div class="hint">Switch mode, visual variant, and density to compare styles quickly.</div>
+    <div class="style-lab-panel" data-style-panel style="margin-top:10px;">
+      <div class="field">
+        <label for="style-mode">Mode</label>
+        <select id="style-mode" data-style-mode>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="style-variant">Variant</label>
+        <select id="style-variant" data-style-variant>
+          <option value="theme-palette-teal">Teal Slate</option>
+          <option value="theme-palette-original">Original Classic</option>
+          <option value="theme-palette-blue">Clinical Blue</option>
+          <option value="theme-palette-indigo">Indigo Dusk</option>
+          <option value="theme-palette-emerald">Emerald Forest</option>
+          <option value="theme-palette-rose">Rose Graphite</option>
+          <option value="theme-palette-custom">Custom Hex Palette</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="style-density">Density</label>
+        <select id="style-density" data-style-density>
+          <option value="density-comfortable">Comfortable</option>
+          <option value="density-compact">Compact</option>
+        </select>
+      </div>
+    </div>
+    <div class="custom-palette-editor" data-custom-palette hidden aria-hidden="true">
+      <div class="custom-palette-grid">
+        <div class="field">
+          <label for="custom-bg">Background</label>
+          <input id="custom-bg" type="text" placeholder="#0F172A" data-custom-bg>
+        </div>
+        <div class="field">
+          <label for="custom-surface">Surface</label>
+          <input id="custom-surface" type="text" placeholder="#1A2740" data-custom-surface>
+        </div>
+        <div class="field">
+          <label for="custom-border">Border</label>
+          <input id="custom-border" type="text" placeholder="#344966" data-custom-border>
+        </div>
+        <div class="field">
+          <label for="custom-accent">Accent</label>
+          <input id="custom-accent" type="text" placeholder="#14B8A6" data-custom-accent>
+        </div>
+        <div class="field">
+          <label for="custom-text">Text</label>
+          <input id="custom-text" type="text" placeholder="#E2EDF9" data-custom-text>
+        </div>
+      </div>
+      <div class="custom-palette-actions">
+        <button type="button" class="btn btn-primary" data-custom-apply>Apply Custom Palette</button>
+        <button type="button" class="btn btn-reset" data-custom-reset>Reset Custom</button>
+      </div>
+      <div class="custom-palette-error" data-custom-error aria-live="polite"></div>
+    </div>
   </div>
 
   <div class="card" id="sec-maint">
@@ -210,17 +277,17 @@
 <nav class="tab-bar">
   <button class="tab-btn active" id="tab-maint" onclick="showPage('maint')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2C6.5 2 2 8 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10C22 8 17.5 2 12 2z"/><path d="M12 6v6l3 3"/></svg>
-    Maintenance
+    💧 Maintenance
     <div class="tab-dot"></div>
   </button>
   <button class="tab-btn" id="tab-balance" onclick="showPage('balance')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v18M3 12h18"/><path d="M7 7l-4 5h8L7 7zM17 7l-4 5h8l-4-5z" stroke-linejoin="round"/></svg>
-    24h Balance
+    ⚖️ 24h Balance
     <div class="tab-dot"></div>
   </button>
   <button class="tab-btn" id="tab-feed" onclick="showPage('feed')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3h6l1 6H8L9 3z"/><path d="M8 9c0 5 1 9 4 12 3-3 4-7 4-12"/><path d="M10 6h4"/></svg>
-    Baby Feeds
+    🍼 Baby Feeds
     <div class="tab-dot"></div>
   </button>
 </nav>

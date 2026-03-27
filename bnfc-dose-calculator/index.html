@@ -7,6 +7,8 @@
   <meta name="color-scheme" content="dark light">
   <title>Simple Analgesia Dosing</title>
   <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <script src="../js/style-system.js"></script>
   <script src="../js/theme-toggle.js"></script>
   <link rel="stylesheet" href="../css/bnfc-dose-calculator.css">
 </head>
@@ -278,16 +280,22 @@
           const ageBandDailyMax = band.doseMax * band.dosesPerDayMax;
           const exceedsPerDoseCap = band.doseMax > safety.perDoseCapMg;
           if (ageBandDailyMax > safety.dailyCapMg || exceedsPerDoseCap) {
-            const warnBits = [];
-            if (ageBandDailyMax > safety.dailyCapMg) {
-              warnBits.push(`age-band maximum (${ageBandDailyMax} mg/day) exceeds weight-band daily cap (${safety.dailyCapMg} mg/day)`);
-            }
+            const warnParts = [];
+            const perDoseRateText = safety.mgPerKgPerDose ? ` (${safety.mgPerKgPerDose} mg/kg)` : "";
+            const dailyRateText = safety.maxMgPerKgPerDay ? ` (${safety.maxMgPerKgPerDay} mg/kg/day)` : "";
             if (exceedsPerDoseCap) {
-              warnBits.push(`age-band max per dose (${band.doseMax} mg) exceeds weight-band per-dose cap (${safety.perDoseCapMg} mg)`);
+              warnParts.push(
+                `Single age-based dose ${band.doseMax} mg exceeds the recommended weight-based single-dose maximum ${safety.perDoseCapMg} mg${perDoseRateText}.`
+              );
+            }
+            if (ageBandDailyMax > safety.dailyCapMg) {
+              warnParts.push(
+                `At this schedule, total daily dose ${ageBandDailyMax} mg/day exceeds the calculated weight-based daily maximum ${safety.dailyCapMg} mg/day${dailyRateText}.`
+              );
             }
             setAlert(
               "para-alert",
-              `Weight safety warning (${safety.bandLabel}): ${warnBits.join("; ")}. Keep within weight-band limits.`,
+              `Weight safety warning (${safety.bandLabel}): ${warnParts.join(" ")}`,
               "warn"
             );
           } else {
