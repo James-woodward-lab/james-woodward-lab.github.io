@@ -669,10 +669,35 @@
         label: 'Neurology',
         icon: 'Nr',
         groups: [
-          { type: 'radio', name: 'tone', label: 'Tone', options: ['Tone normal centrally and peripherally', 'Tone increased centrally and peripherally', 'Tone decreased centrally and peripherally'] },
-          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Movement symmetrical in all four limbs', 'DTRs +2 bilaterally', 'Behaviour and alertness appropriate', 'Fontanelle as above', 'No focal neurology'] },
-          { type: 'radio', name: 'seizure', label: 'Seizure activity', options: ['No seizure activity', 'Seizure activity present'] }
-        ]
+          { type: 'radio', name: 'correctedAge', label: 'Corrected gestational age', options: ['Corrected age appropriate', 'Corrected age preterm considered'] },
+          { type: 'radio', name: 'behaviouralState', label: 'Behavioural state at exam', options: ['Awake and alert', 'Drowsy', 'Quiet sleep', 'Active sleep'] },
+          { type: 'checkbox', name: 'preExamObservation', label: 'General observation before handling', options: ['Good spontaneous activity', 'Reduced spontaneous activity', 'No spontaneous activity'] },
+
+          { type: 'checkbox', name: 'cn2', label: 'CN II', options: ['Visual fixation present', 'Visual tracking present', 'Pupillary light response present', 'Pupillary response reduced or absent'] },
+          { type: 'checkbox', name: 'cn346', label: 'CN III/IV/VI', options: ['Extraocular movements full', 'Conjugate gaze present', 'Nystagmus absent', 'Nystagmus present'] },
+          { type: 'checkbox', name: 'cn5', label: 'CN V', options: ['Rooting reflex present', 'Jaw tone normal', 'Jaw tone reduced', 'Jaw tone increased'] },
+          { type: 'checkbox', name: 'cn7', label: 'CN VII', options: ['Facial symmetry preserved on cry', 'Facial asymmetry present'] },
+          { type: 'checkbox', name: 'cn8', label: 'CN VIII', options: ['Responds to auditory stimuli', 'Reduced response to sound'] },
+          { type: 'checkbox', name: 'cn910', label: 'CN IX/X', options: ['Suck reflex present', 'Swallow coordinated', 'Gag reflex present', 'Suck/swallow impaired'] },
+          { type: 'checkbox', name: 'cn12', label: 'CN XII', options: ['Tongue movement symmetrical', 'Tongue asymmetry present'] },
+
+          { type: 'checkbox', name: 'posture', label: 'Posture (supine)', options: ['Limb flexion posture appropriate', 'Arms adducted to trunk', 'Head central', 'Persistent lateral head deviation', 'Trunk posture normal', 'Arm/leg posture asymmetry'] },
+          { type: 'radio', name: 'movementQuantity', label: 'Movement quantity', options: ['Movement quantity normal', 'Movements excessive', 'Movements sluggish', 'Movements absent'] },
+          { type: 'checkbox', name: 'movementQuality', label: 'Movement quality', options: ['Movements free and smooth', 'Cramped-synchronous movements', 'Jerky movements', 'Tremulous movements', 'Athetoid movements', 'Dystonic movements', 'Myoclonic movements', 'Extensor spasms'] },
+          { type: 'checkbox', name: 'spontaneousMotor', label: 'Spontaneous voluntary motor activity', options: ['Spontaneous motor activity normal in supine', 'Reduced spontaneous voluntary activity in supine'] },
+
+          { type: 'radio', name: 'toneGlobal', label: 'Tone (global)', options: ['Tone normal', 'Tone increased', 'Tone decreased'] },
+          { type: 'checkbox', name: 'toneItems', label: 'Tone examination items', options: ['Scarf sign normal', 'Scarf sign abnormal', 'Arm traction normal', 'Arm traction abnormal', 'Leg traction normal', 'Leg traction abnormal', 'Popliteal angle normal', 'Popliteal angle abnormal', 'Heel-to-ear normal', 'Heel-to-ear abnormal', 'Head lag absent', 'Head lag present', 'Ventral suspension normal', 'Ventral suspension abnormal', 'Neck tone normal', 'Neck tone abnormal', 'Head control in vertical normal', 'Head control in vertical reduced'] },
+
+          { type: 'checkbox', name: 'primitiveReflexes', label: 'Primitive reflexes', options: ['Moro reflex present', 'Rooting reflex present', 'Suck reflex present', 'Palmar grasp present', 'Plantar response extensor with toe fanning (infant pattern)', 'Galant reflex present', 'Stepping reflex present', 'ATNR present'] },
+          { type: 'checkbox', name: 'dtr', label: 'Deep tendon reflexes', options: ['Biceps reflex normal', 'Patellar reflex normal', 'Ankle jerk normal', 'Reflexes brisk', 'Reflexes reduced', 'Ankle clonus absent', 'Ankle clonus present'] },
+
+          { type: 'checkbox', name: 'headSkull', label: 'Head and skull', options: ['Head circumference measured and plotted', 'Head shape normal', 'Plagiocephaly', 'Craniosynostosis concern', 'Anterior fontanelle normal size and tension', 'Posterior fontanelle normal', 'Sutures normal', 'Suture separation/ridging/fusion concern', 'Transillumination not indicated', 'Transillumination performed'] },
+
+          { type: 'checkbox', name: 'developmentBehaviour', label: 'Global development and behaviour', options: ['Motor milestones appropriate for corrected age', 'Social milestones appropriate for corrected age', 'Communication milestones appropriate for corrected age', 'Lateralising/asymmetrical signs absent', 'Lateralising/asymmetrical signs present', 'Cry normal strength and pitch', 'High-pitched cry', 'Alertness and interaction appropriate', 'Reduced alertness/interaction'] },
+          { type: 'checkbox', name: 'additionalObs', label: 'Additional observations', options: ['Spontaneous movements in prone appropriate', 'Seizure-like activity absent', 'Jitteriness stimulus-sensitive and suppressible', 'Setting-sun sign absent', 'Setting-sun sign present', 'Unequal palpebral fissures absent', 'Unequal palpebral fissures present', 'Marcus Gunn phenomenon absent', 'Marcus Gunn phenomenon present', 'Pupil reactions equal and reactive', 'Pupil reactions abnormal'] }
+        ],
+        freeHint: 'Optional: include HINE score, focal findings, or detailed neurological impression'
       }
     ];
 
