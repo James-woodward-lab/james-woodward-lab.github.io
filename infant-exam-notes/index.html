@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>Infant Examination Note Generator</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <script src="../js/style-system.js"></script>
+  <script src="../js/theme-toggle.js"></script>
+  <style>
+    .exam-container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 calc(20px + var(--safe-r)) 120px calc(20px + var(--safe-l));
+    }
+    @media (max-width: 600px) {
+      .exam-container { padding: 0 calc(16px + var(--safe-r)) 120px calc(16px + var(--safe-l)); }
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .section-card .sec-heading {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-card .sec-heading .sec-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--accent-on);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .group-row {
+      margin-bottom: 12px;
+    }
+    .group-row:last-of-type { margin-bottom: 8px; }
+    .group-label {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pill-opt {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 14px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .pill-opt:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .pill-opt input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+    .pill-opt.selected {
+      border-color: var(--accent);
+      background: rgba(36, 170, 204, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .pill-opt.selected.abnormal {
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 6px;
+    }
+    .check-opt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.84rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .check-opt:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .check-opt input {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface);
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .check-opt input:checked {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .check-opt input:checked::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 5px;
+      height: 9px;
+      border: solid var(--accent-on);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .check-opt.selected {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(36, 170, 204, 0.06);
+    }
+    .check-opt.selected.abnormal {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.06);
+    }
+
+    .free-text-field {
+      margin-top: 10px;
+    }
+    .free-text-field textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 0.88rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 38px;
+      transition: border-color 0.15s;
+    }
+    .free-text-field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .free-text-field textarea::placeholder {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .conditional-inline-field {
+      display: none;
+      margin-top: 6px;
+    }
+    .conditional-inline-field.show {
+      display: block;
+    }
+
+    .extra-sections { margin-top: 16px; }
+    .extra-sections details {
+      margin-bottom: 8px;
+    }
+    .extra-sections summary {
+      cursor: pointer;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .extra-sections summary::-webkit-details-marker { display: none; }
+    .extra-sections summary::after {
+      content: "\25B6";
+      font-size: 0.65rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .extra-sections details[open] > summary::after {
+      transform: rotate(90deg);
+    }
+    .extra-sections summary:hover {
+      border-color: var(--accent);
+    }
+    .extra-sections details[open] > summary {
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-bottom-color: transparent;
+      background: var(--surface);
+    }
+    .extra-sections details > .section-card {
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      margin-bottom: 0;
+    }
+
+    .output-panel {
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 14px 0 calc(14px + var(--safe-b));
+      margin: 0 calc(-20px - var(--safe-r)) 0 calc(-20px - var(--safe-l));
+      padding-left: calc(20px + var(--safe-l));
+      padding-right: calc(20px + var(--safe-r));
+    }
+    @media (max-width: 600px) {
+      .output-panel {
+        margin: 0 calc(-16px - var(--safe-r)) 0 calc(-16px - var(--safe-l));
+        padding-left: calc(16px + var(--safe-l));
+        padding-right: calc(16px + var(--safe-r));
+      }
+    }
+    .output-inner {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .output-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .output-toggle-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+    }
+    .output-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .output-actions button {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      min-height: 34px;
+    }
+    .output-actions button:hover { border-color: var(--accent); }
+    .output-actions .copy-btn {
+      background: var(--accent);
+      color: var(--accent-on);
+      border-color: var(--accent);
+    }
+    .output-actions .copy-btn:hover { background: var(--accent2); }
+    .output-actions .copy-btn.copied {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .output-body {
+      margin-top: 10px;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--text);
+      white-space: pre-wrap;
+      max-height: 40vh;
+      overflow-y: auto;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .output-body.empty {
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+      padding: 16px;
+    }
+    .output-collapsed .output-body { display: none; }
+
+    .lung-map-wrap {
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface2);
+      padding: 10px;
+    }
+    .lung-map-title {
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .lung-map-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 720px) {
+      .lung-map-layout { grid-template-columns: 1fr; }
+    }
+    .lung-svg-shell {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 8px;
+    }
+    .lung-zone {
+      cursor: pointer;
+      transition: fill 0.15s, stroke 0.15s, opacity 0.15s;
+      fill: rgba(36, 170, 204, 0.12);
+      stroke: var(--border);
+      stroke-width: 1.5;
+    }
+    .lung-zone:hover {
+      stroke: var(--accent);
+      fill: rgba(36, 170, 204, 0.2);
+    }
+    .lung-zone.active {
+      stroke: var(--accent);
+      fill: rgba(36, 170, 204, 0.3);
+    }
+    .lung-zone.has-findings {
+      stroke: var(--success);
+      fill: rgba(34, 197, 94, 0.2);
+    }
+    .lung-zone-label {
+      font-size: 8px;
+      fill: var(--muted);
+      pointer-events: none;
+      font-weight: 600;
+    }
+    .lung-picker {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 10px;
+    }
+    .lung-picker-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .lung-finding-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .lung-finding-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .lung-finding-chip input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+    .lung-finding-chip.selected {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(36, 170, 204, 0.12);
+      font-weight: 600;
+    }
+    .lung-summary {
+      margin-top: 10px;
+      font-size: 0.76rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .lung-summary-badge {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 3px 8px;
+    }
+    .lung-zone-note {
+      margin-top: 10px;
+    }
+    .lung-zone-note textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 34px;
+    }
+    .lung-zone-note textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    .section-hint {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">&#9728;&#65039;</button>
+  <div class="exam-container">
+    <header class="app-header-center">
+      <h1>Infant Examination Notes</h1>
+      <p>Child under 1 year &mdash; select findings per system</p>
+    </header>
+
+    <div id="exam-sections"></div>
+  </div>
+
+  <div class="output-panel" id="outputPanel">
+    <div class="output-inner">
+      <div class="output-toggle" onclick="toggleOutputPanel()">
+        <span class="output-toggle-title" id="outputToggleTitle">Examination Note</span>
+        <div class="output-actions">
+          <button type="button" class="copy-btn" id="copyBtn" onclick="event.stopPropagation(); copyOutput()">Copy</button>
+          <button type="button" onclick="event.stopPropagation(); clearAll()">Clear all</button>
+        </div>
+      </div>
+      <div class="output-body empty" id="output">Select findings above to generate the note.</div>
+    </div>
+  </div>
+
+  <script>
+    var SECTIONS = [
+      {
+        key: 'general',
+        label: 'General',
+        icon: 'G',
+        groups: [
+          { type: 'radio', name: 'state', label: 'Alertness', options: ['Alert', 'Drowsy', 'Irritable', 'Inconsolable'] },
+          { type: 'radio', name: 'appearance', label: 'Appearance', options: ['Appears well', 'Appears unwell'] },
+          { type: 'radio', name: 'comfort', label: 'Comfort', options: ['Comfortable at rest', 'In distress'] },
+          { type: 'radio', name: 'interaction', label: 'Interaction', options: ['Interacting with carer', 'Not interacting with carer'] },
+          { type: 'radio', name: 'dysmorphism', label: 'Dysmorphic features', options: ['No dysmorphic features', 'Dysmorphic features present'] }
+        ]
+      },
+      {
+        key: 'cardiovascular',
+        label: 'Cardiovascular',
+        icon: 'CV',
+        groups: [
+          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Normal heart sounds', 'Femoral pulses palpable bilaterally and equal', 'No hepatomegaly'] },
+          { type: 'radio', name: 'radialPulse', label: 'Radial pulse quality', options: ['Radial pulses normal volume', 'Radial pulses weak', 'Radial pulses thready', 'Radial pulses bounding'] },
+          { type: 'radio', name: 'murmur', label: 'Murmur', options: ['No murmur', 'Murmur present'] }
+        ],
+        freeHint: 'Murmur grade/location/radiation/character'
+      },
+      {
+        key: 'respiratory',
+        label: 'Respiratory',
+        icon: 'RS',
+        groups: [
+          { type: 'radio', name: 'wob', label: 'Work of breathing', options: ['No WOB', 'Mild', 'Moderate', 'Severe'] },
+          { type: 'checkbox', name: 'recession', label: 'Recession', options: ['No recession', 'Subcostal', 'Intercostal', 'Suprasternal', 'Substernal'] },
+          { type: 'radio', name: 'trachealTug', label: 'Tracheal tug', options: ['Tracheal tug absent', 'Tracheal tug present'] },
+          { type: 'radio', name: 'nasalFlaring', label: 'Nasal flaring', options: ['Nasal flaring absent', 'Nasal flaring present'] },
+          { type: 'radio', name: 'grunting', label: 'Grunting', options: ['Grunting absent', 'Grunting present'] },
+          { type: 'checkbox', name: 'chest', label: 'Auscultation', options: ['Chest symmetrical and normally shaped', 'Equal air entry bilaterally', 'Percussion resonant', 'No added sounds', 'Wheeze', 'Crackles', 'Bronchial breathing', 'Cough absent', 'Cough present'] }
+        ],
+        freeHint: 'Describe cough or added sounds'
+      },
+      {
+        key: 'abdomen',
+        label: 'Abdomen',
+        icon: 'Ab',
+        groups: [
+          { type: 'radio', name: 'consistency', label: 'Consistency', options: ['Soft', 'Rigid'] },
+          { type: 'radio', name: 'distension', label: 'Distension', options: ['Non-distended', 'Distended'] },
+          { type: 'radio', name: 'tenderness', label: 'Tenderness', options: ['Non-tender', 'Tender'] },
+          { type: 'radio', name: 'guarding', label: 'Guarding', options: ['No guarding', 'Guarding present'] },
+          { type: 'radio', name: 'bowelSounds', label: 'Bowel sounds', options: ['Bowel sounds present', 'Bowel sounds reduced', 'Bowel sounds absent'] },
+          { type: 'checkbox', name: 'checks', label: 'Other findings', options: ['No organomegaly', 'No masses', 'Umbilicus normal', 'No inguinal hernias', 'Inguinal hernia present'] }
+        ],
+        freeHint: 'Localise tenderness, describe hernia'
+      },
+      {
+        key: 'perfusionHydration',
+        label: 'Perfusion/Hydration',
+        icon: 'PH',
+        groups: [
+          { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm and well perfused', 'Cool peripherally', 'Shut down'] },
+          { type: 'radio', name: 'crtCentral', label: 'Capillary refill - Centrally', options: ['<2s', '2-3s', '>3s'] },
+          { type: 'radio', name: 'crtPeripheral', label: 'Capillary refill - Peripherally', options: ['<2s', '2-3s', '>3s'] },
+          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', options: ['Anterior fontanelle flat', 'Anterior fontanelle bulging', 'Anterior fontanelle sunken'] },
+          { type: 'radio', name: 'mucosa', label: 'Mucous membranes', options: ['Mucous membranes moist', 'Mucous membranes dry'] }
+        ],
+        freeHint: 'Hydration note if relevant'
+      },
+      {
+        key: 'skin',
+        label: 'Skin',
+        icon: 'Sk',
+        groups: [
+          { type: 'radio', name: 'colour', label: 'Colour', options: ['Pink', 'Pale', 'Jaundiced', 'Mottled', 'Cyanosed'] },
+          { type: 'radio', name: 'rash', label: 'Rash', options: ['No rash', 'Rash (blanching)', 'Rash (non-blanching)'] },
+          { type: 'radio', name: 'bruising', label: 'Bruising', options: ['No bruising', 'Bruising present'] },
+          { type: 'radio', name: 'nappy', label: 'Nappy area', options: ['Nappy area intact', 'Nappy rash present'] },
+          { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm peripheries', 'Cool peripheries'] }
+        ],
+        freeHint: 'Describe rash or bruising (pattern/location)'
+      },
+      {
+        key: 'head',
+        label: 'Head',
+        icon: 'Hd',
+        groups: [
+          { type: 'radio', name: 'sutures', label: 'Sutures', options: ['Sutures normal', 'Sutures separated'] },
+          { type: 'checkbox', name: 'other', label: 'Findings', options: ['Skull shape normal', 'No boggy swelling', 'Haematoma present', 'No signs of head injury'] }
+        ]
+      },
+      {
+        key: 'eyes',
+        label: 'Eyes',
+        icon: 'Ey',
+        groups: [
+          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Red reflex present bilaterally', 'Sclerae white', 'No periorbital swelling or erythema'] },
+          { type: 'radio', name: 'conjunctivae', label: 'Conjunctivae', options: ['Conjunctivae clear', 'Conjunctivae injected', 'Conjunctival discharge'] },
+          { type: 'radio', name: 'photophobia', label: 'Photophobia', options: ['Photophobia absent', 'Photophobia present'] }
+        ],
+        freeHint: 'Describe discharge or other findings'
+      },
+      {
+        key: 'ears',
+        label: 'Ears',
+        icon: 'Er',
+        groups: [
+          { type: 'checkbox', name: 'external', label: 'External ear', options: ['Pinnae normally formed', 'No pre-auricular tags or pits', 'No mastoid tenderness or swelling', 'No tragal tenderness'] },
+          { type: 'radio', name: 'eac', label: 'EAC', options: ['EAC clear bilaterally', 'EAC erythematous bilaterally', 'EAC discharge bilaterally', 'EAC foreign body present'] },
+          { type: 'radio', name: 'tm', label: 'Tympanic membrane', options: ['TM pearly grey bilaterally', 'TM erythematous bilaterally', 'TM bulging bilaterally', 'TM perforated bilaterally', 'TM dull bilaterally'] },
+          { type: 'radio', name: 'light', label: 'Light reflex', options: ['Light reflex present bilaterally', 'Light reflex absent bilaterally'] },
+          { type: 'radio', name: 'landmarks', label: 'Landmarks', options: ['Landmarks visible bilaterally', 'Landmarks obscured bilaterally'] }
+        ]
+      },
+      {
+        key: 'nose',
+        label: 'Nose',
+        icon: 'Ns',
+        groups: [
+          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Patent bilaterally', 'No flaring at rest', 'Flaring present', 'No foreign body'] },
+          { type: 'radio', name: 'secretions', label: 'Secretions', options: ['No secretions', 'Clear secretions', 'Mucopurulent secretions'] }
+        ]
+      },
+      {
+        key: 'mouth',
+        label: 'Mouth/Oropharynx',
+        icon: 'Mo',
+        groups: [
+          { type: 'radio', name: 'mucosa', label: 'Mucosa', options: ['Mucous membranes moist', 'Mucous membranes dry'] },
+          { type: 'radio', name: 'lips', label: 'Lips', options: ['Lips normal', 'Lips dry', 'Lips cracked'] },
+          { type: 'checkbox', name: 'checks', label: 'Oral cavity', options: ['Hard and soft palate intact', 'Tongue midline', 'Uvula midline', 'No drooling', 'Drooling present', 'No trismus', 'Gums normal', 'Sucking reflex present', 'Sucking reflex absent'] },
+          { type: 'radio', name: 'tonsils', label: 'Tonsils', options: ['Tonsils not visible', 'Tonsils visible'] },
+          { type: 'radio', name: 'pharyngealErythema', label: 'Pharyngeal erythema', options: ['Pharyngeal erythema absent', 'Pharyngeal erythema present'] },
+          { type: 'radio', name: 'exudate', label: 'Exudate', options: ['Exudate absent', 'Exudate present'] }
+        ],
+        freeHint: 'Tonsil grade, exudate details, teeth findings'
+      },
+      {
+        key: 'neck',
+        label: 'Neck',
+        icon: 'Nk',
+        groups: [
+          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['No meningism (Kernig and Brudzinski negative)', 'No lymphadenopathy', 'Lymphadenopathy present', 'No masses', 'No torticollis', 'Trachea midline'] },
+          { type: 'radio', name: 'movement', label: 'Movement', options: ['Neck movements full', 'Neck movements restricted'] }
+        ]
+      },
+      {
+        key: 'genitalia',
+        label: 'Genitalia',
+        icon: 'Gn',
+        groups: [
+          { type: 'checkbox', name: 'male', label: 'Male', options: ['Testes palpable bilaterally in scrotum', 'No scrotal swelling or erythema', 'Hypospadias absent', 'Hypospadias present'] },
+          { type: 'checkbox', name: 'female', label: 'Female', options: ['Labia normal appearing', 'No discharge', 'No erythema or swelling'] }
+        ]
+      },
+      {
+        key: 'hipsLimbs',
+        label: 'Hips/Limbs',
+        icon: 'HL',
+        groups: [
+          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Symmetrical movement', 'No erythema or swelling over joints', 'No deformity', 'Normal weight-bearing (if applicable)', 'Non-weight-bearing (if applicable)', 'No pseudoparalysis of limb'] }
+        ]
+      },
+      {
+        key: 'spineBack',
+        label: 'Spine/Back',
+        icon: 'Sp',
+        groups: [
+          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Midline intact', 'No sacral dimple, sinus or hair tuft', 'No spinal tenderness', 'No paraspinal swelling'] }
+        ]
+      },
+      {
+        key: 'neurology',
+        label: 'Neurology',
+        icon: 'Nr',
+        groups: [
+          { type: 'radio', name: 'tone', label: 'Tone', options: ['Tone normal centrally and peripherally', 'Tone increased centrally and peripherally', 'Tone decreased centrally and peripherally'] },
+          { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Movement symmetrical in all four limbs', 'DTRs +2 bilaterally', 'Behaviour and alertness appropriate', 'Fontanelle as above', 'No focal neurology'] },
+          { type: 'radio', name: 'seizure', label: 'Seizure activity', options: ['No seizure activity', 'Seizure activity present'] }
+        ]
+      }
+    ];
+
+    var PRIORITY_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen'];
+    var LUNG_FINDINGS = ['Vesicular breath sounds', 'Reduced air entry', 'Wheeze', 'Crackles'];
+    var LUNG_ZONES = [
+      { key: 'left_upper', label: 'Left upper zone' },
+      { key: 'left_middle', label: 'Left middle zone' },
+      { key: 'left_base', label: 'Left base' },
+      { key: 'right_upper', label: 'Right upper zone' },
+      { key: 'right_middle', label: 'Right middle zone' },
+      { key: 'right_base', label: 'Right base' }
+    ];
+    var lungZoneState = {
+      left_upper: [],
+      left_middle: [],
+      left_base: [],
+      right_upper: [],
+      right_middle: [],
+      right_base: []
+    };
+    var lungZoneNotes = {
+      left_upper: '',
+      left_middle: '',
+      left_base: '',
+      right_upper: '',
+      right_middle: '',
+      right_base: ''
+    };
+    var activeLungZone = 'right_upper';
+
+    var ABNORMAL_PATTERNS = [
+      'present', 'increased', 'decreased', 'unwell', 'appears unwell', 'distress', 'not interacting',
+      'drowsy', 'irritable', 'inconsolable', 'cool peripherally', 'shut down',
+      'pale', 'jaundiced', 'mottled', 'cyanosed', 'bulging', 'sunken',
+      'separated', 'injected', 'discharge', 'erythematous', 'foreign body',
+      'dry', 'cracked', 'restricted', 'wheeze', 'crackles', 'bronchial breathing',
+      'active', 'murmur', 'rigid', 'distended', 'tender', 'reduced',
+      'absent', 'concern', 'inconsistent', 'haematoma', 'flaring present',
+      'cool peripheries', 'guarding present', 'hernia present', 'drooling present',
+      'non-weight-bearing', 'pseudoparalysis', 'seizure activity present'
+    ];
+
+    var NORMAL_PATTERNS = [
+      'no ', 'absent', 'normal', 'intact', 'clear', 'moist',
+      'warm and well perfused', 'warm peripheries', 'appears well',
+      'comfortable at rest', 'interacting with carer', 'consistent with',
+      'flat', 'pink', 'alert', 'soft', 'non-distended', 'non-tender', 'bowel sounds present',
+      'resonant', 'midline', 'symmetrical', 'palpable', 'pearly grey'
+    ];
+
+    function isAbnormal(text) {
+      var p = (text || '').toLowerCase();
+      for (var i = 0; i < ABNORMAL_PATTERNS.length; i++) {
+        if (p.indexOf(ABNORMAL_PATTERNS[i]) !== -1) return true;
+      }
+      return false;
+    }
+
+    function isNormal(text) {
+      var p = (text || '').toLowerCase();
+      for (var i = 0; i < NORMAL_PATTERNS.length; i++) {
+        if (p.indexOf(NORMAL_PATTERNS[i]) !== -1) return true;
+      }
+      return false;
+    }
+
+    function classifyFinding(text) {
+      var abnormal = isAbnormal(text);
+      var normal = isNormal(text);
+      if (abnormal && !normal) return 'abnormal';
+      if (normal && !abnormal) return 'normal';
+      if (abnormal && normal) return 'normal';
+      return 'neutral';
+    }
+
+    function makeId(sectionKey, groupName, idx) {
+      return sectionKey + '__' + groupName + '__' + idx;
+    }
+
+    function getLungZoneLabel(zoneKey) {
+      for (var i = 0; i < LUNG_ZONES.length; i++) {
+        if (LUNG_ZONES[i].key === zoneKey) return LUNG_ZONES[i].label.toLowerCase();
+      }
+      return zoneKey.replace('_', ' ');
+    }
+
+    function toggleLungFinding(zoneKey, finding, selected) {
+      var arr = lungZoneState[zoneKey] || [];
+      var idx = arr.indexOf(finding);
+      if (selected && idx === -1) arr.push(finding);
+      if (!selected && idx !== -1) arr.splice(idx, 1);
+      lungZoneState[zoneKey] = arr;
+      renderLungPickerControls();
+      updateOutput();
+    }
+
+    function setLungZoneNote(zoneKey, note) {
+      lungZoneNotes[zoneKey] = note || '';
+      renderLungPickerControls();
+      updateOutput();
+    }
+
+    function setActiveLungZone(zoneKey) {
+      activeLungZone = zoneKey;
+      renderLungPickerControls();
+    }
+
+    function getLungSummaryLine() {
+      var parts = [];
+      for (var i = 0; i < LUNG_ZONES.length; i++) {
+        var zone = LUNG_ZONES[i];
+        var findings = lungZoneState[zone.key] || [];
+        for (var f = 0; f < findings.length; f++) {
+          var finding = findings[f];
+          if (finding === 'Vesicular breath sounds') parts.push('vesicular breath sounds at the ' + getLungZoneLabel(zone.key));
+          else if (finding === 'Reduced air entry') parts.push('reduced air entry at the ' + getLungZoneLabel(zone.key));
+          else if (finding === 'Wheeze') parts.push('wheeze in the ' + getLungZoneLabel(zone.key));
+          else if (finding === 'Crackles') parts.push('crackles at the ' + getLungZoneLabel(zone.key));
+        }
+        var note = trimSentence(lungZoneNotes[zone.key] || '');
+        if (note) parts.push(note.toLowerCase() + ' at the ' + getLungZoneLabel(zone.key));
+      }
+      if (!parts.length) return '';
+      return sentenceCase(parts.join(', ')) + '.';
+    }
+
+    function renderLungPickerControls() {
+      var zoneTitle = document.getElementById('lungPickerTitle');
+      var chipsHost = document.getElementById('lungFindingChips');
+      var summaryHost = document.getElementById('lungSummary');
+      var noteInput = document.getElementById('lungZoneNoteInput');
+      if (!zoneTitle || !chipsHost || !summaryHost || !noteInput) return;
+
+      zoneTitle.textContent = 'Selected zone: ' + getLungZoneLabel(activeLungZone);
+      chipsHost.innerHTML = '';
+      var selectedFindings = lungZoneState[activeLungZone] || [];
+      for (var i = 0; i < LUNG_FINDINGS.length; i++) {
+        var finding = LUNG_FINDINGS[i];
+        var chip = document.createElement('label');
+        chip.className = 'lung-finding-chip';
+        var inp = document.createElement('input');
+        inp.type = 'checkbox';
+        inp.checked = selectedFindings.indexOf(finding) !== -1;
+        inp.setAttribute('aria-label', finding + ' for ' + getLungZoneLabel(activeLungZone));
+        inp.onchange = (function(zoneKey, findingLabel) {
+          return function() { toggleLungFinding(zoneKey, findingLabel, this.checked); };
+        })(activeLungZone, finding);
+        if (inp.checked) chip.classList.add('selected');
+        chip.appendChild(inp);
+        chip.appendChild(document.createTextNode(finding));
+        chipsHost.appendChild(chip);
+      }
+      noteInput.value = lungZoneNotes[activeLungZone] || '';
+      noteInput.setAttribute('aria-label', 'Free text for ' + getLungZoneLabel(activeLungZone));
+
+      var zoneButtons = document.querySelectorAll('.lung-zone');
+      for (var z = 0; z < zoneButtons.length; z++) {
+        var zoneKey = zoneButtons[z].getAttribute('data-zone');
+        zoneButtons[z].classList.remove('active', 'has-findings');
+        if (zoneKey === activeLungZone) zoneButtons[z].classList.add('active');
+        if ((lungZoneState[zoneKey] || []).length > 0 || trimSentence(lungZoneNotes[zoneKey] || '')) zoneButtons[z].classList.add('has-findings');
+      }
+
+      summaryHost.innerHTML = '';
+      for (var j = 0; j < LUNG_ZONES.length; j++) {
+        var zone = LUNG_ZONES[j];
+        var count = (lungZoneState[zone.key] || []).length;
+        var hasNote = !!trimSentence(lungZoneNotes[zone.key] || '');
+        if (!count && !hasNote) continue;
+        var badge = document.createElement('span');
+        badge.className = 'lung-summary-badge';
+        badge.textContent = zone.label + ': ' + count + (hasNote ? ' + note' : '');
+        summaryHost.appendChild(badge);
+      }
+      if (!summaryHost.children.length) {
+        var none = document.createElement('span');
+        none.textContent = 'No lung-zone findings selected yet.';
+        summaryHost.appendChild(none);
+      }
+    }
+
+    function buildLungMapBlock() {
+      var wrap = document.createElement('div');
+      wrap.className = 'lung-map-wrap';
+      var title = document.createElement('div');
+      title.className = 'lung-map-title';
+      title.textContent = 'Lung auscultation map';
+      wrap.appendChild(title);
+
+      var layout = document.createElement('div');
+      layout.className = 'lung-map-layout';
+
+      var svgShell = document.createElement('div');
+      svgShell.className = 'lung-svg-shell';
+      svgShell.innerHTML =
+        '<svg viewBox=\"0 0 220 220\" width=\"100%\" role=\"img\" aria-label=\"Interactive lung zones\">' +
+        '<line x1=\"110\" y1=\"20\" x2=\"110\" y2=\"200\" stroke=\"var(--border)\" stroke-width=\"2\" />' +
+        '<rect class=\"lung-zone\" data-zone=\"left_upper\" tabindex=\"0\" role=\"button\" aria-label=\"Left upper zone\" x=\"24\" y=\"34\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"left_middle\" tabindex=\"0\" role=\"button\" aria-label=\"Left middle zone\" x=\"24\" y=\"86\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"left_base\" tabindex=\"0\" role=\"button\" aria-label=\"Left base\" x=\"24\" y=\"138\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"right_upper\" tabindex=\"0\" role=\"button\" aria-label=\"Right upper zone\" x=\"122\" y=\"34\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"right_middle\" tabindex=\"0\" role=\"button\" aria-label=\"Right middle zone\" x=\"122\" y=\"86\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"right_base\" tabindex=\"0\" role=\"button\" aria-label=\"Right base\" x=\"122\" y=\"138\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<text class=\"lung-zone-label\" x=\"40\" y=\"62\">L upper</text>' +
+        '<text class=\"lung-zone-label\" x=\"39\" y=\"114\">L mid</text>' +
+        '<text class=\"lung-zone-label\" x=\"43\" y=\"166\">L base</text>' +
+        '<text class=\"lung-zone-label\" x=\"135\" y=\"62\">R upper</text>' +
+        '<text class=\"lung-zone-label\" x=\"139\" y=\"114\">R mid</text>' +
+        '<text class=\"lung-zone-label\" x=\"139\" y=\"166\">R base</text>' +
+        '</svg>';
+      layout.appendChild(svgShell);
+
+      var picker = document.createElement('div');
+      picker.className = 'lung-picker';
+      picker.innerHTML =
+        '<div id=\"lungPickerTitle\" class=\"lung-picker-title\"></div>' +
+        '<div id=\"lungFindingChips\" class=\"lung-finding-chips\"></div>' +
+        '<div class=\"lung-zone-note\"><textarea id=\"lungZoneNoteInput\" rows=\"2\" placeholder=\"Optional free text for this zone (e.g. focal coarse creps posteriorly)\"></textarea></div>' +
+        '<div id=\"lungSummary\" class=\"lung-summary\"></div>';
+      layout.appendChild(picker);
+
+      wrap.appendChild(layout);
+      return wrap;
+    }
+
+    function handlePillClick(label) {
+      var input = label.querySelector('input');
+      var row = label.parentElement;
+      var siblings = row.querySelectorAll('.pill-opt');
+      for (var i = 0; i < siblings.length; i++) {
+        siblings[i].classList.remove('selected', 'abnormal');
+      }
+      label.classList.add('selected');
+      if (classifyFinding(input.value) === 'abnormal') {
+        label.classList.add('abnormal');
+      }
+      input.checked = true;
+      if (input.name === 'abdomen__tenderness') updateAbdomenTendernessField();
+      updateOutput();
+    }
+
+    function handleCheckClick(label) {
+      var input = label.querySelector('input');
+      setTimeout(function() {
+        if (input.checked) {
+          label.classList.add('selected');
+          if (classifyFinding(input.value) === 'abnormal') label.classList.add('abnormal');
+          else label.classList.remove('abnormal');
+        } else {
+          label.classList.remove('selected', 'abnormal');
+        }
+        updateOutput();
+      }, 0);
+    }
+
+    function renderSectionCard(section) {
+      var card = document.createElement('div');
+      card.className = 'section-card';
+
+      var heading = document.createElement('div');
+      heading.className = 'sec-heading';
+      var icon = document.createElement('span');
+      icon.className = 'sec-icon';
+      icon.textContent = section.icon;
+      heading.appendChild(icon);
+      heading.appendChild(document.createTextNode(section.label));
+      card.appendChild(heading);
+
+      for (var g = 0; g < section.groups.length; g++) {
+        var group = section.groups[g];
+        var row = document.createElement('div');
+        row.className = 'group-row';
+
+        if (group.label) {
+          var lbl = document.createElement('div');
+          lbl.className = 'group-label';
+          lbl.textContent = group.label;
+          row.appendChild(lbl);
+        }
+
+        if (group.type === 'radio') {
+          var pillRow = document.createElement('div');
+          pillRow.className = 'pill-row';
+          for (var o = 0; o < group.options.length; o++) {
+            var pillLabel = document.createElement('label');
+            pillLabel.className = 'pill-opt';
+            pillLabel.onclick = (function(lbl) { return function() { handlePillClick(lbl); }; })(pillLabel);
+
+            var inp = document.createElement('input');
+            inp.type = 'radio';
+            inp.name = section.key + '__' + group.name;
+            inp.id = makeId(section.key, group.name, o);
+            inp.value = group.options[o];
+
+            pillLabel.appendChild(inp);
+            pillLabel.appendChild(document.createTextNode(group.options[o]));
+            pillRow.appendChild(pillLabel);
+          }
+          row.appendChild(pillRow);
+        } else {
+          var checkGrid = document.createElement('div');
+          checkGrid.className = 'check-grid';
+          for (var o = 0; o < group.options.length; o++) {
+            var checkLabel = document.createElement('label');
+            checkLabel.className = 'check-opt';
+            checkLabel.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(checkLabel);
+
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.id = makeId(section.key, group.name, o);
+            cb.name = makeId(section.key, group.name, o);
+            cb.value = group.options[o];
+
+            checkLabel.appendChild(cb);
+            checkLabel.appendChild(document.createTextNode(group.options[o]));
+            checkGrid.appendChild(checkLabel);
+          }
+          row.appendChild(checkGrid);
+        }
+
+        card.appendChild(row);
+
+        if (section.key === 'abdomen' && group.name === 'tenderness') {
+          var tendernessFieldInline = document.createElement('div');
+          tendernessFieldInline.id = 'abdomenTenderLocationWrap';
+          tendernessFieldInline.className = 'free-text-field conditional-inline-field';
+          var tendernessInputInline = document.createElement('textarea');
+          tendernessInputInline.id = 'abdomen__tender_location';
+          tendernessInputInline.rows = 1;
+          tendernessInputInline.placeholder = 'Tender location (e.g. right iliac fossa)';
+          tendernessInputInline.addEventListener('input', updateOutput);
+          tendernessFieldInline.appendChild(tendernessInputInline);
+          card.appendChild(tendernessFieldInline);
+        }
+      }
+
+      if (section.key === 'respiratory') {
+        card.appendChild(buildLungMapBlock());
+      }
+
+      var freeField = document.createElement('div');
+      freeField.className = 'free-text-field';
+      var freeInput = document.createElement('textarea');
+      freeInput.id = section.key + '__free';
+      freeInput.rows = 1;
+      freeInput.placeholder = section.freeHint || 'Additional details';
+      freeInput.addEventListener('input', updateOutput);
+      freeField.appendChild(freeInput);
+      card.appendChild(freeField);
+
+      return card;
+    }
+
+    function renderSections() {
+      var host = document.getElementById('exam-sections');
+      host.innerHTML = '';
+      var sectionMap = {};
+      for (var i = 0; i < SECTIONS.length; i++) sectionMap[SECTIONS[i].key] = SECTIONS[i];
+
+      for (var p = 0; p < PRIORITY_KEYS.length; p++) {
+        if (sectionMap[PRIORITY_KEYS[p]]) {
+          host.appendChild(renderSectionCard(sectionMap[PRIORITY_KEYS[p]]));
+        }
+      }
+
+      var extraWrap = document.createElement('div');
+      extraWrap.className = 'extra-sections';
+      for (var s = 0; s < SECTIONS.length; s++) {
+        var section = SECTIONS[s];
+        if (PRIORITY_KEYS.indexOf(section.key) !== -1) continue;
+
+        var details = document.createElement('details');
+        var summary = document.createElement('summary');
+        summary.textContent = section.label;
+        details.appendChild(summary);
+        details.appendChild(renderSectionCard(section));
+        extraWrap.appendChild(details);
+      }
+      host.appendChild(extraWrap);
+    }
+
+    function trimSentence(text) {
+      return (text || '').trim().replace(/[.,;:\s]+$/g, '');
+    }
+
+    function sentenceCase(text) {
+      if (!text) return '';
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    function reorderPhrases(phrases) {
+      var abnormals = [];
+      var normals = [];
+      var neutrals = [];
+      for (var i = 0; i < phrases.length; i++) {
+        var cls = classifyFinding(phrases[i]);
+        if (cls === 'abnormal') abnormals.push(phrases[i]);
+        else if (cls === 'normal') normals.push(phrases[i]);
+        else neutrals.push(phrases[i]);
+      }
+      return abnormals.concat(neutrals, normals);
+    }
+
+    function updateAbdomenTendernessField() {
+      var wrap = document.getElementById('abdomenTenderLocationWrap');
+      var input = document.getElementById('abdomen__tender_location');
+      var tenderSelected = document.querySelector('input[name="abdomen__tenderness"]:checked');
+      var show = !!(tenderSelected && tenderSelected.value === 'Tender');
+      if (!wrap || !input) return;
+      wrap.classList.toggle('show', show);
+      if (!show) input.value = '';
+    }
+
+    function buildSectionLine(section) {
+      var phrases = [];
+      for (var g = 0; g < section.groups.length; g++) {
+        var group = section.groups[g];
+        var selector = group.type === 'radio'
+          ? 'input[name="' + section.key + '__' + group.name + '"]:checked'
+          : 'input[id^="' + section.key + '__' + group.name + '__"]:checked';
+        var selected = document.querySelectorAll(selector);
+        var vals = [];
+        for (var s = 0; s < selected.length; s++) vals.push(trimSentence(selected[s].value));
+        if (section.key === 'respiratory' && group.name === 'wob' && vals.length > 0) {
+          if (vals[0] === 'No WOB') vals = ['No increased WOB'];
+          else vals = [vals[0] + ' WOB'];
+        }
+        if (section.key === 'respiratory' && group.name === 'recession' && vals.length > 0) {
+          var recessionTypes = [];
+          for (var r = 0; r < vals.length; r++) {
+            if (vals[r] !== 'No recession') recessionTypes.push(vals[r].toLowerCase());
+          }
+          if (recessionTypes.length > 0) vals = [recessionTypes.join(', ') + ' recessions'];
+          else vals = ['No recessions'];
+        }
+        if (section.key === 'perfusionHydration' && group.name === 'crtCentral' && vals.length > 0) {
+          vals = ['CRT centrally ' + vals[0]];
+        }
+        if (section.key === 'perfusionHydration' && group.name === 'crtPeripheral' && vals.length > 0) {
+          vals = ['CRT peripherally ' + vals[0]];
+        }
+        if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0] === 'Tender') {
+          var tenderLoc = trimSentence(document.getElementById('abdomen__tender_location') ? document.getElementById('abdomen__tender_location').value : '');
+          if (tenderLoc) vals = ['Tender ' + tenderLoc];
+        }
+        if (vals.length > 0) phrases.push(vals.join(', '));
+      }
+
+      var freeText = trimSentence(document.getElementById(section.key + '__free').value);
+      if (freeText) phrases.push(sentenceCase(freeText));
+      if (phrases.length === 0) return '';
+      phrases = reorderPhrases(phrases);
+
+      var line = '';
+      for (var i = 0; i < phrases.length; i++) {
+        if (i === 0) line += phrases[i];
+        else if (i === phrases.length - 1) line += '. ' + phrases[i];
+        else line += ', ' + phrases[i];
+      }
+      return trimSentence(line) + '.';
+    }
+
+    function updateOutput() {
+      var lines = [];
+      for (var i = 0; i < SECTIONS.length; i++) {
+        var line = buildSectionLine(SECTIONS[i]);
+        if (line) lines.push(line);
+      }
+      var lungLine = getLungSummaryLine();
+      if (lungLine) lines.push(lungLine);
+      var outputEl = document.getElementById('output');
+      var titleEl = document.getElementById('outputToggleTitle');
+      if (lines.length) {
+        outputEl.textContent = lines.join('\n');
+        outputEl.classList.remove('empty');
+        titleEl.textContent = 'Examination Note (' + lines.length + ' system' + (lines.length > 1 ? 's' : '') + ')';
+      } else {
+        outputEl.textContent = 'Select findings above to generate the note.';
+        outputEl.classList.add('empty');
+        titleEl.textContent = 'Examination Note';
+      }
+    }
+
+    var outputExpanded = true;
+    function toggleOutputPanel() {
+      outputExpanded = !outputExpanded;
+      document.getElementById('outputPanel').classList.toggle('output-collapsed', !outputExpanded);
+    }
+
+    function copyOutput() {
+      var out = document.getElementById('output').textContent;
+      if (!out || document.getElementById('output').classList.contains('empty')) return;
+      var btn = document.getElementById('copyBtn');
+
+      function copiedState() {
+        btn.textContent = 'Copied \u2713';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1500);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(out).then(copiedState);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = out;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        copiedState();
+      }
+    }
+
+    function clearAll() {
+      var inputs = document.querySelectorAll('#exam-sections input[type="checkbox"], #exam-sections input[type="radio"]');
+      for (var i = 0; i < inputs.length; i++) inputs[i].checked = false;
+      var pills = document.querySelectorAll('.pill-opt.selected, .check-opt.selected');
+      for (var i = 0; i < pills.length; i++) pills[i].classList.remove('selected', 'abnormal');
+      var textareas = document.querySelectorAll('#exam-sections textarea');
+      for (var t = 0; t < textareas.length; t++) textareas[t].value = '';
+      for (var z = 0; z < LUNG_ZONES.length; z++) {
+        lungZoneState[LUNG_ZONES[z].key] = [];
+        lungZoneNotes[LUNG_ZONES[z].key] = '';
+      }
+      activeLungZone = 'right_upper';
+      renderLungPickerControls();
+      updateAbdomenTendernessField();
+      updateOutput();
+    }
+
+    renderSections();
+    var lungZoneEls = document.querySelectorAll('.lung-zone');
+    for (var i = 0; i < lungZoneEls.length; i++) {
+      lungZoneEls[i].addEventListener('click', function() { setActiveLungZone(this.getAttribute('data-zone')); });
+      lungZoneEls[i].addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setActiveLungZone(this.getAttribute('data-zone'));
+        }
+      });
+    }
+    renderLungPickerControls();
+    updateAbdomenTendernessField();
+    var lungNoteInput = document.getElementById('lungZoneNoteInput');
+    if (lungNoteInput) {
+      lungNoteInput.addEventListener('input', function() {
+        setLungZoneNote(activeLungZone, this.value);
+      });
+    }
+    updateOutput();
+  </script>
+</body>
+</html>
