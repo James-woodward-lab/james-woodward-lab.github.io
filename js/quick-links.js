@@ -6,6 +6,7 @@
   var QUICK_LINKS = [
     { label: "BNFc", url: "https://bnfc.nice.org.uk/", emoji: "💊", tags: ["medications", "dosing", "nice"] },
     { label: "BSAC", url: "https://bsac.org.uk/paediatricpathways/", emoji: "🧫", tags: ["paediatrics", "pathways", "antimicrobial"] },
+    { label: "Burns", url: "https://woundsinternational.com/wp-content/uploads/2023/02/5ebace6c70d4ea53a5d3e28ca65f1b74.pdf", emoji: "🔥", tags: ["burns", "wound care", "guideline"] },
     { label: "MDCalc", url: "https://www.mdcalc.com/", emoji: "🧮", tags: ["scores", "calculator", "reference"] },
     { label: "Healthier Together", url: "https://www.healthiertogether.nhs.uk/professional", emoji: "🌿", tags: ["paediatrics", "guidelines", "professional"] },
     { label: "SORT", url: "https://www.sort.nhs.uk/home.aspx", emoji: "📚", tags: ["resources", "local", "sort"] },

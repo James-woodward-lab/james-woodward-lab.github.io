@@ -317,6 +317,8 @@
     .heent-subblock:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     .heent-subtitle { font-size: 0.975rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
     .heent-tm-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .heent-tm-cols.conditional-inline-field { display: none; }
+    .heent-tm-cols.conditional-inline-field.show { display: grid; }
     @media (max-width: 520px) { .heent-tm-cols { grid-template-columns: 1fr; } }
     .heent-col-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
     .check-grid.heent-tonsils-grid { gap: var(--sp-within); margin-top: 6px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
@@ -759,6 +761,7 @@
         updateRecessionSubtypePanel();
         if (v === 'No recessions') clearRecessionSubtypes();
       }
+      if (n === 'respiratory__wob') updateRespiratoryWobDependentPanels();
       if (n === 'respiratory__auscultationMode') {
         updateAuscultationAddedPanel();
         if (v === 'Chest clear') clearAuscultationAddedFields();
@@ -766,6 +769,10 @@
       if (n === 'cardiovascular__heartMurmur') {
         updateCvMurmurDetailsPanel();
         if (v !== 'Murmur') clearCvMurmurDetailFields();
+      }
+      if (n === 'heent__tm_nad') {
+        updateHeentTmFindingsPanel();
+        if (v !== 'Tympanic membrane findings') clearHeentTmFindings();
       }
       updateOutput();
     }
@@ -785,8 +792,36 @@
       var wrap = document.getElementById('recessionSubtypeWrap');
       if (!wrap) return;
       var present = document.querySelector('input[name="respiratory__recessionMode"][value="Recessions present"]');
-      var show = !!(present && present.checked);
+      var wob = document.querySelector('input[name="respiratory__wob"]:checked');
+      var wobAllows = !!(wob && wob.value !== 'No WOB');
+      var show = wobAllows && !!(present && present.checked);
       wrap.classList.toggle('show', show);
+    }
+
+    function clearRespiratoryWobDependentFields() {
+      var depNames = ['recessionMode', 'trachealTug', 'grunting', 'nasalFlaring'];
+      for (var dn = 0; dn < depNames.length; dn++) {
+        var selected = document.querySelector('input[name="respiratory__' + depNames[dn] + '"]:checked');
+        if (selected) selected.checked = false;
+        var pills = document.querySelectorAll('input[name="respiratory__' + depNames[dn] + '"]');
+        for (var pi = 0; pi < pills.length; pi++) {
+          var pl = pills[pi].closest('.pill-opt');
+          if (pl) pl.classList.remove('selected', 'abnormal', 'pill-normal');
+        }
+      }
+      clearRecessionSubtypes();
+    }
+
+    function updateRespiratoryWobDependentPanels() {
+      var wob = document.querySelector('input[name="respiratory__wob"]:checked');
+      var showDependent = !!(wob && wob.value !== 'No WOB');
+      var depWrapIds = ['respWob_recessionModeWrap', 'respWob_trachealTugWrap', 'respWob_gruntingWrap', 'respWob_nasalFlaringWrap'];
+      for (var i = 0; i < depWrapIds.length; i++) {
+        var w = document.getElementById(depWrapIds[i]);
+        if (w) w.classList.toggle('show', showDependent);
+      }
+      if (!showDependent) clearRespiratoryWobDependentFields();
+      updateRecessionSubtypePanel();
     }
 
     function clearAuscultationAddedFields() {
@@ -827,6 +862,23 @@
       if (!wrap) return;
       var murmur = document.querySelector('input[name="cardiovascular__heartMurmur"][value="Murmur"]');
       var show = !!(murmur && murmur.checked);
+      wrap.classList.toggle('show', show);
+    }
+
+    function clearHeentTmFindings() {
+      var cols = document.querySelectorAll('.heent-tm-cols input[type="checkbox"]');
+      for (var i = 0; i < cols.length; i++) {
+        cols[i].checked = false;
+        var lab = cols[i].closest('.check-opt');
+        if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
+      }
+    }
+
+    function updateHeentTmFindingsPanel() {
+      var wrap = document.getElementById('heentTmFindingsWrap');
+      if (!wrap) return;
+      var findings = document.querySelector('input[name="heent__tm_nad"][value="Tympanic membrane findings"]');
+      var show = !!(findings && findings.checked);
       wrap.classList.toggle('show', show);
     }
 
@@ -997,9 +1049,30 @@
       nadL.appendChild(nadI);
       nadL.appendChild(document.createTextNode('Tympanic membranes NAD bilaterally'));
       nadRow.appendChild(nadL);
+      var findingsL = document.createElement('label');
+      findingsL.className = 'pill-opt';
+      findingsL.onclick = function(e) { handlePillClick(findingsL, e); };
+      var findingsI = document.createElement('input');
+      findingsI.type = 'radio';
+      findingsI.name = 'heent__tm_nad';
+      findingsI.value = 'Tympanic membrane findings';
+      findingsL.appendChild(findingsI);
+      findingsL.appendChild(document.createTextNode('Tympanic membrane findings'));
+      nadRow.appendChild(findingsL);
+      var waxL = document.createElement('label');
+      waxL.className = 'pill-opt';
+      waxL.onclick = function(e) { handlePillClick(waxL, e); };
+      var waxI = document.createElement('input');
+      waxI.type = 'radio';
+      waxI.name = 'heent__tm_nad';
+      waxI.value = 'Wax filled ears';
+      waxL.appendChild(waxI);
+      waxL.appendChild(document.createTextNode('Wax filled ears'));
+      nadRow.appendChild(waxL);
       tmB.appendChild(nadRow);
       var tmCols = document.createElement('div');
-      tmCols.className = 'heent-tm-cols';
+      tmCols.id = 'heentTmFindingsWrap';
+      tmCols.className = 'heent-tm-cols conditional-inline-field';
       tmCols.appendChild(heentTmEarColumn('L', 'Left'));
       tmCols.appendChild(heentTmEarColumn('R', 'Right'));
       tmB.appendChild(tmCols);
@@ -1148,9 +1221,11 @@
       var findingOrder = ['erythematous', 'bulging', 'perforated', 'purulent'];
 
       var nad = root.querySelector('input[name="heent__tm_nad"]:checked');
-      if (nad) {
+      if (nad && nad.value === 'Tympanic membranes NAD bilaterally') {
         lines.push('Tympanic membranes NAD bilaterally.');
-      } else {
+      } else if (nad && nad.value === 'Wax filled ears') {
+        lines.push('Wax filled ear canals, tympanic membranes not visualised.');
+      } else if (nad && nad.value === 'Tympanic membrane findings') {
         var lcol = root.querySelector('.heent-tm-L-col');
         var rcol = root.querySelector('.heent-tm-R-col');
         var tmBits = [];
@@ -1233,6 +1308,10 @@
         row.className = 'group-row';
         if (section.key === 'respiratory' && group.name === 'recessionMode') row.classList.add('span-full');
         if (section.key === 'respiratory' && group.name === 'auscultationMode') row.classList.add('span-full');
+        if (section.key === 'respiratory' && (group.name === 'recessionMode' || group.name === 'trachealTug' || group.name === 'grunting' || group.name === 'nasalFlaring')) {
+          row.classList.add('conditional-inline-field');
+          row.id = 'respWob_' + group.name + 'Wrap';
+        }
 
         if (group.label) {
           var lbl = document.createElement('div');
@@ -1693,16 +1772,21 @@
       activeLungZone = 'right_upper';
       renderLungPickerControls();
       updateAbdomenTendernessField();
+      updateRespiratoryWobDependentPanels();
       updateRecessionSubtypePanel();
       updateCvMurmurDetailsPanel();
       clearCvMurmurDetailFields();
+      updateHeentTmFindingsPanel();
+      clearHeentTmFindings();
       clearAuscultationAddedFields();
       updateAuscultationAddedPanel();
       updateOutput();
     }
 
     renderSections();
+    updateRespiratoryWobDependentPanels();
     updateCvMurmurDetailsPanel();
+    updateHeentTmFindingsPanel();
     updateAuscultationAddedPanel();
     var lungZoneEls = document.querySelectorAll('.lung-zone');
     for (var i = 0; i < lungZoneEls.length; i++) {
