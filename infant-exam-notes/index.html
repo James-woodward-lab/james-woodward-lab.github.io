@@ -384,6 +384,7 @@
           { type: 'radio', name: 'trachealTug', label: 'Tracheal tug', options: ['Tracheal tug absent', 'Tracheal tug present'] },
           { type: 'radio', name: 'nasalFlaring', label: 'Nasal flaring', options: ['Nasal flaring absent', 'Nasal flaring present'] },
           { type: 'radio', name: 'grunting', label: 'Grunting', options: ['Grunting absent', 'Grunting present'] },
+          { type: 'checkbox', name: 'upperAirwaySounds', label: 'Upper airway sounds', options: ['No upper airway sounds', 'Soft stridor', 'Harsh stridor', 'Stertorous'] },
           { type: 'radio', name: 'chestAppearance', label: 'Chest appearance', options: ['Good chest rise'] },
           { type: 'radio', name: 'auscultationMode', label: 'Auscultation', options: ['Chest clear', 'Added sounds'] }
         ],
@@ -518,7 +519,7 @@
       'active', 'murmur', 'rigid', 'distended', 'tender', 'reduced',
       'absent', 'concern', 'inconsistent', 'haematoma', 'flaring present',
       'cool peripheries', 'guarding present', 'hernia present', 'drooling present',
-      'non-weight-bearing', 'pseudoparalysis', 'seizure activity present'
+      'non-weight-bearing', 'pseudoparalysis', 'seizure activity present', 'stridor', 'stertorous'
     ];
 
     var NORMAL_PATTERNS = [
@@ -857,6 +858,26 @@
     function handleCheckClick(label) {
       var input = label.querySelector('input');
       setTimeout(function() {
+        if (input.name.indexOf('respiratory__upperAirwaySounds__') === 0) {
+          var upperWrap = label.closest('.group-row');
+          var upperInputs = upperWrap ? upperWrap.querySelectorAll('input[type="checkbox"]') : [];
+          if (input.checked && input.value === 'No upper airway sounds') {
+            for (var ui = 0; ui < upperInputs.length; ui++) {
+              if (upperInputs[ui] === input) continue;
+              upperInputs[ui].checked = false;
+              var ulab = upperInputs[ui].closest('.check-opt');
+              if (ulab) ulab.classList.remove('selected', 'abnormal', 'pill-normal');
+            }
+          } else if (input.checked && input.value !== 'No upper airway sounds') {
+            for (var uj = 0; uj < upperInputs.length; uj++) {
+              if (upperInputs[uj].value !== 'No upper airway sounds') continue;
+              upperInputs[uj].checked = false;
+              var nlab = upperInputs[uj].closest('.check-opt');
+              if (nlab) nlab.classList.remove('selected', 'abnormal', 'pill-normal');
+            }
+          }
+        }
+
         if (input.checked) {
           label.classList.add('selected');
           if (label.closest('.heent-tm-L-col') || label.closest('.heent-tm-R-col')) {
@@ -1290,7 +1311,7 @@
           ausPanel.className = 'auscultation-added-panel';
           var ausGrid = document.createElement('div');
           ausGrid.className = 'check-grid auscultation-added-check-grid';
-          var soundOpts = ['Wheeze', 'Crackles', 'Bronchial Breathing'];
+          var soundOpts = ['Wheeze', 'Crackles', 'Bronchial Breathing', 'Upper airway secretions heard'];
           for (var ai = 0; ai < soundOpts.length; ai++) {
             var ausLab = document.createElement('label');
             ausLab.className = 'check-opt';
