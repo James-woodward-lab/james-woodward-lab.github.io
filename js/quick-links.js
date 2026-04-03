@@ -5,6 +5,7 @@
 (function() {
   var QUICK_LINKS = [
     { label: "BNFc", url: "https://bnfc.nice.org.uk/", emoji: "💊", tags: ["medications", "dosing", "nice"] },
+    { label: "BSAC", url: "https://bsac.org.uk/paediatricpathways/", emoji: "🧫", tags: ["paediatrics", "pathways", "antimicrobial"] },
     { label: "MDCalc", url: "https://www.mdcalc.com/", emoji: "🧮", tags: ["scores", "calculator", "reference"] },
     { label: "Healthier Together", url: "https://www.healthiertogether.nhs.uk/professional", emoji: "🌿", tags: ["paediatrics", "guidelines", "professional"] },
     { label: "SORT", url: "https://www.sort.nhs.uk/home.aspx", emoji: "📚", tags: ["resources", "local", "sort"] },

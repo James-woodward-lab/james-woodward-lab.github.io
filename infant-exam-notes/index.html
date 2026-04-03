@@ -78,16 +78,16 @@
       gap: 6px;
     }
     .section-card .sec-heading .sec-icon {
-      width: 28.6px;
-      height: 28.6px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: var(--accent-on);
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.845rem;
-      font-weight: 800;
+      width: auto;
+      height: auto;
+      background: transparent;
+      color: inherit;
+      border-radius: 0;
+      font-size: 1.05em;
+      line-height: 1;
       flex-shrink: 0;
     }
 
@@ -354,7 +354,7 @@
       {
         key: 'general',
         label: 'General',
-        icon: 'G',
+        icon: '🏥',
         groups: [
           { type: 'radio', name: 'state', label: 'Alertness', options: ['Alert', 'Drowsy', 'Irritable', 'Inconsolable'] },
           { type: 'radio', name: 'appearance', label: 'Appearance', options: ['Appears well', 'Appears unwell'] },
@@ -366,7 +366,7 @@
       {
         key: 'cardiovascular',
         label: 'Cardiovascular',
-        icon: 'CV',
+        icon: '🫀',
         groups: [
           { type: 'radio', name: 'heartMurmur', label: 'Heart sounds / murmur', options: ['HS I + II only', 'Murmur'] },
           { type: 'checkbox', name: 'checks', label: 'Findings', options: ['Femorals palpable and equal', 'No hepatomegaly'] },
@@ -377,7 +377,7 @@
       {
         key: 'respiratory',
         label: 'Respiratory',
-        icon: 'RS',
+        icon: '🫁',
         groups: [
           { type: 'radio', name: 'wob', label: 'Work of breathing', options: ['No WOB', 'Mild', 'Moderate', 'Severe'] },
           { type: 'radio', name: 'recessionMode', label: 'Recession', options: ['No recessions', 'Recessions present'] },
@@ -393,7 +393,7 @@
       {
         key: 'abdomen',
         label: 'Abdomen',
-        icon: 'Ab',
+        icon: '💩',
         groups: [
           { type: 'radio', name: 'consistency', label: 'Consistency', options: ['Soft', 'Rigid'] },
           { type: 'radio', name: 'distension', label: 'Distension', options: ['Non-distended', 'Distended'] },
@@ -408,7 +408,7 @@
       {
         key: 'perfusionHydration',
         label: 'Perfusion/Hydration',
-        icon: 'PH',
+        icon: '💧',
         groups: [
           { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm and well perfused', 'Cool peripherally', 'Shut down'] },
           { type: 'radio', name: 'crtCentral', label: 'Capillary refill - Centrally', options: ['<2s', '2-3s', '>3s'] },
@@ -421,7 +421,7 @@
       {
         key: 'skin',
         label: 'Skin',
-        icon: 'Sk',
+        icon: '💪',
         groups: [
           { type: 'radio', name: 'colour', label: 'Colour', options: ['Pink', 'Pale', 'Jaundiced', 'Mottled', 'Cyanosed'] },
           { type: 'radio', name: 'rash', label: 'Rash', options: ['No rash', 'Rash (blanching)', 'Rash (non-blanching)'] },
@@ -434,7 +434,7 @@
       {
         key: 'neurology',
         label: 'Neurology',
-        icon: 'Nr',
+        icon: '🧠',
         groups: [
           { type: 'radio', name: 'correctedAge', label: 'Corrected gestational age', options: ['Corrected age appropriate', 'Corrected age preterm considered'] },
           { type: 'radio', name: 'behaviouralState', label: 'Behavioural state at exam', options: ['Awake and alert', 'Drowsy', 'Quiet sleep', 'Active sleep'] },
@@ -753,6 +753,7 @@
       else if (n === 'heent__conj' && v === 'Normal conjunctiva') label.classList.add('pill-normal');
       else if (n === 'heent__conj' && (v === 'Conjunctival injection' || v === 'Conjunctival discharge')) label.classList.add('abnormal');
       else if (classifyFinding(v) === 'abnormal') label.classList.add('abnormal');
+      else if (classifyFinding(v) === 'normal') label.classList.add('pill-normal');
       if (n === 'abdomen__tenderness') updateAbdomenTendernessField();
       if (n === 'respiratory__recessionMode') {
         updateRecessionSubtypePanel();
@@ -772,7 +773,7 @@
       for (var i = 0; i < cbs.length; i++) {
         cbs[i].checked = false;
         var lab = cbs[i].closest('.check-opt');
-        if (lab) lab.classList.remove('selected', 'abnormal');
+        if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
       }
     }
 
@@ -791,7 +792,7 @@
         for (var i = 0; i < cbs.length; i++) {
           cbs[i].checked = false;
           var lab = cbs[i].closest('.check-opt');
-          if (lab) lab.classList.remove('selected', 'abnormal');
+          if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
         }
       }
       var o = document.getElementById('respiratory__auscultation_other');
@@ -886,7 +887,8 @@
           } else if (label.closest('#recessionSubtypeWrap')) label.classList.add('abnormal');
           else if (label.closest('.auscultation-added-check-grid')) label.classList.add('abnormal');
           else if (classifyFinding(input.value) === 'abnormal') label.classList.add('abnormal');
-          else label.classList.remove('abnormal');
+          else if (classifyFinding(input.value) === 'normal') label.classList.add('pill-normal');
+          else label.classList.remove('abnormal', 'pill-normal');
           if (label.closest('#recessionSubtypeWrap')) syncRecessionPresentFromSubtypes();
         } else {
           label.classList.remove('selected', 'abnormal', 'pill-normal');
@@ -949,7 +951,7 @@
       heentHeading.className = 'sec-heading';
       var heentIcon = document.createElement('span');
       heentIcon.className = 'sec-icon';
-      heentIcon.textContent = 'H';
+      heentIcon.textContent = '👂';
       heentHeading.appendChild(heentIcon);
       heentHeading.appendChild(document.createTextNode('HEENT'));
       card.appendChild(heentHeading);
