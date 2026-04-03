@@ -410,11 +410,11 @@
         label: 'Perfusion/Hydration',
         icon: '💧',
         groups: [
-          { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm and well perfused', 'Cool peripherally', 'Shut down'] },
           { type: 'radio', name: 'crtCentral', label: 'Capillary refill - Centrally', options: ['<2s', '2-3s', '>3s'] },
           { type: 'radio', name: 'crtPeripheral', label: 'Capillary refill - Peripherally', options: ['<2s', '2-3s', '>3s'] },
-          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', options: ['Fontanelle flat', 'Fontanelle bulging', 'Fontanelle sunken'] },
-          { type: 'radio', name: 'mucosa', label: 'Mucous membranes', options: ['Moist mucous membranes', 'Dry mucous membranes'] }
+          { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm and well perfused', 'Cool peripherally', 'Shut down'] },
+          { type: 'radio', name: 'mucosa', label: 'Mucous membranes', options: ['Moist mucous membranes', 'Dry mucous membranes'] },
+          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', options: ['Fontanelle flat', 'Fontanelle bulging', 'Fontanelle sunken'] }
         ],
         freeHint: 'Hydration note if relevant'
       },
@@ -763,6 +763,10 @@
         updateAuscultationAddedPanel();
         if (v === 'Chest clear') clearAuscultationAddedFields();
       }
+      if (n === 'cardiovascular__heartMurmur') {
+        updateCvMurmurDetailsPanel();
+        if (v !== 'Murmur') clearCvMurmurDetailFields();
+      }
       updateOutput();
     }
 
@@ -804,6 +808,25 @@
       if (!wrap) return;
       var added = document.querySelector('input[name="respiratory__auscultationMode"][value="Added sounds"]');
       var show = !!(added && added.checked);
+      wrap.classList.toggle('show', show);
+    }
+
+    function clearCvMurmurDetailFields() {
+      var wrap = document.getElementById('cvMurmurDetailsWrap');
+      if (!wrap) return;
+      var radios = wrap.querySelectorAll('input[type="radio"]');
+      for (var r = 0; r < radios.length; r++) radios[r].checked = false;
+      var checks = wrap.querySelectorAll('input[type="checkbox"]');
+      for (var c = 0; c < checks.length; c++) checks[c].checked = false;
+      var labels = wrap.querySelectorAll('.pill-opt.selected, .check-opt.selected');
+      for (var l = 0; l < labels.length; l++) labels[l].classList.remove('selected', 'abnormal', 'pill-normal');
+    }
+
+    function updateCvMurmurDetailsPanel() {
+      var wrap = document.getElementById('cvMurmurDetailsWrap');
+      if (!wrap) return;
+      var murmur = document.querySelector('input[name="cardiovascular__heartMurmur"][value="Murmur"]');
+      var show = !!(murmur && murmur.checked);
       wrap.classList.toggle('show', show);
     }
 
@@ -1340,6 +1363,67 @@
           ausWrap.appendChild(ausPanel);
           groupsWrap.appendChild(ausWrap);
         }
+
+        if (section.key === 'cardiovascular' && group.name === 'heartMurmur') {
+          var murmurWrap = document.createElement('div');
+          murmurWrap.id = 'cvMurmurDetailsWrap';
+          murmurWrap.className = 'group-row span-full conditional-inline-field';
+
+          function addMurmurCheckGroup(title, fieldName, options) {
+            var gl = document.createElement('div');
+            gl.className = 'group-label';
+            gl.textContent = title;
+            murmurWrap.appendChild(gl);
+            var grid = document.createElement('div');
+            grid.className = 'check-grid';
+            for (var i = 0; i < options.length; i++) {
+              var l = document.createElement('label');
+              l.className = 'check-opt';
+              l.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(l);
+              var cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.id = 'cardiovascular__' + fieldName + '__' + i;
+              cb.name = 'cardiovascular__' + fieldName + '__' + i;
+              cb.value = options[i];
+              l.appendChild(cb);
+              l.appendChild(document.createTextNode(options[i]));
+              grid.appendChild(l);
+            }
+            murmurWrap.appendChild(grid);
+          }
+
+          function addMurmurRadioGroup(title, fieldName, options) {
+            var gl = document.createElement('div');
+            gl.className = 'group-label';
+            gl.textContent = title;
+            murmurWrap.appendChild(gl);
+            var row = document.createElement('div');
+            row.className = 'pill-row';
+            for (var i = 0; i < options.length; i++) {
+              var l = document.createElement('label');
+              l.className = 'pill-opt';
+              l.onclick = (function(lbl) { return function(e) { handlePillClick(lbl, e); }; })(l);
+              var inp = document.createElement('input');
+              inp.type = 'radio';
+              inp.name = 'cardiovascular__' + fieldName;
+              inp.id = 'cardiovascular__' + fieldName + '__' + i;
+              inp.value = options[i];
+              l.appendChild(inp);
+              l.appendChild(document.createTextNode(options[i]));
+              row.appendChild(l);
+            }
+            murmurWrap.appendChild(row);
+          }
+
+          addMurmurCheckGroup('Timing', 'murmurTiming', ['Ejection systolic', 'Pansystolic', 'Diastolic', 'Continuous']);
+          addMurmurRadioGroup('Grade', 'murmurGrade', ['1', '2', '3', '4', '5', '6']);
+          addMurmurCheckGroup('Location', 'murmurLocation', ['Upper left sternal edge', 'Upper right sternal edge', 'Lower left sternal edge', 'Apex']);
+          addMurmurCheckGroup('Radiation', 'murmurRadiation', ['Axilla', 'Carotids', 'Back', 'None']);
+          addMurmurCheckGroup('Character', 'murmurCharacter', ['Soft', 'Harsh', 'Blowing', 'Rumbling', 'Vibratory']);
+          addMurmurCheckGroup('Pitch', 'murmurPitch', ['Low', 'Medium', 'High']);
+
+          groupsWrap.appendChild(murmurWrap);
+        }
       }
 
       card.appendChild(groupsWrap);
@@ -1464,6 +1548,28 @@
         }
         if (section.key === 'cardiovascular' && group.name === 'heartMurmur' && vals.length > 0 && vals[0] === 'Murmur') {
           vals = ['Murmur present'];
+          var murmurDetails = [];
+          var timingInputs = document.querySelectorAll('input[id^="cardiovascular__murmurTiming__"]:checked');
+          for (var ti = 0; ti < timingInputs.length; ti++) murmurDetails.push(timingInputs[ti].value.toLowerCase());
+          var gradeInput = document.querySelector('input[name="cardiovascular__murmurGrade"]:checked');
+          if (gradeInput) murmurDetails.push('grade ' + gradeInput.value);
+          var locInputs = document.querySelectorAll('input[id^="cardiovascular__murmurLocation__"]:checked');
+          var locVals = [];
+          for (var li = 0; li < locInputs.length; li++) locVals.push(locInputs[li].value.toLowerCase());
+          if (locVals.length) murmurDetails.push('at ' + locVals.join(', '));
+          var radInputs = document.querySelectorAll('input[id^="cardiovascular__murmurRadiation__"]:checked');
+          var radVals = [];
+          for (var ri = 0; ri < radInputs.length; ri++) radVals.push(radInputs[ri].value.toLowerCase());
+          if (radVals.length) murmurDetails.push('radiation ' + radVals.join(', '));
+          var charInputs = document.querySelectorAll('input[id^="cardiovascular__murmurCharacter__"]:checked');
+          var charVals = [];
+          for (var ci = 0; ci < charInputs.length; ci++) charVals.push(charInputs[ci].value.toLowerCase());
+          if (charVals.length) murmurDetails.push(charVals.join(', '));
+          var pitchInputs = document.querySelectorAll('input[id^="cardiovascular__murmurPitch__"]:checked');
+          var pitchVals = [];
+          for (var pi = 0; pi < pitchInputs.length; pi++) pitchVals.push(pitchInputs[pi].value.toLowerCase() + '-pitched');
+          if (pitchVals.length) murmurDetails.push(pitchVals.join(', '));
+          if (murmurDetails.length) vals = ['Murmur present (' + murmurDetails.join('; ') + ')'];
         }
         if (section.key === 'perfusionHydration' && (group.name === 'crtCentral' || group.name === 'crtPeripheral') && vals.length > 0) {
           var crtMap = { '<2s': '<2 seconds', '2-3s': '2-3 seconds', '>3s': '>3 seconds' };
@@ -1588,12 +1694,15 @@
       renderLungPickerControls();
       updateAbdomenTendernessField();
       updateRecessionSubtypePanel();
+      updateCvMurmurDetailsPanel();
+      clearCvMurmurDetailFields();
       clearAuscultationAddedFields();
       updateAuscultationAddedPanel();
       updateOutput();
     }
 
     renderSections();
+    updateCvMurmurDetailsPanel();
     updateAuscultationAddedPanel();
     var lungZoneEls = document.querySelectorAll('.lung-zone');
     for (var i = 0; i < lungZoneEls.length; i++) {
