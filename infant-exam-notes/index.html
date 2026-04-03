@@ -384,7 +384,7 @@
           { type: 'radio', name: 'trachealTug', label: 'Tracheal tug', options: ['Tracheal tug absent', 'Tracheal tug present'] },
           { type: 'radio', name: 'nasalFlaring', label: 'Nasal flaring', options: ['Nasal flaring absent', 'Nasal flaring present'] },
           { type: 'radio', name: 'grunting', label: 'Grunting', options: ['Grunting absent', 'Grunting present'] },
-          { type: 'checkbox', name: 'upperAirwaySounds', label: 'Upper airway sounds', options: ['No upper airway sounds', 'Soft stridor', 'Harsh stridor', 'Stertorous'] },
+          { type: 'checkbox', name: 'upperAirwaySounds', label: 'Upper airway sounds', options: ['No upper airway sounds', 'Soft stridor', 'Harsh stridor', 'Stertorous', 'Upper airway secretions audible'] },
           { type: 'radio', name: 'chestAppearance', label: 'Chest appearance', options: ['Good chest rise'] },
           { type: 'radio', name: 'auscultationMode', label: 'Auscultation', options: ['Chest clear', 'Added sounds'] }
         ],
@@ -1466,7 +1466,7 @@
         if (section.key === 'perfusionHydration' && (group.name === 'crtCentral' || group.name === 'crtPeripheral') && vals.length > 0) {
           var crtMap = { '<2s': '<2 seconds', '2-3s': '2-3 seconds', '>3s': '>3 seconds' };
           var crtPhrase = crtMap[vals[0]] || vals[0];
-          vals = [group.name === 'crtCentral' ? 'CRT ' + crtPhrase : 'CRT peripheral ' + crtPhrase];
+          vals = [group.name === 'crtCentral' ? 'Central CRT ' + crtPhrase : 'CRT peripheral ' + crtPhrase];
         }
         if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0] === 'Tender') {
           var tenderLoc = trimSentence(document.getElementById('abdomen__tender_location') ? document.getElementById('abdomen__tender_location').value : '');
