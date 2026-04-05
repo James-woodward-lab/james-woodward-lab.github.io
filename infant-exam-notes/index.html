@@ -138,8 +138,13 @@
     /* ===== CHECK BUTTONS (checkbox) ===== */
     .check-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--sp-within);
+    }
+    @media (max-width: 520px) {
+      .check-grid {
+        grid-template-columns: 1fr;
+      }
     }
     .check-opt {
       display: flex;
@@ -178,6 +183,85 @@
     .check-opt.selected { border-color: var(--accent); color: var(--text); background: rgba(36,170,204,0.06); }
     .check-opt.selected.abnormal { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.06); }
     .check-opt.selected.pill-normal { border-color: var(--success); color: var(--success); background: rgba(34,197,94,0.06); }
+
+    /* ===== ABDOMEN PERITONITIC YES/NO (uses .check-grid for tile width; .check-opt-like rows) ===== */
+    .peritonitic-yn-wrap {
+      width: 100%;
+    }
+    .peritonitic-yn-row {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+      padding: 6px 10px;
+      min-height: 36px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .peritonitic-yn-label {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.35;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .peritonitic-yn-actions {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      gap: 6px;
+    }
+    .peritonitic-yn-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      min-height: 36px;
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      .peritonitic-yn-row {
+        min-height: 44px;
+        padding: 8px 12px;
+      }
+      .peritonitic-yn-btn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 8px 12px;
+      }
+    }
+    .peritonitic-yn-btn input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .peritonitic-yn-btn:hover { border-color: var(--accent); color: var(--text); }
+    .peritonitic-yn-btn.selected { font-weight: 500; }
+    .peritonitic-yn-btn.selected.pill-normal {
+      border-color: var(--success);
+      color: var(--success);
+      background: rgba(34, 197, 94, 0.06);
+    }
+    .peritonitic-yn-btn.selected.abnormal {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.06);
+    }
 
     /* ===== FREE TEXT ===== */
     .free-text-field { margin-top: var(--sp-group); }
@@ -319,9 +403,13 @@
     .heent-tm-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
     .heent-tm-cols.conditional-inline-field { display: none; }
     .heent-tm-cols.conditional-inline-field.show { display: grid; }
+    .heent-tonsil-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .heent-tonsil-cols.conditional-inline-field { display: none; }
+    .heent-tonsil-cols.conditional-inline-field.show { display: grid; }
     @media (max-width: 520px) { .heent-tm-cols { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) { .heent-tonsil-cols { grid-template-columns: 1fr; } }
     .heent-col-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-    .check-grid.heent-tonsils-grid { gap: var(--sp-within); margin-top: 6px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+    #heentMouthBlock .peritonitic-yn-wrap { margin-top: 10px; }
     .check-grid.heent-meningism-grid { gap: var(--sp-within); }
 
     .section-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
@@ -352,6 +440,27 @@
   </div>
 
   <script>
+    var ABDOMEN_PERITONITIC_YN_ROWS = [
+      { key: 'peritonitic', label: 'Peritonitic', yes: 'Peritonitic', no: 'Not peritonitic', normalYes: false },
+      { key: 'rebound', label: 'Rebound tenderness', yes: 'Rebound tenderness present', no: 'No rebound tenderness', normalYes: false },
+      { key: 'percussion', label: 'Percussion tenderness', yes: 'Percussion tenderness present', no: 'No percussion tenderness', normalYes: false },
+      { key: 'straightLeg', label: 'Straight leg raise', yes: 'Able to straight leg raise without pain', no: 'Unable to straight leg raise due to pain', normalYes: true },
+      { key: 'singleLeg', label: 'Single leg stand', yes: 'able to single leg stand without pain', no: 'unable to single leg stand', normalYes: true },
+      { key: 'jump', label: 'Jump', yes: 'able to jump without pain', no: 'Not able to jump due to pain', normalYes: true }
+    ];
+
+    var HEENT_ORAL_YN_ROWS = [
+      { key: 'pharyngealEry', label: 'Pharyngeal erythema', yes: 'Pharynx erythematous', no: 'No pharyngeal erythema', normalYes: false },
+      { key: 'uvulaMidline', label: 'Uvula midline', yes: 'Uvula midline', no: 'uvula deviated', normalYes: true },
+      { key: 'drooling', label: 'Drooling', yes: 'Drooling', no: 'No drooling', normalYes: false },
+      { key: 'trismus', label: 'Trismus', yes: 'Trismus present', no: 'No trismus', normalYes: false }
+    ];
+
+    var PERITONITIC_YN_ROW_REGISTRY = {
+      abdomen__peritonitic: ABDOMEN_PERITONITIC_YN_ROWS,
+      heent__oral_yn: HEENT_ORAL_YN_ROWS
+    };
+
     var SECTIONS = [
       {
         key: 'general',
@@ -387,7 +496,7 @@
           { type: 'radio', name: 'nasalFlaring', label: 'Nasal flaring', options: ['Nasal flaring absent', 'Nasal flaring present'] },
           { type: 'radio', name: 'grunting', label: 'Grunting', options: ['Grunting absent', 'Grunting present'] },
           { type: 'checkbox', name: 'upperAirwaySounds', label: 'Upper airway sounds', options: ['No upper airway sounds', 'Soft stridor', 'Harsh stridor', 'Stertorous', 'Upper airway secretions audible'] },
-          { type: 'radio', name: 'chestAppearance', label: 'Chest appearance', options: ['Good chest rise'] },
+          { type: 'radio', name: 'chestAppearance', label: 'Chest appearance', options: ['Good chest rise', 'Asymmetrical chest rise'] },
           { type: 'radio', name: 'auscultationMode', label: 'Auscultation', options: ['Chest clear', 'Added sounds'] }
         ],
         freeHint: 'Describe cough or added sounds'
@@ -402,7 +511,7 @@
           { type: 'radio', name: 'tenderness', label: 'Tenderness', options: ['Non-tender', 'Tender'] },
           { type: 'radio', name: 'guarding', label: 'Guarding', options: ['No guarding', 'Guarding present'] },
           { type: 'radio', name: 'bowelSounds', label: 'Bowel sounds', options: ['Bowel sounds present', 'Bowel sounds reduced', 'Bowel sounds absent'] },
-          { type: 'checkbox', name: 'peritonitic', label: 'Peritonitic', options: ['Not peritonitic', 'Rebound tenderness', 'Percussion tenderness', 'Able to straight leg raise', 'Single leg stand', 'Able to jump'] },
+          { type: 'peritoniticYn', name: 'peritonitic', label: 'Peritonitic', rows: ABDOMEN_PERITONITIC_YN_ROWS },
           { type: 'checkbox', name: 'checks', label: 'Other findings', options: ['No organomegaly', 'No masses', 'Umbilicus normal', 'No inguinal hernias'] }
         ],
         freeHint: 'Localise tenderness, describe hernia'
@@ -471,6 +580,8 @@
     ];
 
     var PRIORITY_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen'];
+    /** Shown as full section cards after HEENT (not inside collapsible extras). */
+    var POST_HEENT_KEYS = ['skin'];
     /** Document output order (matches page layout top to bottom). HEENT inserted via special key. */
     var OUTPUT_SECTION_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen', '_heent_', 'skin', 'neurology'];
     var LUNG_FINDINGS = ['Vesicular breath sounds', 'Reduced air entry', 'Wheeze', 'Crackles'];
@@ -521,7 +632,8 @@
       'active', 'murmur', 'rigid', 'distended', 'tender', 'reduced',
       'absent', 'concern', 'inconsistent', 'haematoma', 'flaring present',
       'cool peripheries', 'guarding present', 'hernia present', 'drooling present',
-      'non-weight-bearing', 'pseudoparalysis', 'seizure activity present', 'stridor', 'stertorous'
+      'non-weight-bearing', 'pseudoparalysis', 'seizure activity present', 'stridor', 'stertorous',
+      'mild wob', 'moderate wob', 'severe wob'
     ];
 
     var NORMAL_PATTERNS = [
@@ -552,6 +664,9 @@
     }
 
     function classifyFinding(text) {
+      var pl = (text || '').toLowerCase();
+      if (pl.indexOf('soft stridor') !== -1) return 'abnormal';
+      if (pl.indexOf('asymmetrical chest rise') !== -1) return 'abnormal';
       var abnormal = isAbnormal(text);
       var normal = isNormal(text);
       if (abnormal && !normal) return 'abnormal';
@@ -729,6 +844,8 @@
         for (var i = 0; i < siblings.length; i++) siblings[i].classList.remove('selected', 'abnormal', 'pill-normal');
         if (input.name === 'abdomen__tenderness') updateAbdomenTendernessField();
         if (input.name === 'respiratory__recessionMode') updateRecessionSubtypePanel();
+        if (input.name === 'skin__rash' || input.name === 'skin__bruising') updateSkinRashBruisingFields();
+        if (input.name === 'heent__oral_cavity_vis' || input.name === 'heent__tonsils_vis') updateHeentOralCavityPanel();
         updateOutput();
         return;
       }
@@ -747,6 +864,7 @@
       else if (n === 'abdomen__bowelSounds' && v === 'Bowel sounds present') label.classList.add('pill-normal');
       else if (n === 'abdomen__bowelSounds' && (v === 'Bowel sounds reduced' || v === 'Bowel sounds absent')) label.classList.add('abnormal');
       else if (n === 'respiratory__chestAppearance' && v === 'Good chest rise') label.classList.add('pill-normal');
+      else if (n === 'respiratory__chestAppearance' && v === 'Asymmetrical chest rise') label.classList.add('abnormal');
       else if (n === 'respiratory__auscultationMode' && v === 'Chest clear') label.classList.add('pill-normal');
       else if (n === 'respiratory__auscultationMode' && v === 'Added sounds') label.classList.add('abnormal');
       else if (n === 'heent__photo' && v === 'No photophobia') label.classList.add('pill-normal');
@@ -754,6 +872,8 @@
       else if (n === 'heent__pearl') label.classList.add('pill-normal');
       else if (n === 'heent__conj' && v === 'Normal conjunctiva') label.classList.add('pill-normal');
       else if (n === 'heent__conj' && (v === 'Conjunctival injection' || v === 'Conjunctival discharge')) label.classList.add('abnormal');
+      else if (n === 'respiratory__wob' && (v === 'Mild' || v === 'Moderate' || v === 'Severe')) label.classList.add('abnormal');
+      else if (n === 'respiratory__wob' && v === 'No WOB') label.classList.add('pill-normal');
       else if (classifyFinding(v) === 'abnormal') label.classList.add('abnormal');
       else if (classifyFinding(v) === 'normal') label.classList.add('pill-normal');
       if (n === 'abdomen__tenderness') updateAbdomenTendernessField();
@@ -774,6 +894,8 @@
         updateHeentTmFindingsPanel();
         if (v !== 'Tympanic membrane findings') clearHeentTmFindings();
       }
+      if (n === 'heent__oral_cavity_vis' || n === 'heent__tonsils_vis') updateHeentOralCavityPanel();
+      if (n === 'skin__rash' || n === 'skin__bruising') updateSkinRashBruisingFields();
       updateOutput();
     }
 
@@ -959,8 +1081,12 @@
           if (label.closest('.heent-tm-L-col') || label.closest('.heent-tm-R-col')) {
             label.classList.add('abnormal');
             label.classList.remove('pill-normal');
+          } else if (label.closest('.heent-tonsil-L-col') || label.closest('.heent-tonsil-R-col')) {
+            label.classList.add('abnormal');
+            label.classList.remove('pill-normal');
           } else if (label.closest('#recessionSubtypeWrap')) label.classList.add('abnormal');
           else if (label.closest('.auscultation-added-check-grid')) label.classList.add('abnormal');
+          else if (input.name.indexOf('respiratory__upperAirwaySounds__') === 0 && input.value === 'Soft stridor') label.classList.add('abnormal');
           else if (classifyFinding(input.value) === 'abnormal') label.classList.add('abnormal');
           else if (classifyFinding(input.value) === 'normal') label.classList.add('pill-normal');
           else label.classList.remove('abnormal', 'pill-normal');
@@ -999,6 +1125,46 @@
       return col;
     }
 
+    function heentTonsilColumn(side, shortLabel) {
+      var col = document.createElement('div');
+      col.className = side === 'L' ? 'heent-tonsil-L-col' : 'heent-tonsil-R-col';
+      var lab = document.createElement('div');
+      lab.className = 'heent-col-label';
+      lab.textContent = shortLabel;
+      col.appendChild(lab);
+      var grid = document.createElement('div');
+      grid.className = 'check-grid';
+      var opts = [
+        { key: 'ery', label: 'Erythematous', val: 'ery' },
+        { key: 'exo', label: 'Exudate', val: 'exo' },
+        { key: 'enl', label: 'Enlarged', val: 'enl' }
+      ];
+      for (var o = 0; o < opts.length; o++) {
+        var cl = document.createElement('label');
+        cl.className = 'check-opt';
+        (function(L) { cl.onclick = function() { handleCheckClick(L); }; })(cl);
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.name = 'heent__tonsil_' + side + '_' + opts[o].key;
+        cb.value = opts[o].val;
+        cl.appendChild(cb);
+        cl.appendChild(document.createTextNode(opts[o].label));
+        grid.appendChild(cl);
+      }
+      var qLab = document.createElement('label');
+      qLab.className = 'check-opt';
+      (function(L) { qLab.onclick = function() { handleCheckClick(L); }; })(qLab);
+      var qCb = document.createElement('input');
+      qCb.type = 'checkbox';
+      qCb.name = 'heent__quincy_' + side;
+      qCb.value = 'quincy';
+      qLab.appendChild(qCb);
+      qLab.appendChild(document.createTextNode('Quincy'));
+      grid.appendChild(qLab);
+      col.appendChild(grid);
+      return col;
+    }
+
     function heentPillRow(name, options) {
       var pr = document.createElement('div');
       pr.className = 'pill-row';
@@ -1015,6 +1181,101 @@
         pr.appendChild(pl);
       }
       return pr;
+    }
+
+    function appendPeritoniticYnWrap(parent, prefix, rowsDef, options) {
+      options = options || {};
+      var wrap = document.createElement('div');
+      if (options.id) wrap.id = options.id;
+      wrap.className = 'check-grid peritonitic-yn-wrap' + (options.spanFull ? ' span-full' : '');
+      wrap.setAttribute('data-peritonitic-prefix', prefix);
+      for (var pr = 0; pr < rowsDef.length; pr++) {
+        var prDef = rowsDef[pr];
+        var ynRow = document.createElement('div');
+        ynRow.className = 'peritonitic-yn-row';
+        ynRow.setAttribute('data-row-key', prDef.key);
+        var prLab = document.createElement('span');
+        prLab.className = 'peritonitic-yn-label';
+        prLab.textContent = prDef.label;
+        ynRow.appendChild(prLab);
+        var ynActions = document.createElement('div');
+        ynActions.className = 'peritonitic-yn-actions';
+        var yesLbl = document.createElement('label');
+        yesLbl.className = 'peritonitic-yn-btn peritonitic-yn-btn--yes';
+        yesLbl.onclick = (function(L) { return function(e) { handlePeritoniticYnClick(L, e); }; })(yesLbl);
+        var yesInp = document.createElement('input');
+        yesInp.type = 'checkbox';
+        yesInp.id = prefix + '__' + prDef.key + '__yes';
+        yesInp.value = 'yes';
+        yesLbl.appendChild(yesInp);
+        yesLbl.appendChild(document.createTextNode('\u2713'));
+        var noLbl = document.createElement('label');
+        noLbl.className = 'peritonitic-yn-btn peritonitic-yn-btn--no';
+        noLbl.onclick = (function(L) { return function(e) { handlePeritoniticYnClick(L, e); }; })(noLbl);
+        var noInp = document.createElement('input');
+        noInp.type = 'checkbox';
+        noInp.id = prefix + '__' + prDef.key + '__no';
+        noInp.value = 'no';
+        noLbl.appendChild(noInp);
+        noLbl.appendChild(document.createTextNode('\u2717'));
+        ynActions.appendChild(yesLbl);
+        ynActions.appendChild(noLbl);
+        ynRow.appendChild(ynActions);
+        wrap.appendChild(ynRow);
+      }
+      parent.appendChild(wrap);
+      return wrap;
+    }
+
+    function syncPeritoniticYnAllRows() {
+      var wraps = document.querySelectorAll('[data-peritonitic-prefix]');
+      for (var w = 0; w < wraps.length; w++) {
+        var rows = wraps[w].querySelectorAll('.peritonitic-yn-row');
+        for (var r = 0; r < rows.length; r++) syncPeritoniticYnRowStyles(rows[r]);
+      }
+    }
+
+    function clearHeentTonsilDetailFields() {
+      var wrap = document.getElementById('heentTonsilsDetailWrap');
+      if (!wrap) return;
+      var inputs = wrap.querySelectorAll('input[type="checkbox"]');
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].checked = false;
+        var lab = inputs[i].closest('.check-opt');
+        if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
+      }
+    }
+
+    function clearHeentOralCavityDetailFields() {
+      var wrap = document.getElementById('heentOralCavityDetailWrap');
+      if (!wrap) return;
+      var inputs = wrap.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].checked = false;
+        var lab = inputs[i].closest('.check-opt, .pill-opt, .peritonitic-yn-btn');
+        if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
+      }
+      syncPeritoniticYnAllRows();
+    }
+
+    function updateHeentOralCavityPanel() {
+      var detail = document.getElementById('heentOralCavityDetailWrap');
+      var tWrap = document.getElementById('heentTonsilsDetailWrap');
+      var oral = document.querySelector('input[name="heent__oral_cavity_vis"]:checked');
+      if (!detail) return;
+      var showDetail = oral && oral.value === 'Oral cavity / tonsils / pharynx visualised';
+      detail.classList.toggle('show', showDetail);
+      if (!showDetail) {
+        clearHeentOralCavityDetailFields();
+        if (tWrap) tWrap.classList.remove('show');
+        return;
+      }
+      var tons = document.querySelector('input[name="heent__tonsils_vis"]:checked');
+      var showTons = tons && tons.value === 'Tonsils visible';
+      if (tWrap) {
+        tWrap.classList.toggle('show', showTons);
+        if (!showTons) clearHeentTonsilDetailFields();
+      }
     }
 
     function buildHeentCard() {
@@ -1113,57 +1374,29 @@
       mouthT.textContent = 'Mouth / oropharynx';
       mouthB.appendChild(mouthT);
       mouthB.appendChild(heentPillRow('heent__lips', ['Lips normal', 'Lips dry', 'Lips cracked']));
-      var oralLab = document.createElement('div');
-      oralLab.className = 'group-label';
-      oralLab.style.marginTop = '8px';
-      oralLab.textContent = 'Oral cavity';
-      mouthB.appendChild(oralLab);
-      var oralGrid = document.createElement('div');
-      oralGrid.className = 'check-grid heent-oral-grid';
-      var oralOpts = ['Uvula midline', 'No drooling', 'Drooling present', 'No trismus'];
-      for (var oo = 0; oo < oralOpts.length; oo++) {
-        var ol = document.createElement('label');
-        ol.className = 'check-opt';
-        (function(L) { ol.onclick = function() { handleCheckClick(L); }; })(ol);
-        var oi = document.createElement('input');
-        oi.type = 'checkbox';
-        oi.name = 'heent__oral_' + oo;
-        oi.value = oralOpts[oo];
-        ol.appendChild(oi);
-        ol.appendChild(document.createTextNode(oralOpts[oo]));
-        oralGrid.appendChild(ol);
-      }
-      mouthB.appendChild(oralGrid);
+      var oralCavT = document.createElement('div');
+      oralCavT.className = 'heent-subtitle';
+      oralCavT.style.marginTop = '10px';
+      oralCavT.textContent = 'Oral cavity / tonsils';
+      mouthB.appendChild(oralCavT);
+      mouthB.appendChild(heentPillRow('heent__oral_cavity_vis', ['Oral cavity / tonsils / pharynx visualised', 'Oral cavity not visualised']));
+      var oralDetail = document.createElement('div');
+      oralDetail.id = 'heentOralCavityDetailWrap';
+      oralDetail.className = 'conditional-inline-field';
       var tonsLab = document.createElement('div');
       tonsLab.className = 'group-label';
       tonsLab.style.marginTop = '8px';
       tonsLab.textContent = 'Tonsils';
-      mouthB.appendChild(tonsLab);
-      var tonsGrid = document.createElement('div');
-      tonsGrid.className = 'check-grid heent-tonsils-grid';
-      var tonsOpts = [
-        'Tonsils not visible',
-        'Tonsils visible',
-        'Tonsils enlarged',
-        'Pharyngeal erythema absent',
-        'Pharyngeal erythema present',
-        'Left tonsilar exudate',
-        'Right tonsilar exudate',
-        'Bilateral tonsilar exudate'
-      ];
-      for (var ti = 0; ti < tonsOpts.length; ti++) {
-        var tl = document.createElement('label');
-        tl.className = 'check-opt';
-        (function(L) { tl.onclick = function() { handleCheckClick(L); }; })(tl);
-        var tcb = document.createElement('input');
-        tcb.type = 'checkbox';
-        tcb.name = 'heent__tonsils_' + ti;
-        tcb.value = tonsOpts[ti];
-        tl.appendChild(tcb);
-        tl.appendChild(document.createTextNode(tonsOpts[ti]));
-        tonsGrid.appendChild(tl);
-      }
-      mouthB.appendChild(tonsGrid);
+      oralDetail.appendChild(tonsLab);
+      oralDetail.appendChild(heentPillRow('heent__tonsils_vis', ['Tonsils NAD', 'Tonsils visible', 'Tonsils not visible']));
+      var tonsilCols = document.createElement('div');
+      tonsilCols.id = 'heentTonsilsDetailWrap';
+      tonsilCols.className = 'heent-tonsil-cols conditional-inline-field';
+      tonsilCols.appendChild(heentTonsilColumn('L', 'Left'));
+      tonsilCols.appendChild(heentTonsilColumn('R', 'Right'));
+      oralDetail.appendChild(tonsilCols);
+      appendPeritoniticYnWrap(oralDetail, 'heent__oral_yn', HEENT_ORAL_YN_ROWS, { id: 'heentOralYnWrap' });
+      mouthB.appendChild(oralDetail);
       card.appendChild(mouthB);
 
       var neckMenB = document.createElement('div');
@@ -1214,6 +1447,91 @@
       return false;
     }
 
+    function formatHeentMouthLine(parts) {
+      if (!parts || !parts.length) return '';
+      return sentenceCase(trimSentence(parts.join(', '))) + '.';
+    }
+
+    function heentTonsilSidePhrase(sideWord, ery, exo, enl) {
+      if (ery && enl && exo) return sideWord + ' tonsil erythematous and enlarged, with exudate';
+      if (ery && enl) return sideWord + ' tonsil erythematous and enlarged';
+      if (ery && exo) return sideWord + ' tonsil erythematous, with exudate';
+      if (enl && exo) return sideWord + ' tonsil enlarged, with exudate';
+      if (exo) return 'Exudate to ' + sideWord + ' tonsil';
+      if (ery) return sideWord + ' tonsil erythematous';
+      if (enl) return sideWord + ' tonsil enlarged';
+      return '';
+    }
+
+    function heentTonsilBilateralPhrase(ery, exo, enl) {
+      if (ery && enl && exo) return 'Tonsils erythematous and enlarged, with exudate bilaterally';
+      if (ery && enl) return 'Tonsils erythematous and enlarged bilaterally';
+      if (ery && exo) return 'Tonsils erythematous, with exudate bilaterally';
+      if (enl && exo) return 'Tonsils enlarged, with exudate bilaterally';
+      if (exo) return 'Exudate to tonsils bilaterally';
+      if (ery) return 'Tonsils erythematous bilaterally';
+      if (enl) return 'Tonsils enlarged bilaterally';
+      return '';
+    }
+
+    function heentReadTonsilSide(root, side) {
+      return {
+        ery: !!(root.querySelector('input[name="heent__tonsil_' + side + '_ery"]:checked')),
+        exo: !!(root.querySelector('input[name="heent__tonsil_' + side + '_exo"]:checked')),
+        enl: !!(root.querySelector('input[name="heent__tonsil_' + side + '_enl"]:checked'))
+      };
+    }
+
+    function heentSameTonsilProfile(a, b) {
+      return a.ery === b.ery && a.exo === b.exo && a.enl === b.enl;
+    }
+
+    function getHeentOralMouthParts(mBlock) {
+      var parts = [];
+      var oral = mBlock.querySelector('input[name="heent__oral_cavity_vis"]:checked');
+      if (oral && oral.value === 'Oral cavity not visualised') {
+        parts.push('Unable to visualise oral cavity');
+        return parts;
+      }
+      if (!oral || oral.value !== 'Oral cavity / tonsils / pharynx visualised') return parts;
+
+      var tons = mBlock.querySelector('input[name="heent__tonsils_vis"]:checked');
+      if (tons && tons.value === 'Tonsils NAD') {
+        parts.push('Tonsils NAD');
+      } else if (tons && tons.value === 'Tonsils not visible') {
+        parts.push('tonsils not visible');
+      } else if (tons && tons.value === 'Tonsils visible') {
+        var L = heentReadTonsilSide(mBlock, 'L');
+        var R = heentReadTonsilSide(mBlock, 'R');
+        var anyL = L.ery || L.exo || L.enl;
+        var anyR = R.ery || R.exo || R.enl;
+        if (anyL && anyR && heentSameTonsilProfile(L, R)) {
+          var bil = heentTonsilBilateralPhrase(L.ery, L.exo, L.enl);
+          if (bil) parts.push(bil);
+        } else {
+          var pl = heentTonsilSidePhrase('left', L.ery, L.exo, L.enl);
+          var pr = heentTonsilSidePhrase('right', R.ery, R.exo, R.enl);
+          if (pl) parts.push(pl);
+          if (pr) parts.push(pr);
+        }
+        var qL = mBlock.querySelector('input[name="heent__quincy_L"]:checked');
+        var qR = mBlock.querySelector('input[name="heent__quincy_R"]:checked');
+        if (qL && qR) parts.push('Appearance of quincy bilaterally');
+        else if (qL) parts.push('Appearance of quincy to left side');
+        else if (qR) parts.push('Appearance of quincy to right side');
+      }
+
+      var ynPfx = 'heent__oral_yn';
+      for (var yi = 0; yi < HEENT_ORAL_YN_ROWS.length; yi++) {
+        var yr = HEENT_ORAL_YN_ROWS[yi];
+        var yesEl = document.getElementById(ynPfx + '__' + yr.key + '__yes');
+        var noEl = document.getElementById(ynPfx + '__' + yr.key + '__no');
+        if (yesEl && yesEl.checked) parts.push(yr.yes);
+        else if (noEl && noEl.checked) parts.push(yr.no);
+      }
+      return parts;
+    }
+
     function getHeentOutputLines() {
       var root = document.getElementById('heentBlock');
       if (!root) return [];
@@ -1261,15 +1579,10 @@
       if (mBlock) {
         var lips = mBlock.querySelector('input[name="heent__lips"]:checked');
         if (lips) mouthParts.push(lips.value);
-        var ocs = mBlock.querySelectorAll('.heent-oral-grid input[type="checkbox"]:checked');
-        for (var ox = 0; ox < ocs.length; ox++) mouthParts.push(ocs[ox].value);
-        var tcb = mBlock.querySelectorAll('.heent-tonsils-grid input[type="checkbox"]:checked');
-        for (var tx = 0; tx < tcb.length; tx++) {
-          if (tcb[tx].value === 'Tonsils enlarged') mouthParts.push('Tonsils appear enlarged');
-          else mouthParts.push(tcb[tx].value);
-        }
+        var oralParts = getHeentOralMouthParts(mBlock);
+        for (var ap = 0; ap < oralParts.length; ap++) mouthParts.push(oralParts[ap]);
       }
-      if (mouthParts.length) lines.push(formatOrderedCommaLine(mouthParts));
+      if (mouthParts.length) lines.push(formatHeentMouthLine(mouthParts));
 
       var neckMenParts = [];
       var neck = root.querySelector('input[name="heent__neck_ln"]:checked');
@@ -1339,6 +1652,9 @@
             pillRow.appendChild(pillLabel);
           }
           row.appendChild(pillRow);
+        } else if (section.key === 'abdomen' && group.type === 'peritoniticYn') {
+          row.classList.add('span-full');
+          appendPeritoniticYnWrap(row, 'abdomen__peritonitic', group.rows, { id: 'abdomenPeritoniticYnWrap', spanFull: true });
         } else {
           var checkGrid = document.createElement('div');
           checkGrid.className = 'check-grid';
@@ -1361,6 +1677,34 @@
         }
 
         groupsWrap.appendChild(row);
+
+        if (section.key === 'skin' && group.name === 'rash') {
+          var rashDetailWrap = document.createElement('div');
+          rashDetailWrap.id = 'skinRashDetailWrap';
+          rashDetailWrap.className = 'free-text-field conditional-inline-field span-full';
+          var rashDetailTa = document.createElement('textarea');
+          rashDetailTa.id = 'skin__rash_detail';
+          rashDetailTa.rows = 2;
+          rashDetailTa.placeholder = 'Rash details (site, distribution, appearance)';
+          rashDetailTa.setAttribute('aria-label', 'Rash details');
+          rashDetailTa.addEventListener('input', updateOutput);
+          rashDetailWrap.appendChild(rashDetailTa);
+          groupsWrap.appendChild(rashDetailWrap);
+        }
+
+        if (section.key === 'skin' && group.name === 'bruising') {
+          var bruisingDetailWrap = document.createElement('div');
+          bruisingDetailWrap.id = 'skinBruisingDetailWrap';
+          bruisingDetailWrap.className = 'free-text-field conditional-inline-field span-full';
+          var bruisingDetailTa = document.createElement('textarea');
+          bruisingDetailTa.id = 'skin__bruising_detail';
+          bruisingDetailTa.rows = 2;
+          bruisingDetailTa.placeholder = 'Bruising details (site, pattern)';
+          bruisingDetailTa.setAttribute('aria-label', 'Bruising details');
+          bruisingDetailTa.addEventListener('input', updateOutput);
+          bruisingDetailWrap.appendChild(bruisingDetailTa);
+          groupsWrap.appendChild(bruisingDetailWrap);
+        }
 
         if (section.key === 'abdomen' && group.name === 'tenderness') {
           var tendernessFieldInline = document.createElement('div');
@@ -1538,11 +1882,19 @@
 
       host.appendChild(buildHeentCard());
 
+      for (var ph = 0; ph < POST_HEENT_KEYS.length; ph++) {
+        var postKey = POST_HEENT_KEYS[ph];
+        if (sectionMap[postKey]) {
+          host.appendChild(renderSectionCard(sectionMap[postKey]));
+        }
+      }
+
       var extraWrap = document.createElement('div');
       extraWrap.className = 'extra-sections';
       for (var s = 0; s < SECTIONS.length; s++) {
         var section = SECTIONS[s];
         if (PRIORITY_KEYS.indexOf(section.key) !== -1) continue;
+        if (POST_HEENT_KEYS.indexOf(section.key) !== -1) continue;
 
         var details = document.createElement('details');
         var summary = document.createElement('summary');
@@ -1592,11 +1944,132 @@
       if (!show) input.value = '';
     }
 
+    function updateSkinRashBruisingFields() {
+      var rashPick = document.querySelector('input[name="skin__rash"]:checked');
+      var rashWrap = document.getElementById('skinRashDetailWrap');
+      var rashTa = document.getElementById('skin__rash_detail');
+      if (rashWrap) {
+        var showRash = !!(rashPick && (rashPick.value === 'Rash (blanching)' || rashPick.value === 'Rash (non-blanching)'));
+        rashWrap.classList.toggle('show', showRash);
+        if (!showRash && rashTa) rashTa.value = '';
+      }
+      var bruPick = document.querySelector('input[name="skin__bruising"]:checked');
+      var bruWrap = document.getElementById('skinBruisingDetailWrap');
+      var bruTa = document.getElementById('skin__bruising_detail');
+      if (bruWrap) {
+        var showBru = !!(bruPick && bruPick.value === 'Bruising present');
+        bruWrap.classList.toggle('show', showBru);
+        if (!showBru && bruTa) bruTa.value = '';
+      }
+    }
+
+    function syncPeritoniticYnRowStyles(row) {
+      if (!row) return;
+      var key = row.getAttribute('data-row-key');
+      var wrap = row.closest('[data-peritonitic-prefix]');
+      if (!wrap) return;
+      var prefix = wrap.getAttribute('data-peritonitic-prefix');
+      var rowsDef = PERITONITIC_YN_ROW_REGISTRY[prefix];
+      if (!rowsDef) return;
+      var def = null;
+      for (var si = 0; si < rowsDef.length; si++) {
+        if (rowsDef[si].key === key) {
+          def = rowsDef[si];
+          break;
+        }
+      }
+      if (!def) return;
+      var yesLbl = row.querySelector('.peritonitic-yn-btn--yes');
+      var noLbl = row.querySelector('.peritonitic-yn-btn--no');
+      var yesInp = yesLbl ? yesLbl.querySelector('input') : null;
+      var noInp = noLbl ? noLbl.querySelector('input') : null;
+      if (yesLbl) yesLbl.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (noLbl) noLbl.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (yesInp && yesInp.checked && yesLbl) {
+        yesLbl.classList.add('selected');
+        yesLbl.classList.add(def.normalYes ? 'pill-normal' : 'abnormal');
+      }
+      if (noInp && noInp.checked && noLbl) {
+        noLbl.classList.add('selected');
+        noLbl.classList.add(def.normalYes ? 'abnormal' : 'pill-normal');
+      }
+    }
+
+    function handlePeritoniticYnClick(label, ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      var isYes = label.classList.contains('peritonitic-yn-btn--yes');
+      var row = label.closest('.peritonitic-yn-row');
+      if (!row) return;
+      var key = row.getAttribute('data-row-key');
+      var wrap = row.closest('[data-peritonitic-prefix]');
+      if (!wrap) return;
+      var prefix = wrap.getAttribute('data-peritonitic-prefix');
+      var yesInp = document.getElementById(prefix + '__' + key + '__yes');
+      var noInp = document.getElementById(prefix + '__' + key + '__no');
+      if (!yesInp || !noInp) return;
+      if (isYes) {
+        if (yesInp.checked) yesInp.checked = false;
+        else {
+          yesInp.checked = true;
+          noInp.checked = false;
+        }
+      } else {
+        if (noInp.checked) noInp.checked = false;
+        else {
+          noInp.checked = true;
+          yesInp.checked = false;
+        }
+      }
+      syncPeritoniticYnRowStyles(row);
+      updateOutput();
+    }
+
     function buildSectionLine(section) {
       var phrases = [];
       for (var g = 0; g < section.groups.length; g++) {
         var group = section.groups[g];
         if (section.key === 'respiratory' && group.name === 'auscultationMode') continue;
+        if (section.key === 'abdomen' && group.type === 'peritoniticYn') {
+          var abPrfx = 'abdomen__peritonitic';
+          for (var py = 0; py < group.rows.length; py++) {
+            var rdef = group.rows[py];
+            var yesEl = document.getElementById(abPrfx + '__' + rdef.key + '__yes');
+            var noEl = document.getElementById(abPrfx + '__' + rdef.key + '__no');
+            if (yesEl && yesEl.checked) phrases.push(rdef.yes);
+            else if (noEl && noEl.checked) phrases.push(rdef.no);
+          }
+          continue;
+        }
+        if (section.key === 'skin' && group.name === 'rash') {
+          var rashPick = document.querySelector('input[name="skin__rash"]:checked');
+          var rashDetailEl = document.getElementById('skin__rash_detail');
+          var rashDetail = rashDetailEl ? trimSentence(rashDetailEl.value) : '';
+          if (rashPick && rashPick.value === 'Rash (blanching)') {
+            var pr = 'Blanching rash';
+            if (rashDetail) pr += ' ' + rashDetail;
+            phrases.push(pr);
+          } else if (rashPick && rashPick.value === 'Rash (non-blanching)') {
+            var pr2 = 'Non-blanching rash';
+            if (rashDetail) pr2 += ' ' + rashDetail;
+            phrases.push(pr2);
+          } else if (rashPick && rashPick.value === 'No rash') {
+            phrases.push('No rash');
+          }
+          continue;
+        }
+        if (section.key === 'skin' && group.name === 'bruising') {
+          var bruPick = document.querySelector('input[name="skin__bruising"]:checked');
+          var bruDetailEl = document.getElementById('skin__bruising_detail');
+          var bruDetail = bruDetailEl ? trimSentence(bruDetailEl.value) : '';
+          if (bruPick && bruPick.value === 'Bruising present') {
+            var pb = 'Bruising';
+            if (bruDetail) pb += ' ' + bruDetail;
+            phrases.push(pb);
+          } else if (bruPick && bruPick.value === 'No bruising') {
+            phrases.push('No bruising');
+          }
+          continue;
+        }
         var selector = group.type === 'radio'
           ? 'input[name="' + section.key + '__' + group.name + '"]:checked'
           : 'input[id^="' + section.key + '__' + group.name + '__"]:checked';
@@ -1653,19 +2126,11 @@
         if (section.key === 'perfusionHydration' && (group.name === 'crtCentral' || group.name === 'crtPeripheral') && vals.length > 0) {
           var crtMap = { '<2s': '<2 seconds', '2-3s': '2-3 seconds', '>3s': '>3 seconds' };
           var crtPhrase = crtMap[vals[0]] || vals[0];
-          vals = [group.name === 'crtCentral' ? 'Central CRT ' + crtPhrase : 'CRT peripheral ' + crtPhrase];
+          vals = [group.name === 'crtCentral' ? 'Central CRT ' + crtPhrase : 'Peripheral CRT ' + crtPhrase];
         }
         if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0] === 'Tender') {
           var tenderLoc = trimSentence(document.getElementById('abdomen__tender_location') ? document.getElementById('abdomen__tender_location').value : '');
           if (tenderLoc) vals = ['Tender ' + tenderLoc];
-        }
-        if (section.key === 'abdomen' && group.name === 'peritonitic' && vals.length > 0) {
-          var periOut = [];
-          for (var pv = 0; pv < vals.length; pv++) {
-            if (vals[pv] === 'Single leg stand') periOut.push('Able to single leg stand');
-            else periOut.push(vals[pv]);
-          }
-          vals = periOut;
         }
         if (vals.length > 0) {
           if (group.type === 'checkbox') {
@@ -1761,8 +2226,8 @@
     function clearAll() {
       var inputs = document.querySelectorAll('#exam-sections input[type="checkbox"], #exam-sections input[type="radio"]');
       for (var i = 0; i < inputs.length; i++) inputs[i].checked = false;
-      var pills = document.querySelectorAll('.pill-opt.selected, .check-opt.selected');
-      for (var i = 0; i < pills.length; i++) pills[i].classList.remove('selected', 'abnormal');
+      var pills = document.querySelectorAll('.pill-opt.selected, .check-opt.selected, .peritonitic-yn-btn.selected');
+      for (var i = 0; i < pills.length; i++) pills[i].classList.remove('selected', 'abnormal', 'pill-normal');
       var textareas = document.querySelectorAll('#exam-sections textarea');
       for (var t = 0; t < textareas.length; t++) textareas[t].value = '';
       for (var z = 0; z < LUNG_ZONES.length; z++) {
@@ -1778,12 +2243,16 @@
       clearCvMurmurDetailFields();
       updateHeentTmFindingsPanel();
       clearHeentTmFindings();
+      updateHeentOralCavityPanel();
       clearAuscultationAddedFields();
       updateAuscultationAddedPanel();
+      updateSkinRashBruisingFields();
       updateOutput();
     }
 
     renderSections();
+    updateHeentOralCavityPanel();
+    syncPeritoniticYnAllRows();
     updateRespiratoryWobDependentPanels();
     updateCvMurmurDetailsPanel();
     updateHeentTmFindingsPanel();
@@ -1801,6 +2270,7 @@
     renderLungPickerControls();
     updateAbdomenTendernessField();
     updateRecessionSubtypePanel();
+    updateSkinRashBruisingFields();
     var lungNoteInput = document.getElementById('lungZoneNoteInput');
     if (lungNoteInput) {
       lungNoteInput.addEventListener('input', function() {
