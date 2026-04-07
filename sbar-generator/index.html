@@ -51,12 +51,12 @@
 .chip:hover{border-color:var(--accent);color:var(--accent);}
 
 /* Investigation rows */
-.invest-row{display:grid;grid-template-columns:2fr 2fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;}
+.invest-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;}
 .invest-row input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:0.84rem;min-height:36px;}
 .invest-row input:focus{outline:none;border-color:var(--accent);}
 .invest-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;padding:4px 8px;}
 .invest-x:hover{color:var(--danger);}
-@media(max-width:520px){.invest-row{grid-template-columns:1fr 1fr;}.invest-row input:nth-child(3){grid-column:1/-1;}}
+@media(max-width:520px){.invest-row{grid-template-columns:1fr auto;}.invest-row input:first-child{grid-column:1/-1;}}
 
 /* Specialty-specific background fields */
 .specialty-bg{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
@@ -90,19 +90,37 @@
 .nkda-btn{display:inline-block;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:0.76rem;color:var(--muted);cursor:pointer;margin-left:8px;vertical-align:middle;}
 .nkda-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-/* Differential toggle */
-.diff-toggle{display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--muted);cursor:pointer;margin-top:6px;}
-.diff-toggle input{accent-color:var(--accent);width:16px;height:16px;}
+/* Interventions block (Examination-style checkboxes, scoped) */
+.sbar-interventions{margin-top:18px;padding-top:18px;border-top:1px solid var(--border);}
+.intervention-block-title{font-size:0.95rem;font-weight:700;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;}
+.intervention-sub{font-size:0.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px;}
+.intervention-sub:first-of-type{margin-top:0;}
+.sbar-interventions .group-label{font-size:0.7rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.sbar-interventions .check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:8px;}
+@media(max-width:520px){.sbar-interventions .check-grid{grid-template-columns:1fr;}}
+.sbar-interventions .check-opt{display:flex;align-items:center;gap:6px;padding:6px 10px;min-height:36px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;font-size:0.875rem;color:var(--muted);cursor:pointer;transition:border-color .15s,color .15s,background .15s;user-select:none;box-sizing:border-box;}
+.sbar-interventions .check-opt:hover{border-color:var(--accent);color:var(--text);}
+.sbar-interventions .check-opt input{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:2px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;flex-shrink:0;position:relative;transition:border-color .15s,background .15s;}
+.sbar-interventions .check-opt input:checked{border-color:var(--accent);background:var(--accent);}
+.sbar-interventions .check-opt input:checked::after{content:"";position:absolute;left:3px;top:1px;width:5px;height:8px;border:solid var(--accent-on);border-width:0 2px 2px 0;transform:rotate(45deg);}
+.sbar-interventions .check-opt.selected{border-color:var(--accent);color:var(--text);background:rgba(36,170,204,.06);}
+.intervention-details{width:100%;min-height:52px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:0.88rem;resize:vertical;font-family:inherit;margin-bottom:12px;}
+.intervention-details:focus{outline:none;border-color:var(--accent);}
 
 /* Disposition radios */
 .disp-row{display:flex;flex-wrap:wrap;gap:8px;}
 .disp-opt{padding:8px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;color:var(--muted);transition:border-color .2s,color .2s;}
 .disp-opt.active{border-color:var(--accent);color:var(--accent);background:rgba(32,178,170,.08);}
 
-/* Specific asks */
-.asks-grid{display:grid;gap:6px;}
-.ask-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.85rem;color:var(--text);cursor:pointer;}
-.ask-item input{accent-color:var(--accent);width:18px;height:18px;flex-shrink:0;}
+/* Specific asks (Examination-style tiles) */
+.asks-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+@media(max-width:520px){.asks-grid{grid-template-columns:1fr;}}
+.asks-grid .check-opt{display:flex;align-items:center;gap:6px;padding:6px 10px;min-height:36px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;font-size:0.875rem;color:var(--muted);cursor:pointer;transition:border-color .15s,color .15s,background .15s;user-select:none;box-sizing:border-box;}
+.asks-grid .check-opt:hover{border-color:var(--accent);color:var(--text);}
+.asks-grid .check-opt input{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:2px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;flex-shrink:0;position:relative;}
+.asks-grid .check-opt input:checked{border-color:var(--accent);background:var(--accent);}
+.asks-grid .check-opt input:checked::after{content:"";position:absolute;left:3px;top:1px;width:5px;height:8px;border:solid var(--accent-on);border-width:0 2px 2px 0;transform:rotate(45deg);}
+.asks-grid .check-opt.selected{border-color:var(--accent);color:var(--text);background:rgba(36,170,204,.06);}
 
 /* Template bar */
 .template-bar{display:none;align-items:center;gap:10px;padding:10px 14px;background:rgba(32,178,170,.08);border:1px solid rgba(32,178,170,.2);border-radius:var(--radius);margin-bottom:14px;font-size:0.84rem;color:var(--text);}
@@ -292,11 +310,9 @@
       <label>Current location</label>
       <select id="currentLocation" onchange="generateOutput()">
         <option value="">Select location</option>
+        <option>Acute</option>
+        <option>PSSU</option>
         <option>Resus</option>
-        <option>Majors</option>
-        <option>Minors</option>
-        <option>Paediatric Assessment Unit</option>
-        <option>Other</option>
       </select>
     </div>
   </div>
@@ -323,10 +339,8 @@
       <input type="text" id="allergies" oninput="generateOutput()" placeholder="Known drug allergies">
     </div>
     <div class="field">
-      <label>Relevant recent investigations</label>
-      <div id="investContainer"></div>
-      <button type="button" class="add-btn" onclick="addInvestRow('','','')">+ Add investigation</button>
-      <div class="chip-row" id="investChips"></div>
+      <label>Social background</label>
+      <textarea id="socialBackground" rows="2" oninput="generateOutput()" placeholder="Home situation, carers, safeguarding, school, relevant social context..." style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:1rem;resize:vertical;font-family:inherit;"></textarea>
     </div>
 
     <!-- Specialty-specific background fields -->
@@ -413,9 +427,8 @@
     <div class="field">
       <label>Working diagnosis / impression</label>
       <input type="text" id="workingDiagnosis" oninput="generateOutput()" placeholder="Your clinical impression">
-      <label class="diff-toggle"><input type="checkbox" id="showDiff" onchange="toggleDiff()"> Show differentials</label>
     </div>
-    <div class="field" id="diffField" style="display:none;">
+    <div class="field">
       <label>Differentials to consider</label>
       <input type="text" id="differentials" oninput="generateOutput()" placeholder="Other diagnoses being considered">
     </div>
@@ -464,28 +477,34 @@
       </div>
     </div>
 
-    <div class="row2">
-      <div class="field">
-        <label>Weight (kg)</label>
-        <input type="number" id="obsWeight" min="0.5" max="200" step="0.1" oninput="generateOutput()" placeholder="Important for dosing context">
-      </div>
-      <div class="field">
-        <label>PEWS / early warning score</label>
-        <input type="number" id="pewsScore" min="0" max="20" oninput="updatePewsHint();generateOutput()">
-        <div class="obs-hint" id="hintPews"></div>
-      </div>
+    <div class="field">
+      <label>PEWS / early warning score</label>
+      <input type="number" id="pewsScore" min="0" max="20" oninput="updatePewsHint();generateOutput()" style="max-width:200px;">
+      <div class="obs-hint" id="hintPews"></div>
     </div>
 
     <div class="field">
       <label>Clinical concern &mdash; &quot;I am concerned because...&quot;</label>
       <textarea id="clinicalConcern" rows="2" oninput="generateOutput()" placeholder="What specifically concerns you about this patient" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:1rem;resize:vertical;font-family:inherit;"></textarea>
     </div>
-    <div class="field">
-      <label>Immediate management already given</label>
-      <div class="tag-wrap" onclick="document.getElementById('mgmtInput').focus()">
-        <div id="mgmtTags" style="display:contents;"></div>
-        <input type="text" class="tag-input" id="mgmtInput" placeholder="e.g. IV access, bloods, paracetamol. Press Enter" onkeydown="handleTagKey(event,'mgmtTags','mgmtInput')">
-      </div>
+
+    <div class="sbar-interventions field">
+      <div class="intervention-block-title">Interventions and treatment</div>
+
+      <div class="intervention-sub">Bloods</div>
+      <div id="investContainer"></div>
+      <button type="button" class="add-btn" onclick="addInvestRow('','')">+ Add investigation</button>
+      <div class="chip-row" id="investChips"></div>
+
+      <div class="group-label" style="margin-top:14px;">Procedures and monitoring</div>
+      <div class="check-grid" id="interventionGroup1"></div>
+      <label class="group-label" for="interventionDetails1">Details</label>
+      <textarea id="interventionDetails1" class="intervention-details" rows="2" oninput="generateOutput()" placeholder="Specific details for procedures and monitoring"></textarea>
+
+      <div class="group-label">Medications and fluids</div>
+      <div class="check-grid" id="interventionGroup2"></div>
+      <label class="group-label" for="interventionDetails2">Details</label>
+      <textarea id="interventionDetails2" class="intervention-details" rows="2" oninput="generateOutput()" placeholder="Specific details for medications and fluids"></textarea>
     </div>
   </div>
 
@@ -820,12 +839,6 @@ function setNkda() {
   generateOutput();
 }
 
-/* ── Differential toggle ─────────────────────────────────────── */
-function toggleDiff() {
-  var show = document.getElementById('showDiff').checked;
-  document.getElementById('diffField').style.display = show ? 'block' : 'none';
-}
-
 /* ── Tag input handlers ──────────────────────────────────────── */
 function handleTagKey(e, containerId, inputId) {
   if (e.key === 'Enter') {
@@ -862,7 +875,7 @@ function getTagValues(containerId) {
 }
 
 /* ── Investigation repeater ──────────────────────────────────── */
-function addInvestRow(testName, result, date) {
+function addInvestRow(testName, result) {
   var container = document.getElementById('investContainer');
   var row = document.createElement('div');
   row.className = 'invest-row';
@@ -872,13 +885,10 @@ function addInvestRow(testName, result, date) {
   var r = document.createElement('input');
   r.type = 'text'; r.placeholder = 'Result'; r.value = result || '';
   r.oninput = generateOutput;
-  var d = document.createElement('input');
-  d.type = 'text'; d.placeholder = 'Date/time'; d.value = date || '';
-  d.oninput = generateOutput;
   var x = document.createElement('button');
   x.type = 'button'; x.className = 'invest-x'; x.textContent = '\u00d7';
   x.onclick = function() { row.remove(); generateOutput(); };
-  row.appendChild(t); row.appendChild(r); row.appendChild(d); row.appendChild(x);
+  row.appendChild(t); row.appendChild(r); row.appendChild(x);
   container.appendChild(row);
 }
 
@@ -889,10 +899,46 @@ function getInvestigations() {
     var inputs = rows[i].querySelectorAll('input');
     var test = inputs[0].value.trim();
     var result = inputs[1].value.trim();
-    var date = inputs[2].value.trim();
-    if (test) results.push({test: test, result: result, date: date});
+    if (test) results.push({test: test, result: result});
   }
   return results;
+}
+
+var INTERVENTION_SET_1 = ['Bloods', 'Blood gas', 'Blood cultures', 'IV access', 'Oxygen', 'ECG', 'Nasal swab', 'Glucose', 'NG tube'];
+var INTERVENTION_SET_2 = ['Analgesia/Antipyretics', 'Burst therapy', 'Inhalers', 'Nebulisers', 'Oral Abx', 'IV Abx', 'IV fluids', 'Fluid challenge'];
+
+function initInterventionCheckboxes() {
+  function fill(containerId, labels) {
+    var c = document.getElementById(containerId);
+    if (!c) return;
+    c.innerHTML = '';
+    for (var j = 0; j < labels.length; j++) {
+      var lab = document.createElement('label');
+      lab.className = 'check-opt';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = labels[j];
+      cb.onchange = function() {
+        var p = this.parentElement;
+        if (p) p.classList.toggle('selected', this.checked);
+        generateOutput();
+      };
+      lab.appendChild(cb);
+      lab.appendChild(document.createTextNode(labels[j]));
+      c.appendChild(lab);
+    }
+  }
+  fill('interventionGroup1', INTERVENTION_SET_1);
+  fill('interventionGroup2', INTERVENTION_SET_2);
+}
+
+function getCheckedInContainer(containerId) {
+  var c = document.getElementById(containerId);
+  if (!c) return [];
+  var cbs = c.querySelectorAll('input[type="checkbox"]:checked');
+  var vals = [];
+  for (var i = 0; i < cbs.length; i++) vals.push(cbs[i].value);
+  return vals;
 }
 
 /* ── Specialty change handling ───────────────────────────────── */
@@ -948,7 +994,7 @@ function updateSpecialtyFields(specialty) {
     chip.className = 'chip';
     chip.textContent = '+ ' + config.invSuggest[i];
     chip.onclick = (function(name) {
-      return function() { addInvestRow(name, '', ''); };
+      return function() { addInvestRow(name, ''); };
     })(config.invSuggest[i]);
     invChipContainer.appendChild(chip);
   }
@@ -962,11 +1008,15 @@ function updateSpecialtyFields(specialty) {
   }
   for (var i = 0; i < allAsks.length; i++) {
     var label = document.createElement('label');
-    label.className = 'ask-item';
+    label.className = 'check-opt';
     var cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.value = allAsks[i];
-    cb.onchange = generateOutput;
+    cb.onchange = function() {
+      var p = this.parentElement;
+      if (p) p.classList.toggle('selected', this.checked);
+      generateOutput();
+    };
     label.appendChild(cb);
     label.appendChild(document.createTextNode(allAsks[i]));
     asksContainer.appendChild(label);
@@ -1186,21 +1236,24 @@ function generateOutput() {
   var pmh = document.getElementById('pmh').value.trim();
   var meds = getTagValues('medsTags');
   var allergies = document.getElementById('allergies').value.trim();
+  var socialBg = document.getElementById('socialBackground').value.trim();
   var invests = getInvestigations();
   var specBg = getSpecialtyBgText();
 
   var dx = document.getElementById('workingDiagnosis').value.trim();
-  var diffs = document.getElementById('showDiff').checked ? document.getElementById('differentials').value.trim() : '';
+  var diffs = document.getElementById('differentials').value.trim();
   var hr = document.getElementById('obsHR').value.trim();
   var rr = document.getElementById('obsRR').value.trim();
   var spo2 = document.getElementById('obsSpO2').value.trim();
   var bp = document.getElementById('obsBP').value.trim();
   var temp = document.getElementById('obsTemp').value.trim();
   var crt = document.getElementById('obsCRT').value;
-  var weight = document.getElementById('obsWeight').value.trim();
   var pews = document.getElementById('pewsScore').value.trim();
   var concern = document.getElementById('clinicalConcern').value.trim();
-  var mgmt = getTagValues('mgmtTags');
+  var intProc = getCheckedInContainer('interventionGroup1');
+  var intMed = getCheckedInContainer('interventionGroup2');
+  var detProc = document.getElementById('interventionDetails1').value.trim();
+  var detMed = document.getElementById('interventionDetails2').value.trim();
 
   var primaryReq = document.getElementById('primaryRequest').value.trim();
   var asks = getCheckedAsks();
@@ -1221,7 +1274,7 @@ function generateOutput() {
   }
 
   /* Check if anything has been entered */
-  var hasContent = name || ageStr || complaint || reason || pmh || dx || hr || rr || primaryReq || concern;
+  var hasContent = name || ageStr || complaint || reason || pmh || socialBg || dx || diffs || hr || rr || spo2 || bp || temp || crt || primaryReq || concern || invests.length > 0 || intProc.length > 0 || intMed.length > 0 || detProc || detMed || specBg || allergies || meds.length > 0 || asks.length > 0 || disp || timeframe || consciousness || pews || location || urgPhrase || state.urgency;
   if (!hasContent) {
     if (emptyMsg) emptyMsg.style.display = 'block';
     var existingSections = body.querySelectorAll('.out-sec,.out-hdr,.out-sep,.out-ts');
@@ -1264,16 +1317,7 @@ function generateOutput() {
   if (pmh) bParts.push('PMH: ' + esc(pmh) + '.');
   if (meds.length > 0) bParts.push('Medications: ' + esc(meds.join(', ')) + '.');
   if (allergies) bParts.push('Allergies: ' + esc(allergies) + '.');
-  if (invests.length > 0) {
-    var invStrs = [];
-    for (var i = 0; i < invests.length; i++) {
-      var s = esc(invests[i].test);
-      if (invests[i].result) s += ' ' + esc(invests[i].result);
-      if (invests[i].date) s += ' (' + esc(invests[i].date) + ')';
-      invStrs.push(s);
-    }
-    bParts.push('Investigations: ' + invStrs.join(', ') + '.');
-  }
+  if (socialBg) bParts.push('Social background: ' + esc(socialBg) + '.');
   if (specBg) bParts.push(esc(specBg) + '.');
 
   /* ── Build Assessment text ── */
@@ -1282,6 +1326,8 @@ function generateOutput() {
     var dxStr = 'My working diagnosis is ' + esc(dx) + '.';
     if (diffs) dxStr += ' Differentials include ' + esc(diffs) + '.';
     aParts.push(dxStr);
+  } else if (diffs) {
+    aParts.push('Differentials include ' + esc(diffs) + '.');
   }
   var obsParts = [];
   if (hr) {
@@ -1314,7 +1360,6 @@ function generateOutput() {
   }
   if (consciousness) obsParts.push(esc(consciousness));
   if (obsParts.length > 0) aParts.push('Observations: ' + obsParts.join(', ') + '.');
-  if (weight) aParts.push('Weight: ' + esc(weight) + ' kg.');
   if (pews) {
     var pewsFlagged = parseInt(pews) >= pewsThreshold;
     var pewsStr = 'PEWS: ' + esc(pews);
@@ -1322,7 +1367,30 @@ function generateOutput() {
     aParts.push(pewsStr + '.');
   }
   if (concern) aParts.push('I am concerned because ' + esc(concern) + '.');
-  if (mgmt.length > 0) aParts.push('Management so far: ' + esc(mgmt.join(', ')) + '.');
+
+  if (invests.length > 0) {
+    var invStrs2 = [];
+    for (var ii = 0; ii < invests.length; ii++) {
+      var s2 = esc(invests[ii].test);
+      if (invests[ii].result) s2 += ': ' + esc(invests[ii].result);
+      invStrs2.push(s2);
+    }
+    aParts.push('Relevant investigations: ' + invStrs2.join('; ') + '.');
+  }
+  var intNarr = [];
+  if (intProc.length > 0 || detProc) {
+    var procLine = 'Procedures and monitoring';
+    if (intProc.length > 0) procLine += ': ' + esc(intProc.join(', '));
+    if (detProc) procLine += (intProc.length > 0 ? '. ' : ': ') + esc(detProc);
+    intNarr.push(procLine + '.');
+  }
+  if (intMed.length > 0 || detMed) {
+    var medLine = 'Medications and fluids';
+    if (intMed.length > 0) medLine += ': ' + esc(intMed.join(', '));
+    if (detMed) medLine += (intMed.length > 0 ? '. ' : ': ') + esc(detMed);
+    intNarr.push(medLine + '.');
+  }
+  if (intNarr.length > 0) aParts.push(intNarr.join(' '));
 
   /* ── Build Recommendation text ── */
   var rParts = [];
@@ -1432,7 +1500,6 @@ function clearAll() {
 
   /* Clear tags */
   document.getElementById('medsTags').innerHTML = '';
-  document.getElementById('mgmtTags').innerHTML = '';
 
   /* Clear investigations */
   document.getElementById('investContainer').innerHTML = '';
@@ -1458,9 +1525,23 @@ function clearAll() {
   document.getElementById('investChips').innerHTML = '';
   document.getElementById('specificAsks').innerHTML = '';
 
+  /* Intervention checkboxes and details */
+  var ic1 = document.querySelectorAll('#interventionGroup1 input[type="checkbox"]');
+  for (var ic = 0; ic < ic1.length; ic++) {
+    ic1[ic].checked = false;
+    var lab = ic1[ic].parentElement;
+    if (lab) lab.classList.remove('selected');
+  }
+  var ic2 = document.querySelectorAll('#interventionGroup2 input[type="checkbox"]');
+  for (var ic = 0; ic < ic2.length; ic++) {
+    ic2[ic].checked = false;
+    var lab2 = ic2[ic].parentElement;
+    if (lab2) lab2.classList.remove('selected');
+  }
+  document.getElementById('interventionDetails1').value = '';
+  document.getElementById('interventionDetails2').value = '';
+
   /* Reset toggles */
-  document.getElementById('showDiff').checked = false;
-  document.getElementById('diffField').style.display = 'none';
   document.getElementById('gcsTotal').textContent = '--';
   document.getElementById('hintHR').textContent = '';
   document.getElementById('hintRR').textContent = '';
@@ -1477,6 +1558,7 @@ function clearAll() {
   if (savedGrade) document.getElementById('clinicianGrade').value = savedGrade;
   if (savedRef) document.getElementById('referringSpecialty').value = savedRef;
 
+  updateSpecialtyFields(document.getElementById('receivingSpecialty').value);
   generateOutput();
 }
 
@@ -1493,7 +1575,9 @@ function clearAll() {
 
 /* ── Initialise ──────────────────────────────────────────────── */
 loadSettings();
-generateOutput();
+initInterventionCheckboxes();
+/* Populate reason chips, investigation chips, and specific asks (otherwise #specificAsks stays empty until receiving specialty changes). */
+onSpecialtyChange();
 </script>
 </body>
 </html>

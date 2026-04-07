@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>A-E Assessment Notes</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <script src="../js/style-system.js"></script>
+  <script src="../js/theme-toggle.js"></script>
+  <style>
+    .ae-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 calc(16px + var(--safe-r)) 36px calc(16px + var(--safe-l));
+    }
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (max-width: 740px) {
+      .section-grid { grid-template-columns: 1fr; }
+    }
+    .output-note {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      padding: 12px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 0.92rem;
+      min-height: 150px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .actions .btn { min-width: 130px; }
+  </style>
+</head>
+<body>
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+<div class="ae-container">
+  <header class="app-header-center">
+    <h1>🧾 A-E Assessment Notes</h1>
+    <p>Paediatric A-E findings to copy-ready notes</p>
+  </header>
+
+  <div class="card">
+    <h2 class="section-title">Airway (A)</h2>
+    <div class="section-grid">
+      <div class="field">
+        <label for="aPatency">Patency</label>
+        <select id="aPatency" data-field>
+          <option value="">Clear</option>
+          <option value="partially obstructed">Partially obstructed</option>
+          <option value="obstructed">Obstructed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="aSounds">Airway sounds</label>
+        <select id="aSounds" data-field>
+          <option value="">No added sounds</option>
+          <option value="stridor present">Stridor present</option>
+          <option value="snoring respirations">Snoring respirations</option>
+          <option value="gurgling secretions">Gurgling secretions</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="aNotes">Other airway findings</label>
+      <input id="aNotes" data-field type="text" placeholder="e.g. copious oral secretions, suction required">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Breathing (B)</h2>
+    <div class="section-grid">
+      <div class="field"><label for="bRR">Respiratory rate</label><input id="bRR" data-field type="number" min="0" placeholder="/min"></div>
+      <div class="field"><label for="bSpO2">SpO2</label><input id="bSpO2" data-field type="number" min="0" max="100" placeholder="%"></div>
+      <div class="field"><label for="bOxygen">Oxygen support</label><input id="bOxygen" data-field type="text" placeholder="e.g. room air / 2L NP"></div>
+      <div class="field">
+        <label for="bWork">Work of breathing</label>
+        <select id="bWork" data-field>
+          <option value="">No increased work of breathing</option>
+          <option value="mild increased work of breathing">Mild increased work of breathing</option>
+          <option value="moderate increased work of breathing">Moderate increased work of breathing</option>
+          <option value="severe increased work of breathing">Severe increased work of breathing</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="bAirEntry">Air entry</label>
+        <select id="bAirEntry" data-field>
+          <option value="">Good bilateral air entry</option>
+          <option value="reduced air entry left">Reduced air entry left</option>
+          <option value="reduced air entry right">Reduced air entry right</option>
+          <option value="poor bilateral air entry">Poor bilateral air entry</option>
+        </select>
+      </div>
+      <div class="field"><label for="bAusc">Auscultation findings</label><input id="bAusc" data-field type="text" placeholder="e.g. wheeze, crackles"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Circulation (C)</h2>
+    <div class="section-grid">
+      <div class="field"><label for="cHR">Heart rate</label><input id="cHR" data-field type="number" min="0" placeholder="bpm"></div>
+      <div class="field"><label for="cBP">Blood pressure</label><input id="cBP" data-field type="text" placeholder="e.g. 95/60"></div>
+      <div class="field">
+        <label for="cCRT">Cap refill time</label>
+        <select id="cCRT" data-field>
+          <option value="">CRT <2s</option>
+          <option value="CRT 2-3s">CRT 2-3s</option>
+          <option value="CRT >3s">CRT >3s</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cPulses">Peripheral pulses</label>
+        <select id="cPulses" data-field>
+          <option value="">Pulses normal volume</option>
+          <option value="pulses weak">Pulses weak</option>
+          <option value="pulses thready">Pulses thready</option>
+          <option value="pulses bounding">Pulses bounding</option>
+        </select>
+      </div>
+      <div class="field"><label for="cPerfusion">Perfusion notes</label><input id="cPerfusion" data-field type="text" placeholder="e.g. cool peripheries, mottled"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Disability (D)</h2>
+    <div class="section-grid">
+      <div class="field">
+        <label for="dAVPU">AVPU</label>
+        <select id="dAVPU" data-field>
+          <option value="">A</option>
+          <option value="V">V</option>
+          <option value="P">P</option>
+          <option value="U">U</option>
+        </select>
+      </div>
+      <div class="field"><label for="dGCS">GCS</label><input id="dGCS" data-field type="text" placeholder="e.g. 15/15"></div>
+      <div class="field"><label for="dGlucose">Glucose</label><input id="dGlucose" data-field type="text" placeholder="e.g. 5.4 mmol/L"></div>
+      <div class="field">
+        <label for="dPupils">Pupils</label>
+        <select id="dPupils" data-field>
+          <option value="">Pupils equal and reactive</option>
+          <option value="pupils unequal">Pupils unequal</option>
+          <option value="pupils sluggish reaction">Pupils sluggish reaction</option>
+          <option value="fixed dilated pupils">Fixed dilated pupils</option>
+        </select>
+      </div>
+      <div class="field"><label for="dNeuro">Other neuro findings</label><input id="dNeuro" data-field type="text" placeholder="e.g. focal neurology"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Exposure (E)</h2>
+    <div class="section-grid">
+      <div class="field"><label for="eTemp">Temperature</label><input id="eTemp" data-field type="number" step="0.1" placeholder="°C"></div>
+      <div class="field">
+        <label for="eRash">Skin/rash</label>
+        <select id="eRash" data-field>
+          <option value="">No rash seen</option>
+          <option value="non-blanching rash present">Non-blanching rash present</option>
+          <option value="blanching rash present">Blanching rash present</option>
+          <option value="urticarial rash present">Urticarial rash present</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="eHydration">Hydration status</label>
+        <select id="eHydration" data-field>
+          <option value="">Appears well hydrated</option>
+          <option value="mild dehydration">Mild dehydration</option>
+          <option value="moderate dehydration">Moderate dehydration</option>
+          <option value="severe dehydration">Severe dehydration</option>
+        </select>
+      </div>
+      <div class="field"><label for="eInjury">Injuries/wounds</label><input id="eInjury" data-field type="text" placeholder="e.g. bruising to shin, no open wounds"></div>
+      <div class="field"><label for="eOther">Other exposure findings</label><input id="eOther" data-field type="text" placeholder="e.g. abdomen soft, no hepatosplenomegaly"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Generated Note</h2>
+    <div id="outputNote" class="output-note"></div>
+    <div class="actions">
+      <button id="copyBtn" type="button" class="btn btn-primary">Copy note</button>
+      <button id="clearBtn" type="button" class="btn btn-reset">Clear all</button>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    For clinical decision support only. Always verify against local guidelines.
+  </footer>
+</div>
+
+<script>
+  function clean(value) {
+    return String(value || "").trim();
+  }
+
+  function joinPhrases(parts) {
+    return parts.filter(Boolean).join(", ");
+  }
+
+  function buildA() {
+    var parts = ["airway patent"];
+    var patency = clean(document.getElementById("aPatency").value);
+    var sounds = clean(document.getElementById("aSounds").value);
+    var notes = clean(document.getElementById("aNotes").value);
+    if (patency) parts[0] = patency;
+    if (sounds) parts.push(sounds);
+    if (notes) parts.push(notes);
+    return "A: " + joinPhrases(parts) + ".";
+  }
+
+  function buildB() {
+    var parts = [];
+    var rr = clean(document.getElementById("bRR").value);
+    var spo2 = clean(document.getElementById("bSpO2").value);
+    var oxygen = clean(document.getElementById("bOxygen").value);
+    var work = clean(document.getElementById("bWork").value) || "no increased work of breathing";
+    var airEntry = clean(document.getElementById("bAirEntry").value) || "good bilateral air entry";
+    var ausc = clean(document.getElementById("bAusc").value);
+
+    if (rr) parts.push("RR " + rr + "/min");
+    if (spo2) parts.push("SpO2 " + spo2 + "%");
+    if (oxygen) parts.push("on " + oxygen);
+    parts.push(work);
+    parts.push(airEntry);
+    if (ausc) parts.push(ausc);
+    if (!rr && !spo2 && !oxygen && !ausc) parts.unshift("breathing comfortable");
+    return "B: " + joinPhrases(parts) + ".";
+  }
+
+  function buildC() {
+    var parts = [];
+    var hr = clean(document.getElementById("cHR").value);
+    var bp = clean(document.getElementById("cBP").value);
+    var crt = clean(document.getElementById("cCRT").value) || "CRT <2s";
+    var pulses = clean(document.getElementById("cPulses").value) || "pulses normal volume";
+    var perfusion = clean(document.getElementById("cPerfusion").value);
+
+    if (hr) parts.push("HR " + hr + " bpm");
+    if (bp) parts.push("BP " + bp);
+    parts.push(crt);
+    parts.push(pulses);
+    if (perfusion) parts.push(perfusion);
+    if (!hr && !bp && !perfusion) parts.unshift("haemodynamically stable");
+    return "C: " + joinPhrases(parts) + ".";
+  }
+
+  function buildD() {
+    var parts = [];
+    var avpu = clean(document.getElementById("dAVPU").value);
+    var gcs = clean(document.getElementById("dGCS").value);
+    var glucose = clean(document.getElementById("dGlucose").value);
+    var pupils = clean(document.getElementById("dPupils").value) || "pupils equal and reactive";
+    var neuro = clean(document.getElementById("dNeuro").value);
+
+    parts.push("AVPU " + (avpu || "A"));
+    if (gcs) parts.push("GCS " + gcs);
+    if (glucose) parts.push("glucose " + glucose);
+    parts.push(pupils);
+    if (neuro) parts.push(neuro);
+    return "D: " + joinPhrases(parts) + ".";
+  }
+
+  function buildE() {
+    var parts = [];
+    var temp = clean(document.getElementById("eTemp").value);
+    var rash = clean(document.getElementById("eRash").value) || "no rash seen";
+    var hydration = clean(document.getElementById("eHydration").value) || "appears well hydrated";
+    var injury = clean(document.getElementById("eInjury").value);
+    var other = clean(document.getElementById("eOther").value);
+
+    if (temp) parts.push("Temp " + temp + "°C");
+    parts.push(rash);
+    parts.push(hydration);
+    if (injury) parts.push(injury);
+    if (other) parts.push(other);
+    return "E: " + joinPhrases(parts) + ".";
+  }
+
+  function generateNote() {
+    var lines = [buildA(), buildB(), buildC(), buildD(), buildE()];
+    var output = lines.join("\n");
+    document.getElementById("outputNote").textContent = output;
+    return output;
+  }
+
+  function copyNote() {
+    var note = generateNote();
+    var btn = document.getElementById("copyBtn");
+    var fallbackCopy = function(text) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(note).then(function() {
+        btn.textContent = "Copied";
+        setTimeout(function() { btn.textContent = "Copy note"; }, 1500);
+      }).catch(function() {
+        fallbackCopy(note);
+        btn.textContent = "Copied";
+        setTimeout(function() { btn.textContent = "Copy note"; }, 1500);
+      });
+      return;
+    }
+
+    fallbackCopy(note);
+    btn.textContent = "Copied";
+    setTimeout(function() { btn.textContent = "Copy note"; }, 1500);
+  }
+
+  function clearAll() {
+    var fields = document.querySelectorAll("[data-field]");
+    fields.forEach(function(field) {
+      field.value = "";
+    });
+    generateNote();
+  }
+
+  document.querySelectorAll("[data-field]").forEach(function(field) {
+    field.addEventListener("input", generateNote);
+    field.addEventListener("change", generateNote);
+  });
+  document.getElementById("copyBtn").addEventListener("click", copyNote);
+  document.getElementById("clearBtn").addEventListener("click", clearAll);
+
+  generateNote();
+</script>
+</body>
+</html>

@@ -410,6 +410,7 @@
     @media (max-width: 520px) { .heent-tonsil-cols { grid-template-columns: 1fr; } }
     .heent-col-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
     #heentMouthBlock .peritonitic-yn-wrap { margin-top: 10px; }
+    #heentNeckMeningismYnWrap { margin-top: 10px; }
     .check-grid.heent-meningism-grid { gap: var(--sp-within); }
 
     .section-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
@@ -455,10 +456,17 @@
       { key: 'drooling', label: 'Drooling', yes: 'Drooling', no: 'No drooling', normalYes: false },
       { key: 'trismus', label: 'Trismus', yes: 'Trismus present', no: 'No trismus', normalYes: false }
     ];
+    var HEENT_NECK_MENINGISM_YN_ROWS = [
+      { key: 'neckMovement', label: 'Normal neck movements', yes: 'normal neck movements', no: 'Neck movements limited', normalYes: true },
+      { key: 'kernigsSign', label: "Kernig's sign negative", yes: "Kernig's sign negative", no: "Kernig's sign positive", normalYes: true },
+      { key: 'photophobia', label: 'No photophobia', yes: 'no photophobia', no: 'photophobic', normalYes: true },
+      { key: 'appearsMeningitic', label: 'Does not appear meningitic', yes: 'does not appear meningitic', no: 'Appearance concerning for meningitis', normalYes: true }
+    ];
 
     var PERITONITIC_YN_ROW_REGISTRY = {
       abdomen__peritonitic: ABDOMEN_PERITONITIC_YN_ROWS,
-      heent__oral_yn: HEENT_ORAL_YN_ROWS
+      heent__oral_yn: HEENT_ORAL_YN_ROWS,
+      heent__neck_meningism_yn: HEENT_NECK_MENINGISM_YN_ROWS
     };
 
     var SECTIONS = [
@@ -538,7 +546,8 @@
           { type: 'radio', name: 'rash', label: 'Rash', options: ['No rash', 'Rash (blanching)', 'Rash (non-blanching)'] },
           { type: 'radio', name: 'bruising', label: 'Bruising', options: ['No bruising', 'Bruising present'] },
           { type: 'radio', name: 'nappy', label: 'Nappy area', options: ['Nappy area intact', 'Nappy rash present'] },
-          { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm peripheries', 'Cool peripheries'] }
+          { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm peripheries', 'Cool peripheries'] },
+          { type: 'radio', name: 'exposure', label: 'Exposure', options: ['Uncovered fully for examination'] }
         ],
         freeHint: 'Describe rash or bruising (pattern/location)'
       },
@@ -622,6 +631,15 @@
       'Fontanelle bulging': 'Anterior fontanelle bulging',
       'Fontanelle sunken': 'Anterior fontanelle sunken'
     };
+    var OUTPUT_SECTION_PREFIX_MAP = {
+      general: 'EOB',
+      perfusionHydration: 'CVS',
+      cardiovascular: '',
+      respiratory: 'RESP',
+      abdomen: 'ABDO',
+      heent: 'HEENT',
+      skin: 'SKIN'
+    };
 
     var ABNORMAL_PATTERNS = [
       'present', 'increased', 'decreased', 'unwell', 'appears unwell', 'distress', 'not interacting',
@@ -633,7 +651,8 @@
       'absent', 'concern', 'inconsistent', 'haematoma', 'flaring present',
       'cool peripheries', 'guarding present', 'hernia present', 'drooling present',
       'non-weight-bearing', 'pseudoparalysis', 'seizure activity present', 'stridor', 'stertorous',
-      'mild wob', 'moderate wob', 'severe wob'
+      'mild wob', 'moderate wob', 'severe wob',
+      'central crt >3 seconds', 'peripheral crt >3 seconds'
     ];
 
     var NORMAL_PATTERNS = [
@@ -645,6 +664,44 @@
       'pearl', 'vesicular', 'nad bilaterally', 'no recessions', 'no increased wob', 'good radial pulses',
       'good chest rise', 'equal bilaterally', 'hs i + ii', 'femorals palpable', 'fontanelle flat',
       'heart sounds i + ii', 'normotensive'
+    ];
+    var URGENT_ABNORMAL_PATTERNS = [
+      'drowsy',
+      'irritable',
+      'inconsolable',
+      'appears unwell',
+      'central capillary refill >3s',
+      'central crt >3 seconds',
+      'shut down',
+      'fontanelle bulging',
+      'fontanelle sunken',
+      'murmur',
+      'radial pulses weak',
+      'radial pulses thready',
+      'severe work of breathing',
+      'sever work of breathing',
+      'harsh stridor',
+      'asymmetrical chest rise',
+      'asymetrical chest rise',
+      'rigid abdomen',
+      'guarding present',
+      'bowel sounds absent',
+      'peritonitic',
+      'rebound tenderness',
+      'percussion tenderness',
+      'unable to straight leg raise',
+      'unable to single leg stand',
+      'unable to jump',
+      'photophobia present',
+      'quincy',
+      'uvula deviated',
+      'drooling',
+      'trismus',
+      'skin jaundiced',
+      'skin mottled',
+      'skin cyanosed',
+      'rash non blanching',
+      'non-blanching rash'
     ];
 
     function isAbnormal(text) {
@@ -673,6 +730,91 @@
       if (normal && !abnormal) return 'normal';
       if (abnormal && normal) return 'normal';
       return 'neutral';
+    }
+
+    function normalizeFindingText(text) {
+      return (text || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+    }
+
+    function isUrgentFinding(text) {
+      var norm = normalizeFindingText(text);
+      if (!norm) return false;
+      for (var i = 0; i < URGENT_ABNORMAL_PATTERNS.length; i++) {
+        var pat = normalizeFindingText(URGENT_ABNORMAL_PATTERNS[i]);
+        if (pat && norm.indexOf(pat) !== -1) return true;
+      }
+      return false;
+    }
+
+    function classifyFindingForOutput(text) {
+      var base = trimSentence(text);
+      var cls = classifyFinding(base);
+      if (cls === 'normal') return 'normal';
+      if (cls === 'abnormal') return isUrgentFinding(base) ? 'urgent' : 'abnormal';
+      return 'abnormal';
+    }
+
+    function capitalizeFirstLetter(text) {
+      return (text || '').replace(/[a-z]/, function(c) { return c.toUpperCase(); });
+    }
+
+    function formatFindingsLine(parts, abnormalCollector) {
+      if (!parts || !parts.length) return '';
+      var abnormalParts = [];
+      var normalParts = [];
+      for (var i = 0; i < parts.length; i++) {
+        var raw = trimSentence(parts[i]);
+        if (!raw) continue;
+        var cls = classifyFindingForOutput(raw);
+        if (cls === 'normal') {
+          normalParts.push(raw);
+          continue;
+        }
+        if (abnormalCollector) abnormalCollector.push({
+          text: raw,
+          classType: cls
+        });
+        if (cls === 'urgent') abnormalParts.push('⚠️ ' + raw.toUpperCase());
+        else abnormalParts.push('*' + raw);
+      }
+      var merged = '';
+      if (abnormalParts.length && normalParts.length) merged = abnormalParts.join(', ') + ' / ' + normalParts.join(', ');
+      else if (abnormalParts.length) merged = abnormalParts.join(', ');
+      else merged = normalParts.join(', ');
+      if (!merged) return '';
+      return capitalizeFirstLetter(merged) + '.';
+    }
+
+    function buildAbnormalSummaryLines(abnormalCollector) {
+      if (!abnormalCollector || !abnormalCollector.length) return [];
+      var seen = {};
+      var urgent = [];
+      var notable = [];
+      for (var i = 0; i < abnormalCollector.length; i++) {
+        var item = abnormalCollector[i];
+        var key = normalizeFindingText(item.text);
+        if (!key || seen[key]) continue;
+        seen[key] = true;
+        if (item.classType === 'urgent') urgent.push(item);
+        else notable.push(item);
+      }
+      if (!urgent.length && !notable.length) return [];
+      var lines = ['--- KEY ABNORMAL FINDINGS ---'];
+      if (urgent.length) {
+        var urgentJoined = [];
+        for (var ui = 0; ui < urgent.length; ui++) urgentJoined.push(trimSentence(urgent[ui].text).toUpperCase());
+        lines.push('⚠️ ' + urgentJoined.join(' + ') + ' ⚠️');
+      }
+      if (notable.length) {
+        var notableJoined = [];
+        for (var ni = 0; ni < notable.length; ni++) notableJoined.push(trimSentence(notable[ni].text));
+        lines.push('**' + notableJoined.join(' + ') + '**');
+      }
+      return lines;
     }
 
     function makeId(sectionKey, groupName, idx) {
@@ -707,7 +849,7 @@
       renderLungPickerControls();
     }
 
-    function getLungSummaryLine() {
+    function getLungSummaryLine(abnormalCollector) {
       var parts = [];
       for (var i = 0; i < LUNG_ZONES.length; i++) {
         var zone = LUNG_ZONES[i];
@@ -723,7 +865,7 @@
         if (note) parts.push(note.toLowerCase() + ' at the ' + getLungZoneLabel(zone.key));
       }
       if (!parts.length) return '';
-      return formatOrderedCommaLine(parts);
+      return formatOrderedCommaLine(parts, abnormalCollector);
     }
 
     function renderLungPickerControls() {
@@ -1004,26 +1146,28 @@
       wrap.classList.toggle('show', show);
     }
 
-    function getRespiratoryAuscultationLine() {
+    function getRespiratoryAuscultationLine(abnormalCollector) {
       var mode = document.querySelector('input[name="respiratory__auscultationMode"]:checked');
       if (!mode) return '';
       if (mode.value === 'Chest clear') {
         return 'On auscultation, chest clear. No added sounds, crackles, or wheeze. Good air entry globally.';
       }
       if (mode.value === 'Added sounds') {
-        var parts = [];
+        var findings = [];
         var ausAddedWrap = document.getElementById('respiratoryAuscultationAddedWrap');
         var grid = ausAddedWrap ? ausAddedWrap.querySelector('.auscultation-added-check-grid') : null;
         if (grid) {
           var checked = grid.querySelectorAll('input[type="checkbox"]:checked');
           for (var ci = 0; ci < checked.length; ci++) {
-            parts.push('global ' + trimSentence(checked[ci].value).toLowerCase());
+            findings.push(trimSentence(checked[ci].value).toLowerCase());
           }
         }
         var other = trimSentence(document.getElementById('respiratory__auscultation_other') ? document.getElementById('respiratory__auscultation_other').value : '');
-        if (other) parts.push('global ' + other.toLowerCase());
-        if (!parts.length) return '';
-        return 'On auscultation, ' + parts.join(', ') + '.';
+        if (other) findings.push(other.toLowerCase());
+        if (!findings.length) return '';
+        var formatted = formatFindingsLine(findings, abnormalCollector);
+        if (!formatted) return '';
+        return 'On auscultation, global ' + formatted;
       }
       return '';
     }
@@ -1406,23 +1550,7 @@
       neckMenT.textContent = 'Neck/meningism';
       neckMenB.appendChild(neckMenT);
       neckMenB.appendChild(heentPillRow('heent__neck_ln', ['No lymphadenopathy', 'Single cervical lymph node', 'Multiple cervical lymph nodes']));
-      var menGrid = document.createElement('div');
-      menGrid.className = 'check-grid heent-meningism-grid';
-      menGrid.style.marginTop = '10px';
-      var menOpts = ['Normal neck movements', "Kernig's sign negative", 'No photophobia', 'Does not appear meningitic'];
-      for (var mo = 0; mo < menOpts.length; mo++) {
-        var ml = document.createElement('label');
-        ml.className = 'check-opt';
-        (function(L) { ml.onclick = function() { handleCheckClick(L); }; })(ml);
-        var mi = document.createElement('input');
-        mi.type = 'checkbox';
-        mi.name = 'heent__men_' + mo;
-        mi.value = menOpts[mo];
-        ml.appendChild(mi);
-        ml.appendChild(document.createTextNode(menOpts[mo]));
-        menGrid.appendChild(ml);
-      }
-      neckMenB.appendChild(menGrid);
+      appendPeritoniticYnWrap(neckMenB, 'heent__neck_meningism_yn', HEENT_NECK_MENINGISM_YN_ROWS, { id: 'heentNeckMeningismYnWrap' });
       card.appendChild(neckMenB);
 
       var ft = document.createElement('div');
@@ -1532,17 +1660,18 @@
       return parts;
     }
 
-    function getHeentOutputLines() {
+    function getHeentOutputLines(abnormalCollector) {
       var root = document.getElementById('heentBlock');
       if (!root) return [];
       var lines = [];
+      var heentMainParts = [];
       var findingOrder = ['erythematous', 'bulging', 'perforated', 'purulent'];
 
       var nad = root.querySelector('input[name="heent__tm_nad"]:checked');
       if (nad && nad.value === 'Tympanic membranes NAD bilaterally') {
-        lines.push('Tympanic membranes NAD bilaterally.');
+        heentMainParts.push('Tympanic membranes NAD bilaterally');
       } else if (nad && nad.value === 'Wax filled ears') {
-        lines.push('Wax filled ear canals, tympanic membranes not visualised.');
+        heentMainParts.push('Wax filled ear canals, tympanic membranes not visualised');
       } else if (nad && nad.value === 'Tympanic membrane findings') {
         var lcol = root.querySelector('.heent-tm-L-col');
         var rcol = root.querySelector('.heent-tm-R-col');
@@ -1559,7 +1688,7 @@
         }
         if (leftOnly.length) tmBits.push('Left TM ' + leftOnly.join(' and '));
         if (rightOnly.length) tmBits.push('Right TM ' + rightOnly.join(' and '));
-        if (tmBits.length) lines.push(formatOrderedCommaLine(tmBits));
+        for (var tb = 0; tb < tmBits.length; tb++) heentMainParts.push(tmBits[tb]);
       }
 
       var eyeParts = [];
@@ -1569,10 +1698,10 @@
       if (pearl) eyeParts.push(pearl.value);
       var conj = root.querySelector('input[name="heent__conj"]:checked');
       if (conj) eyeParts.push(conj.value);
-      if (eyeParts.length) lines.push(formatOrderedCommaLine(eyeParts));
+      for (var ep = 0; ep < eyeParts.length; ep++) heentMainParts.push(eyeParts[ep]);
 
       var nose = root.querySelector('input[name="heent__nose"]:checked');
-      if (nose) lines.push(sentenceCase(nose.value) + '.');
+      if (nose) heentMainParts.push(nose.value);
 
       var mBlock = document.getElementById('heentMouthBlock');
       var mouthParts = [];
@@ -1582,18 +1711,37 @@
         var oralParts = getHeentOralMouthParts(mBlock);
         for (var ap = 0; ap < oralParts.length; ap++) mouthParts.push(oralParts[ap]);
       }
-      if (mouthParts.length) lines.push(formatHeentMouthLine(mouthParts));
+      for (var mp = 0; mp < mouthParts.length; mp++) heentMainParts.push(mouthParts[mp]);
 
       var neckMenParts = [];
       var neck = root.querySelector('input[name="heent__neck_ln"]:checked');
       if (neck) neckMenParts.push(neck.value);
-      var mens = root.querySelectorAll('input[name^="heent__men_"]:checked');
-      for (var mi = 0; mi < mens.length; mi++) neckMenParts.push(mens[mi].value);
-      if (neckMenParts.length) lines.push(formatOrderedCommaLine(neckMenParts));
+      var neckMenPfx = 'heent__neck_meningism_yn';
+      for (var nmi = 0; nmi < HEENT_NECK_MENINGISM_YN_ROWS.length; nmi++) {
+        var nmr = HEENT_NECK_MENINGISM_YN_ROWS[nmi];
+        var neckYesEl = document.getElementById(neckMenPfx + '__' + nmr.key + '__yes');
+        var neckNoEl = document.getElementById(neckMenPfx + '__' + nmr.key + '__no');
+        if (neckYesEl && neckYesEl.checked) neckMenParts.push(nmr.yes);
+        else if (neckNoEl && neckNoEl.checked) neckMenParts.push(nmr.no);
+      }
+      if (heentMainParts.length) lines.push(withSectionPrefix('heent', formatOrderedCommaLine(heentMainParts, abnormalCollector)));
+      if (neckMenParts.length) {
+        var neckLine = formatOrderedCommaLine(neckMenParts, abnormalCollector);
+        if (!lines.length) neckLine = withSectionPrefix('heent', neckLine);
+        else neckLine = '\t' + neckLine;
+        lines.push(neckLine);
+      }
 
       var hf = document.getElementById('heent__free');
       var hft = hf ? trimSentence(hf.value) : '';
-      if (hft) lines.push(sentenceCase(hft) + '.');
+      if (hft) {
+        if (lines.length) {
+          var base = trimSentence(lines[0].replace(/^HEENT:\s*/i, ''));
+          lines[0] = withSectionPrefix('heent', sentenceCase(trimSentence(base + ', ' + hft)) + '.');
+        } else {
+          lines.push(withSectionPrefix('heent', sentenceCase(hft) + '.'));
+        }
+      }
 
       return lines;
     }
@@ -1915,6 +2063,13 @@
       return text.charAt(0).toUpperCase() + text.slice(1);
     }
 
+    function withSectionPrefix(sectionKey, lineText) {
+      var body = trimSentence(lineText || '');
+      if (!body) return '';
+      var prefix = OUTPUT_SECTION_PREFIX_MAP[sectionKey];
+      return prefix ? (prefix + ': ' + body + '.') : (body + '.');
+    }
+
     function reorderPhrases(phrases) {
       var abnormals = [];
       var normals = [];
@@ -1928,10 +2083,10 @@
       return abnormals.concat(neutrals, normals);
     }
 
-    function formatOrderedCommaLine(parts) {
+    function formatOrderedCommaLine(parts, abnormalCollector) {
       if (!parts || !parts.length) return '';
       var ordered = reorderPhrases(parts.slice());
-      return sentenceCase(trimSentence(ordered.join(', '))) + '.';
+      return formatFindingsLine(ordered, abnormalCollector);
     }
 
     function updateAbdomenTendernessField() {
@@ -2024,7 +2179,7 @@
       updateOutput();
     }
 
-    function buildSectionLine(section) {
+    function buildSectionLine(section, abnormalCollector) {
       var phrases = [];
       for (var g = 0; g < section.groups.length; g++) {
         var group = section.groups[g];
@@ -2132,6 +2287,9 @@
           var tenderLoc = trimSentence(document.getElementById('abdomen__tender_location') ? document.getElementById('abdomen__tender_location').value : '');
           if (tenderLoc) vals = ['Tender ' + tenderLoc];
         }
+        if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0] === 'Non-tender') {
+          vals = ['Non-tender'];
+        }
         if (vals.length > 0) {
           if (group.type === 'checkbox') {
             for (var vi = 0; vi < vals.length; vi++) phrases.push(vals[vi]);
@@ -2146,34 +2304,42 @@
       if (phrases.length === 0 && !freeText) return '';
       var ordered = reorderPhrases(phrases);
       if (freeText) ordered.push(freeText);
-      var lineBody = sentenceCase(trimSentence(ordered.join(', '))) + '.';
-      if (section.key === 'abdomen') return 'Abdomen: ' + lineBody;
-      return lineBody;
+      var lineBody = formatFindingsLine(ordered, abnormalCollector);
+      return withSectionPrefix(section.key, lineBody);
     }
 
     function updateOutput() {
       var lines = [];
+      var abnormalCollector = [];
       var sectionMap = {};
       for (var si = 0; si < SECTIONS.length; si++) sectionMap[SECTIONS[si].key] = SECTIONS[si];
       for (var oi = 0; oi < OUTPUT_SECTION_KEYS.length; oi++) {
         var skey = OUTPUT_SECTION_KEYS[oi];
         if (skey === '_heent_') {
-          var heentLines = getHeentOutputLines();
+          var heentLines = getHeentOutputLines(abnormalCollector);
           for (var hl = 0; hl < heentLines.length; hl++) lines.push(heentLines[hl]);
           continue;
         }
         var sec = sectionMap[skey];
         if (!sec) continue;
-        var line = buildSectionLine(sec);
+        var line = buildSectionLine(sec, abnormalCollector);
         if (skey === 'respiratory') {
           if (line) lines.push(line);
-          var ausLine = getRespiratoryAuscultationLine();
-          if (ausLine) lines.push(ausLine);
-          var lungLine = getLungSummaryLine();
-          if (lungLine) lines.push(lungLine);
+          var ausLine = getRespiratoryAuscultationLine(abnormalCollector);
+          if (ausLine) lines.push('\t' + ausLine);
+          var lungLine = getLungSummaryLine(abnormalCollector);
+          if (lungLine) lines.push('\t' + lungLine);
         } else {
-          if (line) lines.push(line);
+          if (line) {
+            if (skey === 'cardiovascular' && OUTPUT_SECTION_PREFIX_MAP.cardiovascular === '') lines.push('\t' + line);
+            else lines.push(line);
+          }
         }
+      }
+      var summaryLines = buildAbnormalSummaryLines(abnormalCollector);
+      if (summaryLines.length) {
+        if (lines.length) lines.push('');
+        for (var sl = 0; sl < summaryLines.length; sl++) lines.push(summaryLines[sl]);
       }
       var outputEl = document.getElementById('output');
       var titleEl = document.getElementById('outputToggleTitle');
