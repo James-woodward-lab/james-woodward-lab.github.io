@@ -588,6 +588,38 @@
       }
     ];
 
+    function tagLabelFromClass(classType) {
+      if (classType === 'urgent') return TAG_URGENT;
+      if (classType === 'abnormal') return TAG_ABNORMAL;
+      return TAG_NORMAL;
+    }
+
+    function resolveFindingTagLabel(text) {
+      return tagLabelFromClass(classifyFindingForOutput(text));
+    }
+
+    function applyTagsToYnRows(rowsDef) {
+      for (var i = 0; i < rowsDef.length; i++) {
+        if (!rowsDef[i].yesTag) rowsDef[i].yesTag = resolveFindingTagLabel(rowsDef[i].yes);
+        if (!rowsDef[i].noTag) rowsDef[i].noTag = resolveFindingTagLabel(rowsDef[i].no);
+      }
+    }
+
+    function applyTagsToSectionOptions() {
+      for (var si = 0; si < SECTIONS.length; si++) {
+        var sec = SECTIONS[si];
+        for (var gi = 0; gi < sec.groups.length; gi++) {
+          var grp = sec.groups[gi];
+          if (!grp.options || !grp.options.length) continue;
+          for (var oi = 0; oi < grp.options.length; oi++) {
+            var opt = grp.options[oi];
+            if (typeof opt === 'string') grp.options[oi] = { value: opt, tag: resolveFindingTagLabel(opt) };
+            else if (opt && !opt.tag) opt.tag = resolveFindingTagLabel(opt.value || '');
+          }
+        }
+      }
+    }
+
     var PRIORITY_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen'];
     /** Shown as full section cards after HEENT (not inside collapsible extras). */
     var POST_HEENT_KEYS = ['skin'];
@@ -703,6 +735,54 @@
       'rash non blanching',
       'non-blanching rash'
     ];
+    var EXPLICIT_URGENT_PATTERNS = [
+      'not interacting with carer',
+      'radial pulses weak',
+      'radial pulses thready',
+      'severe wob',
+      'rigid',
+      'bowel sounds absent',
+      'peritonitic',
+      'rebound tenderness present',
+      'percussion tenderness present',
+      'unable to straight leg raise',
+      'unable to single leg stand',
+      'not able to jump',
+      'left tm perforated',
+      'right tm perforated',
+      'tympanic membranes perforated bilaterally',
+      'photophobia present',
+      'trismus present',
+      'uvula deviated',
+      'drooling',
+      'kernig s sign positive',
+      'appearance concerning for meningitis',
+      'photophobic',
+      'jaundiced',
+      'mottled',
+      'cyanosed'
+    ];
+    var EXPLICIT_ABNORMAL_PATTERNS = [
+      'central crt 2 3 seconds',
+      'peripheral crt 2 3 seconds',
+      'radial pulses bounding',
+      'subcostal recessions',
+      'intercostal recessions',
+      'suprasternal recessions',
+      'substernal recessions'
+    ];
+    var EXPLICIT_NORMAL_PATTERNS = [
+      'uncovered fully for examination',
+      'central crt 2 seconds',
+      'central crt <2 seconds',
+      'peripheral crt 2 seconds',
+      'peripheral crt <2 seconds',
+      'kernig s sign negative',
+      'does not appear meningitic'
+    ];
+    var TAG_NORMAL = 'Normal finding';
+    var TAG_ABNORMAL = 'abnormal finding';
+    var TAG_URGENT = 'urgent abnormal finding';
 
     function isAbnormal(text) {
       var p = (text || '').toLowerCase();
@@ -750,16 +830,54 @@
       return false;
     }
 
+    function matchesAnyPattern(text, patterns) {
+      var norm = normalizeFindingText(text);
+      if (!norm) return false;
+      for (var i = 0; i < patterns.length; i++) {
+        var pat = normalizeFindingText(patterns[i]);
+        if (pat && norm.indexOf(pat) !== -1) return true;
+      }
+      return false;
+    }
+
     function classifyFindingForOutput(text) {
       var base = trimSentence(text);
+      if (matchesAnyPattern(base, EXPLICIT_NORMAL_PATTERNS)) return 'normal';
+      if (matchesAnyPattern(base, EXPLICIT_URGENT_PATTERNS)) return 'urgent';
+      if (matchesAnyPattern(base, EXPLICIT_ABNORMAL_PATTERNS)) return 'abnormal';
       var cls = classifyFinding(base);
       if (cls === 'normal') return 'normal';
       if (cls === 'abnormal') return isUrgentFinding(base) ? 'urgent' : 'abnormal';
       return 'abnormal';
     }
 
-    function capitalizeFirstLetter(text) {
-      return (text || '').replace(/[a-z]/, function(c) { return c.toUpperCase(); });
+    applyTagsToYnRows(ABDOMEN_PERITONITIC_YN_ROWS);
+    applyTagsToYnRows(HEENT_ORAL_YN_ROWS);
+    applyTagsToYnRows(HEENT_NECK_MENINGISM_YN_ROWS);
+    applyTagsToSectionOptions();
+
+    function normalizeFindingTag(tag) {
+      var t = normalizeFindingText(tag);
+      if (t === normalizeFindingText(TAG_URGENT)) return 'urgent';
+      if (t === normalizeFindingText(TAG_ABNORMAL)) return 'abnormal';
+      if (t === normalizeFindingText(TAG_NORMAL)) return 'normal';
+      return '';
+    }
+
+    function classFromTaggedFinding(entryText, entryTag) {
+      if (entryTag === 'free-text') return 'normal';
+      var normalized = normalizeFindingTag(entryTag);
+      if (normalized) return normalized;
+      return classifyFindingForOutput(entryText);
+    }
+
+    function makeTaggedFinding(text, tag) {
+      return { text: trimSentence(text), tag: tag || '' };
+    }
+
+    function getFindingText(entry) {
+      if (entry && typeof entry === 'object' && Object.prototype.hasOwnProperty.call(entry, 'text')) return trimSentence(entry.text);
+      return trimSentence(entry);
     }
 
     function formatFindingsLine(parts, abnormalCollector) {
@@ -767,9 +885,10 @@
       var abnormalParts = [];
       var normalParts = [];
       for (var i = 0; i < parts.length; i++) {
-        var raw = trimSentence(parts[i]);
+        var raw = getFindingText(parts[i]);
         if (!raw) continue;
-        var cls = classifyFindingForOutput(raw);
+        var entryTag = (parts[i] && typeof parts[i] === 'object') ? parts[i].tag : '';
+        var cls = classFromTaggedFinding(raw, entryTag);
         if (cls === 'normal') {
           normalParts.push(raw);
           continue;
@@ -778,15 +897,15 @@
           text: raw,
           classType: cls
         });
-        if (cls === 'urgent') abnormalParts.push('⚠️ ' + raw.toUpperCase());
-        else abnormalParts.push('*' + raw);
+        if (cls === 'urgent') abnormalParts.push(raw);
+        else abnormalParts.push(raw);
       }
       var merged = '';
-      if (abnormalParts.length && normalParts.length) merged = abnormalParts.join(', ') + ' / ' + normalParts.join(', ');
+      if (abnormalParts.length && normalParts.length) merged = abnormalParts.join(', ') + ' /// ' + normalParts.join(', ');
       else if (abnormalParts.length) merged = abnormalParts.join(', ');
       else merged = normalParts.join(', ');
       if (!merged) return '';
-      return capitalizeFirstLetter(merged) + '.';
+      return merged + '.';
     }
 
     function buildAbnormalSummaryLines(abnormalCollector) {
@@ -806,7 +925,7 @@
       var lines = ['--- KEY ABNORMAL FINDINGS ---'];
       if (urgent.length) {
         var urgentJoined = [];
-        for (var ui = 0; ui < urgent.length; ui++) urgentJoined.push(trimSentence(urgent[ui].text).toUpperCase());
+        for (var ui = 0; ui < urgent.length; ui++) urgentJoined.push(trimSentence(urgent[ui].text));
         lines.push('⚠️ ' + urgentJoined.join(' + ') + ' ⚠️');
       }
       if (notable.length) {
@@ -1313,15 +1432,19 @@
       var pr = document.createElement('div');
       pr.className = 'pill-row';
       for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        var optVal = typeof opt === 'string' ? opt : opt.value;
+        var optTag = typeof opt === 'string' ? resolveFindingTagLabel(optVal) : (opt.tag || resolveFindingTagLabel(optVal));
         var pl = document.createElement('label');
         pl.className = 'pill-opt';
         (function(L) { pl.onclick = function(e) { handlePillClick(L, e); }; })(pl);
         var inp = document.createElement('input');
         inp.type = 'radio';
         inp.name = name;
-        inp.value = options[i];
+        inp.value = optVal;
+        inp.setAttribute('data-finding-tag', optTag);
         pl.appendChild(inp);
-        pl.appendChild(document.createTextNode(options[i]));
+        pl.appendChild(document.createTextNode(optVal));
         pr.appendChild(pl);
       }
       return pr;
@@ -1351,6 +1474,7 @@
         yesInp.type = 'checkbox';
         yesInp.id = prefix + '__' + prDef.key + '__yes';
         yesInp.value = 'yes';
+        yesInp.setAttribute('data-finding-tag', prDef.yesTag || resolveFindingTagLabel(prDef.yes));
         yesLbl.appendChild(yesInp);
         yesLbl.appendChild(document.createTextNode('\u2713'));
         var noLbl = document.createElement('label');
@@ -1360,6 +1484,7 @@
         noInp.type = 'checkbox';
         noInp.id = prefix + '__' + prDef.key + '__no';
         noInp.value = 'no';
+        noInp.setAttribute('data-finding-tag', prDef.noTag || resolveFindingTagLabel(prDef.no));
         noLbl.appendChild(noInp);
         noLbl.appendChild(document.createTextNode('\u2717'));
         ynActions.appendChild(yesLbl);
@@ -1662,9 +1787,10 @@
 
     function getHeentOutputLines(abnormalCollector) {
       var root = document.getElementById('heentBlock');
-      if (!root) return [];
+      if (!root) return { lines: [], severity: 'normal' };
       var lines = [];
       var heentMainParts = [];
+      var heentSeverity = 'normal';
       var findingOrder = ['erythematous', 'bulging', 'perforated', 'purulent'];
 
       var nad = root.querySelector('input[name="heent__tm_nad"]:checked');
@@ -1724,10 +1850,14 @@
         if (neckYesEl && neckYesEl.checked) neckMenParts.push(nmr.yes);
         else if (neckNoEl && neckNoEl.checked) neckMenParts.push(nmr.no);
       }
-      if (heentMainParts.length) lines.push(withSectionPrefix('heent', formatOrderedCommaLine(heentMainParts, abnormalCollector)));
+      if (heentMainParts.length) {
+        heentSeverity = mergeSeverity(heentSeverity, getSeverityFromFindings(heentMainParts));
+        lines.push(withSectionPrefix('heent', formatOrderedCommaLine(heentMainParts, abnormalCollector), heentSeverity));
+      }
       if (neckMenParts.length) {
+        heentSeverity = mergeSeverity(heentSeverity, getSeverityFromFindings(neckMenParts));
         var neckLine = formatOrderedCommaLine(neckMenParts, abnormalCollector);
-        if (!lines.length) neckLine = withSectionPrefix('heent', neckLine);
+        if (!lines.length) neckLine = withSectionPrefix('heent', neckLine, heentSeverity);
         else neckLine = '\t' + neckLine;
         lines.push(neckLine);
       }
@@ -1736,14 +1866,14 @@
       var hft = hf ? trimSentence(hf.value) : '';
       if (hft) {
         if (lines.length) {
-          var base = trimSentence(lines[0].replace(/^HEENT:\s*/i, ''));
-          lines[0] = withSectionPrefix('heent', sentenceCase(trimSentence(base + ', ' + hft)) + '.');
+          var base = trimSentence(lines[0].replace(/^(⚠️\s+|\*\*\s+)?HEENT:\s*/i, ''));
+          lines[0] = withSectionPrefix('heent', sentenceCase(trimSentence(base + ', ' + hft)) + '.', heentSeverity);
         } else {
-          lines.push(withSectionPrefix('heent', sentenceCase(hft) + '.'));
+          lines.push(withSectionPrefix('heent', sentenceCase(hft) + '.', 'normal'));
         }
       }
 
-      return lines;
+      return { lines: lines, severity: heentSeverity };
     }
 
     function renderSectionCard(section) {
@@ -1785,6 +1915,9 @@
           var pillRow = document.createElement('div');
           pillRow.className = 'pill-row';
           for (var o = 0; o < group.options.length; o++) {
+            var radioOpt = group.options[o];
+            var radioVal = typeof radioOpt === 'string' ? radioOpt : radioOpt.value;
+            var radioTag = typeof radioOpt === 'string' ? resolveFindingTagLabel(radioVal) : (radioOpt.tag || resolveFindingTagLabel(radioVal));
             var pillLabel = document.createElement('label');
             pillLabel.className = 'pill-opt';
             pillLabel.onclick = (function(lbl) { return function(e) { handlePillClick(lbl, e); }; })(pillLabel);
@@ -1793,10 +1926,11 @@
             inp.type = 'radio';
             inp.name = section.key + '__' + group.name;
             inp.id = makeId(section.key, group.name, o);
-            inp.value = group.options[o];
+            inp.value = radioVal;
+            inp.setAttribute('data-finding-tag', radioTag);
 
             pillLabel.appendChild(inp);
-            pillLabel.appendChild(document.createTextNode(group.options[o]));
+            pillLabel.appendChild(document.createTextNode(radioVal));
             pillRow.appendChild(pillLabel);
           }
           row.appendChild(pillRow);
@@ -1807,6 +1941,9 @@
           var checkGrid = document.createElement('div');
           checkGrid.className = 'check-grid';
           for (var o = 0; o < group.options.length; o++) {
+            var checkOpt = group.options[o];
+            var checkVal = typeof checkOpt === 'string' ? checkOpt : checkOpt.value;
+            var checkTag = typeof checkOpt === 'string' ? resolveFindingTagLabel(checkVal) : (checkOpt.tag || resolveFindingTagLabel(checkVal));
             var checkLabel = document.createElement('label');
             checkLabel.className = 'check-opt';
             checkLabel.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(checkLabel);
@@ -1815,10 +1952,11 @@
             cb.type = 'checkbox';
             cb.id = makeId(section.key, group.name, o);
             cb.name = makeId(section.key, group.name, o);
-            cb.value = group.options[o];
+            cb.value = checkVal;
+            cb.setAttribute('data-finding-tag', checkTag);
 
             checkLabel.appendChild(cb);
-            checkLabel.appendChild(document.createTextNode(group.options[o]));
+            checkLabel.appendChild(document.createTextNode(checkVal));
             checkGrid.appendChild(checkLabel);
           }
           row.appendChild(checkGrid);
@@ -2063,11 +2201,37 @@
       return text.charAt(0).toUpperCase() + text.slice(1);
     }
 
-    function withSectionPrefix(sectionKey, lineText) {
+    function severityRank(severity) {
+      if (severity === 'urgent') return 2;
+      if (severity === 'abnormal') return 1;
+      return 0;
+    }
+
+    function mergeSeverity(current, next) {
+      return severityRank(next) > severityRank(current) ? next : current;
+    }
+
+    function getSeverityFromFindings(findings) {
+      var severity = 'normal';
+      if (!findings || !findings.length) return severity;
+      for (var i = 0; i < findings.length; i++) {
+        var text = getFindingText(findings[i]);
+        var tag = (findings[i] && typeof findings[i] === 'object') ? findings[i].tag : '';
+        var cls = classFromTaggedFinding(text, tag);
+        severity = mergeSeverity(severity, cls === 'urgent' ? 'urgent' : (cls === 'abnormal' ? 'abnormal' : 'normal'));
+      }
+      return severity;
+    }
+
+    function withSectionPrefix(sectionKey, lineText, severity) {
       var body = trimSentence(lineText || '');
       if (!body) return '';
       var prefix = OUTPUT_SECTION_PREFIX_MAP[sectionKey];
-      return prefix ? (prefix + ': ' + body + '.') : (body + '.');
+      if (!prefix) return body + '.';
+      var marker = '';
+      if (severity === 'urgent') marker = '⚠️ ';
+      else if (severity === 'abnormal') marker = '** ';
+      return marker + prefix + ': ' + body + '.';
     }
 
     function reorderPhrases(phrases) {
@@ -2075,8 +2239,11 @@
       var normals = [];
       var neutrals = [];
       for (var i = 0; i < phrases.length; i++) {
-        var cls = classifyFinding(phrases[i]);
+        var text = getFindingText(phrases[i]);
+        var entryTag = (phrases[i] && typeof phrases[i] === 'object') ? phrases[i].tag : '';
+        var cls = classFromTaggedFinding(text, entryTag);
         if (cls === 'abnormal') abnormals.push(phrases[i]);
+        else if (cls === 'urgent') abnormals.push(phrases[i]);
         else if (cls === 'normal') normals.push(phrases[i]);
         else neutrals.push(phrases[i]);
       }
@@ -2085,7 +2252,12 @@
 
     function formatOrderedCommaLine(parts, abnormalCollector) {
       if (!parts || !parts.length) return '';
-      var ordered = reorderPhrases(parts.slice());
+      var taggedParts = [];
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i] && typeof parts[i] === 'object' && Object.prototype.hasOwnProperty.call(parts[i], 'text')) taggedParts.push(parts[i]);
+        else taggedParts.push(makeTaggedFinding(parts[i], resolveFindingTagLabel(parts[i])));
+      }
+      var ordered = reorderPhrases(taggedParts);
       return formatFindingsLine(ordered, abnormalCollector);
     }
 
@@ -2190,8 +2362,8 @@
             var rdef = group.rows[py];
             var yesEl = document.getElementById(abPrfx + '__' + rdef.key + '__yes');
             var noEl = document.getElementById(abPrfx + '__' + rdef.key + '__no');
-            if (yesEl && yesEl.checked) phrases.push(rdef.yes);
-            else if (noEl && noEl.checked) phrases.push(rdef.no);
+            if (yesEl && yesEl.checked) phrases.push(makeTaggedFinding(rdef.yes, rdef.yesTag));
+            else if (noEl && noEl.checked) phrases.push(makeTaggedFinding(rdef.no, rdef.noTag));
           }
           continue;
         }
@@ -2202,13 +2374,13 @@
           if (rashPick && rashPick.value === 'Rash (blanching)') {
             var pr = 'Blanching rash';
             if (rashDetail) pr += ' ' + rashDetail;
-            phrases.push(pr);
+            phrases.push(makeTaggedFinding(pr, resolveFindingTagLabel(pr)));
           } else if (rashPick && rashPick.value === 'Rash (non-blanching)') {
             var pr2 = 'Non-blanching rash';
             if (rashDetail) pr2 += ' ' + rashDetail;
-            phrases.push(pr2);
+            phrases.push(makeTaggedFinding(pr2, resolveFindingTagLabel(pr2)));
           } else if (rashPick && rashPick.value === 'No rash') {
-            phrases.push('No rash');
+            phrases.push(makeTaggedFinding('No rash', resolveFindingTagLabel('No rash')));
           }
           continue;
         }
@@ -2219,9 +2391,9 @@
           if (bruPick && bruPick.value === 'Bruising present') {
             var pb = 'Bruising';
             if (bruDetail) pb += ' ' + bruDetail;
-            phrases.push(pb);
+            phrases.push(makeTaggedFinding(pb, resolveFindingTagLabel(pb)));
           } else if (bruPick && bruPick.value === 'No bruising') {
-            phrases.push('No bruising');
+            phrases.push(makeTaggedFinding('No bruising', resolveFindingTagLabel('No bruising')));
           }
           continue;
         }
@@ -2232,16 +2404,18 @@
         var vals = [];
         for (var s = 0; s < selected.length; s++) {
           var rawVal = trimSentence(selected[s].value);
-          vals.push(OUTPUT_LABEL_MAP[rawVal] || rawVal);
+          var mappedVal = OUTPUT_LABEL_MAP[rawVal] || rawVal;
+          var rawTag = selected[s].getAttribute('data-finding-tag') || '';
+          vals.push(makeTaggedFinding(mappedVal, rawTag));
         }
         if (section.key === 'respiratory' && group.name === 'wob' && vals.length > 0) {
-          if (vals[0] === 'No WOB') vals = ['No increased WOB'];
-          else vals = [vals[0] + ' WOB'];
+          if (vals[0].text === 'No WOB') vals = [makeTaggedFinding('No increased WOB', vals[0].tag)];
+          else vals = [makeTaggedFinding(vals[0].text + ' WOB', vals[0].tag)];
         }
         if (section.key === 'respiratory' && group.name === 'recessionMode') {
           var modeRe = document.querySelector('input[name="respiratory__recessionMode"]:checked');
           if (!modeRe) vals = [];
-          else if (modeRe.value === 'No recessions') vals = ['No recessions'];
+          else if (modeRe.value === 'No recessions') vals = [makeTaggedFinding('No recessions', resolveFindingTagLabel('No recessions'))];
           else {
             var recessionTypes = [];
             var subW = document.getElementById('recessionSubtypeWrap');
@@ -2249,12 +2423,12 @@
               var stCbs = subW.querySelectorAll('input[type="checkbox"]:checked');
               for (var st = 0; st < stCbs.length; st++) recessionTypes.push(stCbs[st].value.toLowerCase());
             }
-            if (recessionTypes.length > 0) vals = [recessionTypes.join(', ') + ' recessions'];
+            if (recessionTypes.length > 0) vals = [makeTaggedFinding(recessionTypes.join(', ') + ' recessions', resolveFindingTagLabel(recessionTypes.join(', ') + ' recessions'))];
             else vals = [];
           }
         }
-        if (section.key === 'cardiovascular' && group.name === 'heartMurmur' && vals.length > 0 && vals[0] === 'Murmur') {
-          vals = ['Murmur present'];
+        if (section.key === 'cardiovascular' && group.name === 'heartMurmur' && vals.length > 0 && vals[0].text === 'Murmur') {
+          vals = [makeTaggedFinding('Murmur present', resolveFindingTagLabel('Murmur present'))];
           var murmurDetails = [];
           var timingInputs = document.querySelectorAll('input[id^="cardiovascular__murmurTiming__"]:checked');
           for (var ti = 0; ti < timingInputs.length; ti++) murmurDetails.push(timingInputs[ti].value.toLowerCase());
@@ -2276,36 +2450,39 @@
           var pitchVals = [];
           for (var pi = 0; pi < pitchInputs.length; pi++) pitchVals.push(pitchInputs[pi].value.toLowerCase() + '-pitched');
           if (pitchVals.length) murmurDetails.push(pitchVals.join(', '));
-          if (murmurDetails.length) vals = ['Murmur present (' + murmurDetails.join('; ') + ')'];
+          if (murmurDetails.length) vals = [makeTaggedFinding('Murmur present (' + murmurDetails.join('; ') + ')', resolveFindingTagLabel('Murmur present'))];
         }
         if (section.key === 'perfusionHydration' && (group.name === 'crtCentral' || group.name === 'crtPeripheral') && vals.length > 0) {
           var crtMap = { '<2s': '<2 seconds', '2-3s': '2-3 seconds', '>3s': '>3 seconds' };
-          var crtPhrase = crtMap[vals[0]] || vals[0];
-          vals = [group.name === 'crtCentral' ? 'Central CRT ' + crtPhrase : 'Peripheral CRT ' + crtPhrase];
+          var crtPhrase = crtMap[vals[0].text] || vals[0].text;
+          var crtText = group.name === 'crtCentral' ? 'Central CRT ' + crtPhrase : 'Peripheral CRT ' + crtPhrase;
+          vals = [makeTaggedFinding(crtText, resolveFindingTagLabel(crtText))];
         }
-        if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0] === 'Tender') {
+        if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0].text === 'Tender') {
           var tenderLoc = trimSentence(document.getElementById('abdomen__tender_location') ? document.getElementById('abdomen__tender_location').value : '');
-          if (tenderLoc) vals = ['Tender ' + tenderLoc];
+          if (tenderLoc) vals = [makeTaggedFinding('Tender ' + tenderLoc, resolveFindingTagLabel('Tender ' + tenderLoc))];
         }
-        if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0] === 'Non-tender') {
-          vals = ['Non-tender'];
+        if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0].text === 'Non-tender') {
+          vals = [makeTaggedFinding('Non-tender', resolveFindingTagLabel('Non-tender'))];
         }
         if (vals.length > 0) {
           if (group.type === 'checkbox') {
             for (var vi = 0; vi < vals.length; vi++) phrases.push(vals[vi]);
           } else {
-            phrases.push(vals.join(', '));
+            var joinedText = [];
+            for (var vj = 0; vj < vals.length; vj++) joinedText.push(vals[vj].text);
+            phrases.push(makeTaggedFinding(joinedText.join(', '), vals[0].tag));
           }
         }
       }
 
       var freeText = trimSentence(document.getElementById(section.key + '__free').value);
       if (freeText) freeText = sentenceCase(freeText);
-      if (phrases.length === 0 && !freeText) return '';
+      if (phrases.length === 0 && !freeText) return { line: '', severity: 'normal' };
       var ordered = reorderPhrases(phrases);
-      if (freeText) ordered.push(freeText);
+      if (freeText) ordered.push(makeTaggedFinding(freeText, 'free-text'));
       var lineBody = formatFindingsLine(ordered, abnormalCollector);
-      return withSectionPrefix(section.key, lineBody);
+      return { line: withSectionPrefix(section.key, lineBody, getSeverityFromFindings(ordered)), severity: getSeverityFromFindings(ordered) };
     }
 
     function updateOutput() {
@@ -2316,13 +2493,15 @@
       for (var oi = 0; oi < OUTPUT_SECTION_KEYS.length; oi++) {
         var skey = OUTPUT_SECTION_KEYS[oi];
         if (skey === '_heent_') {
-          var heentLines = getHeentOutputLines(abnormalCollector);
-          for (var hl = 0; hl < heentLines.length; hl++) lines.push(heentLines[hl]);
+          var heentOut = getHeentOutputLines(abnormalCollector);
+          for (var hl = 0; hl < heentOut.lines.length; hl++) lines.push(heentOut.lines[hl]);
           continue;
         }
         var sec = sectionMap[skey];
         if (!sec) continue;
-        var line = buildSectionLine(sec, abnormalCollector);
+        var built = buildSectionLine(sec, abnormalCollector);
+        var line = built.line;
+        var lineSeverity = built.severity;
         if (skey === 'respiratory') {
           if (line) lines.push(line);
           var ausLine = getRespiratoryAuscultationLine(abnormalCollector);
@@ -2331,8 +2510,26 @@
           if (lungLine) lines.push('\t' + lungLine);
         } else {
           if (line) {
-            if (skey === 'cardiovascular' && OUTPUT_SECTION_PREFIX_MAP.cardiovascular === '') lines.push('\t' + line);
-            else lines.push(line);
+            if (skey === 'cardiovascular' && OUTPUT_SECTION_PREFIX_MAP.cardiovascular === '') {
+              if (lines.length > 0 && OUTPUT_SECTION_PREFIX_MAP.perfusionHydration) {
+                var perfIdx = -1;
+                for (var pi = lines.length - 1; pi >= 0; pi--) {
+                  if (lines[pi].indexOf(OUTPUT_SECTION_PREFIX_MAP.perfusionHydration + ':') !== -1 || lines[pi].indexOf('⚠️ ' + OUTPUT_SECTION_PREFIX_MAP.perfusionHydration + ':') !== -1 || lines[pi].indexOf('** ' + OUTPUT_SECTION_PREFIX_MAP.perfusionHydration + ':') !== -1) {
+                    perfIdx = pi;
+                    break;
+                  }
+                }
+                if (perfIdx !== -1) {
+                  var perfLine = lines[perfIdx];
+                  var perfSeverity = perfLine.indexOf('⚠️ ') === 0 ? 'urgent' : (perfLine.indexOf('** ') === 0 ? 'abnormal' : 'normal');
+                  var merged = mergeSeverity(perfSeverity, lineSeverity);
+                  var perfPrefix = OUTPUT_SECTION_PREFIX_MAP.perfusionHydration;
+                  var perfBody = trimSentence(perfLine.replace(new RegExp('^(⚠️\\s+|\\*\\*\\s+)?' + perfPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ':\\s*', 'i'), ''));
+                  lines[perfIdx] = withSectionPrefix('perfusionHydration', perfBody + '.', merged);
+                }
+              }
+              lines.push('\t' + line);
+            } else lines.push(line);
           }
         }
       }
