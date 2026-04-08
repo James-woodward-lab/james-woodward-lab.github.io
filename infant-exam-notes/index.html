@@ -185,10 +185,10 @@
     .check-opt.selected.pill-normal { border-color: var(--success); color: var(--success); background: rgba(34,197,94,0.06); }
 
     /* ===== ABDOMEN PERITONITIC YES/NO (uses .check-grid for tile width; .check-opt-like rows) ===== */
-    .peritonitic-yn-wrap {
+    .yesno-toggle-wrap {
       width: 100%;
     }
-    .peritonitic-yn-row {
+    .yesno-toggle-row {
       display: flex;
       flex-wrap: nowrap;
       align-items: center;
@@ -203,7 +203,7 @@
       border-radius: 8px;
       box-sizing: border-box;
     }
-    .peritonitic-yn-label {
+    .yesno-toggle-label {
       flex: 1 1 auto;
       min-width: 0;
       font-size: 0.875rem;
@@ -214,13 +214,13 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .peritonitic-yn-actions {
+    .yesno-toggle-actions {
       display: inline-flex;
       align-items: center;
       flex-shrink: 0;
       gap: 6px;
     }
-    .peritonitic-yn-btn {
+    .yesno-toggle-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -239,25 +239,25 @@
       box-sizing: border-box;
     }
     @media (max-width: 600px) {
-      .peritonitic-yn-row {
+      .yesno-toggle-row {
         min-height: 44px;
         padding: 8px 12px;
       }
-      .peritonitic-yn-btn {
+      .yesno-toggle-btn {
         min-height: 44px;
         min-width: 44px;
         padding: 8px 12px;
       }
     }
-    .peritonitic-yn-btn input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-    .peritonitic-yn-btn:hover { border-color: var(--accent); color: var(--text); }
-    .peritonitic-yn-btn.selected { font-weight: 500; }
-    .peritonitic-yn-btn.selected.pill-normal {
+    .yesno-toggle-btn input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .yesno-toggle-btn:hover { border-color: var(--accent); color: var(--text); }
+    .yesno-toggle-btn.selected { font-weight: 500; }
+    .yesno-toggle-btn.selected.pill-normal {
       border-color: var(--success);
       color: var(--success);
       background: rgba(34, 197, 94, 0.06);
     }
-    .peritonitic-yn-btn.selected.abnormal {
+    .yesno-toggle-btn.selected.abnormal {
       border-color: var(--danger);
       color: var(--danger);
       background: rgba(239, 68, 68, 0.06);
@@ -417,7 +417,7 @@
     @media (max-width: 520px) { .heent-tm-cols { grid-template-columns: 1fr; } }
     @media (max-width: 520px) { .heent-tonsil-cols { grid-template-columns: 1fr; } }
     .heent-col-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-    #heentMouthBlock .peritonitic-yn-wrap { margin-top: 10px; }
+    #heentMouthBlock .yesno-toggle-wrap { margin-top: 10px; }
     #heentNeckMeningismYnWrap { margin-top: 10px; }
     .check-grid.heent-meningism-grid { gap: var(--sp-within); }
 
@@ -453,7 +453,7 @@
 
   <script>
     var ABDOMEN_PERITONITIC_YN_ROWS = [
-      { key: 'peritonitic', label: 'Peritonitic', yes: 'Peritonitic', no: 'Not peritonitic', normalYes: false },
+      { key: 'peritonitic', label: 'Peritonitic', yes: 'Peritonitic', no: 'Not peritonitic', normalYes: false, noTag: 'Normal finding' },
       { key: 'rebound', label: 'Rebound tenderness', yes: 'Rebound tenderness present', no: 'No rebound tenderness', normalYes: false },
       { key: 'percussion', label: 'Percussion tenderness', yes: 'Percussion tenderness present', no: 'No percussion tenderness', normalYes: false },
       { key: 'straightLeg', label: 'Straight leg raise', yes: 'Able to straight leg raise without pain', no: 'Unable to straight leg raise due to pain', normalYes: true },
@@ -474,7 +474,7 @@
       { key: 'appearsMeningitic', label: 'Does not appear meningitic', yes: 'does not appear meningitic', no: 'Appearance concerning for meningitis', normalYes: true }
     ];
 
-    var PERITONITIC_YN_ROW_REGISTRY = {
+    var YES_NO_TOGGLE_ROW_REGISTRY = {
       abdomen__peritonitic: ABDOMEN_PERITONITIC_YN_ROWS,
       heent__oral_yn: HEENT_ORAL_YN_ROWS,
       heent__neck_meningism_yn: HEENT_NECK_MENINGISM_YN_ROWS
@@ -530,7 +530,7 @@
           { type: 'radio', name: 'tenderness', label: 'Tenderness', options: ['Non-tender', 'Tender'] },
           { type: 'radio', name: 'guarding', label: 'Guarding', options: ['No guarding', 'Guarding present'] },
           { type: 'radio', name: 'bowelSounds', label: 'Bowel sounds', options: ['Bowel sounds present', 'Bowel sounds reduced', 'Bowel sounds absent'] },
-          { type: 'peritoniticYn', name: 'peritonitic', label: 'Peritonitic', rows: ABDOMEN_PERITONITIC_YN_ROWS },
+          { type: 'yesNoToggle', name: 'peritonitic', label: 'Peritonitic', rows: ABDOMEN_PERITONITIC_YN_ROWS },
           { type: 'checkbox', name: 'checks', label: 'Other findings', options: ['No organomegaly', 'No masses', 'Umbilicus normal', 'No inguinal hernias'] }
         ],
         freeHint: 'Localise tenderness, describe hernia'
@@ -1462,26 +1462,26 @@
       return pr;
     }
 
-    function appendPeritoniticYnWrap(parent, prefix, rowsDef, options) {
+    function appendYesNoToggleWrap(parent, prefix, rowsDef, options) {
       options = options || {};
       var wrap = document.createElement('div');
       if (options.id) wrap.id = options.id;
-      wrap.className = 'check-grid peritonitic-yn-wrap' + (options.spanFull ? ' span-full' : '');
-      wrap.setAttribute('data-peritonitic-prefix', prefix);
+      wrap.className = 'check-grid yesno-toggle-wrap' + (options.spanFull ? ' span-full' : '');
+      wrap.setAttribute('data-yesno-prefix', prefix);
       for (var pr = 0; pr < rowsDef.length; pr++) {
         var prDef = rowsDef[pr];
         var ynRow = document.createElement('div');
-        ynRow.className = 'peritonitic-yn-row';
+        ynRow.className = 'yesno-toggle-row';
         ynRow.setAttribute('data-row-key', prDef.key);
         var prLab = document.createElement('span');
-        prLab.className = 'peritonitic-yn-label';
+        prLab.className = 'yesno-toggle-label';
         prLab.textContent = prDef.label;
         ynRow.appendChild(prLab);
         var ynActions = document.createElement('div');
-        ynActions.className = 'peritonitic-yn-actions';
+        ynActions.className = 'yesno-toggle-actions';
         var yesLbl = document.createElement('label');
-        yesLbl.className = 'peritonitic-yn-btn peritonitic-yn-btn--yes';
-        yesLbl.onclick = (function(L) { return function(e) { handlePeritoniticYnClick(L, e); }; })(yesLbl);
+        yesLbl.className = 'yesno-toggle-btn yesno-toggle-btn--yes';
+        yesLbl.onclick = (function(L) { return function(e) { handleYesNoToggleClick(L, e); }; })(yesLbl);
         var yesInp = document.createElement('input');
         yesInp.type = 'checkbox';
         yesInp.id = prefix + '__' + prDef.key + '__yes';
@@ -1490,8 +1490,8 @@
         yesLbl.appendChild(yesInp);
         yesLbl.appendChild(document.createTextNode('\u2713'));
         var noLbl = document.createElement('label');
-        noLbl.className = 'peritonitic-yn-btn peritonitic-yn-btn--no';
-        noLbl.onclick = (function(L) { return function(e) { handlePeritoniticYnClick(L, e); }; })(noLbl);
+        noLbl.className = 'yesno-toggle-btn yesno-toggle-btn--no';
+        noLbl.onclick = (function(L) { return function(e) { handleYesNoToggleClick(L, e); }; })(noLbl);
         var noInp = document.createElement('input');
         noInp.type = 'checkbox';
         noInp.id = prefix + '__' + prDef.key + '__no';
@@ -1508,11 +1508,11 @@
       return wrap;
     }
 
-    function syncPeritoniticYnAllRows() {
-      var wraps = document.querySelectorAll('[data-peritonitic-prefix]');
+    function syncYesNoToggleAllRows() {
+      var wraps = document.querySelectorAll('[data-yesno-prefix]');
       for (var w = 0; w < wraps.length; w++) {
-        var rows = wraps[w].querySelectorAll('.peritonitic-yn-row');
-        for (var r = 0; r < rows.length; r++) syncPeritoniticYnRowStyles(rows[r]);
+        var rows = wraps[w].querySelectorAll('.yesno-toggle-row');
+        for (var r = 0; r < rows.length; r++) syncYesNoToggleRowStyles(rows[r]);
       }
     }
 
@@ -1533,10 +1533,10 @@
       var inputs = wrap.querySelectorAll('input[type="checkbox"], input[type="radio"]');
       for (var i = 0; i < inputs.length; i++) {
         inputs[i].checked = false;
-        var lab = inputs[i].closest('.check-opt, .pill-opt, .peritonitic-yn-btn');
+        var lab = inputs[i].closest('.check-opt, .pill-opt, .yesno-toggle-btn');
         if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
       }
-      syncPeritoniticYnAllRows();
+      syncYesNoToggleAllRows();
     }
 
     function updateHeentOralCavityPanel() {
@@ -1676,7 +1676,7 @@
       tonsilCols.appendChild(heentTonsilColumn('L', 'Left'));
       tonsilCols.appendChild(heentTonsilColumn('R', 'Right'));
       oralDetail.appendChild(tonsilCols);
-      appendPeritoniticYnWrap(oralDetail, 'heent__oral_yn', HEENT_ORAL_YN_ROWS, { id: 'heentOralYnWrap' });
+      appendYesNoToggleWrap(oralDetail, 'heent__oral_yn', HEENT_ORAL_YN_ROWS, { id: 'heentOralYnWrap' });
       mouthB.appendChild(oralDetail);
       card.appendChild(mouthB);
 
@@ -1687,7 +1687,7 @@
       neckMenT.textContent = 'Neck/meningism';
       neckMenB.appendChild(neckMenT);
       neckMenB.appendChild(heentPillRow('heent__neck_ln', ['No lymphadenopathy', 'Single cervical lymph node', 'Multiple cervical lymph nodes']));
-      appendPeritoniticYnWrap(neckMenB, 'heent__neck_meningism_yn', HEENT_NECK_MENINGISM_YN_ROWS, { id: 'heentNeckMeningismYnWrap' });
+      appendYesNoToggleWrap(neckMenB, 'heent__neck_meningism_yn', HEENT_NECK_MENINGISM_YN_ROWS, { id: 'heentNeckMeningismYnWrap' });
       card.appendChild(neckMenB);
 
       var ft = document.createElement('div');
@@ -1946,9 +1946,9 @@
             pillRow.appendChild(pillLabel);
           }
           row.appendChild(pillRow);
-        } else if (section.key === 'abdomen' && group.type === 'peritoniticYn') {
+        } else if (section.key === 'abdomen' && group.type === 'yesNoToggle') {
           row.classList.add('span-full');
-          appendPeritoniticYnWrap(row, 'abdomen__peritonitic', group.rows, { id: 'abdomenPeritoniticYnWrap', spanFull: true });
+          appendYesNoToggleWrap(row, 'abdomen__peritonitic', group.rows, { id: 'abdomenYesNoToggleWrap', spanFull: true });
         } else {
           var checkGrid = document.createElement('div');
           checkGrid.className = 'check-grid';
@@ -2304,13 +2304,13 @@
       }
     }
 
-    function syncPeritoniticYnRowStyles(row) {
+    function syncYesNoToggleRowStyles(row) {
       if (!row) return;
       var key = row.getAttribute('data-row-key');
-      var wrap = row.closest('[data-peritonitic-prefix]');
+      var wrap = row.closest('[data-yesno-prefix]');
       if (!wrap) return;
-      var prefix = wrap.getAttribute('data-peritonitic-prefix');
-      var rowsDef = PERITONITIC_YN_ROW_REGISTRY[prefix];
+      var prefix = wrap.getAttribute('data-yesno-prefix');
+      var rowsDef = YES_NO_TOGGLE_ROW_REGISTRY[prefix];
       if (!rowsDef) return;
       var def = null;
       for (var si = 0; si < rowsDef.length; si++) {
@@ -2320,8 +2320,8 @@
         }
       }
       if (!def) return;
-      var yesLbl = row.querySelector('.peritonitic-yn-btn--yes');
-      var noLbl = row.querySelector('.peritonitic-yn-btn--no');
+      var yesLbl = row.querySelector('.yesno-toggle-btn--yes');
+      var noLbl = row.querySelector('.yesno-toggle-btn--no');
       var yesInp = yesLbl ? yesLbl.querySelector('input') : null;
       var noInp = noLbl ? noLbl.querySelector('input') : null;
       if (yesLbl) yesLbl.classList.remove('selected', 'pill-normal', 'abnormal');
@@ -2336,15 +2336,15 @@
       }
     }
 
-    function handlePeritoniticYnClick(label, ev) {
+    function handleYesNoToggleClick(label, ev) {
       if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
-      var isYes = label.classList.contains('peritonitic-yn-btn--yes');
-      var row = label.closest('.peritonitic-yn-row');
+      var isYes = label.classList.contains('yesno-toggle-btn--yes');
+      var row = label.closest('.yesno-toggle-row');
       if (!row) return;
       var key = row.getAttribute('data-row-key');
-      var wrap = row.closest('[data-peritonitic-prefix]');
+      var wrap = row.closest('[data-yesno-prefix]');
       if (!wrap) return;
-      var prefix = wrap.getAttribute('data-peritonitic-prefix');
+      var prefix = wrap.getAttribute('data-yesno-prefix');
       var yesInp = document.getElementById(prefix + '__' + key + '__yes');
       var noInp = document.getElementById(prefix + '__' + key + '__no');
       if (!yesInp || !noInp) return;
@@ -2361,7 +2361,7 @@
           yesInp.checked = false;
         }
       }
-      syncPeritoniticYnRowStyles(row);
+      syncYesNoToggleRowStyles(row);
       updateOutput();
     }
 
@@ -2370,7 +2370,7 @@
       for (var g = 0; g < section.groups.length; g++) {
         var group = section.groups[g];
         if (section.key === 'respiratory' && group.name === 'auscultationMode') continue;
-        if (section.key === 'abdomen' && group.type === 'peritoniticYn') {
+        if (section.key === 'abdomen' && group.type === 'yesNoToggle') {
           var abPrfx = 'abdomen__peritonitic';
           for (var py = 0; py < group.rows.length; py++) {
             var rdef = group.rows[py];
@@ -2604,7 +2604,7 @@
     function clearAll() {
       var inputs = document.querySelectorAll('#exam-sections input[type="checkbox"], #exam-sections input[type="radio"]');
       for (var i = 0; i < inputs.length; i++) inputs[i].checked = false;
-      var pills = document.querySelectorAll('.pill-opt.selected, .check-opt.selected, .peritonitic-yn-btn.selected');
+      var pills = document.querySelectorAll('.pill-opt.selected, .check-opt.selected, .yesno-toggle-btn.selected');
       for (var i = 0; i < pills.length; i++) pills[i].classList.remove('selected', 'abnormal', 'pill-normal');
       var textareas = document.querySelectorAll('#exam-sections textarea');
       for (var t = 0; t < textareas.length; t++) textareas[t].value = '';
@@ -2630,7 +2630,7 @@
 
     renderSections();
     updateHeentOralCavityPanel();
-    syncPeritoniticYnAllRows();
+    syncYesNoToggleAllRows();
     updateRespiratoryWobDependentPanels();
     updateCvMurmurDetailsPanel();
     updateHeentTmFindingsPanel();
