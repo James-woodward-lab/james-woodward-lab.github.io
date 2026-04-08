@@ -784,6 +784,7 @@
     ];
     var EXPLICIT_NORMAL_PATTERNS = [
       'uncovered fully for examination',
+      'tonsils nad',
       'central crt 2 seconds',
       'central crt <2 seconds',
       'peripheral crt 2 seconds',
@@ -1869,7 +1870,7 @@
         heentSeverity = mergeSeverity(heentSeverity, getSeverityFromFindings(neckMenParts));
         var neckLine = formatOrderedCommaLine(neckMenParts, abnormalCollector);
         if (!lines.length) neckLine = withSectionPrefix('heent', neckLine, heentSeverity);
-        else neckLine = '\t' + neckLine;
+        else neckLine = neckLine;
         lines.push(neckLine);
       }
 
@@ -2518,9 +2519,9 @@
         if (skey === 'respiratory') {
           if (line) lines.push(line);
           var ausLine = getRespiratoryAuscultationLine(abnormalCollector);
-          if (ausLine) lines.push('\t' + ausLine);
+          if (ausLine) lines.push(ausLine);
           var lungLine = getLungSummaryLine(abnormalCollector);
-          if (lungLine) lines.push('\t' + lungLine);
+          if (lungLine) lines.push(lungLine);
         } else {
           if (line) {
             if (skey === 'cardiovascular' && OUTPUT_SECTION_PREFIX_MAP.cardiovascular === '') {
@@ -2542,7 +2543,7 @@
                   lines[perfIdx] = withSectionPrefix('perfusionHydration', perfBody + '.', merged);
                 }
               }
-              lines.push('\t' + line);
+              lines.push(line);
             } else lines.push(line);
           }
         }
