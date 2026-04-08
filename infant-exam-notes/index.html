@@ -341,6 +341,14 @@
     }
     .output-body.empty { color: var(--muted); font-style: italic; text-align: center; padding: 14px; min-height: 60px; }
     .output-collapsed .output-body { display: none; }
+    .output-options {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .output-options label { cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px; }
 
     /* ===== LUNG MAP ===== */
     .lung-map-wrap { margin-top: var(--sp-group); }
@@ -437,6 +445,9 @@
         </div>
       </div>
       <div class="output-body empty" id="output">Select findings above to generate the note.</div>
+      <div class="output-options">
+        <label><input type="checkbox" id="prefixToggle" checked> Include system prefixes</label>
+      </div>
     </div>
   </div>
 
@@ -1866,7 +1877,7 @@
       var hft = hf ? trimSentence(hf.value) : '';
       if (hft) {
         if (lines.length) {
-          var base = trimSentence(lines[0].replace(/^(⚠️\s+|\*\*\s+)?HEENT:\s*/i, ''));
+          var base = trimSentence(lines[0].replace(/^(?:⚠️\s+|\*\*\s+)?(?:HEENT:\s*)?/i, ''));
           lines[0] = withSectionPrefix('heent', sentenceCase(trimSentence(base + ', ' + hft)) + '.', heentSeverity);
         } else {
           lines.push(withSectionPrefix('heent', sentenceCase(hft) + '.', 'normal'));
@@ -2223,14 +2234,16 @@
       return severity;
     }
 
+    var includeSystemPrefixes = true;
+
     function withSectionPrefix(sectionKey, lineText, severity) {
       var body = trimSentence(lineText || '');
       if (!body) return '';
       var prefix = OUTPUT_SECTION_PREFIX_MAP[sectionKey];
-      if (!prefix) return body + '.';
       var marker = '';
       if (severity === 'urgent') marker = '⚠️ ';
       else if (severity === 'abnormal') marker = '** ';
+      if (!includeSystemPrefixes || !prefix) return marker + body + '.';
       return marker + prefix + ': ' + body + '.';
     }
 
@@ -2519,12 +2532,13 @@
                     break;
                   }
                 }
+                if (perfIdx === -1 && !includeSystemPrefixes && lines.length > 0) perfIdx = lines.length - 1;
                 if (perfIdx !== -1) {
                   var perfLine = lines[perfIdx];
                   var perfSeverity = perfLine.indexOf('⚠️ ') === 0 ? 'urgent' : (perfLine.indexOf('** ') === 0 ? 'abnormal' : 'normal');
                   var merged = mergeSeverity(perfSeverity, lineSeverity);
                   var perfPrefix = OUTPUT_SECTION_PREFIX_MAP.perfusionHydration;
-                  var perfBody = trimSentence(perfLine.replace(new RegExp('^(⚠️\\s+|\\*\\*\\s+)?' + perfPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ':\\s*', 'i'), ''));
+                  var perfBody = trimSentence(perfLine.replace(new RegExp('^(?:⚠️\\s+|\\*\\*\\s+)?(?:' + perfPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ':\\s*)?', 'i'), ''));
                   lines[perfIdx] = withSectionPrefix('perfusionHydration', perfBody + '.', merged);
                 }
               }
@@ -2638,6 +2652,14 @@
     if (lungNoteInput) {
       lungNoteInput.addEventListener('input', function() {
         setLungZoneNote(activeLungZone, this.value);
+      });
+    }
+    var prefixToggle = document.getElementById('prefixToggle');
+    if (prefixToggle) {
+      includeSystemPrefixes = !!prefixToggle.checked;
+      prefixToggle.addEventListener('change', function() {
+        includeSystemPrefixes = !!this.checked;
+        updateOutput();
       });
     }
     updateOutput();
