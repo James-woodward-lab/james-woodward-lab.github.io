@@ -748,7 +748,7 @@
     var POST_HEENT_KEYS = ['skin'];
     /** Document output order (matches page layout top to bottom). HEENT inserted via special key. */
     var OUTPUT_SECTION_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen', '_heent_', 'skin', 'neurology'];
-    var LUNG_FINDINGS = ['Vesicular breath sounds', 'Reduced air entry', 'Wheeze', 'Crackles'];
+    var LUNG_FINDINGS = ['Vesicular breath sounds', 'Reduced air entry', 'Wheeze', 'Fine crackles', 'Course crackles'];
     var LUNG_ZONES = [
       { key: 'left_upper', label: 'Left upper zone' },
       { key: 'left_middle', label: 'Left middle zone' },
@@ -1155,8 +1155,9 @@
           var finding = findings[f];
           if (finding === 'Vesicular breath sounds') parts.push('vesicular breath sounds at the ' + getLungZoneLabel(zone.key));
           else if (finding === 'Reduced air entry') parts.push('reduced air entry at the ' + getLungZoneLabel(zone.key));
-          else if (finding === 'Wheeze') parts.push('wheeze in the ' + getLungZoneLabel(zone.key));
-          else if (finding === 'Crackles') parts.push('crackles at the ' + getLungZoneLabel(zone.key));
+          else if (finding === 'Wheeze') parts.push('polyphonic expiratory wheeze in the ' + getLungZoneLabel(zone.key));
+          else if (finding === 'Fine crackles') parts.push('fine crackles at the ' + getLungZoneLabel(zone.key));
+          else if (finding === 'Course crackles') parts.push('course crackles at the ' + getLungZoneLabel(zone.key));
         }
         var note = trimSentence(lungZoneNotes[zone.key] || '');
         if (note) parts.push(note.toLowerCase() + ' at the ' + getLungZoneLabel(zone.key));
@@ -1440,7 +1441,7 @@
       var mode = document.querySelector('input[name="respiratory__auscultationMode"]:checked');
       if (!mode) return '';
       if (mode.value === 'Chest clear') {
-        return 'On auscultation, chest clear. No added sounds, crackles, or wheeze. Good air entry globally.';
+        return 'On auscultation, chest clear. No added sounds, fine crackles, course crackles, or polyphonic expiratory wheeze. Good air entry globally.';
       }
       if (mode.value === 'Added sounds') {
         var findings = [];
@@ -1449,7 +1450,11 @@
         if (grid) {
           var checked = grid.querySelectorAll('input[type="checkbox"]:checked');
           for (var ci = 0; ci < checked.length; ci++) {
-            findings.push(trimSentence(checked[ci].value).toLowerCase());
+            var findingValue = trimSentence(checked[ci].value);
+            if (findingValue === 'Wheeze') findings.push('polyphonic expiratory wheeze');
+            else if (findingValue === 'Fine crackles') findings.push('fine crackles');
+            else if (findingValue === 'Course crackles') findings.push('course crackles');
+            else findings.push(findingValue.toLowerCase());
           }
         }
         var other = trimSentence(document.getElementById('respiratory__auscultation_other') ? document.getElementById('respiratory__auscultation_other').value : '');
@@ -1457,7 +1462,16 @@
         if (!findings.length) return '';
         var formatted = formatFindingsLine(findings, abnormalCollector, 'respiratory');
         if (!formatted) return '';
-        return 'On auscultation, global ' + formatted;
+        var hasFocalFindings = false;
+        for (var zi = 0; zi < LUNG_ZONES.length; zi++) {
+          var zoneKey = LUNG_ZONES[zi].key;
+          if ((lungZoneState[zoneKey] || []).length > 0 || trimSentence(lungZoneNotes[zoneKey] || '')) {
+            hasFocalFindings = true;
+            break;
+          }
+        }
+        if (!hasFocalFindings) return 'On auscultation, bilateral ' + formatted + ', no focal findings identified';
+        return 'On auscultation, bilateral ' + formatted;
       }
       return '';
     }
@@ -2244,7 +2258,7 @@
           ausPanel.className = 'auscultation-added-panel';
           var ausGrid = document.createElement('div');
           ausGrid.className = 'check-grid auscultation-added-check-grid';
-          var soundOpts = ['Wheeze', 'Crackles', 'Bronchial Breathing', 'Upper airway secretions heard'];
+          var soundOpts = ['Wheeze', 'Fine crackles', 'Course crackles', 'Bronchial Breathing', 'Upper airway secretions heard'];
           for (var ai = 0; ai < soundOpts.length; ai++) {
             var ausLab = document.createElement('label');
             ausLab.className = 'check-opt';
