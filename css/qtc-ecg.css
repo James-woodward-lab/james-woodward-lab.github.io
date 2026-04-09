@@ -414,6 +414,29 @@ body {
   color: var(--text);
 }
 
+.ecg-reference {
+  margin: 0 0 12px;
+  padding: 12px;
+}
+
+.ecg-reference img {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 8px;
+}
+
+.ecg-reference figcaption {
+  margin-top: 8px;
+  font-size: 0.73rem;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* ECG QUESTIONS */
 .eq {
   background: var(--surface);
