@@ -522,7 +522,7 @@
       </div>
       <div class="output-body empty" id="output">Select findings above to generate the note.</div>
       <div class="output-options">
-        <label><input type="checkbox" id="prefixToggle" checked> Include system prefixes</label>
+        <label><input type="checkbox" id="prefixToggle"> Include system prefixes</label>
       </div>
     </div>
   </div>
@@ -2436,7 +2436,7 @@
       return severity;
     }
 
-    var includeSystemPrefixes = true;
+    var includeSystemPrefixes = false;
 
     function withSectionPrefix(sectionKey, lineText, severity) {
       var body = trimSentence(lineText || '');

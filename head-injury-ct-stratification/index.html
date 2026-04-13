@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>Paediatric Head Injury CT Stratification</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <script src="../js/style-system.js"></script>
+  <script src="../js/theme-toggle.js"></script>
+  <link rel="stylesheet" href="../css/head-injury-ct.css">
+</head>
+<body class="head-injury-app">
+  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+  <div class="container">
+    <header class="app-header-center">
+      <h1>Paediatric Head Injury CT Stratification</h1>
+      <p>NICE NG232 (supersedes CG176) and PECARN decision support for children</p>
+    </header>
+
+    <section class="card">
+      <div class="card-title">Patient Age</div>
+      <div class="age-grid">
+        <div class="field">
+          <label for="age-years">Age (years)</label>
+          <input type="number" id="age-years" min="0" max="17" step="1" inputmode="numeric" placeholder="e.g. 3">
+        </div>
+        <div class="field">
+          <label for="age-months">Additional months</label>
+          <input type="number" id="age-months" min="0" max="11" step="1" inputmode="numeric" placeholder="0-11">
+        </div>
+      </div>
+      <p class="hint">Age drives age-specific NICE criteria (&lt;1 year) and PECARN branch (&lt;2 years vs >=2 years).</p>
+      <div id="age-status" class="age-status" aria-live="polite">Enter age to activate age-specific criteria.</div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">NICE NG232 Checklist (under 16 years)</div>
+      <p class="hint">Immediate CT criteria trigger CT head within 1 hour. Secondary factors guide observation and re-assessment.</p>
+
+      <fieldset class="rule-group">
+        <legend>Immediate CT criteria (scan within 1 hour if any)</legend>
+        <div class="check-grid">
+          <label class="checkbox-row"><input type="checkbox" id="nice-nai"><span>Suspicion of non-accidental injury</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-seizure"><span>Post-traumatic seizure (no epilepsy history)</span></label>
+          <label class="checkbox-row nice-ge1-only"><input type="checkbox" id="nice-gcs-lt14"><span>Initial GCS &lt;14</span></label>
+          <label class="checkbox-row nice-under1-only"><input type="checkbox" id="nice-gcs-lt15-under1"><span>For age &lt;1 year: initial GCS &lt;15</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-gcs-lt15-2h"><span>GCS &lt;15 at 2 hours after injury</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-skull-open"><span>Suspected open/depressed skull fracture or tense fontanelle</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-basal"><span>Any sign of basal skull fracture</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-focal"><span>Focal neurological deficit</span></label>
+          <label class="checkbox-row nice-under1-only"><input type="checkbox" id="nice-scalp-over5"><span>For age &lt;1 year: bruise/swelling/laceration on head &gt;5 cm</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="rule-group">
+        <legend>Secondary risk factors (observation pathway if no immediate criteria)</legend>
+        <div class="check-grid">
+          <label class="checkbox-row"><input type="checkbox" id="nice-loc-gt5"><span>Loss of consciousness lasting &gt;5 minutes</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-drowsy"><span>Abnormal drowsiness</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-vomit-3"><span>Three or more discrete vomiting episodes</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-dangerous"><span>Dangerous mechanism of injury</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-amnesia-gt5"><span>Amnesia (antegrade or retrograde) lasting &gt;5 minutes</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="nice-bleeding"><span>Known bleeding/clotting disorder</span></label>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="card">
+      <div class="card-title">PECARN Checklist</div>
+      <p class="hint">Only the age-appropriate PECARN rule is used for classification.</p>
+
+      <div id="pecarn-under2" class="rule-group">
+        <h2 class="rule-heading">PECARN for age &lt;2 years</h2>
+        <div class="check-grid">
+          <label class="checkbox-row"><input type="checkbox" id="p2-ams-gcs"><span>GCS <=14 or altered mental status</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p2-palpable-fracture"><span>Palpable skull fracture</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p2-scalp-hematoma"><span>Occipital/parietal/temporal scalp hematoma</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p2-loc-5s"><span>Loss of consciousness >=5 seconds</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p2-not-normal"><span>Not acting normally per parent</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p2-severe-mech"><span>Severe mechanism of injury</span></label>
+        </div>
+      </div>
+
+      <div id="pecarn-over2" class="rule-group">
+        <h2 class="rule-heading">PECARN for age >=2 years</h2>
+        <div class="check-grid">
+          <label class="checkbox-row"><input type="checkbox" id="p3-ams-gcs"><span>GCS <=14 or altered mental status</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p3-basilar"><span>Signs of basilar skull fracture</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p3-loc-any"><span>Any history of loss of consciousness</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p3-vomit"><span>History of vomiting</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p3-headache"><span>Severe headache</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="p3-severe-mech"><span>Severe mechanism of injury</span></label>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>PECARN severe mechanism definition:</strong> MVC with ejection, death of another passenger, or rollover; pedestrian/cyclist without helmet struck by vehicle; fall &gt;0.9 m (&lt;2y) or &gt;1.5 m (>=2y); or head struck by high-impact object.
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Recommendation Output</div>
+      <div id="results" class="results-grid" aria-live="polite">
+        <article class="result-panel">
+          <h2>NICE NG232 recommendation</h2>
+          <p id="nice-recommendation" class="result-line">Enter age and tick factors to generate an output.</p>
+          <ul id="nice-trigger-list" class="trigger-list"></ul>
+        </article>
+        <article class="result-panel">
+          <h2>PECARN recommendation</h2>
+          <p id="pecarn-recommendation" class="result-line">Enter age and tick factors to generate an output.</p>
+          <ul id="pecarn-trigger-list" class="trigger-list"></ul>
+        </article>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      Clinical decision support only. NICE branch uses NG232 (superseding CG176). Always apply local protocol and senior clinical judgement.
+    </footer>
+  </div>
+
+  <script src="./head-injury-ct.js"></script>
+</body>
+</html>

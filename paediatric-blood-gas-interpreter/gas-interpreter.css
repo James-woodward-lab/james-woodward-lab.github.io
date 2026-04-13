@@ -1,0 +1,130 @@
+.blood-gas-app {
+  padding-bottom: 32px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hidden {
+  display: none;
+}
+
+.headline-badge {
+  display: inline-flex;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.headline-badge.neutral {
+  background: var(--surface2);
+}
+
+.headline-badge.normal {
+  background: rgba(22, 163, 74, 0.15);
+  border-color: rgba(22, 163, 74, 0.45);
+}
+
+.headline-badge.mild {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.45);
+}
+
+.headline-badge.moderate {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.45);
+}
+
+.headline-badge.severe {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.55);
+}
+
+.headline-text {
+  margin: 0;
+}
+
+.sample-notes {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.steps-container {
+  display: grid;
+  gap: 10px;
+}
+
+.step-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface2);
+}
+
+.step-card summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+.step-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.step-body {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  font-size: 0.9rem;
+}
+
+.step-body p {
+  margin: 0 0 6px;
+}
+
+.step-body p:last-child {
+  margin-bottom: 0;
+}
+
+.diff-list ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.clinical-prompt {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--text);
+}
+
+.references {
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.references h3 {
+  margin-top: 0;
+  color: var(--text);
+}
+
+.references ul {
+  margin-top: 8px;
+}

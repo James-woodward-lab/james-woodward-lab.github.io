@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#13293d">
+  <meta name="color-scheme" content="light dark">
+  <title>Wound Closure Decision Aid</title>
+  <link rel="stylesheet" href="css/app-theme.css">
+  <link rel="stylesheet" href="css/style-variants.css">
+  <script src="js/style-system.js"></script>
+  <script src="js/theme-toggle.js"></script>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap">
+  <style>
+    :root {
+      --color-bg: var(--bg);
+      --color-surface: var(--surface);
+      --color-surface-elevated: var(--surface2);
+      --color-surface-muted: var(--bg-elevated);
+      --color-border: var(--border);
+      --color-text: var(--text);
+      --color-text-muted: var(--muted);
+      --color-primary: var(--accent);
+      --color-primary-contrast: var(--accent-on);
+      --color-success: var(--success);
+      --color-warning: var(--warn);
+      --color-error: var(--danger);
+      --color-focus: var(--focus-ring);
+      --color-chip-bg: var(--surface2);
+      --color-chip-active: var(--accent);
+      --color-chip-active-text: var(--accent-on);
+      --shadow-soft: var(--shadow-sm);
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    .container {
+      max-width: 1240px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding-top: 4px;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.28rem;
+      color: var(--color-primary);
+    }
+
+    .page-header p {
+      margin: 3px 0 0;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 16px;
+    }
+
+    .progress-wrap {
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-muted);
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--color-surface-elevated);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: var(--color-primary);
+      transition: width 0.2s ease;
+    }
+
+    details.section {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-elevated);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    details.section summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    details.section summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .section-state {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+
+    .section-body {
+      border-top: 1px solid var(--color-border);
+      padding: 12px;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.87rem;
+    }
+
+    .field input[type="number"],
+    .field select {
+      width: 100%;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      min-height: 44px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      background: var(--color-surface);
+      color: var(--color-text);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .chip:focus-within,
+    .segment input:focus-visible + label,
+    .btn:focus-visible {
+      outline: 3px solid var(--color-focus);
+      outline-offset: 1px;
+    }
+
+    .hint {
+      margin-top: 4px;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      position: relative;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      background: var(--color-chip-bg);
+      overflow: hidden;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .chip span {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      color: var(--color-text);
+      display: inline-block;
+    }
+
+    .chip input:checked + span {
+      background: var(--color-chip-active);
+      color: var(--color-chip-active-text);
+      font-weight: 600;
+    }
+
+    .segment-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .segment {
+      position: relative;
+    }
+
+    .segment input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .segment label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 8px;
+      margin-bottom: 0;
+    }
+
+    .segment input:checked + label {
+      background: var(--color-primary);
+      color: var(--color-primary-contrast);
+      border-color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .check-item {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      padding: 9px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .check-item input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+    }
+
+    .error-msg {
+      color: var(--color-error);
+      font-size: 0.76rem;
+      min-height: 1.1em;
+      margin-top: 2px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      min-height: 44px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-primary-contrast);
+      border-color: var(--color-primary);
+    }
+
+    .btn-secondary {
+      background: var(--color-surface-elevated);
+      color: var(--color-text);
+    }
+
+    .btn-copy {
+      width: 100%;
+      margin-top: 10px;
+      background: var(--color-surface-elevated);
+      color: var(--color-primary);
+    }
+
+    .results-panel {
+      display: none;
+      gap: 10px;
+      flex-direction: column;
+    }
+
+    .results-panel.show {
+      display: flex;
+    }
+
+    .zone {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-elevated);
+      padding: 12px;
+    }
+
+    .zone h2 {
+      margin: 0 0 8px;
+      color: var(--color-primary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .result-title {
+      margin: 0;
+      font-size: 1.08rem;
+    }
+
+    .badge {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-green {
+      color: var(--color-success);
+      border-color: color-mix(in srgb, var(--color-success) 45%, transparent);
+      background: color-mix(in srgb, var(--color-success) 18%, transparent);
+    }
+
+    .badge-amber {
+      color: var(--color-warning);
+      border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);
+      background: color-mix(in srgb, var(--color-warning) 20%, transparent);
+    }
+
+    .badge-red {
+      color: var(--color-error);
+      border-color: color-mix(in srgb, var(--color-error) 45%, transparent);
+      background: color-mix(in srgb, var(--color-error) 18%, transparent);
+    }
+
+    .note-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      font-size: 0.84rem;
+    }
+
+    .note-list li {
+      margin-bottom: 5px;
+    }
+
+    .flag-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .flag-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      background: var(--color-surface);
+    }
+
+    .flag-card h3 {
+      margin: 0 0 4px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .flag-card p {
+      margin: 0;
+      font-size: 0.82rem;
+    }
+
+    .flag-green {
+      border-color: color-mix(in srgb, var(--color-success) 45%, transparent);
+      background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface));
+    }
+
+    .flag-amber {
+      border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);
+      background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+    }
+
+    .flag-red {
+      border-color: color-mix(in srgb, var(--color-error) 45%, transparent);
+      background: color-mix(in srgb, var(--color-error) 11%, var(--color-surface));
+    }
+
+    .source-note {
+      margin-top: 8px;
+      font-size: 0.74rem;
+      color: var(--color-text-muted);
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      font-size: 0.75rem;
+      text-align: center;
+      color: var(--color-text-muted);
+      padding: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface);
+    }
+
+    @media (min-width: 768px) {
+      .row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .segment-row.four {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .segment-row.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .layout {
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: start;
+      }
+
+      .sticky-col {
+        position: sticky;
+        top: calc(10px + var(--safe-t));
+      }
+
+      .results-panel {
+        display: flex;
+        min-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+  <main class="container">
+    <header class="page-header">
+      <div>
+        <h1>Wound Closure Decision Aid</h1>
+        <p>Paediatric ED decision support for closure, antibiotics, tetanus, and referral.</p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span>Section progress</span>
+            <strong id="progressText">0 / 3 complete</strong>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <form id="woundForm" novalidate>
+          <details class="section" open id="section1">
+            <summary>
+              <span>Section 1: Wound Details</span>
+              <span id="sectionState1" class="section-state">Incomplete</span>
+            </summary>
+            <div class="section-body">
+              <div class="field">
+                <label>Wound mechanism</label>
+                <div class="chip-grid">
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Sharp (glass/blade)"><span>Sharp (glass/blade)</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Blunt/crush"><span>Blunt/crush</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — human"><span>Bite — human</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — cat"><span>Bite — cat</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — dog"><span>Bite — dog</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — other animal"><span>Bite — other animal</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Puncture"><span>Puncture</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Degloving/avulsion"><span>Degloving/avulsion</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Burns"><span>Burns (redirect to burns tool)</span></label>
+                </div>
+                <div class="error-msg" data-error-for="mechanism"></div>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label for="timeValue">Time since injury</label>
+                  <input id="timeValue" name="timeValue" type="number" min="0" max="72" step="0.1" placeholder="e.g. 2.5">
+                  <div class="error-msg" data-error-for="timeValue"></div>
+                </div>
+                <div class="field">
+                  <label>Time unit</label>
+                  <div class="segment-row">
+                    <div class="segment">
+                      <input type="radio" id="timeHours" name="timeUnit" value="hours" checked>
+                      <label for="timeHours">Hours</label>
+                    </div>
+                    <div class="segment">
+                      <input type="radio" id="timeMinutes" name="timeUnit" value="minutes">
+                      <label for="timeMinutes">Minutes</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="site">Anatomical site</label>
+                <select id="site" name="site">
+                  <option value="">Select site...</option>
+                  <optgroup label="Face">
+                    <option value="Face — forehead/cheek">Face — forehead/cheek</option>
+                    <option value="Face — periorbital">Face — periorbital</option>
+                    <option value="Face — lip/vermillion">Face — lip/vermillion</option>
+                    <option value="Face — nose">Face — nose</option>
+                  </optgroup>
+                  <optgroup label="Other">
+                    <option value="Scalp">Scalp</option>
+                    <option value="Ear">Ear</option>
+                    <option value="Neck">Neck</option>
+                    <option value="Hand/finger">Hand/finger</option>
+                    <option value="Nail bed">Nail bed</option>
+                    <option value="Foot">Foot</option>
+                    <option value="Trunk">Trunk</option>
+                    <option value="Limb">Limb</option>
+                    <option value="Genitalia">Genitalia</option>
+                  </optgroup>
+                </select>
+                <div class="error-msg" data-error-for="site"></div>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label for="lengthCm">Wound length (cm)</label>
+                  <input id="lengthCm" name="lengthCm" type="number" min="0.1" max="20" step="0.1" placeholder="e.g. 2.5">
+                </div>
+                <div class="field">
+                  <label>Wound depth</label>
+                  <div class="segment-row four">
+                    <div class="segment">
+                      <input type="radio" id="depthSuperficial" name="depth" value="Superficial (skin only)">
+                      <label for="depthSuperficial">Superficial</label>
+                    </div>
+                    <div class="segment">
+                      <input type="radio" id="depthDermal" name="depth" value="Dermal">
+                      <label for="depthDermal">Dermal</label>
+                    </div>
+                    <div class="segment">
+                      <input type="radio" id="depthDeep" name="depth" value="Deep (fat/fascia visible)">
+                      <label for="depthDeep">Deep</label>
+                    </div>
+                    <div class="segment">
+                      <input type="radio" id="depthInvolve" name="depth" value="Possible tendon/bone/joint involvement">
+                      <label for="depthInvolve">Possible tendon/bone/joint</label>
+                    </div>
+                  </div>
+                  <div class="error-msg" data-error-for="depth"></div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Wound edges / features</label>
+                <div class="checkbox-grid">
+                  <label class="check-item"><input type="checkbox" name="edge" value="Ragged/irregular">Ragged/irregular</label>
+                  <label class="check-item"><input type="checkbox" name="edge" value="Gaping (>5mm)">Gaping (&gt;5mm)</label>
+                  <label class="check-item"><input type="checkbox" name="edge" value="Clean linear">Clean linear</label>
+                  <label class="check-item"><input type="checkbox" name="edge" value="Tissue loss">Tissue loss</label>
+                  <label class="check-item"><input type="checkbox" name="edge" value="Contaminated (soil/organic matter)">Contaminated (soil/organic matter)</label>
+                  <label class="check-item"><input type="checkbox" name="edge" value="Glass/foreign body suspected">Glass/foreign body suspected</label>
+                  <label class="check-item"><input type="checkbox" name="edge" value="Actively bleeding">Actively bleeding</label>
+                  <label class="check-item"><input type="checkbox" name="edge" value="Active signs of infection">Active signs of infection</label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Contamination level</label>
+                <div class="segment-row four">
+                  <div class="segment">
+                    <input type="radio" id="contClean" name="contamination" value="Clean" checked>
+                    <label for="contClean">Clean</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="contModerate" name="contamination" value="Moderately contaminated">
+                    <label for="contModerate">Moderate</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="contHeavy" name="contamination" value="Heavily contaminated">
+                    <label for="contHeavy">Heavy</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="contBite" name="contamination" value="Bite wound">
+                    <label for="contBite">Bite wound</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details class="section" id="section2">
+            <summary>
+              <span>Section 2: Patient Factors</span>
+              <span id="sectionState2" class="section-state">Incomplete</span>
+            </summary>
+            <div class="section-body">
+              <div class="row">
+                <div class="field">
+                  <label for="ageValue">Patient age</label>
+                  <input id="ageValue" name="ageValue" type="number" min="0" max="18" step="0.1" placeholder="e.g. 4">
+                </div>
+                <div class="field">
+                  <label>Age unit</label>
+                  <div class="segment-row">
+                    <div class="segment">
+                      <input type="radio" id="ageYears" name="ageUnit" value="years" checked>
+                      <label for="ageYears">Years</label>
+                    </div>
+                    <div class="segment">
+                      <input type="radio" id="ageMonths" name="ageUnit" value="months">
+                      <label for="ageMonths">Months</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label>Immunocompromised?</label>
+                  <div class="segment-row">
+                    <div class="segment">
+                      <input type="radio" id="immunoNo" name="immunocompromised" value="No" checked>
+                      <label for="immunoNo">No</label>
+                    </div>
+                    <div class="segment">
+                      <input type="radio" id="immunoYes" name="immunocompromised" value="Yes">
+                      <label for="immunoYes">Yes</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Penicillin allergy?</label>
+                  <div class="segment-row">
+                    <div class="segment">
+                      <input type="radio" id="penNo" name="penAllergy" value="No" checked>
+                      <label for="penNo">No</label>
+                    </div>
+                    <div class="segment">
+                      <input type="radio" id="penYes" name="penAllergy" value="Yes">
+                      <label for="penYes">Yes</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="field" id="penSeverityWrap" style="display: none;">
+                  <label for="penSeverity">Allergy severity</label>
+                  <select id="penSeverity" name="penSeverity">
+                    <option value="rash only">Rash only</option>
+                    <option value="anaphylaxis">Anaphylaxis</option>
+                    <option value="unknown">Unknown severity</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="weightKg">Estimated weight (kg, optional)</label>
+                  <input id="weightKg" name="weightKg" type="number" min="1" max="120" step="0.1" placeholder="e.g. 16.5">
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="check-item"><input type="checkbox" id="historyMismatch">Injury history inconsistent with wound pattern</label>
+              </div>
+            </div>
+          </details>
+
+          <details class="section" id="section3">
+            <summary>
+              <span>Section 3: Tetanus History</span>
+              <span id="sectionState3" class="section-state">Incomplete</span>
+            </summary>
+            <div class="section-body">
+              <div class="field">
+                <label>Number of tetanus vaccines received</label>
+                <div class="segment-row three">
+                  <div class="segment">
+                    <input type="radio" id="tet0" name="tetanusDoses" value="0">
+                    <label for="tet0">0</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="tet12" name="tetanusDoses" value="1-2">
+                    <label for="tet12">1-2</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="tet3" name="tetanusDoses" value="3+">
+                    <label for="tet3">3+ (full)</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Last tetanus dose</label>
+                <div class="segment-row four">
+                  <div class="segment">
+                    <input type="radio" id="last5" name="lastTetanus" value="<5 years ago">
+                    <label for="last5">&lt;5 years ago</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="last510" name="lastTetanus" value="5-10 years ago">
+                    <label for="last510">5-10 years ago</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="last10" name="lastTetanus" value=">10 years ago">
+                    <label for="last10">&gt;10 years ago</label>
+                  </div>
+                  <div class="segment">
+                    <input type="radio" id="lastUnknown" name="lastTetanus" value="Unknown">
+                    <label for="lastUnknown">Unknown</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Age group (auto)</label>
+                <input id="ageGroupAuto" type="text" value="Not set yet" readonly>
+              </div>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Generate Recommendation</button>
+            <button class="btn btn-secondary" type="button" id="resetBtn">Reset</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="sticky-col">
+        <section id="resultsPanel" class="results-panel">
+          <article class="zone" id="headlineZone">
+            <h2>Closure Recommendation</h2>
+            <div class="result-head">
+              <h3 class="result-title" id="closureTitle">Awaiting input</h3>
+              <span class="badge badge-amber" id="severityBadge">Pending</span>
+            </div>
+            <p id="closureSummary" class="hint">Complete the form and submit to view recommendations.</p>
+            <ul id="closureRationale" class="note-list"></ul>
+          </article>
+
+          <article class="zone" id="checklistZone">
+            <h2>Action Checklist</h2>
+            <ul id="prepChecklist" class="note-list"></ul>
+          </article>
+
+          <article class="zone" id="flagsZone">
+            <h2>Flags Panel</h2>
+            <div class="flag-grid">
+              <section id="antibioticFlag" class="flag-card flag-amber">
+                <h3>Antibiotics</h3>
+                <p>Not assessed yet.</p>
+              </section>
+              <section id="tetanusFlag" class="flag-card flag-amber">
+                <h3>Tetanus</h3>
+                <p>Not assessed yet.</p>
+              </section>
+              <section id="referralFlag" class="flag-card flag-amber">
+                <h3>Referral Triggers</h3>
+                <p>Not assessed yet.</p>
+              </section>
+            </div>
+            <button class="btn btn-copy" id="copyBtn" type="button">Copy to clipboard</button>
+            <p class="source-note">Clinical logic references NICE NG184, UKHSA tetanus aide memoire 2025, Sheffield Children's ED guidance, RCEM/SAEM resources.</p>
+          </article>
+        </section>
+      </aside>
+    </div>
+
+    <footer class="footer-note">
+      This tool is a clinical decision aid and does not replace clinical judgement. Always confirm decisions against local trust guidelines. Not for use as a standalone clinical protocol.
+    </footer>
+  </main>
+
+  <script>
+    const formEl = document.getElementById("woundForm");
+    const resultsPanel = document.getElementById("resultsPanel");
+    const progressText = document.getElementById("progressText");
+    const progressFill = document.getElementById("progressFill");
+    const ageField = document.getElementById("ageValue");
+    const ageUnitInputs = document.querySelectorAll("input[name='ageUnit']");
+    const ageGroupAuto = document.getElementById("ageGroupAuto");
+    const penAllergyInputs = document.querySelectorAll("input[name='penAllergy']");
+    const penSeverityWrap = document.getElementById("penSeverityWrap");
+    const resetBtn = document.getElementById("resetBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    let latestRun = null;
+
+    function getCheckedValues(name) {
+      return Array.from(document.querySelectorAll(`input[name='${name}']:checked`)).map((el) => el.value);
+    }
+
+    function getRadioValue(name) {
+      const selected = document.querySelector(`input[name='${name}']:checked`);
+      return selected ? selected.value : "";
+    }
+
+    function parseNumber(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function isFaceSite(site) {
+      return site.startsWith("Face");
+    }
+
+    function isHighTensionSite(site) {
+      return site === "Hand/finger" || site === "Foot" || site === "Nail bed";
+    }
+
+    function toHours(timeValue, timeUnit) {
+      if (timeValue === null) return null;
+      return timeUnit === "minutes" ? timeValue / 60 : timeValue;
+    }
+
+    function getAgeYears(ageValue, ageUnit) {
+      if (ageValue === null) return null;
+      return ageUnit === "months" ? ageValue / 12 : ageValue;
+    }
+
+    function getAgeBand(ageYears) {
+      if (ageYears === null) return "Not set yet";
+      if (ageYears < (1 / 12)) return "<1 month";
+      if (ageYears < 1) return "1 month-11 months";
+      if (ageYears < 6) return "1-5 years";
+      if (ageYears < 12) return "6-11 years";
+      return "12-17 years";
+    }
+
+    function setError(field, message) {
+      const el = document.querySelector(`[data-error-for='${field}']`);
+      if (el) el.textContent = message;
+    }
+
+    function clearErrors() {
+      document.querySelectorAll(".error-msg").forEach((el) => {
+        el.textContent = "";
+      });
+    }
+
+    function gatherInputs() {
+      const mechanisms = getCheckedValues("mechanism");
+      const timeValue = parseNumber(document.getElementById("timeValue").value);
+      const timeUnit = getRadioValue("timeUnit");
+      const site = document.getElementById("site").value;
+      const lengthCm = parseNumber(document.getElementById("lengthCm").value);
+      const depth = getRadioValue("depth");
+      const woundEdges = getCheckedValues("edge");
+      const contamination = getRadioValue("contamination");
+      const ageValue = parseNumber(document.getElementById("ageValue").value);
+      const ageUnit = getRadioValue("ageUnit");
+      const immunocompromised = getRadioValue("immunocompromised") === "Yes";
+      const penAllergy = getRadioValue("penAllergy") === "Yes";
+      const penSeverity = document.getElementById("penSeverity").value;
+      const weightKg = parseNumber(document.getElementById("weightKg").value);
+      const historyMismatch = document.getElementById("historyMismatch").checked;
+      const tetanusDoses = getRadioValue("tetanusDoses");
+      const lastTetanus = getRadioValue("lastTetanus");
+
+      return {
+        mechanisms,
+        timeValue,
+        timeUnit,
+        timeHours: toHours(timeValue, timeUnit),
+        site,
+        lengthCm,
+        depth,
+        woundEdges,
+        contamination,
+        ageValue,
+        ageUnit,
+        ageYears: getAgeYears(ageValue, ageUnit),
+        ageBand: getAgeBand(getAgeYears(ageValue, ageUnit)),
+        immunocompromised,
+        penAllergy,
+        penSeverity,
+        weightKg,
+        historyMismatch,
+        tetanusDoses,
+        lastTetanus
+      };
+    }
+
+    function validateInputs(inputs) {
+      clearErrors();
+      let valid = true;
+      if (!inputs.mechanisms.length) {
+        setError("mechanism", "Select at least one mechanism.");
+        valid = false;
+      }
+      if (inputs.timeValue === null || inputs.timeValue < 0) {
+        setError("timeValue", "Enter time since injury.");
+        valid = false;
+      }
+      if (!inputs.site) {
+        setError("site", "Select anatomical site.");
+        valid = false;
+      }
+      if (!inputs.depth) {
+        setError("depth", "Select wound depth.");
+        valid = false;
+      }
+      return valid;
+    }
+
+    // Module 1 + 2
+    // Sources: Sheffield Wounds 4.28, Sheffield Bites 4.31, Clinical Advisor, LacerationRepair, RCEM, pediatric adhesive/suture evidence.
+    function classifyClosureMethod(inputs) {
+      const reasons = [];
+      const isBite = inputs.mechanisms.some((m) => m.startsWith("Bite"));
+      const isHumanBite = inputs.mechanisms.includes("Bite — human");
+      const isCatBite = inputs.mechanisms.includes("Bite — cat");
+      const isDogBite = inputs.mechanisms.includes("Bite — dog");
+      const isBurn = inputs.mechanisms.includes("Burns");
+      const hasInfection = inputs.woundEdges.includes("Active signs of infection");
+      const tendonBoneConcern = inputs.depth === "Possible tendon/bone/joint involvement";
+      const heavyContamination = inputs.contamination === "Heavily contaminated";
+      const nonFacialLate = inputs.timeHours !== null && inputs.timeHours > 12 && !isFaceSite(inputs.site);
+      const allLate = inputs.timeHours !== null && inputs.timeHours > 24;
+
+      if (isBurn) {
+        return {
+          recommendation: "Redirect to burns pathway",
+          severity: "red",
+          summary: "Burn injuries should be managed using a dedicated burns tool/pathway rather than this laceration closure guide.",
+          rationale: ["Mechanism includes burns.", "Use local burns referral protocol."],
+          deferred: true
+        };
+      }
+
+      if (tendonBoneConcern || hasInfection) {
+        reasons.push("Possible tendon/bone/joint involvement or active infection requires specialist assessment.");
+        return {
+          recommendation: "Do not close in ED — urgent referral",
+          severity: "red",
+          summary: "Primary closure contraindicated. Refer for specialist review and definitive management.",
+          rationale: reasons,
+          deferred: true
+        };
+      }
+
+      if (heavyContamination || allLate || nonFacialLate) {
+        reasons.push("Primary closure is contraindicated due to contamination/timing factors.");
+        return {
+          recommendation: "Secondary intention or delayed primary closure (3-5 days)",
+          severity: "red",
+          summary: "Irrigate, dress, and arrange review for delayed closure where appropriate.",
+          rationale: reasons,
+          deferred: true
+        };
+      }
+
+      if (isBite) {
+        if (isHumanBite) {
+          const smallCleanFace = isFaceSite(inputs.site) && (inputs.lengthCm || 99) <= 2 && inputs.contamination === "Clean";
+          if (!smallCleanFace) {
+            return {
+              recommendation: "Leave open / delayed closure",
+              severity: "red",
+              summary: "Human bite: avoid primary closure except selected small, clean facial wounds.",
+              rationale: ["High infection risk (including Eikenella and anaerobes).", "Irrigate thoroughly, start antibiotics, consider safeguarding."],
+              deferred: true
+            };
+          }
+        }
+
+        if (isCatBite) {
+          return {
+            recommendation: "Leave open / delayed closure",
+            severity: "red",
+            summary: "Cat bite puncture wounds have very high infection risk and should not be closed primarily.",
+            rationale: ["Pasteurella risk is high.", "Thorough irrigation and antibiotics recommended."],
+            deferred: true
+          };
+        }
+
+        if (isDogBite) {
+          if (inputs.mechanisms.includes("Puncture")) {
+            return {
+              recommendation: "Leave open / delayed closure",
+              severity: "red",
+              summary: "Dog bite puncture wounds should not be closed primarily.",
+              rationale: ["Puncture bites have infection risk.", "Use irrigation, dressing, and prophylaxis when indicated."],
+              deferred: true
+            };
+          }
+          return {
+            recommendation: "Consider delayed closure after irrigation",
+            severity: "amber",
+            summary: "Dog-bite laceration: usually delayed closure; selected facial wounds may be considered for primary closure with senior review.",
+            rationale: ["Assess contamination, depth, and host risk factors.", "Antibiotics often indicated by site/risk profile."],
+            deferred: true
+          };
+        }
+
+        return {
+          recommendation: "Leave open / delayed closure",
+          severity: "red",
+          summary: "Most bite wounds are managed with delayed closure following washout and review.",
+          rationale: ["Primary closure usually avoided for bite injuries."],
+          deferred: true
+        };
+      }
+
+      const length = inputs.lengthCm || 0;
+      const superficial = inputs.depth === "Superficial (skin only)";
+      const dermalOrSuperficial = superficial || inputs.depth === "Dermal";
+      const cleanLinear = inputs.woundEdges.includes("Clean linear");
+      const contaminatedEdge = inputs.woundEdges.includes("Contaminated (soil/organic matter)");
+      const gaping = inputs.woundEdges.includes("Gaping (>5mm)");
+      const ragged = inputs.woundEdges.includes("Ragged/irregular");
+      const tissueLoss = inputs.woundEdges.includes("Tissue loss");
+      const lowTensionSite = ["Face — forehead/cheek", "Face — periorbital", "Face — nose", "Scalp", "Trunk", "Limb", "Neck"].includes(inputs.site);
+      const adhesiveTimeWindow = isFaceSite(inputs.site) ? (inputs.timeHours || 99) < 12 : (inputs.timeHours || 99) < 8;
+
+      if (
+        length <= 2 &&
+        superficial &&
+        lowTensionSite &&
+        cleanLinear &&
+        !contaminatedEdge &&
+        !inputs.site.includes("Hand") &&
+        !inputs.site.includes("Foot")
+      ) {
+        return {
+          recommendation: "Steri-Strips / adhesive tape",
+          severity: "green",
+          summary: "Small, superficial, low-tension wound suitable for adhesive strips.",
+          rationale: ["Best for naturally well-approximating linear wounds.", "Avoid across joints/high mobility zones."],
+          deferred: false
+        };
+      }
+
+      if (
+        length <= 4 &&
+        dermalOrSuperficial &&
+        cleanLinear &&
+        lowTensionSite &&
+        !isHighTensionSite(inputs.site) &&
+        !contaminatedEdge &&
+        adhesiveTimeWindow
+      ) {
+        return {
+          recommendation: "Tissue adhesive (Dermabond/Histoacryl)",
+          severity: "green",
+          summary: "Appropriate for short, clean, low-tension wounds with superficial/dermal depth.",
+          rationale: ["Comparable cosmetic outcomes to sutures in pediatric facial lacerations.", "Usually less painful and faster."],
+          deferred: false
+        };
+      }
+
+      if (
+        inputs.site === "Scalp" &&
+        !ragged &&
+        !tissueLoss &&
+        !gaping &&
+        !contaminatedEdge
+      ) {
+        return {
+          recommendation: "Staples",
+          severity: "amber",
+          summary: "Linear scalp wound with haemostasis can be stapled for quick closure.",
+          rationale: ["Avoid staples for face/hands/feet/high-cosmesis areas."],
+          deferred: false
+        };
+      }
+
+      const sutureReasons = [];
+      if (gaping) sutureReasons.push("Gaping wound (>5 mm).");
+      if (inputs.depth === "Deep (fat/fascia visible)") sutureReasons.push("Deep wound (fat/fascia visible).");
+      if (isHighTensionSite(inputs.site)) sutureReasons.push("High-tension or high-mobility site.");
+      if (ragged || tissueLoss) sutureReasons.push("Irregular edges/tissue loss requiring precise alignment.");
+      if (length > 4) sutureReasons.push("Length >4 cm.");
+      if (inputs.site === "Nail bed") sutureReasons.push("Nail bed injuries generally need fine absorbable sutures.");
+
+      return {
+        recommendation: "Sutures",
+        severity: "amber",
+        summary: "Wound features are most suitable for sutured closure, with layered repair if needed.",
+        rationale: sutureReasons.length ? sutureReasons : ["Sutures favored for wound security and alignment in this presentation."],
+        deferred: false
+      };
+    }
+
+    // Module 3
+    // Sources: Sheffield Wounds 4.28, RCEMLearning paediatric wound management, SAEM.
+    function buildPrepChecklist(inputs) {
+      const irrigationVolume = inputs.lengthCm ? Math.ceil(inputs.lengthCm * 50) : 50;
+      return [
+        "Analgesia/Anaesthesia: consider LAT gel (max 2 ml age 1-3 years; 3 ml >3 years), 30 min contact; escalate to local infiltration or ketamine sedation if required.",
+        `Irrigation: high-pressure saline (19G + 20 ml syringe), at least ${irrigationVolume} ml total (>=50 ml per cm); potable tap water is acceptable.`,
+        "Explore wound for foreign body and tendon/nerve injury before closure.",
+        "Debride devitalised tissue where needed prior to definitive closure."
+      ];
+    }
+
+    // Module 4
+    // Source: NICE NG184 recommendations and pediatric dosing guidance.
+    function assessAntibiotics(inputs) {
+      const isBite = inputs.mechanisms.some((m) => m.startsWith("Bite"));
+      const heavilyContaminated = inputs.contamination === "Heavily contaminated";
+      const handWound = inputs.site === "Hand/finger";
+      const devitalised = inputs.woundEdges.includes("Tissue loss");
+      const indication = isBite || heavilyContaminated || handWound || inputs.immunocompromised || devitalised;
+
+      if (!indication) {
+        return {
+          required: false,
+          tone: "green",
+          text: "Not routinely indicated for clean non-bite wounds in immunocompetent patients.",
+          note: "Confirm against local trust antibiotic formulary before prescribing."
+        };
+      }
+
+      const age = inputs.ageYears;
+      const weight = inputs.weightKg;
+      let regimen = "Co-amoxiclav oral prophylaxis for 3 days (5 days if treatment for infection).";
+
+      if (inputs.penAllergy) {
+        if (inputs.penSeverity === "rash only") {
+          regimen = "Non-anaphylactic rash history: discuss with senior; co-amoxiclav may still be considered with caution.";
+        } else if (age !== null && age < 12) {
+          regimen = "Penicillin anaphylaxis/unknown: co-trimoxazole (off-label) age-band dosing: 6 weeks-5 months 120 mg BD; 6 months-5 years 240 mg BD; 6-11 years 480 mg BD.";
+        } else {
+          regimen = "Penicillin anaphylaxis/unknown age 12-17: doxycycline 200 mg day 1 then 100 mg daily + metronidazole 400 mg TDS.";
+        }
+      } else if (age !== null) {
+        if (age < 1) {
+          regimen = weight ? `Co-amoxiclav 125/31 suspension: 0.25 ml/kg TDS (approx ${Math.round(weight * 0.25 * 10) / 10} ml per dose) for 3 days.` : "Co-amoxiclav 125/31 suspension: 0.25 ml/kg TDS for 3 days.";
+        } else if (age < 6) {
+          regimen = weight ? `Co-amoxiclav 125/31 suspension: 0.25 ml/kg TDS (or 5 ml TDS) for 3 days (approx ${Math.round(weight * 0.25 * 10) / 10} ml per dose).` : "Co-amoxiclav 125/31 suspension: 0.25 ml/kg TDS or 5 ml TDS for 3 days.";
+        } else if (age < 12) {
+          regimen = weight ? `Co-amoxiclav 250/62 suspension: 0.15 ml/kg TDS (or 5 ml TDS) for 3 days (approx ${Math.round(weight * 0.15 * 10) / 10} ml per dose).` : "Co-amoxiclav 250/62 suspension: 0.15 ml/kg TDS or 5 ml TDS for 3 days.";
+        } else {
+          regimen = "Co-amoxiclav tablets 250/125 mg or 500/125 mg TDS for 3 days (5 days if treating infection).";
+        }
+      }
+
+      return {
+        required: true,
+        tone: "amber",
+        text: `Prophylaxis indicated. ${regimen}`,
+        note: "Confirm against local trust antibiotic formulary before prescribing."
+      };
+    }
+
+    // Module 5
+    // Source: UKHSA tetanus aide memoire 2025 and GOV.UK tetanus guidance.
+    function assessTetanus(inputs) {
+      const puncture = inputs.mechanisms.includes("Puncture");
+      const oldWound = (inputs.timeHours || 0) >= 6;
+      const contaminated = inputs.woundEdges.includes("Contaminated (soil/organic matter)") || inputs.contamination === "Moderately contaminated" || inputs.contamination === "Heavily contaminated";
+      const devitalised = inputs.woundEdges.includes("Tissue loss");
+      const burn = inputs.mechanisms.includes("Burns");
+      const highRiskFeatures = inputs.contamination === "Heavily contaminated" || devitalised || inputs.woundEdges.includes("Active signs of infection");
+
+      let woundClass = "Clean wound";
+      if (oldWound || puncture || devitalised || contaminated || burn) {
+        woundClass = "Tetanus-prone wound";
+      }
+      if (woundClass === "Tetanus-prone wound" && highRiskFeatures) {
+        woundClass = "High-risk tetanus-prone wound";
+      }
+
+      let action = "No tetanus intervention required routinely.";
+      const doses = inputs.tetanusDoses;
+      const last = inputs.lastTetanus;
+      const fullRecent = doses === "3+" && (last === "<5 years ago" || last === "5-10 years ago");
+      const fullOld = doses === "3+" && (last === ">10 years ago" || last === "Unknown");
+      const incomplete = doses === "1-2";
+      const unvaccinated = doses === "0" || doses === "";
+
+      if (woundClass === "Clean wound") {
+        if (incomplete) action = "Booster vaccine dose required.";
+        if (unvaccinated) action = "Start/complete full primary tetanus-containing vaccine course.";
+      } else if (woundClass === "Tetanus-prone wound") {
+        if (fullRecent) action = "No routine booster required.";
+        if (fullOld) action = "Booster tetanus-containing vaccine dose required.";
+        if (incomplete) action = "Booster tetanus-containing vaccine dose + TIG 250 IU IM.";
+        if (unvaccinated) action = "Full primary vaccine course + TIG 250 IU IM immediately.";
+      } else {
+        if (fullRecent) action = "Usually no routine intervention; consider TIG if significant high-risk features.";
+        if (fullOld) action = "Booster tetanus-containing vaccine + TIG 250 IU IM (consider 500 IU if >24h old/heavy contamination).";
+        if (incomplete) action = "Booster tetanus-containing vaccine + TIG 250 IU IM (consider 500 IU if >24h old/heavy contamination).";
+        if (unvaccinated) action = "Full primary vaccine course + TIG 250 IU IM immediately (consider 500 IU if >24h old/heavy contamination).";
+      }
+
+      return {
+        woundClass,
+        action,
+        tone: action.includes("No") ? "green" : (action.includes("TIG") ? "red" : "amber"),
+        note: "Refer to UKHSA Green Book Chapter 30 for full schedule. Confirm vaccination history via GP/red book where possible."
+      };
+    }
+
+    // Module 6
+    // Sources: Sheffield Wounds guidance and specialty referral criteria listed in prompt.
+    function checkReferral(inputs) {
+      const triggers = [];
+      const isLipVermillion = inputs.site === "Face — lip/vermillion";
+      const complexFace = isFaceSite(inputs.site) && (inputs.depth === "Deep (fat/fascia visible)" || inputs.woundEdges.includes("Ragged/irregular") || (inputs.lengthCm || 0) > 4);
+      const earCartilageConcern = inputs.site === "Ear" && inputs.depth !== "Superficial (skin only)";
+      const noseCartilageConcern = inputs.site === "Face — nose" && inputs.depth !== "Superficial (skin only)";
+      const nerveConcern = inputs.depth === "Possible tendon/bone/joint involvement";
+      const handTendonConcern = (inputs.site === "Hand/finger" || inputs.site === "Limb") && inputs.depth === "Possible tendon/bone/joint involvement";
+      const jointConcern = inputs.depth === "Possible tendon/bone/joint involvement";
+      const foreignBodyJoint = inputs.woundEdges.includes("Glass/foreign body suspected") && jointConcern;
+      const nailComplex = inputs.site === "Nail bed" && (inputs.lengthCm || 0) > 1;
+      const periorbitalConcern = inputs.site === "Face — periorbital" && (inputs.depth !== "Superficial (skin only)" || inputs.woundEdges.includes("Glass/foreign body suspected"));
+      const humanBite = inputs.mechanisms.includes("Bite — human");
+
+      if (isLipVermillion) triggers.push("Refer plastics/maxfax: lip laceration involving vermillion border.");
+      if (complexFace) triggers.push("Refer plastics/maxfax: complex facial laceration requiring high cosmetic precision.");
+      if (earCartilageConcern) triggers.push("Refer plastics/maxfax: possible ear cartilage involvement.");
+      if (noseCartilageConcern) triggers.push("Refer plastics/maxfax: possible nasal cartilage involvement.");
+      if (nerveConcern) triggers.push("Refer plastics/maxfax: suspected nerve injury (check distal sensation).");
+      if (handTendonConcern) triggers.push("Refer hand surgery/orthopaedics: possible tendon injury with movement risk.");
+      if (jointConcern) triggers.push("Refer hand surgery/orthopaedics: possible joint space penetration.");
+      if (foreignBodyJoint) triggers.push("Refer orthopaedics: suspected intra-articular foreign body.");
+      if (nailComplex) triggers.push("Refer hand surgery: nail bed injury may need formal repair under ring block.");
+      if (periorbitalConcern) triggers.push("Refer ophthalmology: periorbital wound where globe injury cannot be excluded.");
+      if (humanBite) triggers.push("Safeguarding flag: human bite in a child requires safeguarding consideration and documentation.");
+      if (inputs.historyMismatch) triggers.push("Safeguarding flag: injury history inconsistent with wound pattern — follow local safeguarding pathway.");
+
+      return {
+        required: triggers.length > 0,
+        triggers,
+        tone: triggers.some((t) => t.startsWith("Safeguarding")) ? "red" : (triggers.length ? "amber" : "green")
+      };
+    }
+
+    function toneToBadge(tone) {
+      if (tone === "green") return ["Low complexity", "badge-green"];
+      if (tone === "red") return ["High risk / refer", "badge-red"];
+      return ["Moderate complexity", "badge-amber"];
+    }
+
+    // Module 7
+    function renderResults(outputs) {
+      const [badgeText, badgeClass] = toneToBadge(outputs.closure.severity);
+      const badgeEl = document.getElementById("severityBadge");
+      badgeEl.className = `badge ${badgeClass}`;
+      badgeEl.textContent = badgeText;
+
+      document.getElementById("closureTitle").textContent = outputs.closure.recommendation;
+      document.getElementById("closureSummary").textContent = outputs.closure.summary;
+
+      const rationaleEl = document.getElementById("closureRationale");
+      rationaleEl.innerHTML = outputs.closure.rationale.map((item) => `<li>${item}</li>`).join("");
+
+      const prepEl = document.getElementById("prepChecklist");
+      prepEl.innerHTML = outputs.prep.map((item) => `<li>${item}</li>`).join("");
+
+      const antibioticEl = document.getElementById("antibioticFlag");
+      antibioticEl.className = `flag-card flag-${outputs.antibiotics.tone}`;
+      antibioticEl.innerHTML = `<h3>Antibiotics</h3><p>${outputs.antibiotics.text}</p><p class="hint" style="margin-top:6px;">${outputs.antibiotics.note}</p>`;
+
+      const tetanusEl = document.getElementById("tetanusFlag");
+      tetanusEl.className = `flag-card flag-${outputs.tetanus.tone}`;
+      tetanusEl.innerHTML = `<h3>Tetanus</h3><p><strong>Wound classification:</strong> ${outputs.tetanus.woundClass}</p><p style="margin-top:4px;"><strong>Action required:</strong> ${outputs.tetanus.action}</p><p class="hint" style="margin-top:6px;">${outputs.tetanus.note}</p>`;
+
+      const referralEl = document.getElementById("referralFlag");
+      referralEl.className = `flag-card flag-${outputs.referral.tone}`;
+      if (!outputs.referral.required) {
+        referralEl.innerHTML = "<h3>Referral Triggers</h3><p>No immediate referral trigger identified from entered fields.</p>";
+      } else {
+        referralEl.innerHTML = `<h3>Referral Triggers</h3><ul class="note-list">${outputs.referral.triggers.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+      }
+    }
+
+    function formatTimeForCopy(inputs) {
+      if (inputs.timeHours === null) return "Not recorded";
+      return `${Math.round(inputs.timeHours * 10) / 10}h`;
+    }
+
+    // Module 8
+    function buildCopyText(inputs, outputs) {
+      const ts = new Date().toLocaleString();
+      const mechanism = inputs.mechanisms.length ? inputs.mechanisms.join(", ") : "Not recorded";
+      const lengthText = inputs.lengthCm ? inputs.lengthCm.toFixed(1) : "Not recorded";
+      const referralText = outputs.referral.required ? outputs.referral.triggers.join(" | ") : "None required";
+      const antibioticLabel = outputs.antibiotics.required ? `Required — ${outputs.antibiotics.text}` : "Not indicated";
+
+      return [
+        `WOUND CLOSURE DECISION AID — ${ts}`,
+        `Site: ${inputs.site || "Not recorded"} | Mechanism: ${mechanism} | Length: ${lengthText}cm | Depth: ${inputs.depth || "Not recorded"}`,
+        `Time since injury: ${formatTimeForCopy(inputs)} | Contamination: ${inputs.contamination}`,
+        "",
+        `CLOSURE: ${outputs.closure.recommendation}`,
+        "WOUND PREP: LAT gel applied / High-pressure irrigation / Explored / Debrided",
+        "",
+        `ANTIBIOTICS: ${antibioticLabel}`,
+        `TETANUS: Wound class: ${outputs.tetanus.woundClass} | Action: ${outputs.tetanus.action}`,
+        `REFERRAL: ${referralText}`,
+        "",
+        "Generated by PaedTools.co.uk Wound Closure Decision Aid",
+        "Clinical logic based on: NICE NG184, UKHSA Tetanus Aide Memoire 2025,",
+        "Sheffield Children's Hospital ED Guidelines, RCEM/RCEMLearning"
+      ].join("\n");
+    }
+
+    function updateAgeGroupAuto() {
+      const ageValue = parseNumber(ageField.value);
+      const ageUnit = getRadioValue("ageUnit");
+      const ageYears = getAgeYears(ageValue, ageUnit);
+      ageGroupAuto.value = getAgeBand(ageYears);
+    }
+
+    function updateProgress() {
+      const inputs = gatherInputs();
+      const section1Complete = inputs.mechanisms.length > 0 && !!inputs.site && inputs.timeValue !== null && !!inputs.depth;
+      const section2Complete = inputs.ageValue !== null;
+      const section3Complete = !!inputs.tetanusDoses && !!inputs.lastTetanus;
+      const done = [section1Complete, section2Complete, section3Complete].filter(Boolean).length;
+      progressText.textContent = `${done} / 3 complete`;
+      progressFill.style.width = `${(done / 3) * 100}%`;
+      document.getElementById("sectionState1").textContent = section1Complete ? "Complete" : "Incomplete";
+      document.getElementById("sectionState2").textContent = section2Complete ? "Complete" : "Incomplete";
+      document.getElementById("sectionState3").textContent = section3Complete ? "Complete" : "Incomplete";
+    }
+
+    function resetForm() {
+      formEl.reset();
+      document.getElementById("contClean").checked = true;
+      document.getElementById("immunoNo").checked = true;
+      document.getElementById("penNo").checked = true;
+      document.getElementById("timeHours").checked = true;
+      document.getElementById("ageYears").checked = true;
+      penSeverityWrap.style.display = "none";
+      clearErrors();
+      latestRun = null;
+      updateAgeGroupAuto();
+      updateProgress();
+      if (window.innerWidth < 1024) {
+        resultsPanel.classList.remove("show");
+      }
+      document.getElementById("closureTitle").textContent = "Awaiting input";
+      document.getElementById("closureSummary").textContent = "Complete the form and submit to view recommendations.";
+      document.getElementById("closureRationale").innerHTML = "";
+      document.getElementById("prepChecklist").innerHTML = "";
+      document.getElementById("antibioticFlag").innerHTML = "<h3>Antibiotics</h3><p>Not assessed yet.</p>";
+      document.getElementById("tetanusFlag").innerHTML = "<h3>Tetanus</h3><p>Not assessed yet.</p>";
+      document.getElementById("referralFlag").innerHTML = "<h3>Referral Triggers</h3><p>Not assessed yet.</p>";
+    }
+
+    function runAssessment(event) {
+      event.preventDefault();
+      const inputs = gatherInputs();
+      if (!validateInputs(inputs)) {
+        return;
+      }
+
+      const outputs = {
+        closure: classifyClosureMethod(inputs),
+        prep: buildPrepChecklist(inputs),
+        antibiotics: assessAntibiotics(inputs),
+        tetanus: assessTetanus(inputs),
+        referral: checkReferral(inputs)
+      };
+
+      latestRun = { inputs, outputs };
+      renderResults(outputs);
+      resultsPanel.classList.add("show");
+      if (window.innerWidth < 1024) {
+        resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    async function copySummary() {
+      if (!latestRun) return;
+      const text = buildCopyText(latestRun.inputs, latestRun.outputs);
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "Copied";
+        setTimeout(() => {
+          copyBtn.textContent = "Copy to clipboard";
+        }, 1300);
+      } catch (error) {
+        copyBtn.textContent = "Copy failed";
+      }
+    }
+
+    formEl.addEventListener("submit", runAssessment);
+    formEl.addEventListener("input", () => {
+      updateProgress();
+      updateAgeGroupAuto();
+    });
+    resetBtn.addEventListener("click", resetForm);
+    copyBtn.addEventListener("click", copySummary);
+    penAllergyInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        penSeverityWrap.style.display = getRadioValue("penAllergy") === "Yes" ? "block" : "none";
+      });
+    });
+    ageUnitInputs.forEach((input) => input.addEventListener("change", updateAgeGroupAuto));
+    ageField.addEventListener("input", updateAgeGroupAuto);
+
+    updateAgeGroupAuto();
+    updateProgress();
+  </script>
+</body>
+</html>
