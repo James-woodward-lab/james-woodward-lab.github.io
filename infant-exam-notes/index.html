@@ -497,6 +497,75 @@
     #heentNeckMeningismYnWrap { margin-top: 10px; }
     .check-grid.heent-meningism-grid { gap: var(--sp-within); }
 
+    /* ===== MSK SECTION ===== */
+    #mskBlock .msk-group-details {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 6px; background: var(--surface);
+    }
+    #mskBlock .msk-group-details > summary {
+      cursor: pointer; padding: 8px 12px;
+      font-size: 0.95rem; font-weight: 700; color: var(--text);
+      list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+      user-select: none; transition: background 0.15s;
+    }
+    #mskBlock .msk-group-details > summary::-webkit-details-marker { display: none; }
+    #mskBlock .msk-group-details > summary::after {
+      content: "\25B6"; font-size: 0.65rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0;
+    }
+    #mskBlock .msk-group-details[open] > summary::after { transform: rotate(90deg); }
+    #mskBlock .msk-group-details > summary:hover { background: var(--surface2); }
+    #mskBlock .msk-group-body { padding: 6px 8px 8px; border-top: 1px solid var(--border); }
+    #mskBlock .msk-subsection-details {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 5px; background: var(--surface2);
+    }
+    #mskBlock .msk-subsection-details > summary {
+      cursor: pointer; padding: 6px 10px;
+      font-size: 0.88rem; font-weight: 600; color: var(--text);
+      list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+      user-select: none; transition: background 0.15s;
+    }
+    #mskBlock .msk-subsection-details > summary::-webkit-details-marker { display: none; }
+    #mskBlock .msk-subsection-details > summary::after {
+      content: "\25B6"; font-size: 0.6rem; color: var(--muted); transition: transform 0.2s; flex-shrink: 0;
+    }
+    #mskBlock .msk-subsection-details[open] > summary::after { transform: rotate(90deg); }
+    #mskBlock .msk-subsection-details > summary:hover { background: var(--surface); }
+    #mskBlock .msk-subsection-body { padding: 8px 10px 10px; border-top: 1px solid var(--border); }
+    .msk-bilateral-cols {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;
+    }
+    @media (max-width: 520px) { .msk-bilateral-cols { grid-template-columns: 1fr; } }
+    .msk-side-col-label {
+      font-size: 0.7rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .msk-nad-row { margin-bottom: 6px; }
+    .msk-findings-wrap { display: block; }
+
+    #mskBlock .msk-shoulder-bilateral-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+      align-items: start;
+    }
+    @media (max-width: 560px) { #mskBlock .msk-shoulder-bilateral-cols { grid-template-columns: 1fr; } }
+    .msk-shoulder-side-col .yesno-toggle-wrap { width: 100%; }
+    .msk-shoulder-section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 10px 0 6px;
+    }
+    .msk-shoulder-side-col .msk-shoulder-section-title:first-of-type { margin-top: 0; }
+    .msk-shoulder-ins-wrap .conditional-inline-field,
+    .msk-shoulder-palp-wrap .conditional-inline-field { display: none; margin-top: 6px; margin-bottom: 6px; }
+    .msk-shoulder-ins-wrap .conditional-inline-field.show,
+    .msk-shoulder-palp-wrap .conditional-inline-field.show { display: block; }
+    .msk-shoulder-wounds-ta { width: 100%; min-height: 44px; }
+
     .section-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
   </style>
 </head>
@@ -711,6 +780,425 @@
       }
     ];
 
+    var MSK_GROUPS = [
+      {
+        key: 'upperLimb', label: 'Upper limb',
+        subsections: [
+          {
+            key: 'shoulder', label: 'Shoulder', bilateral: true,
+            useShoulderCustomUi: true
+          },
+          {
+            key: 'upperArm', label: 'Upper arm', bilateral: true,
+            findings: [
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'No deformity', tag: TAG_NORMAL },
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
+              { value: 'Open fracture', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'elbow', label: 'Elbow', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Reduced extension', tag: TAG_ABNORMAL },
+              { value: 'Reduced flexion', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Effusion', tag: TAG_ABNORMAL },
+              { value: 'Dislocation', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'forearm', label: 'Forearm', bilateral: true,
+            findings: [
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'No deformity', tag: TAG_NORMAL },
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
+              { value: 'Open fracture', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'wrist', label: 'Wrist', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Anatomical snuffbox tenderness', tag: TAG_ABNORMAL }
+            ]
+          },
+          {
+            key: 'hand', label: 'Hand and fingers', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Grip strength normal', tag: TAG_NORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Reduced grip strength', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Finger clubbing', tag: TAG_ABNORMAL },
+              { value: 'Mallet finger', tag: TAG_ABNORMAL },
+              { value: 'Trigger finger', tag: TAG_ABNORMAL }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'lowerLimb', label: 'Lower limb',
+        subsections: [
+          {
+            key: 'hip', label: 'Hip', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Normal gait', tag: TAG_NORMAL },
+              { value: 'Barlow negative', tag: TAG_NORMAL },
+              { value: 'Ortolani negative', tag: TAG_NORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Reduced internal rotation', tag: TAG_ABNORMAL },
+              { value: 'Reduced external rotation', tag: TAG_ABNORMAL },
+              { value: 'Reduced abduction', tag: TAG_ABNORMAL },
+              { value: 'Antalgic gait', tag: TAG_ABNORMAL },
+              { value: 'Leg length discrepancy', tag: TAG_ABNORMAL },
+              { value: 'Trendelenburg positive', tag: TAG_ABNORMAL },
+              { value: 'Barlow positive', tag: TAG_URGENT },
+              { value: 'Ortolani positive', tag: TAG_URGENT },
+              { value: 'Non-weight-bearing', tag: TAG_URGENT },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'knee', label: 'Knee', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'No effusion', tag: TAG_NORMAL },
+              { value: 'Stable to valgus and varus stress', tag: TAG_NORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Reduced extension', tag: TAG_ABNORMAL },
+              { value: 'Reduced flexion', tag: TAG_ABNORMAL },
+              { value: 'Effusion', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Lachman positive', tag: TAG_ABNORMAL },
+              { value: 'Anterior drawer positive', tag: TAG_ABNORMAL },
+              { value: 'Valgus instability', tag: TAG_ABNORMAL },
+              { value: 'Varus instability', tag: TAG_ABNORMAL },
+              { value: 'Locked knee', tag: TAG_URGENT },
+              { value: 'Non-weight-bearing', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'ankle', label: 'Ankle', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Reduced dorsiflexion', tag: TAG_ABNORMAL },
+              { value: 'Reduced plantarflexion', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Lateral malleolus tenderness', tag: TAG_ABNORMAL },
+              { value: 'Medial malleolus tenderness', tag: TAG_ABNORMAL },
+              { value: 'Dislocation', tag: TAG_URGENT },
+              { value: 'Non-weight-bearing', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'foot', label: 'Foot', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Normal arch', tag: TAG_NORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Pes planus', tag: TAG_ABNORMAL },
+              { value: 'Pes cavus', tag: TAG_ABNORMAL },
+              { value: 'Talipes equinovarus', tag: TAG_ABNORMAL },
+              { value: 'Metatarsus adductus', tag: TAG_ABNORMAL },
+              { value: 'Non-weight-bearing', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'upperLeg', label: 'Upper leg', bilateral: true,
+            findings: [
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'No deformity', tag: TAG_NORMAL },
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Non-weight-bearing', tag: TAG_URGENT },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
+              { value: 'Open fracture', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'lowerLeg', label: 'Lower leg', bilateral: true,
+            findings: [
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'No deformity', tag: TAG_NORMAL },
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Non-weight-bearing', tag: TAG_URGENT },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
+              { value: 'Open fracture', tag: TAG_URGENT }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'thoraxGroup', label: 'Thorax / chest wall',
+        subsections: [
+          {
+            key: 'thorax', label: 'Thorax / chest wall', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'Symmetrical', tag: TAG_NORMAL },
+              { value: 'No deformity', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Bony tenderness', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL },
+              { value: 'Pectus excavatum', tag: TAG_ABNORMAL },
+              { value: 'Pectus carinatum', tag: TAG_ABNORMAL }
+            ]
+          },
+          {
+            key: 'abdominalWall', label: 'Abdominal wall', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'No hernia', tag: TAG_NORMAL },
+              { value: 'Normal muscle tone', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Hernia present', tag: TAG_ABNORMAL },
+              { value: 'Diastasis recti', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Warmth', tag: TAG_ABNORMAL },
+              { value: 'Mass palpable', tag: TAG_ABNORMAL }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'spineGroup', label: 'Spine',
+        subsections: [
+          {
+            key: 'cervicalSpine', label: 'Cervical spine', bilateral: false,
+            findings: [
+              { value: 'Normal alignment', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No midline tenderness', tag: TAG_NORMAL },
+              { value: 'No paraspinal tenderness', tag: TAG_NORMAL },
+              { value: 'No step deformity', tag: TAG_NORMAL },
+              { value: 'Midline tenderness', tag: TAG_ABNORMAL },
+              { value: 'Paraspinal tenderness', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Reduced flexion', tag: TAG_ABNORMAL },
+              { value: 'Reduced extension', tag: TAG_ABNORMAL },
+              { value: 'Reduced rotation', tag: TAG_ABNORMAL },
+              { value: 'Muscle spasm', tag: TAG_ABNORMAL },
+              { value: 'Torticollis', tag: TAG_ABNORMAL },
+              { value: 'Step deformity', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'thoracicSpine', label: 'Thoracic spine', bilateral: false,
+            findings: [
+              { value: 'Normal alignment', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No midline tenderness', tag: TAG_NORMAL },
+              { value: 'No paraspinal tenderness', tag: TAG_NORMAL },
+              { value: 'No step deformity', tag: TAG_NORMAL },
+              { value: 'Normal curvature', tag: TAG_NORMAL },
+              { value: 'Midline tenderness', tag: TAG_ABNORMAL },
+              { value: 'Paraspinal tenderness', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Kyphosis', tag: TAG_ABNORMAL },
+              { value: 'Scoliosis', tag: TAG_ABNORMAL },
+              { value: 'Muscle spasm', tag: TAG_ABNORMAL },
+              { value: 'Step deformity', tag: TAG_URGENT }
+            ]
+          },
+          {
+            key: 'lumbarSpine', label: 'Lumbar spine', bilateral: false,
+            findings: [
+              { value: 'Normal alignment', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No midline tenderness', tag: TAG_NORMAL },
+              { value: 'No paraspinal tenderness', tag: TAG_NORMAL },
+              { value: 'No step deformity', tag: TAG_NORMAL },
+              { value: 'Straight leg raise negative bilaterally', tag: TAG_NORMAL },
+              { value: 'Midline tenderness', tag: TAG_ABNORMAL },
+              { value: 'Paraspinal tenderness', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Reduced flexion', tag: TAG_ABNORMAL },
+              { value: 'Reduced extension', tag: TAG_ABNORMAL },
+              { value: 'Muscle spasm', tag: TAG_ABNORMAL },
+              { value: 'Scoliosis', tag: TAG_ABNORMAL },
+              { value: 'Straight leg raise positive', tag: TAG_URGENT },
+              { value: 'Step deformity', tag: TAG_URGENT },
+              { value: 'Saddle anaesthesia', tag: TAG_URGENT },
+              { value: 'Perianal sensation reduced', tag: TAG_URGENT }
+            ]
+          }
+        ]
+      },
+      {
+        key: 'headNeckGroup', label: 'Head and neck',
+        subsections: [
+          {
+            key: 'head', label: 'Head', bilateral: false,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Haematoma', tag: TAG_ABNORMAL },
+              { value: 'Crepitus', tag: TAG_ABNORMAL }
+            ]
+          },
+          {
+            key: 'scalp', label: 'Scalp', bilateral: false,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'No lacerations', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Boggy swelling', tag: TAG_ABNORMAL },
+              { value: 'Laceration', tag: TAG_ABNORMAL },
+              { value: 'Haematoma', tag: TAG_ABNORMAL },
+              { value: 'Cephalohaematoma', tag: TAG_ABNORMAL },
+              { value: 'Caput succedaneum', tag: TAG_ABNORMAL }
+            ]
+          },
+          {
+            key: 'face', label: 'Face', bilateral: true,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Symmetrical', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No swelling', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Swelling', tag: TAG_ABNORMAL },
+              { value: 'Asymmetry', tag: TAG_ABNORMAL },
+              { value: 'Deformity', tag: TAG_ABNORMAL },
+              { value: 'Erythema', tag: TAG_ABNORMAL },
+              { value: 'Bruising', tag: TAG_ABNORMAL },
+              { value: 'Laceration', tag: TAG_ABNORMAL }
+            ]
+          },
+          {
+            key: 'neck', label: 'Neck', bilateral: false,
+            findings: [
+              { value: 'Normal appearance', tag: TAG_NORMAL },
+              { value: 'Full range of movement', tag: TAG_NORMAL },
+              { value: 'No tenderness', tag: TAG_NORMAL },
+              { value: 'No masses', tag: TAG_NORMAL },
+              { value: 'No lymphadenopathy', tag: TAG_NORMAL },
+              { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
+              { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
+              { value: 'Lymphadenopathy', tag: TAG_ABNORMAL },
+              { value: 'Mass palpable', tag: TAG_ABNORMAL },
+              { value: 'Torticollis', tag: TAG_ABNORMAL }
+            ]
+          }
+        ]
+      }
+    ];
+
+    function getMskAllSubsections() {
+      var all = [];
+      for (var gi = 0; gi < MSK_GROUPS.length; gi++) {
+        for (var si = 0; si < MSK_GROUPS[gi].subsections.length; si++) {
+          all.push(MSK_GROUPS[gi].subsections[si]);
+        }
+      }
+      return all;
+    }
+
     function tagLabelFromClass(classType) {
       if (classType === 'urgent') return TAG_URGENT;
       if (classType === 'abnormal') return TAG_ABNORMAL;
@@ -747,7 +1235,7 @@
     /** Shown as full section cards after HEENT (not inside collapsible extras). */
     var POST_HEENT_KEYS = ['skin'];
     /** Document output order (matches page layout top to bottom). HEENT inserted via special key. */
-    var OUTPUT_SECTION_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen', '_heent_', 'skin', 'neurology'];
+    var OUTPUT_SECTION_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen', '_heent_', 'skin', 'neurology', '_msk_'];
     var LUNG_FINDINGS = ['Vesicular breath sounds', 'Reduced air entry', 'Wheeze', 'Fine crackles', 'Course crackles'];
     var LUNG_ZONES = [
       { key: 'left_upper', label: 'Left upper zone' },
@@ -805,7 +1293,8 @@
       respiratory: 'RESP',
       abdomen: 'ABDO',
       heent: 'HEENT',
-      skin: 'SKIN'
+      skin: 'SKIN',
+      msk: 'MSK'
     };
 
     var ABNORMAL_PATTERNS = [
@@ -820,7 +1309,11 @@
       'cool peripheries', 'guarding present', 'hernia present', 'drooling present',
       'non-weight-bearing', 'pseudoparalysis', 'seizure activity present', 'stridor', 'stertorous',
       'mild wob', 'moderate wob', 'severe wob',
-      'central crt >3 seconds', 'peripheral crt >3 seconds'
+      'central crt >3 seconds', 'peripheral crt >3 seconds',
+      'swelling', 'effusion', 'crepitus', 'deformity', 'erythema', 'warmth',
+      'muscle wasting', 'muscle spasm', 'tenderness on palpation', 'midline tenderness',
+      'paraspinal tenderness', 'antalgic gait', 'instability', 'positive',
+      'kyphosis', 'scoliosis', 'torticollis', 'locked knee'
     ];
 
     var NORMAL_PATTERNS = [
@@ -831,7 +1324,9 @@
       'resonant', 'midline', 'symmetrical', 'palpable', 'pearly grey',
       'pearl', 'vesicular', 'nad bilaterally', 'no recessions', 'no increased wob', 'good radial pulses',
       'good chest rise', 'equal bilaterally', 'hs i + ii', 'femorals palpable', 'fontanelle flat',
-      'heart sounds i + ii', 'normotensive'
+      'heart sounds i + ii', 'normotensive',
+      'full range of movement', 'nad', 'grip strength normal', 'negative',
+      'stable to valgus and varus stress', 'normal arch', 'normal gait', 'normal alignment', 'normal curvature'
     ];
     var URGENT_ABNORMAL_PATTERNS = [
       'drowsy',
@@ -872,7 +1367,13 @@
       'skin mottled',
       'skin cyanosed',
       'rash non blanching',
-      'non-blanching rash'
+      'non-blanching rash',
+      'dislocation',
+      'open fracture',
+      'neurovascular compromise',
+      'saddle anaesthesia',
+      'locked knee',
+      'step deformity'
     ];
     var EXPLICIT_URGENT_PATTERNS = [
       'not interacting with carer',
@@ -903,7 +1404,16 @@
       'jaundiced',
       'mottled',
       'cyanosed',
-      'poor chest rise bilaterally'
+      'poor chest rise bilaterally',
+      'barlow positive',
+      'ortolani positive',
+      'straight leg raise positive',
+      'saddle anaesthesia',
+      'perianal sensation reduced',
+      'neurovascular compromise distally',
+      'open fracture',
+      'dislocation',
+      'locked knee'
     ];
     var EXPLICIT_ABNORMAL_PATTERNS = [
       'central crt 2 3 seconds',
@@ -922,11 +1432,55 @@
       'peripheral crt 2 seconds',
       'peripheral crt <2 seconds',
       'kernig s sign negative',
-      'does not appear meningitic'
+      'does not appear meningitic',
+      'barlow negative',
+      'ortolani negative',
+      'straight leg raise negative bilaterally'
     ];
     var TAG_NORMAL = 'Normal finding';
     var TAG_ABNORMAL = 'abnormal finding';
     var TAG_URGENT = 'urgent abnormal finding';
+
+    var MSK_SHOULDER_BONY_SITES = [
+      'sternoclavicular joint',
+      'clavicle',
+      'acromioclavicular joint',
+      'acromion',
+      'coracoid process',
+      'humeral head'
+    ];
+    var MSK_SHOULDER_SOFT_SITES = [
+      'periscapular region',
+      'deltoid',
+      'rotator cuff tendon insertion / greater tuberosity',
+      'long head of the biceps tendon in groove'
+    ];
+    var MSK_SHOULDER_INSPECTION_YN_ROWS = [
+      { key: 'deformity', label: 'Deformity', yes: 'Shoulder deformity', no: 'No shoulder deformity', normalYes: false, yesTag: TAG_ABNORMAL, noTag: TAG_NORMAL },
+      { key: 'wounds', label: 'Wounds', yes: 'Shoulder wound', no: 'No shoulder wounds', normalYes: false, yesTag: TAG_ABNORMAL, noTag: TAG_NORMAL },
+      { key: 'swelling', label: 'Swelling', yes: 'Shoulder swelling', no: 'No shoulder swelling', normalYes: false, yesTag: TAG_ABNORMAL, noTag: TAG_NORMAL },
+      { key: 'subluxation', label: 'Subluxation', yes: 'Shoulder subluxation', no: 'No shoulder subluxation', normalYes: false, yesTag: TAG_ABNORMAL, noTag: TAG_NORMAL }
+    ];
+    var MSK_SHOULDER_PALPATION_YN_ROWS = [
+      { key: 'bonyTenderness', label: 'Bony tenderness', yes: 'Bony tenderness', no: 'No bony tenderness', normalYes: false, yesTag: TAG_ABNORMAL, noTag: TAG_NORMAL },
+      { key: 'softTissueTenderness', label: 'Muscular / soft tissue tenderness', yes: 'Soft tissue tenderness', no: 'No soft tissue tenderness', normalYes: false, yesTag: TAG_ABNORMAL, noTag: TAG_NORMAL }
+    ];
+    var MSK_SHOULDER_ROM_YN_ROWS = [
+      { key: 'normalRom', label: 'Normal ROM', yes: 'Normal ROM', no: 'ROM not normal', normalYes: true, yesTag: TAG_NORMAL, noTag: TAG_ABNORMAL }
+    ];
+    var MSK_SHOULDER_NEUROVASCULAR_YN_ROWS = [
+      { key: 'sensationIntact', label: 'Sensation intact', yes: 'Sensation intact', no: 'Sensation impaired', normalYes: true, yesTag: TAG_NORMAL, noTag: TAG_ABNORMAL },
+      { key: 'capillaryRefill', label: 'Capillary refill <2s', yes: 'Cap refill <2s', no: 'Cap refill prolonged', normalYes: true, yesTag: TAG_NORMAL, noTag: TAG_ABNORMAL },
+      { key: 'pulsesNormal', label: 'Pulses normal', yes: 'Pulses normal', no: 'Pulses abnormal', normalYes: true, yesTag: TAG_NORMAL, noTag: TAG_ABNORMAL }
+    ];
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__R__inspection'] = MSK_SHOULDER_INSPECTION_YN_ROWS;
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__L__inspection'] = MSK_SHOULDER_INSPECTION_YN_ROWS;
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__R__palpation'] = MSK_SHOULDER_PALPATION_YN_ROWS;
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__L__palpation'] = MSK_SHOULDER_PALPATION_YN_ROWS;
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__R__rom'] = MSK_SHOULDER_ROM_YN_ROWS;
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__L__rom'] = MSK_SHOULDER_ROM_YN_ROWS;
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__R__neurovascular'] = MSK_SHOULDER_NEUROVASCULAR_YN_ROWS;
+    YES_NO_TOGGLE_ROW_REGISTRY['msk__shoulder__L__neurovascular'] = MSK_SHOULDER_NEUROVASCULAR_YN_ROWS;
 
     function isAbnormal(text) {
       var p = (text || '').toLowerCase();
@@ -1089,7 +1643,7 @@
           buckets[g].notable.push(trimSentence(item.text));
         }
       }
-      var order = ['general', 'cvs', 'respiratory', 'abdomen', 'heent', 'skin', 'neurology', 'other'];
+      var order = ['general', 'cvs', 'respiratory', 'abdomen', 'heent', 'skin', 'neurology', 'msk', 'other'];
       var urgentLines = [];
       var notableLines = [];
       for (var oi = 0; oi < order.length; oi++) {
@@ -1441,7 +1995,7 @@
       var mode = document.querySelector('input[name="respiratory__auscultationMode"]:checked');
       if (!mode) return '';
       if (mode.value === 'Chest clear') {
-        return 'On auscultation, chest clear. No added sounds, fine crackles, course crackles, or polyphonic expiratory wheeze. Good air entry globally.';
+        return 'On auscultation, chest clear, vesicular breath sounds throughout, good air entry globally, no added sounds';
       }
       if (mode.value === 'Added sounds') {
         var findings = [];
@@ -1492,6 +2046,22 @@
       }
     }
 
+    function clearMskSubsectionFindings(subKey) {
+      if (subKey === 'shoulder') {
+        clearMskShoulderFields();
+        return;
+      }
+      var mskBlock = document.getElementById('mskBlock');
+      if (!mskBlock || !subKey) return;
+      var sel = 'input[name^="msk__' + subKey + '__R__"], input[name^="msk__' + subKey + '__L__"], input[name^="msk__' + subKey + '__M__"]';
+      var nodes = mskBlock.querySelectorAll(sel);
+      for (var i = 0; i < nodes.length; i++) {
+        nodes[i].checked = false;
+        var lab = nodes[i].closest('.check-opt');
+        if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
+      }
+    }
+
     function handleCheckClick(label) {
       var input = label.querySelector('input');
       setTimeout(function() {
@@ -1515,6 +2085,23 @@
           }
         }
 
+        if (input.name && input.name.indexOf('msk__') === 0 && input.type === 'checkbox') {
+          var mskNameParts = input.name.split('__');
+          if (mskNameParts.length === 3 && mskNameParts[2] === 'nad' && input.checked) {
+            if (mskNameParts[1] === 'shoulder') clearMskShoulderFields();
+            else clearMskSubsectionFindings(mskNameParts[1]);
+          } else if (mskNameParts.length >= 4 && mskNameParts[0] === 'msk' && (mskNameParts[2] === 'R' || mskNameParts[2] === 'L' || mskNameParts[2] === 'M')) {
+            if (input.checked) {
+              var nadEl = document.getElementById('msk__' + mskNameParts[1] + '__nad');
+              if (nadEl && nadEl.checked) {
+                nadEl.checked = false;
+                var nadLab = nadEl.closest('.check-opt');
+                if (nadLab) nadLab.classList.remove('selected', 'abnormal', 'pill-normal');
+              }
+            }
+          }
+        }
+
         if (input.checked) {
           label.classList.add('selected');
           if (label.closest('.heent-tm-L-col') || label.closest('.heent-tm-R-col')) {
@@ -1526,6 +2113,7 @@
           } else if (label.closest('#recessionSubtypeWrap')) label.classList.add('abnormal');
           else if (label.closest('.auscultation-added-check-grid')) label.classList.add('abnormal');
           else if (input.name.indexOf('respiratory__upperAirwaySounds__') === 0 && input.value === 'Soft stridor') label.classList.add('abnormal');
+          else if (input.name.indexOf('msk__') === 0 && input.name.indexOf('__nad') !== -1) label.classList.add('pill-normal');
           else if (classifyFinding(input.value) === 'abnormal') label.classList.add('abnormal');
           else if (classifyFinding(input.value) === 'normal') label.classList.add('pill-normal');
           else label.classList.remove('abnormal', 'pill-normal');
@@ -1637,6 +2225,43 @@
       return pr;
     }
 
+    function appendYesNoToggleRow(wrap, prefix, prDef) {
+      var ynRow = document.createElement('div');
+      ynRow.className = 'yesno-toggle-row';
+      ynRow.setAttribute('data-row-key', prDef.key);
+      var prLab = document.createElement('span');
+      prLab.className = 'yesno-toggle-label';
+      prLab.textContent = prDef.label;
+      ynRow.appendChild(prLab);
+      var ynActions = document.createElement('div');
+      ynActions.className = 'yesno-toggle-actions';
+      var yesLbl = document.createElement('label');
+      yesLbl.className = 'yesno-toggle-btn yesno-toggle-btn--yes';
+      yesLbl.onclick = (function(L) { return function(e) { handleYesNoToggleClick(L, e); }; })(yesLbl);
+      var yesInp = document.createElement('input');
+      yesInp.type = 'checkbox';
+      yesInp.id = prefix + '__' + prDef.key + '__yes';
+      yesInp.value = 'yes';
+      yesInp.setAttribute('data-finding-tag', prDef.yesTag || resolveFindingTagLabel(prDef.yes));
+      yesLbl.appendChild(yesInp);
+      yesLbl.appendChild(document.createTextNode('\u2713'));
+      var noLbl = document.createElement('label');
+      noLbl.className = 'yesno-toggle-btn yesno-toggle-btn--no';
+      noLbl.onclick = (function(L) { return function(e) { handleYesNoToggleClick(L, e); }; })(noLbl);
+      var noInp = document.createElement('input');
+      noInp.type = 'checkbox';
+      noInp.id = prefix + '__' + prDef.key + '__no';
+      noInp.value = 'no';
+      noInp.setAttribute('data-finding-tag', prDef.noTag || resolveFindingTagLabel(prDef.no));
+      noLbl.appendChild(noInp);
+      noLbl.appendChild(document.createTextNode('\u2717'));
+      ynActions.appendChild(yesLbl);
+      ynActions.appendChild(noLbl);
+      ynRow.appendChild(ynActions);
+      wrap.appendChild(ynRow);
+      return ynRow;
+    }
+
     function appendYesNoToggleWrap(parent, prefix, rowsDef, options) {
       options = options || {};
       var wrap = document.createElement('div');
@@ -1644,40 +2269,7 @@
       wrap.className = 'check-grid yesno-toggle-wrap' + (options.spanFull ? ' span-full' : '');
       wrap.setAttribute('data-yesno-prefix', prefix);
       for (var pr = 0; pr < rowsDef.length; pr++) {
-        var prDef = rowsDef[pr];
-        var ynRow = document.createElement('div');
-        ynRow.className = 'yesno-toggle-row';
-        ynRow.setAttribute('data-row-key', prDef.key);
-        var prLab = document.createElement('span');
-        prLab.className = 'yesno-toggle-label';
-        prLab.textContent = prDef.label;
-        ynRow.appendChild(prLab);
-        var ynActions = document.createElement('div');
-        ynActions.className = 'yesno-toggle-actions';
-        var yesLbl = document.createElement('label');
-        yesLbl.className = 'yesno-toggle-btn yesno-toggle-btn--yes';
-        yesLbl.onclick = (function(L) { return function(e) { handleYesNoToggleClick(L, e); }; })(yesLbl);
-        var yesInp = document.createElement('input');
-        yesInp.type = 'checkbox';
-        yesInp.id = prefix + '__' + prDef.key + '__yes';
-        yesInp.value = 'yes';
-        yesInp.setAttribute('data-finding-tag', prDef.yesTag || resolveFindingTagLabel(prDef.yes));
-        yesLbl.appendChild(yesInp);
-        yesLbl.appendChild(document.createTextNode('\u2713'));
-        var noLbl = document.createElement('label');
-        noLbl.className = 'yesno-toggle-btn yesno-toggle-btn--no';
-        noLbl.onclick = (function(L) { return function(e) { handleYesNoToggleClick(L, e); }; })(noLbl);
-        var noInp = document.createElement('input');
-        noInp.type = 'checkbox';
-        noInp.id = prefix + '__' + prDef.key + '__no';
-        noInp.value = 'no';
-        noInp.setAttribute('data-finding-tag', prDef.noTag || resolveFindingTagLabel(prDef.no));
-        noLbl.appendChild(noInp);
-        noLbl.appendChild(document.createTextNode('\u2717'));
-        ynActions.appendChild(yesLbl);
-        ynActions.appendChild(noLbl);
-        ynRow.appendChild(ynActions);
-        wrap.appendChild(ynRow);
+        appendYesNoToggleRow(wrap, prefix, rowsDef[pr]);
       }
       parent.appendChild(wrap);
       return wrap;
@@ -2367,6 +2959,527 @@
       return card;
     }
 
+    function appendMskShoulderSiteCheckGrid(wrap, side, kind, sites) {
+      var grid = document.createElement('div');
+      grid.className = 'check-grid msk-shoulder-site-grid';
+      for (var si = 0; si < sites.length; si++) {
+        var site = sites[si];
+        var lab = document.createElement('label');
+        lab.className = 'check-opt';
+        lab.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(lab);
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.name = 'msk__shoulder__' + side + '__' + kind + '__' + si;
+        cb.value = site;
+        cb.setAttribute('data-tag', TAG_ABNORMAL);
+        lab.appendChild(cb);
+        lab.appendChild(document.createTextNode(site));
+        grid.appendChild(lab);
+      }
+      wrap.appendChild(grid);
+    }
+
+    function buildMskShoulderSideColumn(side, colTitle) {
+      var col = document.createElement('div');
+      col.className = 'msk-shoulder-side-col';
+      var colLab = document.createElement('div');
+      colLab.className = 'msk-side-col-label';
+      colLab.textContent = colTitle;
+      col.appendChild(colLab);
+
+      var insTitle = document.createElement('div');
+      insTitle.className = 'msk-shoulder-section-title';
+      insTitle.textContent = 'Inspection';
+      col.appendChild(insTitle);
+
+      var insWrap = document.createElement('div');
+      insWrap.className = 'yesno-toggle-wrap msk-shoulder-ins-wrap';
+      var insPrefix = 'msk__shoulder__' + side + '__inspection';
+      insWrap.setAttribute('data-yesno-prefix', insPrefix);
+      for (var ii = 0; ii < MSK_SHOULDER_INSPECTION_YN_ROWS.length; ii++) {
+        var irow = MSK_SHOULDER_INSPECTION_YN_ROWS[ii];
+        appendYesNoToggleRow(insWrap, insPrefix, irow);
+        if (irow.key === 'wounds') {
+          var wd = document.createElement('div');
+          wd.id = 'msk__shoulder__' + side + '__wounds_detail';
+          wd.className = 'conditional-inline-field';
+          var wta = document.createElement('textarea');
+          wta.className = 'msk-shoulder-wounds-ta';
+          wta.id = 'msk__shoulder__' + side + '__wounds_note';
+          wta.rows = 2;
+          wta.placeholder = 'Describe wound';
+          wta.addEventListener('input', function() {
+            if (trimSentence(this.value)) {
+              var n = document.getElementById('msk__shoulder__nad');
+              if (n && n.checked) {
+                n.checked = false;
+                var nl = n.closest('.check-opt');
+                if (nl) nl.classList.remove('selected', 'abnormal', 'pill-normal');
+              }
+            }
+            updateOutput();
+          });
+          wd.appendChild(wta);
+          insWrap.appendChild(wd);
+        }
+      }
+      col.appendChild(insWrap);
+
+      var palTitle = document.createElement('div');
+      palTitle.className = 'msk-shoulder-section-title';
+      palTitle.textContent = 'Palpation';
+      col.appendChild(palTitle);
+
+      var palWrap = document.createElement('div');
+      palWrap.className = 'yesno-toggle-wrap msk-shoulder-palp-wrap';
+      var palPrefix = 'msk__shoulder__' + side + '__palpation';
+      palWrap.setAttribute('data-yesno-prefix', palPrefix);
+      appendYesNoToggleRow(palWrap, palPrefix, MSK_SHOULDER_PALPATION_YN_ROWS[0]);
+      var bonyDet = document.createElement('div');
+      bonyDet.id = 'msk__shoulder__' + side + '__bony_detail';
+      bonyDet.className = 'conditional-inline-field';
+      appendMskShoulderSiteCheckGrid(bonyDet, side, 'bony', MSK_SHOULDER_BONY_SITES);
+      palWrap.appendChild(bonyDet);
+      appendYesNoToggleRow(palWrap, palPrefix, MSK_SHOULDER_PALPATION_YN_ROWS[1]);
+      var softDet = document.createElement('div');
+      softDet.id = 'msk__shoulder__' + side + '__soft_detail';
+      softDet.className = 'conditional-inline-field';
+      appendMskShoulderSiteCheckGrid(softDet, side, 'soft', MSK_SHOULDER_SOFT_SITES);
+      palWrap.appendChild(softDet);
+      col.appendChild(palWrap);
+
+      var romTitle = document.createElement('div');
+      romTitle.className = 'msk-shoulder-section-title';
+      romTitle.textContent = 'Range of motion';
+      col.appendChild(romTitle);
+
+      var romWrap = document.createElement('div');
+      romWrap.className = 'yesno-toggle-wrap msk-shoulder-rom-wrap';
+      var romPrefix = 'msk__shoulder__' + side + '__rom';
+      romWrap.setAttribute('data-yesno-prefix', romPrefix);
+      for (var rmi = 0; rmi < MSK_SHOULDER_ROM_YN_ROWS.length; rmi++) {
+        appendYesNoToggleRow(romWrap, romPrefix, MSK_SHOULDER_ROM_YN_ROWS[rmi]);
+      }
+      col.appendChild(romWrap);
+
+      var nvTitle = document.createElement('div');
+      nvTitle.className = 'msk-shoulder-section-title';
+      nvTitle.textContent = 'Neurovascular status';
+      col.appendChild(nvTitle);
+
+      var nvWrap = document.createElement('div');
+      nvWrap.className = 'yesno-toggle-wrap msk-shoulder-nv-wrap';
+      var nvPrefix = 'msk__shoulder__' + side + '__neurovascular';
+      nvWrap.setAttribute('data-yesno-prefix', nvPrefix);
+      for (var nvi = 0; nvi < MSK_SHOULDER_NEUROVASCULAR_YN_ROWS.length; nvi++) {
+        appendYesNoToggleRow(nvWrap, nvPrefix, MSK_SHOULDER_NEUROVASCULAR_YN_ROWS[nvi]);
+      }
+      col.appendChild(nvWrap);
+
+      return col;
+    }
+
+    function buildMskShoulderSubsectionBody() {
+      var body = document.createElement('div');
+      body.className = 'msk-subsection-body';
+
+      var nadRow = document.createElement('div');
+      nadRow.className = 'pill-row msk-nad-row';
+      var nadLabel = document.createElement('label');
+      nadLabel.className = 'check-opt';
+      nadLabel.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(nadLabel);
+      var nadInput = document.createElement('input');
+      nadInput.type = 'checkbox';
+      nadInput.id = 'msk__shoulder__nad';
+      nadInput.name = 'msk__shoulder__nad';
+      nadInput.value = 'NAD';
+      nadLabel.appendChild(nadInput);
+      nadLabel.appendChild(document.createTextNode('NAD'));
+      nadRow.appendChild(nadLabel);
+      body.appendChild(nadRow);
+
+      var findingsWrap = document.createElement('div');
+      findingsWrap.className = 'msk-findings-wrap';
+      findingsWrap.id = 'msk__shoulder__findings';
+
+      var cols = document.createElement('div');
+      cols.className = 'msk-shoulder-bilateral-cols';
+      cols.appendChild(buildMskShoulderSideColumn('R', 'Right'));
+      cols.appendChild(buildMskShoulderSideColumn('L', 'Left'));
+      findingsWrap.appendChild(cols);
+      body.appendChild(findingsWrap);
+
+      setTimeout(function() {
+        syncYesNoToggleAllRows();
+        updateMskShoulderPanels();
+      }, 0);
+      return body;
+    }
+
+    function updateMskShoulderPanels() {
+      var sides = ['R', 'L'];
+      for (var s = 0; s < sides.length; s++) {
+        var side = sides[s];
+        var woundsYes = document.getElementById('msk__shoulder__' + side + '__inspection__wounds__yes');
+        var wd = document.getElementById('msk__shoulder__' + side + '__wounds_detail');
+        if (wd) wd.classList.toggle('show', !!(woundsYes && woundsYes.checked));
+        var bonyYes = document.getElementById('msk__shoulder__' + side + '__palpation__bonyTenderness__yes');
+        var bd = document.getElementById('msk__shoulder__' + side + '__bony_detail');
+        if (bd) bd.classList.toggle('show', !!(bonyYes && bonyYes.checked));
+        var softYes = document.getElementById('msk__shoulder__' + side + '__palpation__softTissueTenderness__yes');
+        var sd = document.getElementById('msk__shoulder__' + side + '__soft_detail');
+        if (sd) sd.classList.toggle('show', !!(softYes && softYes.checked));
+      }
+    }
+
+    function clearMskShoulderFields() {
+      var mskBlock = document.getElementById('mskBlock');
+      if (!mskBlock) return;
+      var all = mskBlock.querySelectorAll('[name^="msk__shoulder__"]');
+      for (var i = 0; i < all.length; i++) {
+        var el = all[i];
+        if (el.name === 'msk__shoulder__nad') continue;
+        if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = false;
+          var lab = el.closest('.check-opt, .yesno-toggle-btn');
+          if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
+        }
+      }
+      var ynShoulder = mskBlock.querySelectorAll('input[type="checkbox"][id^="msk__shoulder__"]');
+      for (var y = 0; y < ynShoulder.length; y++) {
+        var ye = ynShoulder[y];
+        if (ye.id === 'msk__shoulder__nad') continue;
+        ye.checked = false;
+        var ylab = ye.closest('.yesno-toggle-btn');
+        if (ylab) ylab.classList.remove('selected', 'abnormal', 'pill-normal');
+      }
+      var tas = mskBlock.querySelectorAll('textarea[id^="msk__shoulder__"]');
+      for (var t = 0; t < tas.length; t++) tas[t].value = '';
+      syncYesNoToggleAllRows();
+      updateMskShoulderPanels();
+    }
+
+    function collectMskShoulderSidePhrases(side, sideWord) {
+      var parts = [];
+      var insPrefix = 'msk__shoulder__' + side + '__inspection';
+      function ynAt(prefix, rowKey, yesPhrase, noPhrase, tagYes, tagNo) {
+        var yEl = document.getElementById(prefix + '__' + rowKey + '__yes');
+        var nEl = document.getElementById(prefix + '__' + rowKey + '__no');
+        if (yEl && yEl.checked) parts.push(makeTaggedFinding(yesPhrase, tagYes));
+        else if (nEl && nEl.checked) parts.push(makeTaggedFinding(noPhrase, tagNo));
+      }
+      function ynOut(rowKey, yesPhrase, noPhrase, tagYes, tagNo) {
+        ynAt(insPrefix, rowKey, yesPhrase, noPhrase, tagYes, tagNo);
+      }
+      ynOut('deformity', sideWord + ' Shoulder deformed', 'No ' + sideWord + ' shoulder deformity', TAG_ABNORMAL, TAG_NORMAL);
+      var wYes = document.getElementById(insPrefix + '__wounds__yes');
+      var wNo = document.getElementById(insPrefix + '__wounds__no');
+      if (wYes && wYes.checked) {
+        var wNote = trimSentence(document.getElementById('msk__shoulder__' + side + '__wounds_note') ? document.getElementById('msk__shoulder__' + side + '__wounds_note').value : '');
+        var wTxt = 'wound to ' + sideWord + ' shoulder';
+        if (wNote) wTxt += ' ' + wNote;
+        parts.push(makeTaggedFinding(wTxt, TAG_ABNORMAL));
+      } else if (wNo && wNo.checked) {
+        parts.push(makeTaggedFinding('No ' + sideWord + ' shoulder wounds', TAG_NORMAL));
+      }
+      ynOut('swelling', sideWord + ' shoulder swollen', 'No ' + sideWord + ' shoulder swelling', TAG_ABNORMAL, TAG_NORMAL);
+      ynOut('subluxation', sideWord + ' Shoulder appears subluxed', 'No apparent ' + sideWord + ' shoulder subluxation', TAG_ABNORMAL, TAG_NORMAL);
+
+      var palPrefix = 'msk__shoulder__' + side + '__palpation';
+      var bY = document.getElementById(palPrefix + '__bonyTenderness__yes');
+      var bN = document.getElementById(palPrefix + '__bonyTenderness__no');
+      if (bY && bY.checked) {
+        var bSites = [];
+        for (var bi = 0; bi < MSK_SHOULDER_BONY_SITES.length; bi++) {
+          var bCb = document.querySelector('input[name="msk__shoulder__' + side + '__bony__' + bi + '"]:checked');
+          if (bCb) bSites.push(bCb.value);
+        }
+        var bLine = bSites.length
+          ? sideWord + ' shoulder bony tenderness to ' + bSites.join(', ')
+          : sideWord + ' shoulder bony tenderness';
+        parts.push(makeTaggedFinding(bLine, TAG_ABNORMAL));
+      } else if (bN && bN.checked) {
+        parts.push(makeTaggedFinding('No ' + sideWord + ' shoulder bony tenderness', TAG_NORMAL));
+      }
+      var sY = document.getElementById(palPrefix + '__softTissueTenderness__yes');
+      var sN = document.getElementById(palPrefix + '__softTissueTenderness__no');
+      if (sY && sY.checked) {
+        var sSites = [];
+        for (var sj = 0; sj < MSK_SHOULDER_SOFT_SITES.length; sj++) {
+          var sCb = document.querySelector('input[name="msk__shoulder__' + side + '__soft__' + sj + '"]:checked');
+          if (sCb) sSites.push(sCb.value);
+        }
+        var sLine = sSites.length
+          ? sideWord + ' shoulder soft tissue tenderness over ' + sSites.join(', ')
+          : sideWord + ' shoulder soft tissue tenderness';
+        parts.push(makeTaggedFinding(sLine, TAG_ABNORMAL));
+      } else if (sN && sN.checked) {
+        parts.push(makeTaggedFinding('No ' + sideWord + ' shoulder soft tissue tenderness', TAG_NORMAL));
+      }
+
+      var romPrefix = 'msk__shoulder__' + side + '__rom';
+      ynAt(romPrefix, 'normalRom', sideWord + ' shoulder normal ROM', sideWord + ' shoulder ROM limited or abnormal', TAG_NORMAL, TAG_ABNORMAL);
+
+      var nvPrefix = 'msk__shoulder__' + side + '__neurovascular';
+      ynAt(nvPrefix, 'sensationIntact', sideWord + ' shoulder sensation intact', sideWord + ' shoulder sensation not intact', TAG_NORMAL, TAG_ABNORMAL);
+      ynAt(nvPrefix, 'capillaryRefill', sideWord + ' shoulder capillary refill <2 s', sideWord + ' shoulder capillary refill prolonged or >=2 s', TAG_NORMAL, TAG_ABNORMAL);
+      ynAt(nvPrefix, 'pulsesNormal', sideWord + ' shoulder pulses normal', sideWord + ' shoulder pulses abnormal', TAG_NORMAL, TAG_ABNORMAL);
+
+      return parts;
+    }
+
+    function buildMskSubsectionBody(sub) {
+      if (sub.useShoulderCustomUi) {
+        return buildMskShoulderSubsectionBody();
+      }
+      var body = document.createElement('div');
+      body.className = 'msk-subsection-body';
+
+      var nadRow = document.createElement('div');
+      nadRow.className = 'pill-row msk-nad-row';
+      var nadLabel = document.createElement('label');
+      nadLabel.className = 'check-opt';
+      nadLabel.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(nadLabel);
+      var nadInput = document.createElement('input');
+      nadInput.type = 'checkbox';
+      nadInput.id = 'msk__' + sub.key + '__nad';
+      nadInput.name = 'msk__' + sub.key + '__nad';
+      nadInput.value = 'NAD';
+      nadLabel.appendChild(nadInput);
+      nadLabel.appendChild(document.createTextNode('NAD'));
+      nadRow.appendChild(nadLabel);
+      body.appendChild(nadRow);
+
+      var findingsWrap = document.createElement('div');
+      findingsWrap.className = 'msk-findings-wrap';
+      findingsWrap.id = 'msk__' + sub.key + '__findings';
+
+      if (sub.bilateral) {
+        var cols = document.createElement('div');
+        cols.className = 'msk-bilateral-cols';
+
+        var rCol = document.createElement('div');
+        var rLab = document.createElement('div');
+        rLab.className = 'msk-side-col-label';
+        rLab.textContent = 'Right';
+        rCol.appendChild(rLab);
+        var rGrid = document.createElement('div');
+        rGrid.className = 'check-grid';
+        for (var fi = 0; fi < sub.findings.length; fi++) {
+          var rf = sub.findings[fi];
+          var rl = document.createElement('label');
+          rl.className = 'check-opt';
+          rl.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(rl);
+          var ri = document.createElement('input');
+          ri.type = 'checkbox';
+          ri.name = 'msk__' + sub.key + '__R__' + fi;
+          ri.value = rf.value;
+          ri.setAttribute('data-tag', rf.tag);
+          rl.appendChild(ri);
+          rl.appendChild(document.createTextNode(rf.value));
+          rGrid.appendChild(rl);
+        }
+        rCol.appendChild(rGrid);
+        cols.appendChild(rCol);
+
+        var lCol = document.createElement('div');
+        var lLab = document.createElement('div');
+        lLab.className = 'msk-side-col-label';
+        lLab.textContent = 'Left';
+        lCol.appendChild(lLab);
+        var lGrid = document.createElement('div');
+        lGrid.className = 'check-grid';
+        for (var fj = 0; fj < sub.findings.length; fj++) {
+          var lf = sub.findings[fj];
+          var ll = document.createElement('label');
+          ll.className = 'check-opt';
+          ll.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(ll);
+          var li = document.createElement('input');
+          li.type = 'checkbox';
+          li.name = 'msk__' + sub.key + '__L__' + fj;
+          li.value = lf.value;
+          li.setAttribute('data-tag', lf.tag);
+          ll.appendChild(li);
+          ll.appendChild(document.createTextNode(lf.value));
+          lGrid.appendChild(ll);
+        }
+        lCol.appendChild(lGrid);
+        cols.appendChild(lCol);
+        findingsWrap.appendChild(cols);
+      } else {
+        var mGrid = document.createElement('div');
+        mGrid.className = 'check-grid';
+        for (var fk = 0; fk < sub.findings.length; fk++) {
+          var mf = sub.findings[fk];
+          var ml = document.createElement('label');
+          ml.className = 'check-opt';
+          ml.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(ml);
+          var mi = document.createElement('input');
+          mi.type = 'checkbox';
+          mi.name = 'msk__' + sub.key + '__M__' + fk;
+          mi.value = mf.value;
+          mi.setAttribute('data-tag', mf.tag);
+          ml.appendChild(mi);
+          ml.appendChild(document.createTextNode(mf.value));
+          mGrid.appendChild(ml);
+        }
+        findingsWrap.appendChild(mGrid);
+      }
+
+      body.appendChild(findingsWrap);
+      return body;
+    }
+
+    function buildMskCard() {
+      var card = document.createElement('div');
+      card.className = 'section-card';
+      card.id = 'mskBlock';
+
+      for (var gi = 0; gi < MSK_GROUPS.length; gi++) {
+        var group = MSK_GROUPS[gi];
+        var groupDet = document.createElement('details');
+        groupDet.className = 'msk-group-details';
+        var groupSum = document.createElement('summary');
+        groupSum.textContent = group.label;
+        groupDet.appendChild(groupSum);
+
+        var groupBody = document.createElement('div');
+        groupBody.className = 'msk-group-body';
+
+        for (var si = 0; si < group.subsections.length; si++) {
+          var sub = group.subsections[si];
+          var subDet = document.createElement('details');
+          subDet.className = 'msk-subsection-details';
+          subDet.setAttribute('data-msk-sub', sub.key);
+          var subSum = document.createElement('summary');
+          subSum.textContent = sub.label;
+          subDet.appendChild(subSum);
+          subDet.appendChild(buildMskSubsectionBody(sub));
+          groupBody.appendChild(subDet);
+        }
+
+        groupDet.appendChild(groupBody);
+        card.appendChild(groupDet);
+      }
+
+      var freeField = document.createElement('div');
+      freeField.className = 'group-row free-text-field';
+      freeField.style.padding = '8px 10px';
+      var freeLabel = document.createElement('label');
+      freeLabel.className = 'group-label';
+      freeLabel.textContent = 'Additional MSK details';
+      freeField.appendChild(freeLabel);
+      var freeInput = document.createElement('textarea');
+      freeInput.className = 'free-text-input';
+      freeInput.id = 'msk__free';
+      freeInput.rows = 2;
+      freeInput.placeholder = 'Describe specific findings, mechanism, or functional assessment';
+      freeInput.addEventListener('input', updateOutput);
+      freeField.appendChild(freeInput);
+      card.appendChild(freeField);
+
+      return card;
+    }
+
+    function getMskOutputLines(abnormalCollector) {
+      var mskBlock = document.getElementById('mskBlock');
+      if (!mskBlock) return { lines: [], severity: 'normal' };
+      var mskParts = [];
+      var mskSeverity = 'normal';
+      var allSubs = getMskAllSubsections();
+
+      for (var si = 0; si < allSubs.length; si++) {
+        var sub = allSubs[si];
+
+        var nadEl = mskBlock.querySelector('#msk__' + sub.key + '__nad');
+        if (nadEl && nadEl.checked) {
+          mskParts.push(makeTaggedFinding(sub.label + ': NAD', TAG_NORMAL));
+          continue;
+        }
+
+        if (sub.useShoulderCustomUi) {
+          var rPh = collectMskShoulderSidePhrases('R', 'right');
+          var lPh = collectMskShoulderSidePhrases('L', 'left');
+          var shAll = rPh.concat(lPh);
+          if (shAll.length) {
+            var shOrd = reorderPhrases(shAll);
+            var shLine = formatFindingsLine(shOrd, abnormalCollector, 'msk');
+            if (shLine) {
+              mskSeverity = mergeSeverity(mskSeverity, getSeverityFromFindings(shOrd));
+              mskParts.push('Shoulder: ' + shLine);
+            }
+          }
+          continue;
+        }
+
+        if (sub.bilateral) {
+          var rChecked = mskBlock.querySelectorAll('input[name^="msk__' + sub.key + '__R__"]:checked');
+          var lChecked = mskBlock.querySelectorAll('input[name^="msk__' + sub.key + '__L__"]:checked');
+          if (!rChecked.length && !lChecked.length) continue;
+
+          var rVals = {};
+          for (var ri = 0; ri < rChecked.length; ri++) rVals[rChecked[ri].value] = rChecked[ri].getAttribute('data-tag');
+          var lVals = {};
+          for (var li = 0; li < lChecked.length; li++) lVals[lChecked[li].value] = lChecked[li].getAttribute('data-tag');
+
+          var allKeys = {};
+          for (var rv in rVals) allKeys[rv] = true;
+          for (var lv in lVals) allKeys[lv] = true;
+
+          var subPhrases = [];
+          for (var fk = 0; fk < sub.findings.length; fk++) {
+            var fVal = sub.findings[fk].value;
+            if (!allKeys[fVal]) continue;
+            var inR = !!rVals[fVal];
+            var inL = !!lVals[fVal];
+            var tag = sub.findings[fk].tag;
+            if (inR && inL) {
+              subPhrases.push(makeTaggedFinding('bilateral ' + fVal.toLowerCase(), tag));
+            } else if (inR) {
+              subPhrases.push(makeTaggedFinding('right ' + fVal.toLowerCase(), tag));
+            } else {
+              subPhrases.push(makeTaggedFinding('left ' + fVal.toLowerCase(), tag));
+            }
+          }
+          if (subPhrases.length) {
+            var subLine = formatFindingsLine(reorderPhrases(subPhrases), abnormalCollector, 'msk');
+            var subSev = getSeverityFromFindings(subPhrases);
+            mskSeverity = mergeSeverity(mskSeverity, subSev);
+            mskParts.push(sub.label + ': ' + subLine);
+          }
+        } else {
+          var mChecked = mskBlock.querySelectorAll('input[name^="msk__' + sub.key + '__M__"]:checked');
+          if (!mChecked.length) continue;
+          var midPhrases = [];
+          for (var mi = 0; mi < mChecked.length; mi++) {
+            midPhrases.push(makeTaggedFinding(mChecked[mi].value, mChecked[mi].getAttribute('data-tag')));
+          }
+          var midLine = formatFindingsLine(reorderPhrases(midPhrases), abnormalCollector, 'msk');
+          var midSev = getSeverityFromFindings(midPhrases);
+          mskSeverity = mergeSeverity(mskSeverity, midSev);
+          mskParts.push(sub.label + ': ' + midLine);
+        }
+      }
+
+      var freeText = trimSentence(document.getElementById('msk__free') ? document.getElementById('msk__free').value : '');
+      if (freeText) mskParts.push(sentenceCase(freeText));
+
+      if (!mskParts.length) return { lines: [], severity: 'normal' };
+
+      var lineParts = [];
+      for (var pi = 0; pi < mskParts.length; pi++) {
+        var partText = typeof mskParts[pi] === 'object' ? getFindingText(mskParts[pi]) : mskParts[pi];
+        if (partText) lineParts.push(trimSentence(partText));
+      }
+
+      var marker = '';
+      if (mskSeverity === 'urgent') marker = '⚠️ ';
+      else if (mskSeverity === 'abnormal') marker = '** ';
+      var outputLine = marker + 'MSK: ' + lineParts.join('. ') + '.';
+
+      return { lines: [outputLine], severity: mskSeverity };
+    }
+
     function renderSections() {
       var host = document.getElementById('exam-sections');
       host.innerHTML = '';
@@ -2402,6 +3515,14 @@
         details.appendChild(renderSectionCard(section));
         extraWrap.appendChild(details);
       }
+
+      var mskDetails = document.createElement('details');
+      var mskSummary = document.createElement('summary');
+      mskSummary.textContent = 'Musculoskeletal';
+      mskDetails.appendChild(mskSummary);
+      mskDetails.appendChild(buildMskCard());
+      extraWrap.appendChild(mskDetails);
+
       host.appendChild(extraWrap);
     }
 
@@ -2575,6 +3696,7 @@
         if (!recessYesAfter || !recessYesAfter.checked) clearRecessionSubtypes();
         updateRecessionSubtypePanel();
       }
+      if (prefix.indexOf('msk__shoulder__') === 0) updateMskShoulderPanels();
       updateOutput();
     }
 
@@ -2748,6 +3870,11 @@
         if (skey === '_heent_') {
           var heentOut = getHeentOutputLines(abnormalCollector);
           for (var hl = 0; hl < heentOut.lines.length; hl++) lines.push(heentOut.lines[hl]);
+          continue;
+        }
+        if (skey === '_msk_') {
+          var mskOut = getMskOutputLines(abnormalCollector);
+          for (var ml = 0; ml < mskOut.lines.length; ml++) lines.push(mskOut.lines[ml]);
           continue;
         }
         var sec = sectionMap[skey];
