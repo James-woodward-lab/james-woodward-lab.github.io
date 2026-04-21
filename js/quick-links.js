@@ -1,42 +1,46 @@
 /**
- * Homepage quick links list.
- * Add more by appending objects to QUICK_LINKS.
+ * Homepage Quick Links — renders a filterable set of external reference
+ * shortcuts (BNFc, MDCalc, local pathways, etc.). Add new items by
+ * appending to QUICK_LINKS below; the search matches on label, tags and URL.
  */
-(function() {
+(function () {
+  'use strict';
+
   var QUICK_LINKS = [
-    { label: "BNFc", url: "https://bnfc.nice.org.uk/", emoji: "💊", tags: ["medications", "dosing", "nice"] },
-    { label: "BSAC", url: "https://bsac.org.uk/paediatricpathways/", emoji: "🧫", tags: ["paediatrics", "pathways", "antimicrobial"] },
-    { label: "Burns", url: "https://woundsinternational.com/wp-content/uploads/2023/02/5ebace6c70d4ea53a5d3e28ca65f1b74.pdf", emoji: "🔥", tags: ["burns", "wound care", "guideline"] },
-    { label: "MDCalc", url: "https://www.mdcalc.com/", emoji: "🧮", tags: ["scores", "calculator", "reference"] },
-    { label: "Healthier Together", url: "https://www.healthiertogether.nhs.uk/professional", emoji: "🌿", tags: ["paediatrics", "guidelines", "professional"] },
-    { label: "SORT", url: "https://www.sort.nhs.uk/home.aspx", emoji: "📚", tags: ["resources", "local", "sort"] },
-    { label: "PIER", url: "https://www.piernetwork.org/", emoji: "🧠", tags: ["guidelines", "paediatrics", "pier"] },
-    { label: "Staffnet", url: "https://staffnet.uhs.nhs.uk", emoji: "🏢", tags: ["uhs", "intranet", "staff"] },
-    { label: "Southampton Hospital at Home (H@H)", url: "https://forms.office.com/pages/responsepage.aspx?id=wRwyQbnsfEaw1YVGRNlOO96jJGeS21RFoF5oTRt3gkpUODdMM1JGV0tKU0pTTjI0R1VSUlhaWk5UTy4u&route=shorturl", emoji: "🏠", tags: ["h@h", "hospital at home", "southampton"] }
+    { label: 'BNFc',                url: 'https://bnfc.nice.org.uk/',                                                                                                                                                                                                                                                     emoji: '💊', tags: ['medications', 'dosing', 'nice'] },
+    { label: 'BSAC',                url: 'https://bsac.org.uk/paediatricpathways/',                                                                                                                                                                                                                                       emoji: '🧫', tags: ['paediatrics', 'pathways', 'antimicrobial'] },
+    { label: 'Burns',               url: 'https://woundsinternational.com/wp-content/uploads/2023/02/5ebace6c70d4ea53a5d3e28ca65f1b74.pdf',                                                                                                                                                                               emoji: '🔥', tags: ['burns', 'wound care', 'guideline'] },
+    { label: 'MDCalc',              url: 'https://www.mdcalc.com/',                                                                                                                                                                                                                                                       emoji: '🧮', tags: ['scores', 'calculator', 'reference'] },
+    { label: 'Healthier Together',  url: 'https://www.healthiertogether.nhs.uk/professional',                                                                                                                                                                                                                             emoji: '🌿', tags: ['paediatrics', 'guidelines', 'professional'] },
+    { label: 'SORT',                url: 'https://www.sort.nhs.uk/home.aspx',                                                                                                                                                                                                                                             emoji: '📚', tags: ['resources', 'local', 'sort'] },
+    { label: 'PIER',                url: 'https://www.piernetwork.org/',                                                                                                                                                                                                                                                  emoji: '🧠', tags: ['guidelines', 'paediatrics', 'pier'] },
+    { label: 'Staffnet',            url: 'https://staffnet.uhs.nhs.uk',                                                                                                                                                                                                                                                   emoji: '🏢', tags: ['uhs', 'intranet', 'staff'] },
+    { label: 'Southampton Hospital at Home (H@H)', url: 'https://forms.office.com/pages/responsepage.aspx?id=wRwyQbnsfEaw1YVGRNlOO96jJGeS21RFoF5oTRt3gkpUODdMM1JGV0tKU0pTTjI0R1VSUlhaWk5UTy4u&route=shorturl', emoji: '🏠', tags: ['h@h', 'hospital at home', 'southampton'] }
   ];
 
   function normalise(value) {
-    return String(value || "").toLowerCase().trim();
+    return String(value || '').toLowerCase().trim();
   }
 
-  function getSearchText(link) {
-    var tagText = Array.isArray(link.tags) ? link.tags.join(" ") : "";
-    return normalise(link.label + " " + tagText + " " + link.url);
+  function searchText(link) {
+    var tagText = Array.isArray(link.tags) ? link.tags.join(' ') : '';
+    return normalise(link.label + ' ' + tagText + ' ' + link.url);
   }
 
   function createLinkButton(link) {
-    var anchor = document.createElement("a");
-    anchor.className = "app-btn";
+    var anchor = document.createElement('a');
+    anchor.className = 'app-btn';
     anchor.href = link.url;
-    anchor.target = "_blank";
-    anchor.rel = "noopener noreferrer";
-    anchor.setAttribute("aria-label", link.label);
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    anchor.setAttribute('aria-label', link.label + ' (opens in new tab)');
 
-    var emoji = document.createElement("span");
-    emoji.className = "quick-link-emoji";
-    emoji.textContent = link.emoji || "🔗";
+    var emoji = document.createElement('span');
+    emoji.className = 'quick-link-emoji';
+    emoji.setAttribute('aria-hidden', 'true');
+    emoji.textContent = link.emoji || '🔗';
 
-    var text = document.createElement("span");
+    var text = document.createElement('span');
     text.textContent = link.label;
 
     anchor.appendChild(emoji);
@@ -45,33 +49,33 @@
   }
 
   function renderLinks(links, grid, emptyState) {
-    grid.textContent = "";
-    links.forEach(function(link) {
-      grid.appendChild(createLinkButton(link));
-    });
+    grid.textContent = '';
+    var frag = document.createDocumentFragment();
+    links.forEach(function (link) { frag.appendChild(createLinkButton(link)); });
+    grid.appendChild(frag);
     emptyState.hidden = links.length > 0;
   }
 
-  function initQuickLinks() {
-    var searchInput = document.getElementById("quick-links-search");
-    var grid = document.getElementById("quick-links-grid");
-    var emptyState = document.getElementById("quick-links-empty");
+  function init() {
+    var searchInput = document.getElementById('quick-links-search');
+    var grid = document.getElementById('quick-links-grid');
+    var emptyState = document.getElementById('quick-links-empty');
     if (!searchInput || !grid || !emptyState) return;
 
     renderLinks(QUICK_LINKS, grid, emptyState);
 
-    searchInput.addEventListener("input", function() {
+    searchInput.addEventListener('input', function () {
       var query = normalise(searchInput.value);
-      var filtered = QUICK_LINKS.filter(function(link) {
-        return getSearchText(link).indexOf(query) !== -1;
-      });
+      var filtered = query
+        ? QUICK_LINKS.filter(function (link) { return searchText(link).indexOf(query) !== -1; })
+        : QUICK_LINKS;
       renderLinks(filtered, grid, emptyState);
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initQuickLinks);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    initQuickLinks();
+    init();
   }
 })();

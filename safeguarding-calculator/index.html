@@ -7,8 +7,6 @@
 <meta name="color-scheme" content="dark light">
 <title>NAI Fracture Red Flag Checker</title>
 <link rel="stylesheet" href="../css/app-theme.css">
-<link rel="stylesheet" href="../css/style-variants.css">
-<script src="../js/style-system.js"></script>
 <script src="../js/theme-toggle.js"></script>
 <link rel="stylesheet" href="../css/safeguarding-tool.css">
 </head>
@@ -506,12 +504,31 @@ Risk stratification output: ${resultTitle}
     note += `
 This tool provides clinical decision support only and does not constitute a diagnosis of non-accidental injury.`;
 
-    navigator.clipboard.writeText(note).then(() => {
-      const btn = document.getElementById('copyBtn');
+    const btn = document.getElementById('copyBtn');
+    const showCopied = () => {
       btn.textContent = '✅ Copied to clipboard';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = '📋 Copy clinical note to clipboard'; btn.classList.remove('copied'); }, 2500);
-    });
+    };
+    const showFailed = () => {
+      btn.textContent = '⚠️ Copy failed — try again';
+      setTimeout(() => { btn.textContent = '📋 Copy clinical note to clipboard'; }, 2500);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(note).then(showCopied, showFailed);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = note;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? showCopied() : showFailed();
+    }
   }
 </script>
 

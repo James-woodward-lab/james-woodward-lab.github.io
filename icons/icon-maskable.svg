@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Maskable variant: all meaningful content inside the central 40% safe zone
+  (the spec guarantees a circle of radius 0.4 × width is visible). The colour
+  field extends to the edges so aggressive shape masks still look correct.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="James Woodward Lab">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0ea5b7"/>
+      <stop offset="1" stop-color="#0b3b55"/>
+    </linearGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6fbff"/>
+      <stop offset="1" stop-color="#9be3f4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed background. -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Central safe zone content (H 200×200 centered). -->
+  <g transform="translate(156 156)">
+    <!-- Tile backing for contrast. -->
+    <rect width="200" height="200" rx="36" ry="36" fill="rgba(255,255,255,0.04)"
+          stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+
+    <!-- Pulse trace. -->
+    <path d="M20 115 L65 115 L80 78 L100 160 L120 95 L138 120 L180 120"
+          fill="none" stroke="url(#stroke)" stroke-width="8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Monogram. -->
+    <text x="24" y="72" font-family="-apple-system, 'Segoe UI', system-ui, sans-serif"
+          font-weight="700" font-size="58" letter-spacing="-2" fill="#ffffff">jw</text>
+
+    <!-- Accent dot. -->
+    <circle cx="170" cy="42" r="9" fill="#ffd166"/>
+  </g>
+</svg>

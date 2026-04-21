@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>Paediatric Vitals — James Woodward Lab</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <link rel="stylesheet" href="../css/paediatric-vitals.css">
+  <script src="../js/style-system.js"></script>
+  <script src="../js/theme-toggle.js"></script>
+</head>
+<body class="vitals-app">
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+<div class="container">
+  <header class="app-header-center">
+    <h1>📈 Paediatric Vitals</h1>
+    <p>Age-aware observation interpretation &mdash; APLS normal ranges, auto-flagging, one-line note</p>
+  </header>
+
+  <section class="card no-print">
+    <div class="card-title">Patient</div>
+    <div class="pv-patient-grid">
+      <div class="field">
+        <label for="age-years">Age (years)</label>
+        <input type="number" id="age-years" min="0" max="17" step="1" inputmode="numeric" placeholder="e.g. 3">
+      </div>
+      <div class="field">
+        <label for="age-months">Months</label>
+        <input type="number" id="age-months" min="0" max="11" step="1" inputmode="numeric" placeholder="0-11">
+      </div>
+      <div class="field pv-ga-toggle">
+        <label class="pv-switch">
+          <input type="checkbox" id="ex-prem">
+          <span>Ex-preterm?</span>
+        </label>
+      </div>
+      <div class="field" id="ga-field" hidden>
+        <label for="ga-weeks">Gestation at birth (weeks)</label>
+        <input type="number" id="ga-weeks" min="22" max="41" step="1" inputmode="numeric" placeholder="e.g. 28">
+        <p class="hint" id="corrected-age-hint"></p>
+      </div>
+    </div>
+    <div id="age-band-banner" class="pv-age-banner empty">Enter age to activate interpretation</div>
+  </section>
+
+  <section class="card no-print">
+    <div class="card-title">Paste from monitor &middot; <span class="pv-muted-small">optional time-saver</span></div>
+    <textarea id="paste-input" rows="2" class="pv-paste"
+              placeholder='Paste anything — e.g. "HR 142  RR 32  SpO2 98%  BP 95/58  T 38.1  CRT <2s"'></textarea>
+    <div class="pv-paste-row">
+      <button type="button" class="btn btn-reset" id="btn-clear-paste">Clear</button>
+      <button type="button" class="btn btn-primary" id="btn-parse">Parse &amp; fill</button>
+      <span id="paste-report" class="pv-paste-report" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-title">Observations</div>
+    <div class="pv-vitals-grid">
+      <div class="pv-vital" data-key="rr">
+        <label for="v-rr">Respiratory rate <span class="pv-unit">/min</span></label>
+        <div class="pv-input-row">
+          <input type="number" id="v-rr" min="0" max="120" step="1" inputmode="numeric">
+          <span class="pv-flag" data-flag-for="rr" aria-live="polite">—</span>
+        </div>
+        <p class="pv-range" data-range-for="rr"></p>
+      </div>
+
+      <div class="pv-vital" data-key="wob">
+        <label for="v-wob">Work of breathing</label>
+        <div class="pv-chip-group" role="radiogroup" aria-label="Work of breathing">
+          <button type="button" class="pv-chip" data-wob="none">None</button>
+          <button type="button" class="pv-chip" data-wob="mild">Mild</button>
+          <button type="button" class="pv-chip" data-wob="moderate">Moderate</button>
+          <button type="button" class="pv-chip" data-wob="severe">Severe</button>
+        </div>
+      </div>
+
+      <div class="pv-vital" data-key="hr">
+        <label for="v-hr">Heart rate <span class="pv-unit">/min</span></label>
+        <div class="pv-input-row">
+          <input type="number" id="v-hr" min="0" max="300" step="1" inputmode="numeric">
+          <span class="pv-flag" data-flag-for="hr" aria-live="polite">—</span>
+        </div>
+        <p class="pv-range" data-range-for="hr"></p>
+      </div>
+
+      <div class="pv-vital" data-key="bp">
+        <label for="v-sbp">Blood pressure <span class="pv-unit">mmHg</span></label>
+        <div class="pv-input-row pv-bp-row">
+          <input type="number" id="v-sbp" min="0" max="250" step="1" inputmode="numeric" placeholder="SBP">
+          <span class="pv-bp-sep">/</span>
+          <input type="number" id="v-dbp" min="0" max="200" step="1" inputmode="numeric" placeholder="DBP">
+          <span class="pv-flag" data-flag-for="bp" aria-live="polite">—</span>
+        </div>
+        <p class="pv-range" data-range-for="bp"></p>
+      </div>
+
+      <div class="pv-vital" data-key="spo2">
+        <label for="v-spo2">SpO<sub>2</sub> <span class="pv-unit">%</span></label>
+        <div class="pv-input-row pv-spo2-row">
+          <input type="number" id="v-spo2" min="40" max="100" step="1" inputmode="numeric">
+          <div class="pv-chip-group" role="radiogroup" aria-label="Oxygen status">
+            <button type="button" class="pv-chip pv-chip-sm" data-o2="air">Air</button>
+            <button type="button" class="pv-chip pv-chip-sm" data-o2="o2">On O₂</button>
+          </div>
+          <span class="pv-flag" data-flag-for="spo2" aria-live="polite">—</span>
+        </div>
+        <p class="pv-range" data-range-for="spo2"></p>
+      </div>
+
+      <div class="pv-vital" data-key="temp">
+        <label for="v-temp">Temperature <span class="pv-unit">°C</span></label>
+        <div class="pv-input-row">
+          <input type="number" id="v-temp" min="25" max="44" step="0.1" inputmode="decimal">
+          <span class="pv-flag" data-flag-for="temp" aria-live="polite">—</span>
+        </div>
+        <p class="pv-range" data-range-for="temp"></p>
+      </div>
+
+      <div class="pv-vital" data-key="crt">
+        <label for="v-crt">CRT <span class="pv-unit">seconds</span></label>
+        <div class="pv-input-row">
+          <input type="number" id="v-crt" min="0" max="10" step="0.5" inputmode="decimal">
+          <span class="pv-flag" data-flag-for="crt" aria-live="polite">—</span>
+        </div>
+        <p class="pv-range" data-range-for="crt"></p>
+      </div>
+
+      <div class="pv-vital" data-key="avpu">
+        <label>Consciousness (AVPU)</label>
+        <div class="pv-chip-group" role="radiogroup" aria-label="AVPU">
+          <button type="button" class="pv-chip" data-avpu="A">A</button>
+          <button type="button" class="pv-chip" data-avpu="V">V</button>
+          <button type="button" class="pv-chip" data-avpu="P">P</button>
+          <button type="button" class="pv-chip" data-avpu="U">U</button>
+        </div>
+        <span class="pv-flag pv-flag-below" data-flag-for="avpu" aria-live="polite">—</span>
+      </div>
+    </div>
+
+    <div class="pv-actions">
+      <button type="button" class="btn btn-reset" id="btn-reset-vitals">Clear vitals</button>
+      <button type="button" class="btn btn-reset" id="btn-reset-all">Reset all</button>
+    </div>
+    <p class="hint pv-shortcut-hint">
+      Shortcuts: type <kbd>A</kbd>/<kbd>V</kbd>/<kbd>P</kbd>/<kbd>U</kbd> for AVPU,
+      <kbd>O</kbd> to toggle O₂, <kbd>Ctrl</kbd>+<kbd>V</kbd> anywhere to paste
+      vitals from a monitor readout.
+    </p>
+  </section>
+
+  <section class="card">
+    <div class="card-title">Interpretation</div>
+    <div id="overall-banner" class="pv-overall empty" role="status" aria-live="polite">
+      Enter age and at least one observation to interpret.
+    </div>
+    <div class="pv-summary-grid">
+      <div class="pv-summary-block">
+        <h3>One-line note</h3>
+        <div class="pv-note-box">
+          <code id="note-text">—</code>
+        </div>
+        <div class="pv-note-actions">
+          <button type="button" class="btn btn-primary" id="btn-copy-note">Copy note</button>
+          <button type="button" class="btn btn-reset" id="btn-copy-detailed">Copy detailed</button>
+        </div>
+      </div>
+      <div class="pv-summary-block">
+        <h3>Flagged findings</h3>
+        <ul id="flag-list" class="pv-flag-list">
+          <li class="pv-flag-empty">No flags.</li>
+        </ul>
+        <div class="pv-wetflag-link" id="wetflag-cta" hidden>
+          <a href="/wetflag-calculator/" class="btn btn-primary">
+            🚨 Open WETFLAG &rarr;
+          </a>
+          <p class="hint">Red flag triggered &mdash; weight-based emergency doses are one click away.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card no-print">
+    <details>
+      <summary><strong>📏 Normal ranges &amp; thresholds</strong></summary>
+      <div class="pv-ref-wrap">
+        <table class="pv-ref-table">
+          <thead>
+            <tr>
+              <th>Age band</th>
+              <th>HR</th>
+              <th>RR</th>
+              <th>SBP (lower)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th>0–11 months</th><td>110–160</td><td>30–40</td><td>70–90</td></tr>
+            <tr><th>1–2 years</th><td>100–150</td><td>25–35</td><td>80–95</td></tr>
+            <tr><th>2–5 years</th><td>95–140</td><td>25–30</td><td>80–100</td></tr>
+            <tr><th>5–12 years</th><td>80–120</td><td>20–25</td><td>90–110</td></tr>
+            <tr><th>≥12 years</th><td>60–100</td><td>12–20</td><td>100–120</td></tr>
+          </tbody>
+        </table>
+        <ul class="pv-ref-list">
+          <li><strong>Shock threshold SBP:</strong> 5th centile &asymp; 70 + (2 &times; age in years) mmHg for 0–10y; &lt;90 mmHg at &gt;10y.</li>
+          <li><strong>SpO<sub>2</sub>:</strong> &ge;95% on air normal; 92–94% concerning; &lt;92% serious; any supplemental O<sub>2</sub> raises the bar.</li>
+          <li><strong>Temperature:</strong> fever &ge;38.0&deg;C (red flag at any age &lt;3 months per NICE CG160). Hypothermia &lt;36.0&deg;C.</li>
+          <li><strong>CRT:</strong> &lt;2s normal; 2–3s borderline; &ge;3s delayed / concerning.</li>
+          <li><strong>AVPU:</strong> A normal; V = concerning; P/U = emergency (GCS equivalent &le;8).</li>
+        </ul>
+        <p class="hint">
+          Based on APLS 6th edition age-banded normals and NICE CG160 / CG98
+          red-flag thresholds. Trust PEWS charts differ slightly &mdash; always
+          follow local guidance. This tool is decision support, not a
+          substitute for clinical judgement.
+        </p>
+      </div>
+    </details>
+  </section>
+
+  <footer class="app-footer">
+    For clinical decision support only. Normal ranges are age-based guides;
+    context (fever, crying, pain, medications) alters expected vitals.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ==================================================================
+   * Age bands & normal ranges (APLS 6th ed.)
+   * ================================================================== */
+
+  const BANDS = [
+    { id: 'infant',     label: '0–11 months (Infant)',    upperMonths: 12,
+      hr: [110, 160], rr: [30, 40], sbp: [70, 90] },
+    { id: 'toddler',    label: '1–2 years (Toddler)',     upperMonths: 24,
+      hr: [100, 150], rr: [25, 35], sbp: [80, 95] },
+    { id: 'preschool',  label: '2–5 years (Preschool)',   upperMonths: 60,
+      hr: [95, 140],  rr: [25, 30], sbp: [80, 100] },
+    { id: 'schoolage',  label: '5–12 years (School age)', upperMonths: 144,
+      hr: [80, 120],  rr: [20, 25], sbp: [90, 110] },
+    { id: 'adolescent', label: '12+ years (Adolescent)',  upperMonths: Infinity,
+      hr: [60, 100],  rr: [12, 20], sbp: [100, 120] }
+  ];
+
+  function bandForMonths(months) {
+    if (!isFinite(months) || months < 0) return null;
+    for (const b of BANDS) if (months < b.upperMonths) return b;
+    return BANDS[BANDS.length - 1];
+  }
+
+  function shockSBP(years) {
+    // 5th centile approximation: 70 + 2·age (0–10y); 90 thereafter.
+    if (years == null || !isFinite(years)) return null;
+    if (years >= 10) return 90;
+    return 70 + 2 * years;
+  }
+
+  /* ==================================================================
+   * State
+   * ================================================================== */
+
+  const state = {
+    ageYears: null,
+    ageMonths: null,
+    exPrem: false,
+    gaWeeks: null,
+    vitals: {
+      rr: null, hr: null, sbp: null, dbp: null,
+      spo2: null, o2: null,                          // o2: null | 'air' | 'o2'
+      temp: null, crt: null,
+      avpu: null,                                    // 'A' | 'V' | 'P' | 'U'
+      wob: null                                      // 'none'|'mild'|'moderate'|'severe'
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  /* ==================================================================
+   * Age derivation (with prematurity correction up to 2y corrected)
+   * ================================================================== */
+
+  function rawAgeMonths() {
+    const y = state.ageYears || 0;
+    const m = state.ageMonths || 0;
+    if (!y && !m && state.ageYears == null && state.ageMonths == null) return null;
+    return y * 12 + m;
+  }
+
+  function correctedAgeMonths() {
+    const raw = rawAgeMonths();
+    if (raw == null) return null;
+    if (!state.exPrem || !state.gaWeeks) return raw;
+    const weeksEarly = Math.max(0, 40 - state.gaWeeks);
+    const monthsEarly = weeksEarly / 4.345;
+    const corrected = raw - monthsEarly;
+    // Correction is clinically applied up to 2 years corrected age.
+    if (raw >= 24) return raw;
+    return Math.max(0, corrected);
+  }
+
+  function ageYearsForShock() {
+    const m = correctedAgeMonths();
+    return m == null ? null : m / 12;
+  }
+
+  /* ==================================================================
+   * Flagging logic
+   * ================================================================== */
+
+  // Returns { level, label } for a numeric value against [lo, hi] with
+  // optional severe-delta (fractional). Level is one of:
+  //   'normal' | 'amber-low' | 'amber-high' | 'red-low' | 'red-high'
+  function flagRange(value, [lo, hi], severeDelta = 0.25) {
+    if (value == null || !isFinite(value)) return null;
+    if (value >= lo && value <= hi) return { level: 'normal', label: 'Normal' };
+    if (value < lo) {
+      if (value < lo * (1 - severeDelta)) return { level: 'red-low', label: 'Very low' };
+      return { level: 'amber-low', label: 'Low' };
+    }
+    if (value > hi * (1 + severeDelta)) return { level: 'red-high', label: 'Very high' };
+    return { level: 'amber-high', label: 'High' };
+  }
+
+  function flagSpO2(value, onO2) {
+    if (value == null) return null;
+    if (value < 92)  return { level: 'red-low',   label: onO2 ? 'Low on O₂' : 'Low' };
+    if (value < 95)  return { level: 'amber-low', label: 'Borderline' };
+    if (onO2)        return { level: 'amber-high', label: 'On O₂' };
+    return { level: 'normal', label: 'Normal' };
+  }
+
+  function flagTemp(value, months) {
+    if (value == null) return null;
+    if (value < 36.0)  return { level: 'red-low',    label: 'Hypothermia' };
+    if (value >= 38.0 && (months != null && months < 3))
+                        return { level: 'red-high',  label: 'Fever <3m' };
+    if (value >= 39.5) return { level: 'red-high',   label: 'High fever' };
+    if (value >= 38.0) return { level: 'amber-high', label: 'Fever' };
+    if (value >= 37.6) return { level: 'amber-high', label: 'Low-grade' };
+    if (value < 36.5)  return { level: 'amber-low',  label: 'Low' };
+    return { level: 'normal', label: 'Normal' };
+  }
+
+  function flagCRT(value) {
+    if (value == null) return null;
+    if (value < 2) return { level: 'normal', label: 'Brisk' };
+    if (value < 3) return { level: 'amber-high', label: 'Borderline' };
+    return { level: 'red-high', label: 'Delayed' };
+  }
+
+  function flagAVPU(value) {
+    if (!value) return null;
+    if (value === 'A') return { level: 'normal', label: 'Alert' };
+    if (value === 'V') return { level: 'amber-high', label: 'Voice only' };
+    return { level: 'red-high', label: value === 'P' ? 'Pain only' : 'Unresponsive' };
+  }
+
+  function flagWOB(value) {
+    if (!value) return null;
+    if (value === 'none')     return { level: 'normal', label: 'No distress' };
+    if (value === 'mild')     return { level: 'amber-high', label: 'Mild WoB' };
+    if (value === 'moderate') return { level: 'red-high',   label: 'Moderate WoB' };
+    return { level: 'red-high', label: 'Severe WoB' };
+  }
+
+  function flagSBP(value, band, years) {
+    if (value == null || !band) return null;
+    const shock = shockSBP(years);
+    if (shock != null && value < shock) {
+      return { level: 'red-low', label: 'Shock threshold' };
+    }
+    return flagRange(value, band.sbp, 0.15);
+  }
+
+  /* ==================================================================
+   * Rendering
+   * ================================================================== */
+
+  function render() {
+    renderPatient();
+    renderRanges();
+    renderVitals();
+    renderSummary();
+  }
+
+  function renderPatient() {
+    const ga = $('ga-field');
+    ga.hidden = !state.exPrem;
+    ga.setAttribute('aria-hidden', String(!state.exPrem));
+
+    const banner = $('age-band-banner');
+    const correctedM = correctedAgeMonths();
+    const band = bandForMonths(correctedM);
+    const rawM = rawAgeMonths();
+
+    if (rawM == null) {
+      banner.className = 'pv-age-banner empty';
+      banner.textContent = 'Enter age to activate interpretation';
+      $('corrected-age-hint').textContent = '';
+      return;
+    }
+
+    const parts = [];
+    if (state.ageYears) parts.push(state.ageYears + 'y');
+    if (state.ageMonths) parts.push(state.ageMonths + 'm');
+    const rawLabel = parts.length ? parts.join(' ') : '<1m';
+
+    let extra = '';
+    if (state.exPrem && state.gaWeeks && rawM < 24) {
+      const cy = Math.floor(correctedM / 12);
+      const cm = Math.round(correctedM - cy * 12);
+      const cLabel = (cy ? cy + 'y ' : '') + cm + 'm';
+      extra = ` · corrected ${cLabel}`;
+      $('corrected-age-hint').textContent =
+        `Corrected age ${cLabel} — ranges adjusted. Correction applies up to 2 years.`;
+    } else if (state.exPrem && state.gaWeeks && rawM >= 24) {
+      extra = '';
+      $('corrected-age-hint').textContent =
+        'Beyond 2 years — no further correction applied.';
+    } else {
+      $('corrected-age-hint').textContent = '';
+    }
+
+    banner.className = 'pv-age-banner ready';
+    banner.innerHTML = `<strong>${rawLabel}${extra}</strong> &middot; <span class="pv-band-label">${band.label}</span>`;
+  }
+
+  function renderRanges() {
+    const band = bandForMonths(correctedAgeMonths());
+    const years = ageYearsForShock();
+    const fmt = (arr) => arr[0] + '–' + arr[1];
+    const setRange = (key, text) => {
+      document.querySelectorAll(`[data-range-for="${key}"]`).forEach((el) => {
+        el.textContent = text;
+      });
+    };
+    if (!band) {
+      ['hr', 'rr', 'bp', 'spo2', 'temp', 'crt'].forEach((k) => setRange(k, ''));
+      return;
+    }
+    setRange('hr', `Normal ${fmt(band.hr)} /min`);
+    setRange('rr', `Normal ${fmt(band.rr)} /min`);
+    const shock = shockSBP(years);
+    const shockText = shock != null ? ` · shock <${Math.round(shock)}` : '';
+    setRange('bp', `SBP ${fmt(band.sbp)} mmHg${shockText}`);
+    setRange('spo2', 'Normal ≥95% on air');
+    setRange('temp', 'Normal 36.5–37.5 °C · fever ≥38.0');
+    setRange('crt', 'Normal <2s · delayed ≥3s');
+  }
+
+  function renderVitals() {
+    // Chip visual states
+    document.querySelectorAll('[data-wob]').forEach((el) => {
+      el.classList.toggle('active', el.dataset.wob === state.vitals.wob);
+    });
+    document.querySelectorAll('[data-avpu]').forEach((el) => {
+      el.classList.toggle('active', el.dataset.avpu === state.vitals.avpu);
+    });
+    document.querySelectorAll('[data-o2]').forEach((el) => {
+      el.classList.toggle('active', el.dataset.o2 === state.vitals.o2);
+    });
+
+    // Number inputs reflect state (so paste-fill updates the UI).
+    syncNumberInput('v-rr',   state.vitals.rr);
+    syncNumberInput('v-hr',   state.vitals.hr);
+    syncNumberInput('v-sbp',  state.vitals.sbp);
+    syncNumberInput('v-dbp',  state.vitals.dbp);
+    syncNumberInput('v-spo2', state.vitals.spo2);
+    syncNumberInput('v-temp', state.vitals.temp);
+    syncNumberInput('v-crt',  state.vitals.crt);
+
+    // Per-parameter flags
+    const flags = computeFlags();
+    Object.keys(flags).forEach((key) => {
+      const el = document.querySelector(`[data-flag-for="${key}"]`);
+      if (!el) return;
+      const f = flags[key];
+      el.className = 'pv-flag' + (el.classList.contains('pv-flag-below') ? ' pv-flag-below' : '');
+      if (!f) { el.textContent = '—'; el.classList.add('pv-flag-none'); return; }
+      el.classList.add('pv-flag-' + f.level);
+      el.textContent = f.label;
+    });
+  }
+
+  function syncNumberInput(id, value) {
+    const el = $(id);
+    if (!el) return;
+    if (document.activeElement === el) return;         // don't clobber while typing
+    el.value = (value == null) ? '' : String(value);
+  }
+
+  function computeFlags() {
+    const months = correctedAgeMonths();
+    const band = bandForMonths(months);
+    const years = ageYearsForShock();
+    const v = state.vitals;
+    return {
+      rr:   band ? flagRange(v.rr, band.rr) : null,
+      hr:   band ? flagRange(v.hr, band.hr) : null,
+      bp:   flagSBP(v.sbp, band, years),
+      spo2: flagSpO2(v.spo2, v.o2 === 'o2'),
+      temp: flagTemp(v.temp, months),
+      crt:  flagCRT(v.crt),
+      avpu: flagAVPU(v.avpu),
+      wob:  flagWOB(v.wob)
+    };
+  }
+
+  function worstLevel(flags) {
+    const order = { 'red-low': 3, 'red-high': 3, 'amber-low': 2, 'amber-high': 2, 'normal': 1 };
+    let worst = 0;
+    Object.values(flags).forEach((f) => {
+      if (f && order[f.level] > worst) worst = order[f.level];
+    });
+    return worst; // 0 none, 1 normal, 2 amber, 3 red
+  }
+
+  /* ==================================================================
+   * Summary (one-liner + flagged list + overall banner)
+   * ================================================================== */
+
+  function renderSummary() {
+    const flags = computeFlags();
+    const enteredCount = countEntered();
+    const months = correctedAgeMonths();
+    const overall = $('overall-banner');
+    const wetCTA = $('wetflag-cta');
+    const flagList = $('flag-list');
+
+    // Overall banner
+    if (months == null || enteredCount === 0) {
+      overall.className = 'pv-overall empty';
+      overall.textContent = 'Enter age and at least one observation to interpret.';
+      wetCTA.hidden = true;
+    } else {
+      const level = worstLevel(flags);
+      overall.classList.remove('empty');
+      overall.className = 'pv-overall level-' + level;
+      if (level >= 3) {
+        overall.innerHTML = '<strong>🚨 Red-flag vitals.</strong> Escalate now — senior review, reassess airway/breathing/circulation.';
+      } else if (level === 2) {
+        overall.innerHTML = '<strong>⚠️ Concerning vitals.</strong> Reassess in context, plan early review.';
+      } else {
+        overall.innerHTML = '<strong>✅ No concerning vitals.</strong> Within age-appropriate ranges.';
+      }
+      wetCTA.hidden = level < 3;
+    }
+
+    // Flagged list
+    const items = [];
+    const vlabel = {
+      rr: 'RR', hr: 'HR', bp: 'BP', spo2: 'SpO₂',
+      temp: 'Temp', crt: 'CRT', avpu: 'AVPU', wob: 'WoB'
+    };
+    const vdisplay = displayValues();
+    Object.keys(flags).forEach((k) => {
+      const f = flags[k];
+      if (!f || f.level === 'normal') return;
+      items.push({ key: k, flag: f, val: vdisplay[k] });
+    });
+
+    if (!items.length) {
+      flagList.innerHTML = '<li class="pv-flag-empty">' +
+        (enteredCount ? 'All entered values within age-appropriate ranges.' : 'No flags.') +
+        '</li>';
+    } else {
+      // Red first, then amber.
+      items.sort((a, b) => (b.flag.level.startsWith('red') ? 1 : 0) - (a.flag.level.startsWith('red') ? 1 : 0));
+      flagList.innerHTML = items.map((it) => `
+        <li class="pv-flag-item pv-flag-${it.flag.level}">
+          <strong>${escapeHTML(vlabel[it.key])}</strong>
+          <span class="pv-flag-val">${escapeHTML(it.val || '')}</span>
+          <span class="pv-flag-lbl">${escapeHTML(it.flag.label)}</span>
+        </li>
+      `).join('');
+    }
+
+    // One-line note
+    $('note-text').textContent = buildNote(false) || '—';
+  }
+
+  function countEntered() {
+    const v = state.vitals;
+    return [v.rr, v.hr, v.sbp, v.spo2, v.temp, v.crt, v.avpu, v.wob]
+      .filter((x) => x !== null && x !== undefined && x !== '').length;
+  }
+
+  function displayValues() {
+    const v = state.vitals;
+    const bp = (v.sbp != null) ? (v.sbp + (v.dbp != null ? '/' + v.dbp : '')) : '';
+    return {
+      rr: v.rr != null ? v.rr + '/min' : '',
+      hr: v.hr != null ? v.hr + '/min' : '',
+      bp: bp,
+      spo2: v.spo2 != null ? v.spo2 + '%' + (v.o2 === 'o2' ? ' on O₂' : (v.o2 === 'air' ? ' RA' : '')) : '',
+      temp: v.temp != null ? v.temp + '°C' : '',
+      crt: v.crt != null ? '<' + v.crt + 's' : '',
+      avpu: v.avpu || '',
+      wob: v.wob ? ({ none: 'no WoB', mild: 'mild WoB', moderate: 'mod WoB', severe: 'severe WoB' }[v.wob]) : ''
+    };
+  }
+
+  function buildNote(detailed) {
+    const v = state.vitals;
+    const months = correctedAgeMonths();
+    const band = bandForMonths(months);
+    const flags = computeFlags();
+    if (months == null) return '';
+    const pieces = [];
+    const rawParts = [];
+    if (state.ageYears) rawParts.push(state.ageYears + 'y');
+    if (state.ageMonths) rawParts.push(state.ageMonths + 'm');
+    const ageLabel = rawParts.join(' ') || '<1m';
+    let ageBit = ageLabel;
+    if (state.exPrem && state.gaWeeks) {
+      ageBit += ' (ex-prem ' + state.gaWeeks + '/40)';
+    }
+
+    const flagTag = (f) => {
+      if (!f || f.level === 'normal') return '';
+      const short = {
+        'amber-high': '↑', 'amber-low': '↓',
+        'red-high': '↑↑', 'red-low': '↓↓'
+      }[f.level] || '';
+      return ' ' + short;
+    };
+
+    if (v.hr   != null) pieces.push('HR '   + v.hr + flagTag(flags.hr));
+    if (v.rr   != null) pieces.push('RR '   + v.rr + flagTag(flags.rr));
+    if (v.spo2 != null) {
+      const tail = v.o2 === 'o2' ? ' on O₂' : (v.o2 === 'air' ? ' RA' : '');
+      pieces.push('SpO₂ ' + v.spo2 + '%' + tail + flagTag(flags.spo2));
+    }
+    if (v.sbp  != null) {
+      pieces.push('BP ' + v.sbp + (v.dbp != null ? '/' + v.dbp : '') + flagTag(flags.bp));
+    }
+    if (v.temp != null) pieces.push('T ' + v.temp + '°C' + flagTag(flags.temp));
+    if (v.crt  != null) pieces.push('CRT <' + v.crt + 's' + flagTag(flags.crt));
+    if (v.avpu)         pieces.push('AVPU=' + v.avpu + flagTag(flags.avpu));
+    if (v.wob)          pieces.push(({ none: 'no WoB', mild: 'mild WoB', moderate: 'mod WoB', severe: 'severe WoB' }[v.wob]) + flagTag(flags.wob));
+
+    const base = `${ageBit} · ` + (pieces.length ? pieces.join(', ') : 'no vitals entered');
+    if (!detailed) return base;
+
+    // Detailed: add the band label and a flag explanation tail.
+    const concerning = Object.keys(flags)
+      .filter((k) => flags[k] && flags[k].level !== 'normal')
+      .map((k) => {
+        const labelMap = { rr:'RR', hr:'HR', bp:'BP', spo2:'SpO₂', temp:'Temp', crt:'CRT', avpu:'AVPU', wob:'WoB' };
+        return `${labelMap[k]} ${flags[k].label.toLowerCase()}`;
+      });
+    let tail = ' · ranges ' + band.label.split(' (')[0];
+    if (concerning.length) tail += ' · flags: ' + concerning.join('; ');
+    else if (countEntered()) tail += ' · no flags';
+    return base + tail;
+  }
+
+  /* ==================================================================
+   * Paste-from-monitor parser
+   * ================================================================== */
+
+  // Whole-word matchers — permissive about separators and case.
+  const PARSERS = [
+    { key: 'hr',   re: /\b(?:HR|heart\s?rate|pulse)\b[^0-9]{0,6}(\d{2,3})\b/i },
+    { key: 'rr',   re: /\b(?:RR|resp\s?rate|resps?)\b[^0-9]{0,6}(\d{1,2})\b/i },
+    { key: 'spo2', re: /\b(?:SpO2|SaO2|sats?|oxygen\s?sats?)\b[^0-9]{0,6}(\d{2,3})\b/i },
+    { key: 'temp', re: /\b(?:T|Temp|temperature)\b[^0-9]{0,6}(\d{2}(?:\.\d)?)\b/i },
+    { key: 'bp',   re: /\bBP\b[^0-9]{0,6}(\d{2,3})\s*\/\s*(\d{2,3})\b/i },
+    { key: 'crt',  re: /\b(?:CRT|cap\s?refill)\b[^0-9]{0,6}[<>]?\s*(\d(?:\.\d)?)(?!\d)/i }
+  ];
+
+  function parsePasted(text) {
+    const found = {};
+    if (!text) return found;
+    PARSERS.forEach((p) => {
+      const m = p.re.exec(text);
+      if (!m) return;
+      if (p.key === 'bp') {
+        found.sbp = Number(m[1]);
+        found.dbp = Number(m[2]);
+      } else {
+        found[p.key] = Number(m[1]);
+      }
+    });
+
+    // Detect "on O2" / "RA" keywords
+    if (/\bon\s?O2\b|\bon\s?oxygen\b/i.test(text)) found.o2 = 'o2';
+    else if (/\b(?:RA|room\s?air|on\s?air)\b/i.test(text)) found.o2 = 'air';
+
+    // AVPU as a bare token
+    const avpu = /\bAVPU[^A-Z]{0,3}([AVPU])\b/i.exec(text) || /\b(alert|verbal|pain|unresponsive)\b/i.exec(text);
+    if (avpu) {
+      const tok = avpu[1].toUpperCase();
+      const map = { ALERT: 'A', VERBAL: 'V', PAIN: 'P', UNRESPONSIVE: 'U' };
+      found.avpu = map[tok] || tok;
+    }
+    return found;
+  }
+
+  function applyPaste(found) {
+    let changed = 0;
+    if (found.hr   != null) { state.vitals.hr = found.hr;     changed++; }
+    if (found.rr   != null) { state.vitals.rr = found.rr;     changed++; }
+    if (found.spo2 != null) { state.vitals.spo2 = found.spo2; changed++; }
+    if (found.temp != null) { state.vitals.temp = found.temp; changed++; }
+    if (found.sbp  != null) { state.vitals.sbp = found.sbp;   changed++; }
+    if (found.dbp  != null) { state.vitals.dbp = found.dbp;   changed++; }
+    if (found.crt  != null) { state.vitals.crt = found.crt;   changed++; }
+    if (found.o2)           { state.vitals.o2 = found.o2;     changed++; }
+    if (found.avpu)         { state.vitals.avpu = found.avpu; changed++; }
+    return changed;
+  }
+
+  /* ==================================================================
+   * Utilities
+   * ================================================================== */
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  async function copyText(text, btn, label) {
+    try {
+      await navigator.clipboard.writeText(text);
+      flashBtn(btn, label || 'Copied ✓');
+    } catch (_) {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flashBtn(btn, label || 'Copied ✓'); }
+      catch (__) { flashBtn(btn, 'Copy failed'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  function flashBtn(btn, text) {
+    const original = btn.textContent;
+    btn.textContent = text;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1200);
+  }
+
+  /* ==================================================================
+   * Wiring
+   * ================================================================== */
+
+  function wireAgeInputs() {
+    const onNum = (id, key, max, isInt) => {
+      $(id).addEventListener('input', () => {
+        const raw = $(id).value.trim();
+        if (raw === '') { state[key] = null; render(); return; }
+        let v = isInt ? parseInt(raw, 10) : Number(raw);
+        if (!isFinite(v)) { state[key] = null; render(); return; }
+        if (max != null && v > max) v = max;
+        if (v < 0) v = 0;
+        state[key] = v;
+        render();
+      });
+    };
+    onNum('age-years', 'ageYears', 17, true);
+    onNum('age-months', 'ageMonths', 11, true);
+    onNum('ga-weeks',  'gaWeeks', 41, true);
+    $('ex-prem').addEventListener('change', (e) => {
+      state.exPrem = e.target.checked;
+      if (!state.exPrem) state.gaWeeks = null;
+      render();
+    });
+  }
+
+  function wireVitalsInputs() {
+    const onNum = (id, key, dp) => {
+      $(id).addEventListener('input', () => {
+        const raw = $(id).value.trim();
+        if (raw === '') { state.vitals[key] = null; render(); return; }
+        const v = Number(raw);
+        if (!isFinite(v)) { state.vitals[key] = null; render(); return; }
+        state.vitals[key] = dp != null ? Number(v.toFixed(dp)) : v;
+        render();
+      });
+    };
+    onNum('v-rr',   'rr',   0);
+    onNum('v-hr',   'hr',   0);
+    onNum('v-sbp',  'sbp',  0);
+    onNum('v-dbp',  'dbp',  0);
+    onNum('v-spo2', 'spo2', 0);
+    onNum('v-temp', 'temp', 1);
+    onNum('v-crt',  'crt',  1);
+
+    // Chip groups
+    document.querySelectorAll('[data-wob]').forEach((el) => {
+      el.addEventListener('click', () => {
+        state.vitals.wob = state.vitals.wob === el.dataset.wob ? null : el.dataset.wob;
+        render();
+      });
+    });
+    document.querySelectorAll('[data-avpu]').forEach((el) => {
+      el.addEventListener('click', () => {
+        state.vitals.avpu = state.vitals.avpu === el.dataset.avpu ? null : el.dataset.avpu;
+        render();
+      });
+    });
+    document.querySelectorAll('[data-o2]').forEach((el) => {
+      el.addEventListener('click', () => {
+        state.vitals.o2 = state.vitals.o2 === el.dataset.o2 ? null : el.dataset.o2;
+        render();
+      });
+    });
+  }
+
+  function wirePasteCard() {
+    const pasteEl = $('paste-input');
+    const report = $('paste-report');
+    const doParse = () => {
+      const text = pasteEl.value;
+      const found = parsePasted(text);
+      const n = applyPaste(found);
+      report.className = 'pv-paste-report ' + (n ? 'ok' : 'warn');
+      report.textContent = n ? `Filled ${n} field${n === 1 ? '' : 's'}` : 'Nothing recognisable found.';
+      render();
+    };
+    $('btn-parse').addEventListener('click', doParse);
+    $('btn-clear-paste').addEventListener('click', () => {
+      pasteEl.value = '';
+      report.textContent = '';
+    });
+    // Auto-parse on paste event.
+    pasteEl.addEventListener('paste', () => {
+      setTimeout(doParse, 0);
+    });
+  }
+
+  function wireButtons() {
+    $('btn-reset-vitals').addEventListener('click', () => {
+      state.vitals = { rr: null, hr: null, sbp: null, dbp: null, spo2: null,
+                       o2: null, temp: null, crt: null, avpu: null, wob: null };
+      ['v-rr','v-hr','v-sbp','v-dbp','v-spo2','v-temp','v-crt'].forEach((id) => { $(id).value = ''; });
+      $('paste-input').value = '';
+      $('paste-report').textContent = '';
+      render();
+    });
+    $('btn-reset-all').addEventListener('click', () => {
+      state.ageYears = state.ageMonths = state.gaWeeks = null;
+      state.exPrem = false;
+      state.vitals = { rr: null, hr: null, sbp: null, dbp: null, spo2: null,
+                       o2: null, temp: null, crt: null, avpu: null, wob: null };
+      ['age-years','age-months','ga-weeks','v-rr','v-hr','v-sbp','v-dbp','v-spo2','v-temp','v-crt']
+        .forEach((id) => { if ($(id)) $(id).value = ''; });
+      $('ex-prem').checked = false;
+      $('paste-input').value = '';
+      $('paste-report').textContent = '';
+      render();
+      $('age-years').focus();
+    });
+    $('btn-copy-note').addEventListener('click', (e) => {
+      const text = buildNote(false);
+      if (!text) { flashBtn(e.currentTarget, 'Enter age first'); return; }
+      copyText(text, e.currentTarget);
+    });
+    $('btn-copy-detailed').addEventListener('click', (e) => {
+      const text = buildNote(true);
+      if (!text) { flashBtn(e.currentTarget, 'Enter age first'); return; }
+      copyText(text, e.currentTarget);
+    });
+  }
+
+  function wireKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      const t = e.target;
+      const inInput = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+      if (inInput) return;
+      const key = e.key.toUpperCase();
+      if (['A','V','P','U'].includes(key)) {
+        e.preventDefault();
+        state.vitals.avpu = state.vitals.avpu === key ? null : key;
+        render();
+      } else if (key === 'O') {
+        e.preventDefault();
+        state.vitals.o2 = state.vitals.o2 === 'o2' ? 'air' : 'o2';
+        render();
+      }
+    });
+  }
+
+  function init() {
+    wireAgeInputs();
+    wireVitalsInputs();
+    wirePasteCard();
+    wireButtons();
+    wireKeyboardShortcuts();
+    render();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>

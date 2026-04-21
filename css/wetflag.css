@@ -1,0 +1,329 @@
+/* ==========================================================================
+   WETFLAG Paediatric Resuscitation Calculator
+   All colour/spacing/radius/shadow values reference tokens from app-theme.css.
+   ========================================================================== */
+
+/* ---------- Inputs row ---------- */
+.wetflag-app .wf-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: var(--sp-2);
+}
+
+@media (max-width: 620px) {
+  .wetflag-app .wf-inputs { grid-template-columns: 1fr 1fr; }
+  .wetflag-app .wf-inputs > .field:last-child { grid-column: 1 / -1; }
+}
+
+.wetflag-app .wf-inputs .field { margin-bottom: 0; }
+
+.wetflag-app .optional {
+  color: var(--muted);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-xs);
+}
+
+.wetflag-app .wf-actions {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+}
+
+@media (max-width: 520px) {
+  .wetflag-app .wf-actions { grid-template-columns: 1fr 1fr; }
+  .wetflag-app .wf-actions > :first-child { grid-column: 1 / -1; }
+}
+
+.wetflag-app .wf-actions .btn,
+.wetflag-app .wf-actions .btn-primary,
+.wetflag-app .wf-actions .btn-reset { margin-top: 0; }
+
+.wetflag-app #weight-source {
+  margin-top: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Patient banner ---------- */
+.wetflag-app .wf-patient-banner {
+  padding: var(--sp-2) 14px;
+  background: var(--surface2);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-base);
+  color: var(--text-soft);
+  margin-bottom: var(--sp-2);
+}
+
+.wetflag-app .wf-patient-banner.ready {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface2));
+  border: 1.5px solid var(--accent);
+  color: var(--text);
+}
+
+.wetflag-app .wf-patient-banner.empty { font-style: italic; }
+
+.wetflag-app .wf-tag {
+  display: inline-block;
+  margin-left: var(--sp-1);
+  padding: 2px var(--sp-1);
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ---------- WETFLAG grid ---------- */
+.wetflag-app .wf-card { position: relative; }
+
+.wetflag-app .wf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+  gap: var(--sp-1);
+}
+
+.wetflag-app .wf-item {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: var(--sp-1);
+  padding: var(--sp-2);
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    transform    var(--duration-fast) var(--ease-standard);
+}
+
+.wetflag-app .wf-item:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+
+.wetflag-app .wf-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--accent-on);
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+/* Distinct accent hues per letter — visual aid only, not status-meaningful.
+   Kept as explicit hex to preserve the clinical at-a-glance colour cue. */
+.wetflag-app .wf-w .wf-letter { background: #0ea5e9; color: #fff; }
+.wetflag-app .wf-e .wf-letter { background: #f59e0b; color: #1a1300; }
+.wetflag-app .wf-t .wf-letter { background: #8b5cf6; color: #fff; }
+.wetflag-app .wf-f .wf-letter { background: #14b8a6; color: #fff; }
+.wetflag-app .wf-l .wf-letter { background: #f43f5e; color: #fff; }
+.wetflag-app .wf-a .wf-letter { background: #ef4444; color: #fff; }
+.wetflag-app .wf-g .wf-letter { background: #22c55e; color: #052e16; }
+
+.wetflag-app .wf-name {
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: var(--fw-bold);
+}
+
+.wetflag-app .wf-value {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: var(--lh-tight);
+  margin-top: 2px;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
+}
+
+.wetflag-app .wf-sub {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: var(--lh-snug);
+}
+
+.wetflag-app .wf-sep { color: var(--muted); margin: 0 4px; }
+
+/* ---------- Drug table ---------- */
+.wetflag-app .wf-drug-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  -webkit-overflow-scrolling: touch;
+}
+
+.wetflag-app .wf-drug-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+  font-size: var(--fs-sm);
+}
+
+.wetflag-app .wf-drug-table thead th {
+  background: var(--surface3);
+  color: var(--accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.wetflag-app .wf-drug-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.wetflag-app .wf-drug-table tbody tr:last-child { border-bottom: none; }
+.wetflag-app .wf-drug-table tbody tr:hover { background: var(--surface2); }
+
+.wetflag-app .wf-drug-table tbody tr.critical {
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+.wetflag-app .wf-drug-table tbody tr.critical:hover {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+}
+
+.wetflag-app .wf-drug-table th,
+.wetflag-app .wf-drug-table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  line-height: var(--lh-snug);
+}
+
+.wetflag-app .wf-drug-table th[scope="row"] {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.wetflag-app .wf-drug-table .dose { color: var(--text-soft); white-space: nowrap; }
+
+.wetflag-app .wf-drug-table .calc {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+  color: var(--accent2);
+  white-space: nowrap;
+}
+
+.wetflag-app .wf-drug-table .notes {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+/* ---------- Quick reference ---------- */
+.wetflag-app .wf-refs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: var(--sp-2);
+}
+
+.wetflag-app .wf-ref-block {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-2) 14px;
+}
+
+.wetflag-app .wf-ref-block h3 {
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-1);
+  font-weight: var(--fw-bold);
+}
+
+.wetflag-app .wf-ref-block ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
+  line-height: var(--lh-snug);
+}
+
+.wetflag-app .wf-ref-block strong { color: var(--text); }
+
+/* ---------- Print ---------- */
+.wetflag-app .print-only-title { display: none; }
+
+@media print {
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .wetflag-app .theme-toggle,
+  .wetflag-app .no-print,
+  .wetflag-app .app-footer { display: none !important; }
+  .wetflag-app .app-header-center { padding: 0 0 8px; }
+  .wetflag-app .app-header-center h1 { color: #000 !important; font-size: 1.2rem; }
+  .wetflag-app .app-header-center p { font-size: 0.75rem; }
+
+  .wetflag-app .container {
+    max-width: 100%;
+    padding: 10mm;
+  }
+  .wetflag-app .card {
+    background: #fff !important;
+    border: 1px solid #333 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+  }
+  .wetflag-app .print-only-title { display: block; color: #000 !important; }
+  .wetflag-app .wf-patient-banner {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1.5px solid #000 !important;
+  }
+  .wetflag-app .wf-tag { background: #fff !important; color: #333 !important; border: 1px solid #555 !important; }
+  .wetflag-app .wf-item {
+    background: #fff !important;
+    border: 1px solid #333 !important;
+  }
+  .wetflag-app .wf-letter { color: #fff !important; }
+  .wetflag-app .wf-name, .wetflag-app .wf-sub { color: #444 !important; }
+  .wetflag-app .wf-value { color: #000 !important; }
+  .wetflag-app .wf-drug-table { font-size: 0.72rem; min-width: 0; }
+  .wetflag-app .wf-drug-table thead th { background: #eee !important; color: #000 !important; }
+  .wetflag-app .wf-drug-table th, .wetflag-app .wf-drug-table td { padding: 4px 6px; }
+  .wetflag-app .wf-drug-table .calc { color: #000 !important; }
+  .wetflag-app .wf-drug-table .notes { color: #333 !important; }
+  .wetflag-app .wf-drug-table tbody tr.critical {
+    background: #fff3f3 !important;
+  }
+  .wetflag-app .wf-ref-block {
+    background: #fff !important;
+    border: 1px solid #666 !important;
+  }
+  .wetflag-app .wf-ref-block h3, .wetflag-app .wf-ref-block ul { color: #000 !important; }
+  .wetflag-app .stat {
+    background: #fff !important;
+    border: 1px solid #333 !important;
+  }
+  .wetflag-app .stat .lbl { color: #333 !important; }
+  .wetflag-app .stat .val { color: #000 !important; }
+  .wetflag-app .stat .sub { color: #444 !important; }
+}

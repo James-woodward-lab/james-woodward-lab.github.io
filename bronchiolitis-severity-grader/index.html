@@ -7,8 +7,6 @@
   <meta name="color-scheme" content="dark light">
   <title>Bronchiolitis Severity Grader</title>
   <link rel="stylesheet" href="../css/app-theme.css">
-  <link rel="stylesheet" href="../css/style-variants.css">
-  <script src="../js/style-system.js"></script>
   <script src="../js/theme-toggle.js"></script>
   <link rel="stylesheet" href="../css/bronchiolitis-severity-grader.css">
 </head>
@@ -399,13 +397,31 @@
     async function copyToClipboard() {
       const text = handoverPreviewEl.textContent || "";
       if (!text.trim()) return;
-      await navigator.clipboard.writeText(text);
       const btn = document.getElementById("copy-btn");
       const old = btn.textContent;
-      btn.textContent = "Copied";
-      setTimeout(() => {
-        btn.textContent = old;
-      }, 1500);
+      const flash = (label, ms) => {
+        btn.textContent = label;
+        setTimeout(() => { btn.textContent = old; }, ms);
+      };
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(ta);
+          if (!ok) throw new Error("execCommand failed");
+        }
+        flash("Copied", 1500);
+      } catch (err) {
+        flash("Copy failed", 1800);
+      }
     }
 
     function printSummary() {

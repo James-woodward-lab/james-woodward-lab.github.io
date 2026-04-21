@@ -1,0 +1,489 @@
+/* -----------------------------------------------------------
+   Paediatric Vitals — age-aware observation interpreter
+   Pairs with app-theme.css / style-variants.css
+   ----------------------------------------------------------- */
+
+.vitals-app .pv-muted-small { color: var(--muted); font-size: 0.78rem; font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+/* ---------------- Patient card ---------------- */
+.vitals-app .pv-patient-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto 1.6fr;
+  gap: 12px;
+  align-items: end;
+}
+@media (max-width: 720px) {
+  .vitals-app .pv-patient-grid { grid-template-columns: 1fr 1fr; }
+  .vitals-app .pv-patient-grid .pv-ga-toggle { grid-column: 1 / -1; }
+  .vitals-app .pv-patient-grid #ga-field     { grid-column: 1 / -1; }
+}
+.vitals-app .pv-patient-grid .field { margin-bottom: 0; }
+
+.vitals-app .pv-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text);
+  user-select: none;
+  min-height: 44px;
+}
+.vitals-app .pv-switch input { margin: 0; width: 18px; height: 18px; }
+.vitals-app .pv-switch:has(input:checked) {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface2));
+}
+
+.vitals-app .pv-age-banner {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--border);
+  background: var(--surface2);
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+.vitals-app .pv-age-banner.ready {
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface2));
+  color: var(--text);
+}
+.vitals-app .pv-age-banner.empty { font-style: italic; }
+.vitals-app .pv-band-label {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 10px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+
+/* ---------------- Paste card ---------------- */
+.vitals-app .pv-paste {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  resize: vertical;
+  min-height: 44px;
+}
+.vitals-app .pv-paste:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.vitals-app .pv-paste-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.vitals-app .pv-paste-row .btn,
+.vitals-app .pv-paste-row .btn-primary,
+.vitals-app .pv-paste-row .btn-reset { margin-top: 0; width: auto; flex: 0 0 auto; padding: 10px 16px; }
+.vitals-app .pv-paste-report {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-left: 4px;
+}
+.vitals-app .pv-paste-report.ok   { color: var(--success); }
+.vitals-app .pv-paste-report.warn { color: var(--warn); }
+
+/* ---------------- Vitals grid ---------------- */
+.vitals-app .pv-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+@media (max-width: 640px) { .vitals-app .pv-vitals-grid { grid-template-columns: 1fr; } }
+
+.vitals-app .pv-vital {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+.vitals-app .pv-vital label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.vitals-app .pv-unit {
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 4px;
+  font-size: 0.78rem;
+}
+
+.vitals-app .pv-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+.vitals-app .pv-input-row input[type="number"] {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.vitals-app .pv-input-row input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.vitals-app .pv-bp-row {
+  grid-template-columns: 1fr auto 1fr auto;
+}
+.vitals-app .pv-bp-sep { color: var(--muted); font-size: 1.1rem; font-weight: 700; padding: 0 2px; }
+
+.vitals-app .pv-spo2-row {
+  grid-template-columns: 90px 1fr auto;
+  gap: 10px;
+}
+@media (max-width: 420px) {
+  .vitals-app .pv-spo2-row { grid-template-columns: 1fr; }
+  .vitals-app .pv-spo2-row .pv-flag { justify-self: start; }
+}
+
+.vitals-app .pv-range {
+  margin-top: 6px;
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.1em;
+}
+
+/* ---------------- Chip groups ---------------- */
+.vitals-app .pv-chip-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.vitals-app .pv-chip {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+  touch-action: manipulation;
+  min-height: 44px;
+}
+.vitals-app .pv-chip:hover {
+  border-color: var(--accent2);
+}
+.vitals-app .pv-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-on);
+}
+.vitals-app .pv-chip-sm {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  min-height: 40px;
+}
+
+/* ---------------- Flag badges ---------------- */
+.vitals-app .pv-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border: 1.5px solid var(--border);
+  background: var(--surface3);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.vitals-app .pv-flag-none   { opacity: 0.7; }
+.vitals-app .pv-flag-normal {
+  background: color-mix(in srgb, var(--success) 14%, var(--surface2));
+  border-color: var(--success);
+  color: var(--success);
+}
+.vitals-app .pv-flag-amber-high,
+.vitals-app .pv-flag-amber-low {
+  background: color-mix(in srgb, var(--warn) 14%, var(--surface2));
+  border-color: var(--warn);
+  color: var(--warn);
+}
+.vitals-app .pv-flag-red-high,
+.vitals-app .pv-flag-red-low {
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface2));
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.vitals-app .pv-flag-below {
+  margin-top: 8px;
+  align-self: start;
+}
+
+/* ---------------- Actions row ---------------- */
+.vitals-app .pv-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.vitals-app .pv-actions .btn,
+.vitals-app .pv-actions .btn-reset { flex: 1 1 140px; margin-top: 0; }
+
+.vitals-app .pv-shortcut-hint {
+  margin-top: 10px;
+  font-size: 0.78rem;
+}
+.vitals-app .pv-shortcut-hint kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 6px;
+  margin: 0 2px;
+  color: var(--text);
+}
+
+/* ---------------- Overall banner ---------------- */
+.vitals-app .pv-overall {
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  margin-bottom: 14px;
+}
+.vitals-app .pv-overall.empty { font-style: italic; color: var(--muted); }
+.vitals-app .pv-overall.level-1 {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, var(--surface2));
+  color: var(--text);
+}
+.vitals-app .pv-overall.level-2 {
+  border-color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, var(--surface2));
+  color: var(--text);
+}
+.vitals-app .pv-overall.level-3 {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface2));
+  color: var(--text);
+}
+.vitals-app .pv-overall strong { font-weight: 700; }
+
+/* ---------------- Summary grid ---------------- */
+.vitals-app .pv-summary-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 760px) { .vitals-app .pv-summary-grid { grid-template-columns: 1fr; } }
+
+.vitals-app .pv-summary-block h3 {
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.vitals-app .pv-note-box {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text);
+  min-height: 52px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.vitals-app .pv-note-box code { font-family: inherit; }
+
+.vitals-app .pv-note-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.vitals-app .pv-note-actions .btn,
+.vitals-app .pv-note-actions .btn-reset,
+.vitals-app .pv-note-actions .btn-primary { flex: 1 1 140px; margin-top: 0; }
+
+/* ---------------- Flagged list ---------------- */
+.vitals-app .pv-flag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.vitals-app .pv-flag-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  font-size: 0.87rem;
+}
+.vitals-app .pv-flag-item strong { font-weight: 700; color: var(--text); }
+.vitals-app .pv-flag-item .pv-flag-val {
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+.vitals-app .pv-flag-item .pv-flag-lbl {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+.vitals-app .pv-flag-item.pv-flag-amber-high,
+.vitals-app .pv-flag-item.pv-flag-amber-low {
+  border-color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 10%, var(--surface2));
+}
+.vitals-app .pv-flag-item.pv-flag-amber-high .pv-flag-lbl,
+.vitals-app .pv-flag-item.pv-flag-amber-low .pv-flag-lbl { color: var(--warn); }
+.vitals-app .pv-flag-item.pv-flag-red-high,
+.vitals-app .pv-flag-item.pv-flag-red-low {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface2));
+}
+.vitals-app .pv-flag-item.pv-flag-red-high .pv-flag-lbl,
+.vitals-app .pv-flag-item.pv-flag-red-low .pv-flag-lbl { color: var(--danger); }
+
+.vitals-app .pv-flag-empty {
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+}
+
+.vitals-app .pv-wetflag-link {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface2));
+}
+.vitals-app .pv-wetflag-link .btn,
+.vitals-app .pv-wetflag-link .btn-primary {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--danger);
+  text-decoration: none;
+  margin: 0;
+  width: auto;
+}
+.vitals-app .pv-wetflag-link .btn:hover {
+  filter: brightness(1.08);
+}
+.vitals-app .pv-wetflag-link .hint { margin-top: 8px; color: var(--muted); }
+
+/* ---------------- Reference table ---------------- */
+.vitals-app .pv-ref-wrap { margin-top: 12px; overflow-x: auto; }
+.vitals-app .pv-ref-table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-bottom: 14px;
+}
+.vitals-app .pv-ref-table thead th {
+  background: var(--surface3);
+  color: var(--accent);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.vitals-app .pv-ref-table tbody tr { border-bottom: 1px solid var(--border); }
+.vitals-app .pv-ref-table tbody tr:last-child { border-bottom: none; }
+.vitals-app .pv-ref-table th,
+.vitals-app .pv-ref-table td {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.vitals-app .pv-ref-table tbody th { font-weight: 600; color: var(--text); }
+
+.vitals-app .pv-ref-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+.vitals-app .pv-ref-list strong { color: var(--text); }
+
+/* ---------------- Print ---------------- */
+@media print {
+  html, body { background: #fff !important; color: #000 !important; }
+  .vitals-app .theme-toggle,
+  .vitals-app .no-print,
+  .vitals-app .app-footer,
+  #jwl-cmdk-launcher { display: none !important; }
+  .vitals-app .container { max-width: 100%; padding: 10mm; }
+  .vitals-app .card {
+    background: #fff !important; border: 1px solid #333 !important;
+    box-shadow: none !important; break-inside: avoid;
+    margin-bottom: 8px; padding: 10px 12px;
+  }
+  .vitals-app .pv-age-banner,
+  .vitals-app .pv-vital,
+  .vitals-app .pv-note-box,
+  .vitals-app .pv-overall {
+    background: #fff !important; color: #000 !important; border: 1px solid #333 !important;
+  }
+  .vitals-app .pv-flag { border-color: #333 !important; color: #000 !important; background: #f7f7f7 !important; }
+}

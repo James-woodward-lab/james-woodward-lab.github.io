@@ -1344,15 +1344,35 @@
 
   function copySummary() {
     var t = $('summaryPre').textContent;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(t);
-    } else {
+    var btn = document.getElementById('copyBtn');
+    var original = btn ? btn.textContent : '';
+
+    function flash(label, ms) {
+      if (!btn) return;
+      btn.textContent = label;
+      setTimeout(function() { btn.textContent = original; }, ms);
+    }
+
+    function legacy() {
       var ta = document.createElement('textarea');
       ta.value = t;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
       document.body.appendChild(ta);
       ta.select();
-      document.execCommand('copy');
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
       document.body.removeChild(ta);
+      flash(ok ? 'Copied \u2713' : 'Copy failed', ok ? 1500 : 1800);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(
+        function() { flash('Copied \u2713', 1500); },
+        legacy
+      );
+    } else {
+      legacy();
     }
   }
 

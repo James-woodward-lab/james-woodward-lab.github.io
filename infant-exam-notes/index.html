@@ -7,8 +7,6 @@
   <meta name="color-scheme" content="dark light">
   <title>Examination Notes</title>
   <link rel="stylesheet" href="../css/app-theme.css">
-  <link rel="stylesheet" href="../css/style-variants.css">
-  <script src="../js/style-system.js"></script>
   <script src="../js/theme-toggle.js"></script>
   <style>
     /* ===== GLOBAL SPACING TOKENS ===== */
@@ -181,9 +179,9 @@
     }
     .pill-opt:hover { border-color: var(--accent); color: var(--text); }
     .pill-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-    .pill-opt.selected { border-color: var(--accent); background: rgba(36,170,204,0.12); color: var(--accent); font-weight: 600; }
-    .pill-opt.selected.abnormal { border-color: var(--danger); background: rgba(239,68,68,0.1); color: var(--danger); }
-    .pill-opt.selected.pill-normal { border-color: var(--success); background: rgba(34,197,94,0.12); color: var(--success); }
+    .pill-opt.selected { border-color: var(--accent); background: color-mix(in srgb,var(--accent) 12%,transparent); color: var(--accent); font-weight: 600; }
+    .pill-opt.selected.abnormal { border-color: var(--danger); background: var(--danger-surface); color: var(--danger); }
+    .pill-opt.selected.pill-normal { border-color: var(--success); background: color-mix(in srgb,var(--success) 12%,transparent); color: var(--success); }
 
     /* ===== CHECK BUTTONS (checkbox) ===== */
     .check-grid {
@@ -230,9 +228,9 @@
       border: solid var(--accent-on); border-width: 0 2px 2px 0;
       transform: rotate(45deg);
     }
-    .check-opt.selected { border-color: var(--accent); color: var(--text); background: rgba(36,170,204,0.06); }
-    .check-opt.selected.abnormal { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.06); }
-    .check-opt.selected.pill-normal { border-color: var(--success); color: var(--success); background: rgba(34,197,94,0.06); }
+    .check-opt.selected { border-color: var(--accent); color: var(--text); background: color-mix(in srgb,var(--accent) 6%,transparent); }
+    .check-opt.selected.abnormal { border-color: var(--danger); color: var(--danger); background: color-mix(in srgb,var(--danger) 6%,transparent); }
+    .check-opt.selected.pill-normal { border-color: var(--success); color: var(--success); background: color-mix(in srgb,var(--success) 6%,transparent); }
 
     /* ===== ABDOMEN PERITONITIC YES/NO (uses .check-grid for tile width; .check-opt-like rows) ===== */
     .yesno-toggle-wrap {
@@ -305,12 +303,12 @@
     .yesno-toggle-btn.selected.pill-normal {
       border-color: var(--success);
       color: var(--success);
-      background: rgba(34, 197, 94, 0.06);
+      background: color-mix(in srgb, var(--success) 6%, transparent);
     }
     .yesno-toggle-btn.selected.abnormal {
       border-color: var(--danger);
       color: var(--danger);
-      background: rgba(239, 68, 68, 0.06);
+      background: color-mix(in srgb, var(--danger) 6%, transparent);
     }
 
     /* ===== FREE TEXT ===== */
@@ -391,14 +389,94 @@
     }
     .output-body.empty { color: var(--muted); font-style: italic; text-align: center; padding: 14px; min-height: 60px; }
     .output-collapsed .output-body { display: none; }
-    .output-options {
+    .output-options-wrap {
       margin-top: 8px;
-      display: flex;
-      justify-content: flex-end;
-      color: var(--muted);
-      font-size: 0.9rem;
     }
-    .output-options label { cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 6px; }
+    .output-options-details {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+    .output-options-details > summary {
+      cursor: pointer;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      user-select: none;
+    }
+    .output-options-details > summary::-webkit-details-marker { display: none; }
+    .output-options-details > summary::after {
+      content: "\25B6"; font-size: 0.65rem; color: var(--muted); transition: transform 0.2s;
+    }
+    .output-options-details[open] > summary::after { transform: rotate(90deg); }
+    .output-options-details > summary .output-options-count { color: var(--accent); font-weight: 700; text-transform: none; letter-spacing: 0; }
+    .output-options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 6px 8px 8px;
+      border-top: 1px solid var(--border);
+    }
+    @media (min-width: 520px) {
+      .output-options-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .output-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      min-height: 36px;
+      box-sizing: border-box;
+    }
+    .output-option:hover { border-color: var(--accent); }
+    .output-option-label { line-height: 1.25; }
+    .output-option-switch {
+      appearance: none; -webkit-appearance: none;
+      width: 34px; height: 18px;
+      flex: 0 0 auto;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .output-option-switch::after {
+      content: "";
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: transform 0.15s, background 0.15s;
+    }
+    .output-option-switch:checked {
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      border-color: var(--accent);
+    }
+    .output-option-switch:checked::after {
+      transform: translateX(16px);
+      background: var(--accent);
+    }
+    .output-option.is-on { border-color: var(--accent); }
 
     /* ===== LUNG MAP ===== */
     .lung-map-wrap { margin-top: var(--sp-group); }
@@ -424,10 +502,10 @@
       padding: 4px; width: 100%; max-width: 22.5rem; margin: 0 auto; box-sizing: border-box;
     }
     .lung-svg-shell svg { display: block; width: 100%; height: auto; }
-    .lung-zone { cursor: pointer; transition: fill 0.15s, stroke 0.15s; fill: rgba(36,170,204,0.12); stroke: var(--border); stroke-width: 1.5; }
-    .lung-zone:hover { stroke: var(--accent); fill: rgba(36,170,204,0.2); }
-    .lung-zone.active { stroke: var(--accent); fill: rgba(36,170,204,0.3); }
-    .lung-zone.has-findings { stroke: var(--success); fill: rgba(34,197,94,0.2); }
+    .lung-zone { cursor: pointer; transition: fill 0.15s, stroke 0.15s; fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: var(--border); stroke-width: 1.5; }
+    .lung-zone:hover { stroke: var(--accent); fill: color-mix(in srgb, var(--accent) 20%, transparent); }
+    .lung-zone.active { stroke: var(--accent); fill: color-mix(in srgb, var(--accent) 30%, transparent); }
+    .lung-zone.has-findings { stroke: var(--success); fill: color-mix(in srgb, var(--success) 20%, transparent); }
     .lung-zone-label { font-size: 0.875rem; fill: var(--muted); pointer-events: none; font-weight: 500; }
     .lung-picker { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 6px; }
     .lung-picker-title { font-size: 0.875rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
@@ -441,7 +519,7 @@
     }
     @media (max-width: 600px) { .lung-finding-chip { min-height: 44px; padding: 6px 10px; } }
     .lung-finding-chip input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-    .lung-finding-chip.selected { border-color: var(--accent); color: var(--accent); background: rgba(36,170,204,0.12); font-weight: 600; }
+    .lung-finding-chip.selected { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); font-weight: 600; }
     .lung-summary { margin-top: 4px; font-size: 0.875rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px; font-weight: 500; }
     .lung-summary-badge { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 2px 6px; }
     .lung-zone-note { margin-top: 4px; }
@@ -566,6 +644,125 @@
     .msk-shoulder-palp-wrap .conditional-inline-field.show { display: block; }
     .msk-shoulder-wounds-ta { width: 100%; min-height: 44px; }
 
+    /* ===== MSK QUICK PICKER / QUICK SCREEN ===== */
+    .msk-quick-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+    }
+    .msk-quick-search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .msk-quick-search {
+      flex: 1 1 180px;
+      min-height: 36px;
+      padding: 6px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    .msk-quick-search:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .msk-quick-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .msk-quick-btn {
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      min-height: 32px;
+      font-family: inherit;
+    }
+    .msk-quick-btn:hover { border-color: var(--accent); }
+    .msk-quick-btn.primary {
+      background: var(--accent);
+      color: var(--accent-on);
+      border-color: var(--accent);
+    }
+    .msk-quick-btn.primary:hover { background: var(--accent2); }
+    .msk-quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .msk-quick-chip {
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      min-height: 28px;
+      line-height: 1.2;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .msk-quick-chip:hover { border-color: var(--accent); }
+    .msk-quick-chip[hidden] { display: none; }
+    .msk-quick-chip.is-nad {
+      border-color: var(--success);
+      background: color-mix(in srgb, var(--success) 12%, transparent);
+      color: var(--success);
+    }
+    .msk-quick-chip.has-findings {
+      border-color: var(--danger);
+      background: var(--danger-surface);
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .msk-quick-empty {
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 4px 2px;
+    }
+
+    .msk-quick-screen {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+    .msk-quick-screen-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .msk-quick-screen .check-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    @media (max-width: 520px) {
+      .msk-quick-screen .check-grid { grid-template-columns: 1fr; }
+    }
+
+    @keyframes mskFlashHighlight {
+      0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); }
+      30%  { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent); }
+      100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); }
+    }
+    .msk-subsection-details.flash-highlight { animation: mskFlashHighlight 1s ease-out; border-radius: 6px; }
+
     .section-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
   </style>
 </head>
@@ -590,8 +787,39 @@
         </div>
       </div>
       <div class="output-body empty" id="output">Select findings above to generate the note.</div>
-      <div class="output-options">
-        <label><input type="checkbox" id="prefixToggle"> Include system prefixes</label>
+      <div class="output-options-wrap">
+        <details class="output-options-details" id="outputOptionsDetails">
+          <summary>
+            <span>Output options</span>
+            <span class="output-options-count" id="outputOptionsCount"></span>
+          </summary>
+          <div class="output-options-grid">
+            <label class="output-option" data-option-id="prefixToggle">
+              <span class="output-option-label">Include system prefixes (e.g. CVS, RESP)</span>
+              <input type="checkbox" class="output-option-switch" id="prefixToggle">
+            </label>
+            <label class="output-option is-on" data-option-id="severityToggle">
+              <span class="output-option-label">Show severity markers (&#9888;&#65039; / **)</span>
+              <input type="checkbox" class="output-option-switch" id="severityToggle" checked>
+            </label>
+            <label class="output-option is-on" data-option-id="summaryToggle">
+              <span class="output-option-label">Append notable findings summary</span>
+              <input type="checkbox" class="output-option-switch" id="summaryToggle" checked>
+            </label>
+            <label class="output-option" data-option-id="abnormalsOnlyToggle">
+              <span class="output-option-label">Abnormal findings only</span>
+              <input type="checkbox" class="output-option-switch" id="abnormalsOnlyToggle">
+            </label>
+            <label class="output-option" data-option-id="expandAbbrevToggle">
+              <span class="output-option-label">Expand abbreviations (NAD, TM, CRT&hellip;)</span>
+              <input type="checkbox" class="output-option-switch" id="expandAbbrevToggle">
+            </label>
+            <label class="output-option" data-option-id="timestampToggle">
+              <span class="output-option-label">Prepend date &amp; time stamp</span>
+              <input type="checkbox" class="output-option-switch" id="timestampToggle">
+            </label>
+          </div>
+        </details>
       </div>
     </div>
   </div>
@@ -634,9 +862,9 @@
     var CARDIOVASCULAR_HEPATOMEGALY_YN_ROWS = [
       {
         key: 'hepatomegaly',
-        label: 'Hepatomegally',
+        label: 'Hepatomegaly',
         yes: 'Large palpable liver',
-        no: 'No hepatomegally',
+        no: 'No hepatomegaly',
         normalYes: false,
         yesTag: 'abnormal finding',
         noTag: 'Normal finding'
@@ -652,13 +880,48 @@
       { key: 'nasalFlaring', label: 'Nasal flaring', yes: 'Nasal flaring present', no: 'No nasal flaring', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' }
     ];
 
+    var NEURO_CN_YN_ROWS = [
+      { key: 'pupils', label: 'Pupils equal & reactive', yes: 'Pupils equal and reactive to light', no: 'Pupils unequal or non-reactive', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'visualFields', label: 'Visual fields / fixation', yes: 'Visual fields and fixation intact', no: 'Visual field or fixation deficit', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'eyeMovements', label: 'Eye movements full', yes: 'Eye movements full with no nystagmus', no: 'Eye movements restricted or nystagmus present', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'faceSymmetry', label: 'Face symmetrical', yes: 'Face symmetrical at rest and on movement', no: 'Facial asymmetry present', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'hearing', label: 'Hearing grossly intact', yes: 'Hearing grossly intact', no: 'Reduced response to sound', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'bulbar', label: 'Tongue / palate / speech', yes: 'Tongue, palate and speech/swallow normal', no: 'Tongue, palate or speech/swallow abnormal', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' }
+    ];
+    var NEURO_UL_YN_ROWS = [
+      { key: 'bulk', label: 'Bulk symmetrical', yes: 'Upper limb bulk symmetrical with no wasting', no: 'Upper limb muscle wasting or asymmetry', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'tone', label: 'Tone normal', yes: 'Upper limb tone normal bilaterally', no: 'Upper limb tone abnormal or asymmetrical', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'power', label: 'Power 5/5', yes: 'Upper limb power 5/5 bilaterally', no: 'Upper limb power reduced', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'reflexes', label: 'Reflexes normal', yes: 'Upper limb reflexes normal (biceps, triceps, brachioradialis)', no: 'Upper limb reflexes abnormal or asymmetrical', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'coordination', label: 'Coordination normal', yes: 'Upper limb coordination normal (finger\u2013nose)', no: 'Upper limb coordination impaired', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'sensation', label: 'Sensation intact', yes: 'Upper limb sensation grossly intact', no: 'Upper limb sensory deficit', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' }
+    ];
+    var NEURO_LL_YN_ROWS = [
+      { key: 'bulk', label: 'Bulk symmetrical', yes: 'Lower limb bulk symmetrical with no wasting', no: 'Lower limb muscle wasting or asymmetry', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'tone', label: 'Tone normal', yes: 'Lower limb tone normal bilaterally', no: 'Lower limb tone abnormal or asymmetrical', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'power', label: 'Power 5/5', yes: 'Lower limb power 5/5 bilaterally', no: 'Lower limb power reduced', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'reflexes', label: 'Reflexes normal', yes: 'Lower limb reflexes normal (knee, ankle)', no: 'Lower limb reflexes abnormal or asymmetrical', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'clonus', label: 'Ankle clonus absent', yes: 'Ankle clonus absent', no: 'Sustained ankle clonus present', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'plantars', label: 'Plantars downgoing', yes: 'Plantars downgoing bilaterally', no: 'Plantars upgoing', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'coordination', label: 'Coordination normal', yes: 'Lower limb coordination normal (heel\u2013shin)', no: 'Lower limb coordination impaired', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'sensation', label: 'Sensation intact', yes: 'Lower limb sensation grossly intact', no: 'Lower limb sensory deficit', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'gait', label: 'Gait normal', yes: 'Gait normal and age-appropriate', no: 'Gait abnormal', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' }
+    ];
+    var NEURO_INFANT_HEAD_YN_ROWS = [
+      { key: 'headControl', label: 'Head control age-appropriate', yes: 'Head control age-appropriate', no: 'Head lag present', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' }
+    ];
+
     var YES_NO_TOGGLE_ROW_REGISTRY = {
       abdomen__peritonitic: ABDOMEN_PERITONITIC_YN_ROWS,
       heent__oral_yn: HEENT_ORAL_YN_ROWS,
       heent__neck_meningism_yn: HEENT_NECK_MENINGISM_YN_ROWS,
       cardiovascular__femoral: CARDIOVASCULAR_FEMORAL_YN_ROWS,
       cardiovascular__hepatomegaly: CARDIOVASCULAR_HEPATOMEGALY_YN_ROWS,
-      respiratory__accessory: RESPIRATORY_ACCESSORY_YN_ROWS
+      respiratory__accessory: RESPIRATORY_ACCESSORY_YN_ROWS,
+      neurology__cn: NEURO_CN_YN_ROWS,
+      neurology__upperLimb: NEURO_UL_YN_ROWS,
+      neurology__lowerLimb: NEURO_LL_YN_ROWS,
+      neurology__infantHead: NEURO_INFANT_HEAD_YN_ROWS
     };
 
     var SECTIONS = [
@@ -748,35 +1011,14 @@
         label: 'Neurology',
         icon: '🧠',
         groups: [
-          { type: 'radio', name: 'correctedAge', label: 'Corrected gestational age', options: ['Corrected age appropriate', 'Corrected age preterm considered'] },
-          { type: 'radio', name: 'behaviouralState', label: 'Behavioural state at exam', options: ['Awake and alert', 'Drowsy', 'Quiet sleep', 'Active sleep'] },
-          { type: 'radio', name: 'preExamObservation', label: 'Spontaneous activity', options: ['Good spontaneous activity', 'Reduced spontaneous activity', 'No spontaneous activity'] },
-
-          { type: 'checkbox', name: 'cn2', label: 'CN II', options: ['Visual fixation present', 'Visual tracking present', 'Pupillary light response present', 'Pupillary response reduced or absent'] },
-          { type: 'checkbox', name: 'cn346', label: 'CN III/IV/VI', options: ['Extraocular movements full', 'Conjugate gaze present', 'Nystagmus absent', 'Nystagmus present'] },
-          { type: 'checkbox', name: 'cn5', label: 'CN V', options: ['Rooting reflex present', 'Jaw tone normal', 'Jaw tone reduced', 'Jaw tone increased'] },
-          { type: 'checkbox', name: 'cn7', label: 'CN VII', options: ['Facial symmetry preserved on cry', 'Facial asymmetry present'] },
-          { type: 'checkbox', name: 'cn8', label: 'CN VIII', options: ['Responds to auditory stimuli', 'Reduced response to sound'] },
-          { type: 'checkbox', name: 'cn910', label: 'CN IX/X', options: ['Suck reflex present', 'Swallow coordinated', 'Gag reflex present', 'Suck/swallow impaired'] },
-          { type: 'checkbox', name: 'cn12', label: 'CN XII', options: ['Tongue movement symmetrical', 'Tongue asymmetry present'] },
-
-          { type: 'checkbox', name: 'posture', label: 'Posture (supine)', options: ['Limb flexion posture appropriate', 'Arms adducted to trunk', 'Head central', 'Persistent lateral head deviation', 'Trunk posture normal', 'Arm/leg posture asymmetry'] },
-          { type: 'radio', name: 'movementQuantity', label: 'Movement quantity', options: ['Movement quantity normal', 'Movements excessive', 'Movements sluggish', 'Movements absent'] },
-          { type: 'checkbox', name: 'movementQuality', label: 'Movement quality', options: ['Movements free and smooth', 'Cramped-synchronous movements', 'Jerky movements', 'Tremulous movements', 'Athetoid movements', 'Dystonic movements', 'Myoclonic movements', 'Extensor spasms'] },
-          { type: 'checkbox', name: 'spontaneousMotor', label: 'Spontaneous voluntary motor activity', options: ['Spontaneous motor activity normal in supine', 'Reduced spontaneous voluntary activity in supine'] },
-
-          { type: 'radio', name: 'toneGlobal', label: 'Tone (global)', options: ['Tone normal', 'Tone increased', 'Tone decreased'] },
-          { type: 'checkbox', name: 'toneItems', label: 'Tone examination items', options: ['Scarf sign normal', 'Scarf sign abnormal', 'Arm traction normal', 'Arm traction abnormal', 'Leg traction normal', 'Leg traction abnormal', 'Popliteal angle normal', 'Popliteal angle abnormal', 'Heel-to-ear normal', 'Heel-to-ear abnormal', 'Head lag absent', 'Head lag present', 'Ventral suspension normal', 'Ventral suspension abnormal', 'Neck tone normal', 'Neck tone abnormal', 'Head control in vertical normal', 'Head control in vertical reduced'] },
-
-          { type: 'checkbox', name: 'primitiveReflexes', label: 'Primitive reflexes', options: ['Moro reflex present', 'Rooting reflex present', 'Suck reflex present', 'Palmar grasp present', 'Plantar response extensor with toe fanning (infant pattern)', 'Galant reflex present', 'Stepping reflex present', 'ATNR present'] },
-          { type: 'checkbox', name: 'dtr', label: 'Deep tendon reflexes', options: ['Biceps reflex normal', 'Patellar reflex normal', 'Ankle jerk normal', 'Reflexes brisk', 'Reflexes reduced', 'Ankle clonus absent', 'Ankle clonus present'] },
-
-          { type: 'checkbox', name: 'headSkull', label: 'Head and skull', options: ['Head circumference measured and plotted', 'Head shape normal', 'Plagiocephaly', 'Craniosynostosis concern', 'Anterior fontanelle normal size and tension', 'Posterior fontanelle normal', 'Sutures normal', 'Suture separation/ridging/fusion concern', 'Transillumination not indicated', 'Transillumination performed'] },
-
-          { type: 'checkbox', name: 'developmentBehaviour', label: 'Global development and behaviour', options: ['Motor milestones appropriate for corrected age', 'Social milestones appropriate for corrected age', 'Communication milestones appropriate for corrected age', 'Lateralising/asymmetrical signs absent', 'Lateralising/asymmetrical signs present', 'Cry normal strength and pitch', 'High-pitched cry', 'Alertness and interaction appropriate', 'Reduced alertness/interaction'] },
-          { type: 'checkbox', name: 'additionalObs', label: 'Additional observations', options: ['Spontaneous movements in prone appropriate', 'Seizure-like activity absent', 'Jitteriness stimulus-sensitive and suppressible', 'Setting-sun sign absent', 'Setting-sun sign present', 'Unequal palpebral fissures absent', 'Unequal palpebral fissures present', 'Marcus Gunn phenomenon absent', 'Marcus Gunn phenomenon present', 'Pupil reactions equal and reactive', 'Pupil reactions abnormal'] }
+          { type: 'radio', name: 'behaviour', label: 'Behaviour / conscious level', options: ['Alert and orientated', 'Drowsy', 'Irritable', 'Inconsolable', 'Obtunded', 'Unresponsive'] },
+          { type: 'radio', name: 'interaction', label: 'Interaction', options: ['Interacting appropriately', 'Reduced interaction'] },
+          { type: 'yesNoToggle', name: 'cn', label: 'Cranial nerves', rows: NEURO_CN_YN_ROWS },
+          { type: 'yesNoToggle', name: 'upperLimb', label: 'Upper limb neurology', rows: NEURO_UL_YN_ROWS },
+          { type: 'yesNoToggle', name: 'lowerLimb', label: 'Lower limb neurology', rows: NEURO_LL_YN_ROWS },
+          { type: 'infantSpecific', name: 'infant' }
         ],
-        freeHint: 'Optional: include HINE score, focal findings, or detailed neurological impression'
+        freeHint: 'Optional: focal findings, HINE score, or detailed neurological impression'
       }
     ];
 
@@ -894,8 +1136,6 @@
               { value: 'No tenderness', tag: TAG_NORMAL },
               { value: 'No swelling', tag: TAG_NORMAL },
               { value: 'Normal gait', tag: TAG_NORMAL },
-              { value: 'Barlow negative', tag: TAG_NORMAL },
-              { value: 'Ortolani negative', tag: TAG_NORMAL },
               { value: 'Swelling', tag: TAG_ABNORMAL },
               { value: 'Tenderness on palpation', tag: TAG_ABNORMAL },
               { value: 'Reduced range of movement', tag: TAG_ABNORMAL },
@@ -905,8 +1145,6 @@
               { value: 'Antalgic gait', tag: TAG_ABNORMAL },
               { value: 'Leg length discrepancy', tag: TAG_ABNORMAL },
               { value: 'Trendelenburg positive', tag: TAG_ABNORMAL },
-              { value: 'Barlow positive', tag: TAG_URGENT },
-              { value: 'Ortolani positive', tag: TAG_URGENT },
               { value: 'Non-weight-bearing', tag: TAG_URGENT },
               { value: 'Pseudoparalysis', tag: TAG_URGENT }
             ]
@@ -1149,9 +1387,7 @@
               { value: 'Swelling', tag: TAG_ABNORMAL },
               { value: 'Boggy swelling', tag: TAG_ABNORMAL },
               { value: 'Laceration', tag: TAG_ABNORMAL },
-              { value: 'Haematoma', tag: TAG_ABNORMAL },
-              { value: 'Cephalohaematoma', tag: TAG_ABNORMAL },
-              { value: 'Caput succedaneum', tag: TAG_ABNORMAL }
+              { value: 'Haematoma', tag: TAG_ABNORMAL }
             ]
           },
           {
@@ -1236,7 +1472,7 @@
     var POST_HEENT_KEYS = ['skin'];
     /** Document output order (matches page layout top to bottom). HEENT inserted via special key. */
     var OUTPUT_SECTION_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen', '_heent_', 'skin', 'neurology', '_msk_'];
-    var LUNG_FINDINGS = ['Vesicular breath sounds', 'Reduced air entry', 'Wheeze', 'Fine crackles', 'Course crackles'];
+    var LUNG_FINDINGS = ['Vesicular breath sounds', 'Reduced air entry', 'Wheeze', 'Fine crackles', 'Coarse crackles'];
     var LUNG_ZONES = [
       { key: 'left_upper', label: 'Left upper zone' },
       { key: 'left_middle', label: 'Left middle zone' },
@@ -1265,26 +1501,38 @@
 
     var OUTPUT_LABEL_MAP = {
       'HS I + II only': 'Heart sounds I + II with no added sounds',
-      'Radial pulses normal': 'Good radial pulses, normal volume',
+      'Radial pulses normal': 'Radial pulses palpable and of normal volume',
       'Well': 'appears well',
       'Mildly unwell': 'appears mildly unwell',
-      'Toxic/Septic': 'Appears toxic/septic',
-      'Interacting with carer': 'Interacting well with carer',
-      'Comfortable': 'Comfortable at rest',
-      'Mild pain': 'Mild pain at rest',
-      'Moderate pain': 'Moderate pain at rest',
-      'Severe pain': 'Severe pain at rest',
-      'Dry cough': 'Dry cough witnessed',
-      'Wet cough': 'Wet productive cough witnessed',
-      'Barking cough': 'Barking cough witnessed',
-      'Dysmorphic features': 'Dysmorphic features present',
-      'Good chest rise': 'Good chest rise, equal bilaterally',
-      'Poor chest rise': 'Poor chest rise bilaterally',
-      'Fontanelle flat': 'Anterior fontanelle flat and normotensive',
-      'Fontanelle bulging': 'Anterior fontanelle bulging',
-      'Fontanelle sunken': 'Anterior fontanelle sunken',
-      'Good tears': 'Crying good tears',
-      'No tears': 'No tears when crying'
+      'Toxic/Septic': 'appears toxic/septic',
+      'Interacting with carer': 'interacting well with carer',
+      'Comfortable': 'comfortable at rest',
+      'Mild pain': 'in mild pain at rest',
+      'Moderate pain': 'in moderate pain at rest',
+      'Severe pain': 'in severe pain at rest',
+      'In distress': 'in distress',
+      'Dry cough': 'dry cough witnessed',
+      'Wet cough': 'wet productive cough witnessed',
+      'Barking cough': 'barking cough witnessed',
+      'Dysmorphic features': 'dysmorphic features present',
+      'No dysmorphic features': 'no dysmorphic features',
+      'Good chest rise': 'good chest rise, equal bilaterally',
+      'Poor chest rise': 'poor chest rise bilaterally',
+      'Asymmetrical chest rise': 'asymmetrical chest rise',
+      'Fontanelle flat': 'anterior fontanelle flat and normotensive',
+      'Fontanelle bulging': 'anterior fontanelle bulging',
+      'Fontanelle sunken': 'anterior fontanelle sunken',
+      'Good tears': 'crying good tears',
+      'No tears': 'no tears when crying',
+      'Alert': 'alert',
+      'Lethargic': 'lethargic',
+      'Drowsy': 'drowsy',
+      'Irritable': 'irritable',
+      'Inconsolable': 'inconsolable',
+      'Withdrawn': 'withdrawn',
+      'Radial pulses weak': 'radial pulses weak',
+      'Radial pulses thready': 'radial pulses thready',
+      'Radial pulses bounding': 'radial pulses bounding'
     };
     var OUTPUT_SECTION_PREFIX_MAP = {
       general: 'EOB',
@@ -1313,7 +1561,13 @@
       'swelling', 'effusion', 'crepitus', 'deformity', 'erythema', 'warmth',
       'muscle wasting', 'muscle spasm', 'tenderness on palpation', 'midline tenderness',
       'paraspinal tenderness', 'antalgic gait', 'instability', 'positive',
-      'kyphosis', 'scoliosis', 'torticollis', 'locked knee'
+      'kyphosis', 'scoliosis', 'torticollis', 'locked knee',
+      'obtunded', 'unresponsive', 'reduced interaction', 'head lag present',
+      'power reduced', 'tone abnormal', 'reflexes abnormal', 'coordination impaired',
+      'sensory deficit', 'visual field or fixation deficit', 'nystagmus present',
+      'facial asymmetry', 'reduced response to sound', 'pupils unequal', 'pupils non-reactive',
+      'plantars upgoing', 'ankle clonus present', 'sustained ankle clonus',
+      'primitive reflex asymmetry', 'primitive reflexes persistent beyond'
     ];
 
     var NORMAL_PATTERNS = [
@@ -1326,12 +1580,26 @@
       'good chest rise', 'equal bilaterally', 'hs i + ii', 'femorals palpable', 'fontanelle flat',
       'heart sounds i + ii', 'normotensive',
       'full range of movement', 'nad', 'grip strength normal', 'negative',
-      'stable to valgus and varus stress', 'normal arch', 'normal gait', 'normal alignment', 'normal curvature'
+      'stable to valgus and varus stress', 'normal arch', 'normal gait', 'normal alignment', 'normal curvature',
+      'alert and orientated', 'interacting appropriately', 'head control age-appropriate',
+      'pupils equal and reactive', 'eye movements full', 'face symmetrical',
+      'hearing grossly intact', 'tongue, palate and speech', 'power 5/5', 'sensation grossly intact',
+      'coordination normal', 'plantars downgoing', 'ankle clonus absent', 'gait normal',
+      'moro present', 'rooting present', 'suck present', 'palmar grasp present',
+      'stepping present', 'atnr present'
     ];
     var URGENT_ABNORMAL_PATTERNS = [
       'drowsy',
       'irritable',
       'inconsolable',
+      'obtunded',
+      'unresponsive',
+      'pupils unequal',
+      'pupils non-reactive',
+      'power reduced',
+      'tone abnormal',
+      'sustained ankle clonus',
+      'plantars upgoing',
       'appears unwell',
       'appears toxic/septic',
       'central capillary refill >3s',
@@ -1343,10 +1611,8 @@
       'radial pulses weak',
       'radial pulses thready',
       'severe work of breathing',
-      'sever work of breathing',
       'harsh stridor',
       'asymmetrical chest rise',
-      'asymetrical chest rise',
       'poor chest rise',
       'poor chest rise bilaterally',
       'rigid abdomen',
@@ -1377,6 +1643,17 @@
     ];
     var EXPLICIT_URGENT_PATTERNS = [
       'not interacting with carer',
+      'obtunded',
+      'unresponsive',
+      'pupils unequal or non-reactive',
+      'upper limb power reduced',
+      'lower limb power reduced',
+      'upper limb tone abnormal or asymmetrical',
+      'lower limb tone abnormal or asymmetrical',
+      'sustained ankle clonus present',
+      'plantars upgoing',
+      'anterior fontanelle bulging',
+      'anterior fontanelle sunken',
       'appears toxic/septic',
       'moderate pain at rest',
       'severe pain at rest',
@@ -1435,7 +1712,17 @@
       'does not appear meningitic',
       'barlow negative',
       'ortolani negative',
-      'straight leg raise negative bilaterally'
+      'straight leg raise negative bilaterally',
+      'alert and orientated',
+      'interacting appropriately',
+      'head control age-appropriate',
+      'anterior fontanelle flat and normotensive',
+      'moro present and symmetrical',
+      'rooting present',
+      'suck present',
+      'palmar grasp present',
+      'stepping present',
+      'atnr present'
     ];
     var TAG_NORMAL = 'Normal finding';
     var TAG_ABNORMAL = 'abnormal finding';
@@ -1556,6 +1843,10 @@
     applyTagsToYnRows(CARDIOVASCULAR_FEMORAL_YN_ROWS);
     applyTagsToYnRows(CARDIOVASCULAR_HEPATOMEGALY_YN_ROWS);
     applyTagsToYnRows(RESPIRATORY_ACCESSORY_YN_ROWS);
+    applyTagsToYnRows(NEURO_CN_YN_ROWS);
+    applyTagsToYnRows(NEURO_UL_YN_ROWS);
+    applyTagsToYnRows(NEURO_LL_YN_ROWS);
+    applyTagsToYnRows(NEURO_INFANT_HEAD_YN_ROWS);
     applyTagsToSectionOptions();
 
     function normalizeFindingTag(tag) {
@@ -1582,6 +1873,15 @@
       return trimSentence(entry);
     }
 
+    function capitaliseFirst(text) {
+      if (!text) return text;
+      var first = text.charAt(0);
+      if (first && first.toLowerCase() === first && /[a-z]/.test(first)) {
+        return first.toUpperCase() + text.slice(1);
+      }
+      return text;
+    }
+
     function formatFindingsLine(parts, abnormalCollector, systemKey) {
       if (!parts || !parts.length) return '';
       var abnormalParts = [];
@@ -1601,15 +1901,29 @@
           classType: cls,
           system: sys
         });
-        if (cls === 'urgent') abnormalParts.push(raw);
-        else abnormalParts.push(raw);
+        abnormalParts.push(raw);
+      }
+      if (abnormalsOnly) {
+        if (!abnormalParts.length) return '';
+        normalParts = [];
       }
       var merged = '';
-      if (abnormalParts.length && normalParts.length) merged = abnormalParts.join(', ') + ' /// ' + normalParts.join(', ');
-      else if (abnormalParts.length) merged = abnormalParts.join(', ');
-      else merged = normalParts.join(', ');
+      if (abnormalParts.length && normalParts.length) {
+        merged = capitaliseFirst(abnormalParts.join(', ')) + '. ' + capitaliseFirst(normalParts.join(', '));
+      } else if (abnormalParts.length) {
+        merged = abnormalParts.join(', ');
+      } else {
+        merged = normalParts.join(', ');
+      }
       if (!merged) return '';
       return merged + '.';
+    }
+
+    function joinAsProse(items) {
+      if (!items || !items.length) return '';
+      if (items.length === 1) return items[0];
+      if (items.length === 2) return items[0] + ' and ' + items[1];
+      return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
     }
 
     function buildAbnormalSummaryLines(abnormalCollector) {
@@ -1621,8 +1935,8 @@
       function summaryLineWithSystemLead(groupKey, text) {
         var body = trimSentence(text || '');
         if (!body) return '';
-        if (groupKey !== 'abdomen') return body;
-        if (body.toLowerCase().indexOf('abdomen ') === 0) return body;
+        if (groupKey !== 'abdomen') return capitaliseFirst(body);
+        if (body.toLowerCase().indexOf('abdomen ') === 0) return capitaliseFirst(body);
         if (/^[A-Z]/.test(body)) body = body.charAt(0).toLowerCase() + body.slice(1);
         return 'Abdomen ' + body;
       }
@@ -1650,19 +1964,19 @@
         var gk = order[oi];
         var b = buckets[gk];
         if (!b) continue;
-        if (b.urgent.length) urgentLines.push(summaryLineWithSystemLead(gk, b.urgent.join(' + ')));
-        if (b.notable.length) notableLines.push(summaryLineWithSystemLead(gk, b.notable.join(' + ')));
+        if (b.urgent.length) urgentLines.push(summaryLineWithSystemLead(gk, joinAsProse(b.urgent)) + '.');
+        if (b.notable.length) notableLines.push(summaryLineWithSystemLead(gk, joinAsProse(b.notable)) + '.');
       }
       if (!urgentLines.length && !notableLines.length) return [];
-      var lines = ['--- ABNORMAL FINDINGS ---'];
+      var lines = ['--- Notable findings ---'];
       if (urgentLines.length) {
         for (var ui = 0; ui < urgentLines.length; ui++) {
-          lines.push((ui === 0 ? '⚠️ ' : '') + urgentLines[ui]);
+          lines.push((showSeverityMarkers ? '⚠️ ' : '') + urgentLines[ui]);
         }
       }
       if (notableLines.length) {
         for (var ni = 0; ni < notableLines.length; ni++) {
-          lines.push((ni === 0 ? '** ' : '') + notableLines[ni]);
+          lines.push((showSeverityMarkers ? '** ' : '') + notableLines[ni]);
         }
       }
       return lines;
@@ -1711,7 +2025,7 @@
           else if (finding === 'Reduced air entry') parts.push('reduced air entry at the ' + getLungZoneLabel(zone.key));
           else if (finding === 'Wheeze') parts.push('polyphonic expiratory wheeze in the ' + getLungZoneLabel(zone.key));
           else if (finding === 'Fine crackles') parts.push('fine crackles at the ' + getLungZoneLabel(zone.key));
-          else if (finding === 'Course crackles') parts.push('course crackles at the ' + getLungZoneLabel(zone.key));
+          else if (finding === 'Coarse crackles') parts.push('coarse crackles at the ' + getLungZoneLabel(zone.key));
         }
         var note = trimSentence(lungZoneNotes[zone.key] || '');
         if (note) parts.push(note.toLowerCase() + ' at the ' + getLungZoneLabel(zone.key));
@@ -1995,7 +2309,8 @@
       var mode = document.querySelector('input[name="respiratory__auscultationMode"]:checked');
       if (!mode) return '';
       if (mode.value === 'Chest clear') {
-        return 'On auscultation, chest clear, vesicular breath sounds throughout, good air entry globally, no added sounds';
+        if (abnormalsOnly) return '';
+        return 'On auscultation, chest clear, with vesicular breath sounds throughout, good air entry globally and no added sounds.';
       }
       if (mode.value === 'Added sounds') {
         var findings = [];
@@ -2007,7 +2322,7 @@
             var findingValue = trimSentence(checked[ci].value);
             if (findingValue === 'Wheeze') findings.push('polyphonic expiratory wheeze');
             else if (findingValue === 'Fine crackles') findings.push('fine crackles');
-            else if (findingValue === 'Course crackles') findings.push('course crackles');
+            else if (findingValue === 'Coarse crackles') findings.push('coarse crackles');
             else findings.push(findingValue.toLowerCase());
           }
         }
@@ -2024,8 +2339,9 @@
             break;
           }
         }
-        if (!hasFocalFindings) return 'On auscultation, bilateral ' + formatted + ', no focal findings identified';
-        return 'On auscultation, bilateral ' + formatted;
+        var formattedBody = trimSentence(formatted);
+        if (!hasFocalFindings) return 'On auscultation, bilateral ' + formattedBody + ', with no focal findings identified.';
+        return 'On auscultation, bilateral ' + formattedBody + '.';
       }
       return '';
     }
@@ -2113,7 +2429,12 @@
           } else if (label.closest('#recessionSubtypeWrap')) label.classList.add('abnormal');
           else if (label.closest('.auscultation-added-check-grid')) label.classList.add('abnormal');
           else if (input.name.indexOf('respiratory__upperAirwaySounds__') === 0 && input.value === 'Soft stridor') label.classList.add('abnormal');
-          else if (input.name.indexOf('msk__') === 0 && input.name.indexOf('__nad') !== -1) label.classList.add('pill-normal');
+          else if (input.name.indexOf('msk__') === 0 && (input.name.indexOf('__nad') !== -1 || input.name.indexOf('msk__quickscreen__') === 0)) label.classList.add('pill-normal');
+          else if (input.name.indexOf('neurology__primitiveReflexes__') === 0) {
+            var neuroReflexTag = normalizeFindingTag(input.getAttribute('data-finding-tag') || '');
+            if (neuroReflexTag === 'normal') label.classList.add('pill-normal');
+            else if (neuroReflexTag === 'abnormal' || neuroReflexTag === 'urgent') label.classList.add('abnormal');
+          }
           else if (classifyFinding(input.value) === 'abnormal') label.classList.add('abnormal');
           else if (classifyFinding(input.value) === 'normal') label.classList.add('pill-normal');
           else label.classList.remove('abnormal', 'pill-normal');
@@ -2671,6 +2992,92 @@
       return { lines: lines, severity: heentSeverity };
     }
 
+    var NEURO_FONTANELLE_OPTIONS = [
+      { value: 'Anterior fontanelle flat and normotensive', tag: TAG_NORMAL },
+      { value: 'Anterior fontanelle bulging', tag: TAG_URGENT },
+      { value: 'Anterior fontanelle sunken', tag: TAG_URGENT }
+    ];
+    var NEURO_PRIMITIVE_REFLEX_OPTIONS = [
+      { value: 'Moro reflex present and symmetrical', tag: TAG_NORMAL },
+      { value: 'Rooting reflex present', tag: TAG_NORMAL },
+      { value: 'Suck reflex present', tag: TAG_NORMAL },
+      { value: 'Palmar grasp present', tag: TAG_NORMAL },
+      { value: 'Stepping reflex present', tag: TAG_NORMAL },
+      { value: 'ATNR present', tag: TAG_NORMAL },
+      { value: 'Primitive reflex asymmetry present', tag: TAG_ABNORMAL },
+      { value: 'Primitive reflexes persistent beyond expected age', tag: TAG_ABNORMAL }
+    ];
+
+    function buildNeurologyInfantBlock(host) {
+      var details = document.createElement('details');
+      details.className = 'lung-map-details';
+      details.id = 'neurologyInfantDetails';
+      var summary = document.createElement('summary');
+      summary.className = 'lung-map-details-summary';
+      summary.textContent = 'Infant-specific findings (optional)';
+      details.appendChild(summary);
+
+      var body = document.createElement('div');
+      body.className = 'lung-map-details-body';
+
+      var fontLbl = document.createElement('div');
+      fontLbl.className = 'group-label';
+      fontLbl.textContent = 'Anterior fontanelle';
+      body.appendChild(fontLbl);
+      var fontPillRow = document.createElement('div');
+      fontPillRow.className = 'pill-row';
+      for (var fi = 0; fi < NEURO_FONTANELLE_OPTIONS.length; fi++) {
+        var fOpt = NEURO_FONTANELLE_OPTIONS[fi];
+        var fLabel = document.createElement('label');
+        fLabel.className = 'pill-opt';
+        fLabel.onclick = (function(lbl) { return function(e) { handlePillClick(lbl, e); }; })(fLabel);
+        var fInp = document.createElement('input');
+        fInp.type = 'radio';
+        fInp.name = 'neurology__fontanelle';
+        fInp.id = 'neurology__fontanelle__' + fi;
+        fInp.value = fOpt.value;
+        fInp.setAttribute('data-finding-tag', fOpt.tag);
+        fLabel.appendChild(fInp);
+        fLabel.appendChild(document.createTextNode(fOpt.value));
+        fontPillRow.appendChild(fLabel);
+      }
+      body.appendChild(fontPillRow);
+
+      var headLbl = document.createElement('div');
+      headLbl.className = 'group-label';
+      headLbl.textContent = 'Head control / head lag';
+      headLbl.style.marginTop = 'var(--sp-group)';
+      body.appendChild(headLbl);
+      appendYesNoToggleWrap(body, 'neurology__infantHead', NEURO_INFANT_HEAD_YN_ROWS, { id: 'neurologyInfantHeadYnWrap', spanFull: true });
+
+      var reflexLbl = document.createElement('div');
+      reflexLbl.className = 'group-label';
+      reflexLbl.textContent = 'Primitive reflexes';
+      reflexLbl.style.marginTop = 'var(--sp-group)';
+      body.appendChild(reflexLbl);
+      var reflexGrid = document.createElement('div');
+      reflexGrid.className = 'check-grid';
+      for (var pi = 0; pi < NEURO_PRIMITIVE_REFLEX_OPTIONS.length; pi++) {
+        var pOpt = NEURO_PRIMITIVE_REFLEX_OPTIONS[pi];
+        var pLabel = document.createElement('label');
+        pLabel.className = 'check-opt';
+        pLabel.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(pLabel);
+        var pCb = document.createElement('input');
+        pCb.type = 'checkbox';
+        pCb.id = 'neurology__primitiveReflexes__' + pi;
+        pCb.name = 'neurology__primitiveReflexes__' + pi;
+        pCb.value = pOpt.value;
+        pCb.setAttribute('data-finding-tag', pOpt.tag);
+        pLabel.appendChild(pCb);
+        pLabel.appendChild(document.createTextNode(pOpt.value));
+        reflexGrid.appendChild(pLabel);
+      }
+      body.appendChild(reflexGrid);
+
+      details.appendChild(body);
+      host.appendChild(details);
+    }
+
     function renderSectionCard(section) {
       var card = document.createElement('div');
       card.className = 'section-card';
@@ -2770,6 +3177,14 @@
           var cvYnName = group.name || 'femoral';
           var cvYnId = 'cardiovascular' + cvYnName.charAt(0).toUpperCase() + cvYnName.slice(1) + 'YnWrap';
           appendYesNoToggleWrap(row, 'cardiovascular__' + cvYnName, group.rows, { id: cvYnId, spanFull: true });
+        } else if (section.key === 'neurology' && group.type === 'yesNoToggle') {
+          row.classList.add('span-full');
+          var neuroYnName = group.name;
+          var neuroYnId = 'neurology' + neuroYnName.charAt(0).toUpperCase() + neuroYnName.slice(1) + 'YnWrap';
+          appendYesNoToggleWrap(row, 'neurology__' + neuroYnName, group.rows, { id: neuroYnId, spanFull: true });
+        } else if (section.key === 'neurology' && group.type === 'infantSpecific') {
+          row.classList.add('span-full');
+          buildNeurologyInfantBlock(row);
         } else {
           var checkGrid = document.createElement('div');
           checkGrid.className = 'check-grid';
@@ -2850,7 +3265,7 @@
           ausPanel.className = 'auscultation-added-panel';
           var ausGrid = document.createElement('div');
           ausGrid.className = 'check-grid auscultation-added-check-grid';
-          var soundOpts = ['Wheeze', 'Fine crackles', 'Course crackles', 'Bronchial Breathing', 'Upper airway secretions heard'];
+          var soundOpts = ['Wheeze', 'Fine crackles', 'Coarse crackles', 'Bronchial breathing', 'Upper airway secretions heard'];
           for (var ai = 0; ai < soundOpts.length; ai++) {
             var ausLab = document.createElement('label');
             ausLab.className = 'check-opt';
@@ -3330,10 +3745,235 @@
       return body;
     }
 
+    /* ===== MSK QUICK SCREEN + QUICK PICKER ===== */
+    var MSK_QUICK_SCREEN_ITEMS = [
+      { key: 'noDeformity',   value: 'No gross deformity',                 tag: TAG_NORMAL },
+      { key: 'movesLimbs',    value: 'Moves all four limbs equally',       tag: TAG_NORMAL },
+      { key: 'noBonyTender',  value: 'No bony tenderness on palpation',    tag: TAG_NORMAL },
+      { key: 'nvIntact',      value: 'Neurovascularly intact distally',    tag: TAG_NORMAL },
+      { key: 'mobility',      value: 'Age-appropriate mobility and gait',  tag: TAG_NORMAL },
+      { key: 'spine',         value: 'Spine straight, no midline tenderness', tag: TAG_NORMAL }
+    ];
+
+    function buildMskQuickScreen() {
+      var panel = document.createElement('div');
+      panel.className = 'msk-quick-screen';
+      var title = document.createElement('div');
+      title.className = 'msk-quick-screen-title';
+      title.textContent = 'Quick screen (baseline NAD)';
+      panel.appendChild(title);
+      var grid = document.createElement('div');
+      grid.className = 'check-grid';
+      for (var i = 0; i < MSK_QUICK_SCREEN_ITEMS.length; i++) {
+        var item = MSK_QUICK_SCREEN_ITEMS[i];
+        var lab = document.createElement('label');
+        lab.className = 'check-opt';
+        lab.onclick = (function(l) { return function() { handleCheckClick(l); }; })(lab);
+        var inp = document.createElement('input');
+        inp.type = 'checkbox';
+        inp.id = 'msk__quickscreen__' + item.key;
+        inp.name = 'msk__quickscreen__' + item.key;
+        inp.value = item.value;
+        inp.setAttribute('data-tag', item.tag);
+        lab.appendChild(inp);
+        lab.appendChild(document.createTextNode(item.value));
+        grid.appendChild(lab);
+      }
+      panel.appendChild(grid);
+      return panel;
+    }
+
+    function setCheckboxState(input, checked) {
+      if (!input) return;
+      var changed = input.checked !== checked;
+      input.checked = checked;
+      var lab = input.closest('.check-opt');
+      if (lab) {
+        if (checked) {
+          lab.classList.add('selected');
+          if (input.name && input.name.indexOf('__nad') !== -1) {
+            lab.classList.add('pill-normal');
+            lab.classList.remove('abnormal');
+          } else if (input.getAttribute && input.getAttribute('data-tag') === TAG_NORMAL) {
+            lab.classList.add('pill-normal');
+            lab.classList.remove('abnormal');
+          }
+        } else {
+          lab.classList.remove('selected', 'abnormal', 'pill-normal');
+        }
+      }
+      return changed;
+    }
+
+    function mskSubsectionHasCheckedFindings(subKey) {
+      var mskBlock = document.getElementById('mskBlock');
+      if (!mskBlock || !subKey) return false;
+      if (subKey === 'shoulder') {
+        var sh = mskBlock.querySelectorAll('input[name^="msk__shoulder__"]:checked');
+        for (var i = 0; i < sh.length; i++) {
+          if (sh[i].name === 'msk__shoulder__nad') continue;
+          return true;
+        }
+        return false;
+      }
+      var sel = 'input[name^="msk__' + subKey + '__R__"]:checked,'
+              + 'input[name^="msk__' + subKey + '__L__"]:checked,'
+              + 'input[name^="msk__' + subKey + '__M__"]:checked';
+      return !!mskBlock.querySelector(sel);
+    }
+
+    function mskSubsectionIsNad(subKey) {
+      var el = document.getElementById('msk__' + subKey + '__nad');
+      return !!(el && el.checked);
+    }
+
+    function updateMskQuickChipStates() {
+      var chips = document.querySelectorAll('.msk-quick-chip[data-msk-sub-chip]');
+      for (var i = 0; i < chips.length; i++) {
+        var chip = chips[i];
+        var subKey = chip.getAttribute('data-msk-sub-chip');
+        chip.classList.remove('is-nad', 'has-findings');
+        if (mskSubsectionHasCheckedFindings(subKey)) chip.classList.add('has-findings');
+        else if (mskSubsectionIsNad(subKey)) chip.classList.add('is-nad');
+      }
+    }
+
+    function focusMskSubsection(subKey) {
+      var mskBlock = document.getElementById('mskBlock');
+      if (!mskBlock) return;
+      var subDet = mskBlock.querySelector('details.msk-subsection-details[data-msk-sub="' + subKey + '"]');
+      if (!subDet) return;
+      var parentGroup = subDet.closest('details.msk-group-details');
+      if (parentGroup) parentGroup.open = true;
+      subDet.open = true;
+      try { subDet.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { subDet.scrollIntoView(); }
+      subDet.classList.remove('flash-highlight');
+      void subDet.offsetWidth;
+      subDet.classList.add('flash-highlight');
+      setTimeout(function() { subDet.classList.remove('flash-highlight'); }, 1100);
+    }
+
+    function buildMskQuickBar() {
+      var bar = document.createElement('div');
+      bar.className = 'msk-quick-bar';
+
+      var searchRow = document.createElement('div');
+      searchRow.className = 'msk-quick-search-row';
+      var search = document.createElement('input');
+      search.type = 'search';
+      search.id = 'msk__quickSearch';
+      search.className = 'msk-quick-search';
+      search.placeholder = 'Jump to region (e.g. wrist, knee, c-spine)';
+      search.setAttribute('autocomplete', 'off');
+      search.setAttribute('aria-label', 'Search MSK regions');
+      searchRow.appendChild(search);
+
+      var actions = document.createElement('div');
+      actions.className = 'msk-quick-actions';
+      var nadBtn = document.createElement('button');
+      nadBtn.type = 'button';
+      nadBtn.className = 'msk-quick-btn primary';
+      nadBtn.textContent = 'Mark MSK NAD';
+      nadBtn.title = 'Tick quick-screen findings and set every region to NAD';
+      nadBtn.addEventListener('click', markAllMskNad);
+      var clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'msk-quick-btn';
+      clearBtn.textContent = 'Clear MSK';
+      clearBtn.title = 'Clear every MSK selection';
+      clearBtn.addEventListener('click', clearAllMskFindings);
+      actions.appendChild(nadBtn);
+      actions.appendChild(clearBtn);
+      searchRow.appendChild(actions);
+      bar.appendChild(searchRow);
+
+      var chips = document.createElement('div');
+      chips.className = 'msk-quick-chips';
+      chips.id = 'msk__quickChips';
+      var allSubs = getMskAllSubsections();
+      for (var si = 0; si < allSubs.length; si++) {
+        var sub = allSubs[si];
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'msk-quick-chip';
+        chip.setAttribute('data-msk-sub-chip', sub.key);
+        chip.setAttribute('data-search-text', sub.label.toLowerCase());
+        chip.textContent = sub.label;
+        chip.addEventListener('click', (function(k) {
+          return function() { focusMskSubsection(k); };
+        })(sub.key));
+        chips.appendChild(chip);
+      }
+      bar.appendChild(chips);
+
+      var empty = document.createElement('div');
+      empty.className = 'msk-quick-empty';
+      empty.id = 'msk__quickEmpty';
+      empty.textContent = 'No matching regions.';
+      empty.hidden = true;
+      bar.appendChild(empty);
+
+      search.addEventListener('input', function() {
+        var q = (search.value || '').trim().toLowerCase();
+        var allChips = chips.querySelectorAll('.msk-quick-chip');
+        var visible = 0;
+        for (var i = 0; i < allChips.length; i++) {
+          var txt = allChips[i].getAttribute('data-search-text') || '';
+          var match = !q || txt.indexOf(q) !== -1;
+          allChips[i].hidden = !match;
+          if (match) visible++;
+        }
+        empty.hidden = visible !== 0;
+      });
+      search.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          var firstVisible = chips.querySelector('.msk-quick-chip:not([hidden])');
+          if (firstVisible) {
+            e.preventDefault();
+            firstVisible.click();
+          }
+        }
+      });
+
+      return bar;
+    }
+
+    function markAllMskNad() {
+      for (var qi = 0; qi < MSK_QUICK_SCREEN_ITEMS.length; qi++) {
+        var qEl = document.getElementById('msk__quickscreen__' + MSK_QUICK_SCREEN_ITEMS[qi].key);
+        setCheckboxState(qEl, true);
+      }
+      var subs = getMskAllSubsections();
+      for (var si = 0; si < subs.length; si++) {
+        var sub = subs[si];
+        if (sub.useShoulderCustomUi) clearMskShoulderFields();
+        else clearMskSubsectionFindings(sub.key);
+        var nadEl = document.getElementById('msk__' + sub.key + '__nad');
+        setCheckboxState(nadEl, true);
+      }
+      updateMskQuickChipStates();
+      updateOutput();
+    }
+
+    function clearAllMskFindings() {
+      var mskBlock = document.getElementById('mskBlock');
+      if (!mskBlock) return;
+      var checks = mskBlock.querySelectorAll('input[type="checkbox"]');
+      for (var i = 0; i < checks.length; i++) setCheckboxState(checks[i], false);
+      var tas = mskBlock.querySelectorAll('textarea');
+      for (var t = 0; t < tas.length; t++) tas[t].value = '';
+      if (typeof updateMskShoulderPanels === 'function') updateMskShoulderPanels();
+      updateMskQuickChipStates();
+      updateOutput();
+    }
+
     function buildMskCard() {
       var card = document.createElement('div');
       card.className = 'section-card';
       card.id = 'mskBlock';
+
+      card.appendChild(buildMskQuickBar());
+      card.appendChild(buildMskQuickScreen());
 
       for (var gi = 0; gi < MSK_GROUPS.length; gi++) {
         var group = MSK_GROUPS[gi];
@@ -3385,15 +4025,25 @@
       var mskBlock = document.getElementById('mskBlock');
       if (!mskBlock) return { lines: [], severity: 'normal' };
       var mskParts = [];
+      var nadLabels = [];
+      var quickScreenPhrases = [];
       var mskSeverity = 'normal';
       var allSubs = getMskAllSubsections();
+
+      for (var qi = 0; qi < MSK_QUICK_SCREEN_ITEMS.length; qi++) {
+        var qItem = MSK_QUICK_SCREEN_ITEMS[qi];
+        var qEl = document.getElementById('msk__quickscreen__' + qItem.key);
+        if (qEl && qEl.checked) {
+          quickScreenPhrases.push(qItem.value.toLowerCase());
+        }
+      }
 
       for (var si = 0; si < allSubs.length; si++) {
         var sub = allSubs[si];
 
         var nadEl = mskBlock.querySelector('#msk__' + sub.key + '__nad');
         if (nadEl && nadEl.checked) {
-          mskParts.push(makeTaggedFinding(sub.label + ': NAD', TAG_NORMAL));
+          nadLabels.push(sub.label.toLowerCase());
           continue;
         }
 
@@ -3462,20 +4112,42 @@
       }
 
       var freeText = trimSentence(document.getElementById('msk__free') ? document.getElementById('msk__free').value : '');
-      if (freeText) mskParts.push(sentenceCase(freeText));
 
-      if (!mskParts.length) return { lines: [], severity: 'normal' };
+      var leadParts = [];
+      if (quickScreenPhrases.length) {
+        leadParts.push(sentenceCase(quickScreenPhrases.join(', ')));
+      }
+      if (nadLabels.length) {
+        var nadJoined;
+        if (nadLabels.length === 1) nadJoined = sentenceCase(nadLabels[0]) + ' NAD';
+        else if (nadLabels.length === 2) nadJoined = sentenceCase(nadLabels[0] + ' and ' + nadLabels[1]) + ' NAD';
+        else {
+          var last = nadLabels[nadLabels.length - 1];
+          nadJoined = sentenceCase(nadLabels.slice(0, -1).join(', ') + ' and ' + last) + ' NAD';
+        }
+        leadParts.push(nadJoined);
+      }
+
+      var orderedParts = leadParts.concat(mskParts);
+      if (freeText) orderedParts.push(sentenceCase(freeText));
+
+      if (!orderedParts.length) return { lines: [], severity: 'normal' };
+      if (abnormalsOnly && mskSeverity === 'normal') return { lines: [], severity: 'normal' };
 
       var lineParts = [];
-      for (var pi = 0; pi < mskParts.length; pi++) {
-        var partText = typeof mskParts[pi] === 'object' ? getFindingText(mskParts[pi]) : mskParts[pi];
+      for (var pi = 0; pi < orderedParts.length; pi++) {
+        var partText = typeof orderedParts[pi] === 'object' ? getFindingText(orderedParts[pi]) : orderedParts[pi];
         if (partText) lineParts.push(trimSentence(partText));
       }
 
       var marker = '';
-      if (mskSeverity === 'urgent') marker = '⚠️ ';
-      else if (mskSeverity === 'abnormal') marker = '** ';
-      var outputLine = marker + 'MSK: ' + lineParts.join('. ') + '.';
+      if (showSeverityMarkers) {
+        if (mskSeverity === 'urgent') marker = '⚠️ ';
+        else if (mskSeverity === 'abnormal') marker = '** ';
+      }
+      var mskBody = lineParts.join('. ') + '.';
+      var lead = includeSystemPrefixes ? 'MSK: ' : 'Musculoskeletal: ';
+      var outputLine = marker + lead + capitaliseFirst(mskBody);
 
       return { lines: [outputLine], severity: mskSeverity };
     }
@@ -3558,23 +4230,69 @@
     }
 
     var includeSystemPrefixes = false;
+    var showSeverityMarkers = true;
+    var showAbnormalSummary = true;
+    var abnormalsOnly = false;
+    var expandAbbreviations = false;
 
     function withSectionPrefix(sectionKey, lineText, severity) {
       var body = trimSentence(lineText || '');
       if (!body) return '';
       var prefix = OUTPUT_SECTION_PREFIX_MAP[sectionKey];
       var marker = '';
-      if (severity === 'urgent') marker = '⚠️ ';
-      else if (severity === 'abnormal') marker = '** ';
+      if (showSeverityMarkers) {
+        if (severity === 'urgent') marker = '⚠️ ';
+        else if (severity === 'abnormal') marker = '** ';
+      }
       if (!includeSystemPrefixes || !prefix) {
         if (sectionKey === 'abdomen' && body.toLowerCase().indexOf('abdomen ') !== 0) {
           var proseBody = body;
           if (/^[A-Z]/.test(proseBody)) proseBody = proseBody.charAt(0).toLowerCase() + proseBody.slice(1);
           return marker + 'Abdomen ' + proseBody + '.';
         }
-        return marker + body + '.';
+        return marker + capitaliseFirst(body) + '.';
       }
-      return marker + prefix + ': ' + body + '.';
+      return marker + prefix + ': ' + capitaliseFirst(body) + '.';
+    }
+
+    var ABBREVIATION_EXPANSIONS = [
+      { pattern: /\bHS I \+ II\b/g, replace: 'Heart sounds I and II' },
+      { pattern: /\bTMs\b/g, replace: 'tympanic membranes' },
+      { pattern: /\bTM\b/g, replace: 'tympanic membrane' },
+      { pattern: /\bCRT\b/g, replace: 'capillary refill time' },
+      { pattern: /\bWOB\b/g, replace: 'work of breathing' },
+      { pattern: /\bROM\b/g, replace: 'range of movement' },
+      { pattern: /\bATNR\b/g, replace: 'asymmetric tonic neck reflex' },
+      { pattern: /\bPEARL\b/g, replace: 'pupils equal and reactive to light' },
+      { pattern: /\bNAD\b/g, replace: 'no abnormality detected' },
+      { pattern: /\bHEENT\b/g, replace: 'Head, eyes, ears, nose and throat' },
+      { pattern: /\bEOB\b/g, replace: 'End-of-bed observations' },
+      { pattern: /\bCVS\b/g, replace: 'Cardiovascular' },
+      { pattern: /\bRESP\b/g, replace: 'Respiratory' },
+      { pattern: /\bABDO\b/g, replace: 'Abdomen' },
+      { pattern: /\bMSK\b/g, replace: 'Musculoskeletal' },
+      { pattern: /\bSKIN\b/g, replace: 'Skin' }
+    ];
+
+    function formatExamTimestamp() {
+      var now = new Date();
+      var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+      var day = pad(now.getDate());
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var month = months[now.getMonth()];
+      var year = now.getFullYear();
+      var hh = pad(now.getHours());
+      var mm = pad(now.getMinutes());
+      return day + ' ' + month + ' ' + year + ' at ' + hh + ':' + mm;
+    }
+
+    function applyAbbreviationExpansions(text) {
+      if (!text) return text;
+      var out = text;
+      for (var i = 0; i < ABBREVIATION_EXPANSIONS.length; i++) {
+        out = out.replace(ABBREVIATION_EXPANSIONS[i].pattern, ABBREVIATION_EXPANSIONS[i].replace);
+      }
+      return out;
     }
 
     function reorderPhrases(phrases) {
@@ -3724,6 +4442,38 @@
             var cvNoEl = document.getElementById(cvYnPrfx + '__' + crdef.key + '__no');
             if (cvYesEl && cvYesEl.checked) phrases.push(makeTaggedFinding(crdef.yes, crdef.yesTag));
             else if (cvNoEl && cvNoEl.checked) phrases.push(makeTaggedFinding(crdef.no, crdef.noTag));
+          }
+          continue;
+        }
+        if (section.key === 'neurology' && group.type === 'yesNoToggle') {
+          var nYnPrfx = 'neurology__' + group.name;
+          for (var nfy = 0; nfy < group.rows.length; nfy++) {
+            var nrdef = group.rows[nfy];
+            var nYesEl = document.getElementById(nYnPrfx + '__' + nrdef.key + '__yes');
+            var nNoEl = document.getElementById(nYnPrfx + '__' + nrdef.key + '__no');
+            if (nYesEl && nYesEl.checked) phrases.push(makeTaggedFinding(nrdef.yes, nrdef.yesTag));
+            else if (nNoEl && nNoEl.checked) phrases.push(makeTaggedFinding(nrdef.no, nrdef.noTag));
+          }
+          continue;
+        }
+        if (section.key === 'neurology' && group.type === 'infantSpecific') {
+          var fontPick = document.querySelector('input[name="neurology__fontanelle"]:checked');
+          if (fontPick) {
+            var fontTag = fontPick.getAttribute('data-finding-tag') || '';
+            phrases.push(makeTaggedFinding(fontPick.value, fontTag));
+          }
+          var infantHeadPrfx = 'neurology__infantHead';
+          for (var ih = 0; ih < NEURO_INFANT_HEAD_YN_ROWS.length; ih++) {
+            var ihRow = NEURO_INFANT_HEAD_YN_ROWS[ih];
+            var ihYesEl = document.getElementById(infantHeadPrfx + '__' + ihRow.key + '__yes');
+            var ihNoEl = document.getElementById(infantHeadPrfx + '__' + ihRow.key + '__no');
+            if (ihYesEl && ihYesEl.checked) phrases.push(makeTaggedFinding(ihRow.yes, ihRow.yesTag));
+            else if (ihNoEl && ihNoEl.checked) phrases.push(makeTaggedFinding(ihRow.no, ihRow.noTag));
+          }
+          var refCbs = document.querySelectorAll('input[id^="neurology__primitiveReflexes__"]:checked');
+          for (var rc = 0; rc < refCbs.length; rc++) {
+            var refTag = refCbs[rc].getAttribute('data-finding-tag') || '';
+            phrases.push(makeTaggedFinding(refCbs[rc].value, refTag));
           }
           continue;
         }
@@ -3914,17 +4664,37 @@
           }
         }
       }
-      var summaryLines = buildAbnormalSummaryLines(abnormalCollector);
-      if (summaryLines.length) {
-        if (lines.length) lines.push('');
-        for (var sl = 0; sl < summaryLines.length; sl++) lines.push(summaryLines[sl]);
+      if (showAbnormalSummary) {
+        var summaryLines = buildAbnormalSummaryLines(abnormalCollector);
+        if (summaryLines.length) {
+          if (lines.length) lines.push('');
+          for (var sl = 0; sl < summaryLines.length; sl++) lines.push(summaryLines[sl]);
+        }
       }
+      if (typeof updateMskQuickChipStates === 'function') updateMskQuickChipStates();
+
       var outputEl = document.getElementById('output');
       var titleEl = document.getElementById('outputToggleTitle');
+      var systemLineCount = 0;
+      for (var lc = 0; lc < lines.length; lc++) {
+        var lineText = lines[lc];
+        if (!lineText || lineText.indexOf('--- ') === 0) continue;
+        if (lineText.indexOf('⚠️ ') === 0 || lineText.indexOf('** ') === 0) {
+          // summary lines look the same as severity-marked system lines; we stop counting
+          // once we hit the summary divider (handled via the blank line above).
+        }
+        systemLineCount++;
+      }
       if (lines.length) {
-        outputEl.textContent = lines.join('\n');
+        var joinedOutput = lines.join('\n');
+        if (expandAbbreviations) joinedOutput = applyAbbreviationExpansions(joinedOutput);
+        if (prependTimestamp) {
+          joinedOutput = 'Examined ' + formatExamTimestamp() + '.\n' + joinedOutput;
+        }
+        outputEl.textContent = joinedOutput;
         outputEl.classList.remove('empty');
-        titleEl.textContent = 'Examination Note (' + lines.length + ' system' + (lines.length > 1 ? 's' : '') + ')';
+        var wordCount = (joinedOutput.match(/\b[\w'-]+\b/g) || []).length;
+        titleEl.textContent = 'Examination Note (' + wordCount + ' word' + (wordCount === 1 ? '' : 's') + ')';
       } else {
         outputEl.textContent = 'Select findings above to generate the note.';
         outputEl.classList.add('empty');
@@ -3952,18 +4722,29 @@
         }, 1500);
       }
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(out).then(copiedState);
-      } else {
+      function failedState() {
+        var original = btn.textContent;
+        btn.textContent = 'Copy failed';
+        setTimeout(function() { btn.textContent = original; }, 1800);
+      }
+
+      function legacyCopy() {
         var ta = document.createElement('textarea');
         ta.value = out;
         ta.style.position = 'fixed';
         ta.style.opacity = '0';
         document.body.appendChild(ta);
         ta.select();
-        document.execCommand('copy');
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
         document.body.removeChild(ta);
-        copiedState();
+        if (ok) copiedState(); else failedState();
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(out).then(copiedState, legacyCopy);
+      } else {
+        legacyCopy();
       }
     }
 
@@ -4021,14 +4802,38 @@
         setLungZoneNote(activeLungZone, this.value);
       });
     }
-    var prefixToggle = document.getElementById('prefixToggle');
-    if (prefixToggle) {
-      includeSystemPrefixes = !!prefixToggle.checked;
-      prefixToggle.addEventListener('change', function() {
-        includeSystemPrefixes = !!this.checked;
+    var prependTimestamp = false;
+
+    function refreshOptionToggleStyles() {
+      var inputs = document.querySelectorAll('.output-options-grid .output-option-switch');
+      var activeCount = 0;
+      for (var i = 0; i < inputs.length; i++) {
+        var wrap = inputs[i].closest('.output-option');
+        if (wrap) wrap.classList.toggle('is-on', inputs[i].checked);
+        if (inputs[i].checked) activeCount++;
+      }
+      var countEl = document.getElementById('outputOptionsCount');
+      if (countEl) countEl.textContent = activeCount ? (activeCount + ' on') : '';
+    }
+
+    function bindOutputOption(id, setter) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      setter(!!el.checked);
+      el.addEventListener('change', function() {
+        setter(!!this.checked);
+        refreshOptionToggleStyles();
         updateOutput();
       });
     }
+
+    bindOutputOption('prefixToggle', function(v) { includeSystemPrefixes = v; });
+    bindOutputOption('severityToggle', function(v) { showSeverityMarkers = v; });
+    bindOutputOption('summaryToggle', function(v) { showAbnormalSummary = v; });
+    bindOutputOption('abnormalsOnlyToggle', function(v) { abnormalsOnly = v; });
+    bindOutputOption('expandAbbrevToggle', function(v) { expandAbbreviations = v; });
+    bindOutputOption('timestampToggle', function(v) { prependTimestamp = v; });
+    refreshOptionToggleStyles();
     updateOutput();
   </script>
 </body>

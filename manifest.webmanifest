@@ -1,0 +1,72 @@
+{
+  "name": "James Woodward Lab",
+  "short_name": "JW Lab",
+  "description": "Paediatric clinical tools & calculators. Works offline once loaded.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#13293d",
+  "theme_color": "#13293d",
+  "categories": ["medical", "health", "productivity", "education"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "WETFLAG Resus Card",
+      "short_name": "WETFLAG",
+      "description": "Paediatric resuscitation weight-based doses",
+      "url": "/wetflag-calculator/?source=pwa-shortcut",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Fluid Calculator",
+      "short_name": "Fluids",
+      "url": "/fluid-calculator/?source=pwa-shortcut",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "QTc Calculator",
+      "short_name": "QTc",
+      "url": "/qtc-calculator/?source=pwa-shortcut",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Examination Notes",
+      "short_name": "Exam",
+      "url": "/infant-exam-notes/?source=pwa-shortcut",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

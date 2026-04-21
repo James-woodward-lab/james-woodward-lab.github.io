@@ -1,64 +1,66 @@
+/* ==========================================================================
+   Paediatric Head Injury CT Stratification — tokens from app-theme.css
+   ========================================================================== */
+
 .head-injury-app .age-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
   gap: 14px;
 }
 
 .head-injury-app .age-status {
-  margin-top: 10px;
-  font-size: 0.84rem;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-sm);
   color: var(--text-soft);
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  padding: var(--sp-1) 10px;
 }
 
 .head-injury-app .rule-group {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--surface2) 70%, transparent);
-  padding: 12px;
-  margin-top: 12px;
+  padding: var(--sp-2);
+  margin-top: var(--sp-2);
 }
 
 .head-injury-app .rule-group legend {
   display: block;
   width: 100%;
   float: left;
-  font-size: 0.83rem;
+  font-size: var(--fs-sm);
   color: var(--muted);
   padding: 0 6px;
-  margin-bottom: 8px;
+  margin-bottom: var(--sp-1);
 }
 
-.head-injury-app .rule-group > *:not(legend) {
-  clear: both;
-}
+.head-injury-app .rule-group > *:not(legend) { clear: both; }
 
 .head-injury-app .rule-heading {
-  font-size: 0.92rem;
+  font-size: var(--fs-base);
   line-height: 1.35;
-  margin: 0 0 8px;
+  margin: 0 0 var(--sp-1);
   color: var(--text);
 }
 
 .head-injury-app .check-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: var(--sp-1) var(--sp-2);
 }
 
 .head-injury-app .checkbox-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  font-size: 0.87rem;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  padding: var(--sp-1) 10px;
 }
 
 .head-injury-app .checkbox-row span {
@@ -66,40 +68,36 @@
   line-height: 1.35;
 }
 
-.head-injury-app .checkbox-row input[type="checkbox"] {
-  margin-top: 2px;
-}
+.head-injury-app .checkbox-row input[type="checkbox"] { margin-top: 2px; }
 
-.head-injury-app .callout {
-  margin-top: 12px;
-}
+.head-injury-app .callout { margin-top: var(--sp-2); }
 
 .head-injury-app .results-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: var(--sp-2);
 }
 
 .head-injury-app .result-panel {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface2);
-  padding: 12px;
+  padding: var(--sp-2);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sp-1);
 }
 
 .head-injury-app .result-panel h2 {
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   line-height: 1.35;
   margin: 0;
 }
 
 .head-injury-app .result-line {
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   color: var(--text);
-  line-height: 1.45;
+  line-height: var(--lh-snug);
   margin: 0;
 }
 
@@ -107,20 +105,7 @@
   margin: 0;
   padding-left: 18px;
   color: var(--text-soft);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   display: grid;
   gap: 5px;
-}
-
-@media (max-width: 900px) {
-  .head-injury-app .check-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 700px) {
-  .head-injury-app .age-grid,
-  .head-injury-app .results-grid {
-    grid-template-columns: 1fr;
-  }
 }
