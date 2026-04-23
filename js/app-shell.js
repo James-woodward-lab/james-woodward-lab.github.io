@@ -33,6 +33,7 @@
     { title: 'Fluid Calculator',                href: '/fluid-calculator/',                emoji: '💧', tags: 'fluid maintenance iv hydration', group: 'Top' },
     { title: 'QTc Calculator',                  href: '/qtc-calculator/',                  emoji: '🫀', tags: 'qtc ecg cardiac rhythm bazett fridericia', group: 'Top' },
     { title: 'Simple Analgesia Dosing',         href: '/bnfc-dose-calculator/',            emoji: '💊', tags: 'paracetamol ibuprofen analgesia dose bnfc', group: 'Top' },
+    { title: 'ED Discharge Pack',               href: '/ed-discharge-pack/',               emoji: '📝', tags: 'discharge pack safety netting gp letter clinical summary note template bronchiolitis gastroenteritis fever head injury asthma uti wound croup febrile convulsion constipation hand foot mouth chickenpox scarlet fever allergic reaction abdominal pain healthier together parent resources', group: 'Top' },
 
     // Works in progress
     { title: 'A-E Assessment Notes',            href: '/ae-assessment/',                   emoji: '🅰️', tags: 'abcde a-e assessment primary survey', group: 'WIP' },

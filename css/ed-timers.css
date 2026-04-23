@@ -1,0 +1,481 @@
+/* ==========================================================================
+   Stop the Clock — ED multi-timer dashboard
+   All colour / spacing / radius / motion reference tokens from app-theme.css.
+   Scoped under .ed-timers-app to avoid leaking into other tools.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   Controls card — Clear / Sound / Vibrate toolbar
+   -------------------------------------------------------------------------- */
+.ed-timers-app .edt-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.ed-timers-app .edt-control-btn,
+.ed-timers-app .edt-toggle-btn {
+  flex: 1 1 auto;
+  width: auto;
+  margin-top: 0;
+  padding: var(--sp-1) var(--sp-3);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.ed-timers-app .edt-control-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ed-timers-app .edt-toggle-btn {
+  flex: 0 0 auto;
+  min-width: 130px;
+}
+
+.ed-timers-app .edt-toggle-btn .edt-toggle-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+/* "Off" state visually muted; "on" state uses accent border. */
+.ed-timers-app .edt-toggle-btn:not(.edt-toggle-on) {
+  opacity: 0.65;
+}
+
+.ed-timers-app .edt-toggle-btn.edt-toggle-on {
+  background: var(--accent-surface);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+
+/* --------------------------------------------------------------------------
+   Preset chips
+   -------------------------------------------------------------------------- */
+.ed-timers-app .edt-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+}
+
+.ed-timers-app .edt-preset {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 2px;
+  padding: var(--sp-2);
+  min-height: 64px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background   var(--duration-fast) var(--ease-standard),
+    transform    var(--duration-fast) var(--ease-standard);
+  touch-action: manipulation;
+}
+
+.ed-timers-app .edt-preset:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.ed-timers-app .edt-preset:active {
+  transform: translateY(0);
+}
+
+.ed-timers-app .edt-preset-dur {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  color: var(--accent2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.ed-timers-app .edt-preset-label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  color: var(--text);
+}
+
+
+/* --------------------------------------------------------------------------
+   Custom timer form
+   -------------------------------------------------------------------------- */
+.ed-timers-app .edt-custom-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: var(--sp-2);
+  align-items: end;
+}
+
+.ed-timers-app .edt-custom-form .field {
+  margin-bottom: 0;
+}
+
+.ed-timers-app .edt-unit-label {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-snug);
+}
+
+.ed-timers-app .edt-chip-group {
+  display: inline-flex;
+  gap: 4px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface2);
+  padding: 3px;
+}
+
+.ed-timers-app .edt-chip {
+  padding: 8px 14px;
+  min-height: 38px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-soft);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color      var(--duration-fast) var(--ease-standard);
+}
+
+.ed-timers-app .edt-chip-active {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+
+.ed-timers-app .edt-add-btn {
+  width: auto;
+  min-width: 132px;
+  margin-top: 0;
+  align-self: end;
+}
+
+@media (max-width: 720px) {
+  .ed-timers-app .edt-custom-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ed-timers-app .edt-custom-form .edt-custom-label {
+    grid-column: 1 / -1;
+  }
+  .ed-timers-app .edt-add-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   Count badge
+   -------------------------------------------------------------------------- */
+.ed-timers-app .edt-count {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+  letter-spacing: var(--tracking-wide);
+  margin-left: var(--sp-1);
+  text-transform: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   Timer grid
+   -------------------------------------------------------------------------- */
+.ed-timers-app .edt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.ed-timers-app .edt-empty,
+.ed-timers-app .edt-max-warning {
+  margin-top: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface2);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.ed-timers-app .edt-max-warning {
+  border-style: solid;
+  border-color: var(--warn-border);
+  background: var(--warn-surface);
+  color: var(--text);
+  font-style: normal;
+}
+
+
+/* --------------------------------------------------------------------------
+   Timer card
+   -------------------------------------------------------------------------- */
+.ed-timers-app .edt-card {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: var(--sp-1);
+  padding: var(--sp-2);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow   var(--duration-fast) var(--ease-standard),
+    background   var(--duration-fast) var(--ease-standard);
+}
+
+.ed-timers-app .edt-card-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-1);
+  align-items: center;
+  min-width: 0;
+}
+
+.ed-timers-app .edt-label {
+  min-width: 0;
+  padding: 4px 6px;
+  margin: 0;
+  background: transparent;
+  border: 1px dashed transparent;
+  border-radius: var(--radius-xs);
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.ed-timers-app .edt-label:hover {
+  border-color: var(--border-strong);
+}
+
+.ed-timers-app .edt-label-input {
+  min-width: 0;
+  width: 100%;
+  padding: 4px 6px;
+  background: var(--surface2);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-xs);
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.ed-timers-app .edt-dur-badge {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  white-space: nowrap;
+}
+
+/* ---------- Ring + readout ---------- */
+.ed-timers-app .edt-display {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  max-width: 180px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.ed-timers-app .edt-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);    /* start at 12 o'clock */
+  transform-origin: 50% 50%;
+  overflow: visible;
+}
+
+.ed-timers-app .edt-ring-bg,
+.ed-timers-app .edt-ring-fg {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.ed-timers-app .edt-ring-bg {
+  stroke: var(--surface2);
+}
+
+.ed-timers-app .edt-ring-fg {
+  stroke: var(--accent);
+  transition: stroke var(--duration-fast) var(--ease-standard);
+}
+
+.ed-timers-app .edt-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.ed-timers-app .edt-time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.4rem, 1rem + 2.5vw, 2.1rem);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.ed-timers-app .edt-status {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  min-height: 1em;
+}
+
+
+/* ---------- Card state variants ---------- */
+.ed-timers-app .edt-state-running .edt-ring-fg { stroke: var(--accent); }
+.ed-timers-app .edt-state-running .edt-status  { color: var(--accent2); }
+
+.ed-timers-app .edt-state-warning {
+  border-color: var(--warn-border);
+  background: var(--warn-surface);
+}
+.ed-timers-app .edt-state-warning .edt-ring-fg { stroke: var(--warn); }
+.ed-timers-app .edt-state-warning .edt-status  { color: var(--warn); }
+
+.ed-timers-app .edt-state-paused {
+  border-color: var(--border-strong);
+}
+.ed-timers-app .edt-state-paused .edt-ring-fg { stroke: var(--muted); }
+.ed-timers-app .edt-state-paused .edt-time    { color: var(--text-soft); }
+.ed-timers-app .edt-state-paused .edt-status  { color: var(--muted); }
+
+.ed-timers-app .edt-state-expired {
+  border-color: var(--danger);
+  background: var(--danger-surface);
+  animation: edt-pulse 1.2s var(--ease-standard) infinite;
+}
+.ed-timers-app .edt-state-expired .edt-ring-fg { stroke: var(--danger); }
+.ed-timers-app .edt-state-expired .edt-time    { color: var(--danger); }
+.ed-timers-app .edt-state-expired .edt-status  { color: var(--danger); }
+
+@keyframes edt-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 50%, transparent); }
+  50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--danger) 0%, transparent); }
+}
+
+
+/* ---------- Controls row ---------- */
+.ed-timers-app .edt-card-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--sp-1);
+}
+
+.ed-timers-app .edt-ctl {
+  width: auto;
+  margin-top: 0;
+  padding: var(--sp-1) var(--sp-2);
+  min-height: 40px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.ed-timers-app .edt-ctl-remove {
+  min-width: 44px;
+  padding: var(--sp-1);
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.ed-timers-app .edt-ctl-remove:hover {
+  background: var(--danger-surface);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+
+/* --------------------------------------------------------------------------
+   Reduced-motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ed-timers-app .edt-state-expired {
+    animation: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 35%, transparent);
+  }
+  .ed-timers-app .edt-preset,
+  .ed-timers-app .edt-toggle-btn,
+  .ed-timers-app .edt-card,
+  .ed-timers-app .edt-label {
+    transition: none;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   Print — keep cards legible on a laminated snapshot
+   -------------------------------------------------------------------------- */
+@media print {
+  .ed-timers-app .theme-toggle,
+  .ed-timers-app .no-print,
+  .ed-timers-app .app-footer,
+  .ed-timers-app .edt-card-controls,
+  #jwl-cmdk-launcher,
+  #back-home-link,
+  .skip-link {
+    display: none !important;
+  }
+  .ed-timers-app .edt-card {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1.5px solid #333 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    animation: none !important;
+  }
+  .ed-timers-app .edt-time,
+  .ed-timers-app .edt-status,
+  .ed-timers-app .edt-label,
+  .ed-timers-app .edt-dur-badge {
+    color: #000 !important;
+  }
+  .ed-timers-app .edt-ring-bg { stroke: #ddd !important; }
+  .ed-timers-app .edt-ring-fg { stroke: #000 !important; }
+  .ed-timers-app .container { padding: 10mm; max-width: 100%; }
+}

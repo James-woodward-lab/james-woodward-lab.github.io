@@ -1,0 +1,55 @@
+﻿/* ED discharge pack */
+.discharge-pack-app .optional { color: var(--muted); font-size: .78rem; font-weight: 400; }
+
+.discharge-pack-app .dp-patient-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.discharge-pack-app .dp-patient-grid .field { margin-bottom: 0; }
+
+.discharge-pack-app .dp-chip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.discharge-pack-app .dp-chip { display:flex; align-items:center; gap:8px; min-height:48px; padding:10px 12px; background:var(--surface); border:1.5px solid var(--border); border-radius:10px; color:var(--text); font-weight:600; cursor:pointer; }
+.discharge-pack-app .dp-chip.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+.discharge-pack-app .dp-chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.discharge-pack-app .dp-outputs-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.discharge-pack-app .dp-copy-all { width:auto; margin-top:0; }
+.discharge-pack-app .dp-outputs-stack { display:grid; gap:14px; }
+.discharge-pack-app .dp-output { background:var(--surface2); border:1.5px solid var(--border); border-radius:12px; padding:14px; }
+.discharge-pack-app .dp-output-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+.discharge-pack-app .dp-output-head h2 { margin:0; font-size:.72rem; letter-spacing:1px; text-transform:uppercase; color:var(--accent); }
+.discharge-pack-app .dp-output-head .dp-copy { width:auto; margin-top:0; min-height:32px; padding:6px 12px; font-size:.8rem; }
+
+.discharge-pack-app .dp-placeholder-note { margin:8px 0 10px; color:var(--muted); font-size:.8rem; }
+.discharge-pack-app .dp-subsection { margin-bottom:10px; }
+.discharge-pack-app .dp-subhead { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+.discharge-pack-app .dp-subhead h3 { margin:0; font-size:.82rem; color:var(--text); }
+.discharge-pack-app .dp-copy-sub { width:auto; margin-top:0; min-height:30px; padding:4px 10px; font-size:.76rem; }
+.discharge-pack-app .dp-sub-textarea { width:100%; min-height:120px; resize:none; overflow:hidden; background:var(--surface); border:1.5px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-family:var(--font-mono); font-size:.84rem; line-height:1.55; white-space:pre-wrap; }
+.discharge-pack-app .dp-sub-textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--focus-ring); }
+.discharge-pack-app .dp-empty { margin:0; padding:12px; border:1px dashed var(--border); border-radius:10px; color:var(--muted); font-style:italic; }
+
+.discharge-pack-app .dp-block { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; white-space:pre-wrap; margin:0; font-family:var(--font-mono); }
+.discharge-pack-app .dp-block-safety { background: color-mix(in srgb, var(--warn) 10%, var(--surface)); border-color: var(--warn); }
+
+.discharge-pack-app .dp-resources { margin-top:8px; padding:12px; background:var(--surface); border:1px dashed var(--border); border-radius:10px; }
+.discharge-pack-app .dp-resources-title { margin:0 0 4px; font-size:.7rem; letter-spacing:1px; text-transform:uppercase; color:var(--accent); }
+.discharge-pack-app .dp-resource-list { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.discharge-pack-app .dp-resource { display:grid; grid-template-columns:1fr auto; gap:10px; padding:10px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; }
+.discharge-pack-app .dp-resource-label { font-weight:600; }
+.discharge-pack-app .dp-resource-url { color:var(--accent); font-family:var(--font-mono); font-size:.78rem; word-break:break-all; text-decoration:none; }
+.discharge-pack-app .dp-resource-actions { display:flex; gap:6px; flex-wrap:wrap; }
+.discharge-pack-app .dp-resource-actions .btn { width:auto; margin-top:0; padding:6px 10px; min-height:32px; font-size:.78rem; text-decoration:none; }
+.discharge-pack-app .dp-resource-empty { padding:10px 12px; color:var(--muted); border:1px dashed var(--border); border-radius:10px; font-style:italic; }
+
+.discharge-pack-app .dp-refs ul { list-style:none; padding:0; margin:10px 0; display:grid; gap:6px; font-size:.85rem; color:var(--text-soft); }
+.discharge-pack-app .dp-refs a { color:var(--accent); text-decoration:none; }
+
+@media (max-width: 520px) { .discharge-pack-app .dp-resource { grid-template-columns:1fr; } }
+
+@media print {
+  .discharge-pack-app .theme-toggle, .discharge-pack-app .no-print, .discharge-pack-app .app-footer,
+  .discharge-pack-app .dp-copy, .discharge-pack-app .dp-copy-all, .discharge-pack-app .dp-copy-link,
+  .discharge-pack-app .dp-open-link, .discharge-pack-app .dp-resource-actions, #jwl-cmdk-launcher { display:none !important; }
+  .discharge-pack-app .container { max-width:100%; padding:10mm; }
+  .discharge-pack-app .card, .discharge-pack-app .dp-output, .discharge-pack-app .dp-block, .discharge-pack-app .dp-resources, .discharge-pack-app .dp-resource { background:#fff !important; color:#000 !important; border:1px solid #333 !important; box-shadow:none !important; }
+  .discharge-pack-app .dp-sub-textarea { background:#fff !important; color:#000 !important; border:1px solid #333 !important; height:auto !important; overflow:visible !important; }
+  .discharge-pack-app .dp-resource-url { color:#000 !important; text-decoration: underline; }
+}

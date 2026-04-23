@@ -66,6 +66,13 @@
       "short_name": "Exam",
       "url": "/infant-exam-notes/?source=pwa-shortcut",
       "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "ED Discharge Pack",
+      "short_name": "Discharge",
+      "description": "Clinical summary, GP letter, and safety-netting generator",
+      "url": "/ed-discharge-pack/?source=pwa-shortcut",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
   "prefer_related_applications": false

@@ -14,7 +14,7 @@
  * caches are cleaned on activate.
  */
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const SHELL_CACHE = `jwl-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `jwl-runtime-${CACHE_VERSION}`;
 
@@ -24,10 +24,12 @@ const APP_SHELL = [
   '/manifest.webmanifest',
   '/css/app-theme.css',
   '/css/style-variants.css',
+  '/css/ed-discharge-pack.css',
   '/js/style-system.js',
   '/js/theme-toggle.js',
   '/js/quick-links.js',
   '/js/app-shell.js',
+  '/ed-discharge-pack/index.html',
   '/icons/icon.svg',
   '/icons/icon-maskable.svg'
 ];

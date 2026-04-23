@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>Stop the Clock — Paediatric ED Timer Dashboard</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/ed-timers.css">
+  <script src="../js/theme-toggle.js"></script>
+</head>
+<body class="ed-timers-app">
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+<div class="container">
+  <header class="app-header-center">
+    <h1>⏱️ Stop the Clock</h1>
+    <p>Simultaneous reassessment, dose-interval and chase-task timers for paediatric ED</p>
+  </header>
+
+  <section class="card no-print" aria-labelledby="edt-controls-title">
+    <div class="card-title" id="edt-controls-title">Controls</div>
+    <div class="edt-controls-row">
+      <button type="button" class="btn-ghost edt-control-btn" id="btn-clear-expired">Clear expired</button>
+      <button type="button" class="btn-ghost edt-control-btn" id="btn-clear-all">Clear all</button>
+      <button type="button"
+              class="btn-ghost edt-toggle-btn edt-toggle-on"
+              id="btn-sound"
+              aria-pressed="true"
+              aria-label="Sound on expiry — currently on">
+        <span class="edt-toggle-icon" aria-hidden="true">🔔</span>
+        <span class="edt-toggle-label">Sound</span>
+      </button>
+      <button type="button"
+              class="btn-ghost edt-toggle-btn edt-toggle-on"
+              id="btn-vibrate"
+              aria-pressed="true"
+              aria-label="Vibration on expiry — currently on">
+        <span class="edt-toggle-icon" aria-hidden="true">📳</span>
+        <span class="edt-toggle-label">Vibrate</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="card no-print" aria-labelledby="edt-presets-title">
+    <div class="card-title" id="edt-presets-title">Presets</div>
+    <p class="hint">One tap adds a running timer with a sensible default. All presets drawn from common paeds-ED reassessment windows.</p>
+    <div class="edt-presets" id="presets" role="list"></div>
+  </section>
+
+  <section class="card no-print" aria-labelledby="edt-custom-title">
+    <div class="card-title" id="edt-custom-title">Custom timer</div>
+    <form class="edt-custom-form" id="custom-form" novalidate>
+      <div class="field edt-custom-label">
+        <label for="custom-label">Label</label>
+        <input id="custom-label" type="text" maxlength="40"
+               placeholder="e.g. Reassess Bay 3" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field edt-custom-duration">
+        <label for="custom-duration">Duration</label>
+        <input id="custom-duration" type="number" min="1" max="240" step="1"
+               value="15" inputmode="numeric">
+      </div>
+      <div class="field edt-custom-unit">
+        <span class="edt-unit-label">Unit</span>
+        <div class="edt-chip-group" role="radiogroup" aria-label="Duration unit">
+          <button type="button" class="edt-chip edt-chip-active" data-unit="min"
+                  role="radio" aria-checked="true">min</button>
+          <button type="button" class="edt-chip" data-unit="h"
+                  role="radio" aria-checked="false">h</button>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary edt-add-btn">Add timer</button>
+    </form>
+    <p class="hint">
+      Shortcuts: <kbd>N</kbd> focus label ·
+      <kbd>Space</kbd> pause/resume most-recent timer ·
+      <kbd>R</kbd> reset most-recent ·
+      <kbd>Esc</kbd> cancel rename.
+    </p>
+  </section>
+
+  <section class="card" aria-labelledby="edt-active-title">
+    <div class="card-title" id="edt-active-title">
+      Active timers
+      <span class="edt-count" id="timer-count" aria-live="polite" aria-atomic="true"></span>
+    </div>
+    <div class="edt-grid" id="timer-grid"></div>
+    <p class="hint edt-empty" id="edt-empty">
+      No timers running. Tap a preset above or add a custom timer.
+    </p>
+    <p class="hint edt-max-warning" id="edt-max" hidden>
+      Maximum of 12 timers reached — remove or reset one to add another.
+    </p>
+  </section>
+
+  <span class="visually-hidden" id="edt-live" aria-live="assertive" role="status"></span>
+
+  <footer class="app-footer">
+    For clinical decision support only. Timers are reminders and do not replace clinical reassessment. Always act on the clinical picture, not on a beep.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ====================================================================
+   * Constants
+   * ==================================================================== */
+
+  var STORAGE_KEY       = 'jwl-ed-timers-v1';
+  var MAX_TIMERS        = 12;
+  var MAX_LABEL_LEN     = 40;
+  var WARNING_FRACTION  = 0.20;
+  var WRITE_THROTTLE_MS = 1000;
+  var RING_R            = 45;
+  var RING_C            = 2 * Math.PI * RING_R;
+
+  var PRESETS = [
+    { id: 'salbutamol',      label: 'Post-salbutamol reassess',            minutes: 30  },
+    { id: 'post-benzo',      label: 'Post-benzo seizure reassess',         minutes: 10  },
+    { id: 'post-adrenaline', label: 'Post-adrenaline anaphylaxis reassess', minutes: 5  },
+    { id: 'anaphylaxis-obs', label: 'Anaphylaxis discharge observation',   minutes: 240 },
+    { id: 'paracetamol',     label: 'Paracetamol next dose',               minutes: 240 },
+    { id: 'ibuprofen',       label: 'Ibuprofen next dose',                 minutes: 360 },
+    { id: 'ondansetron',     label: 'Post-ondansetron oral trial',         minutes: 15  },
+    { id: 'sepsis-reassess', label: 'Sepsis reassess (post-bolus)',        minutes: 15  },
+    { id: 'sepsis-hour-1',   label: 'Sepsis hour-1 bundle review',         minutes: 60  },
+    { id: 'bloods',          label: 'Bloods chase',                        minutes: 45  },
+    { id: 'imaging',         label: 'Imaging chase',                       minutes: 30  },
+    { id: 'croup-dex',       label: 'Croup post-dex reassess',             minutes: 30  },
+    { id: 'in-fentanyl',     label: 'Intranasal fentanyl reassess',        minutes: 10  }
+  ];
+
+  /* ====================================================================
+   * State
+   * ==================================================================== */
+
+  /** @type {Array<{id:string,label:string,startedAtMs:number,durationMs:number,pausedAtMs:?number,accumulatedPauseMs:number}>} */
+  var timers = [];
+  var soundEnabled   = true;
+  var vibrateEnabled = true;
+  var lastInteracted = null;
+
+  /* runtime-only (not persisted) */
+  var audioCtx        = null;
+  var audioUnlocked   = false;
+  var chimedIds       = new Set();   // IDs for which expiry chime has fired
+  var announcedIds    = new Set();   // IDs for which expiry announcement has fired
+  var persistTimer    = null;
+  var renameActiveId  = null;        // id of timer currently being renamed in-place
+
+  /* ====================================================================
+   * DOM refs
+   * ==================================================================== */
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var dom = {};
+
+  function grabDom() {
+    dom.grid            = $('timer-grid');
+    dom.count           = $('timer-count');
+    dom.empty           = $('edt-empty');
+    dom.max             = $('edt-max');
+    dom.live            = $('edt-live');
+    dom.presets         = $('presets');
+    dom.customForm      = $('custom-form');
+    dom.customLabel     = $('custom-label');
+    dom.customDuration  = $('custom-duration');
+    dom.btnClearExpired = $('btn-clear-expired');
+    dom.btnClearAll     = $('btn-clear-all');
+    dom.btnSound        = $('btn-sound');
+    dom.btnVibrate      = $('btn-vibrate');
+  }
+
+  /* ====================================================================
+   * Utilities
+   * ==================================================================== */
+
+  function uid() {
+    return 't_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+  }
+
+  function now() { return Date.now(); }
+
+  function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+  /** Format ms >= 0 as mm:ss, or hh:mm:ss when >= 1h. */
+  function fmtClock(ms) {
+    var total = Math.max(0, Math.floor(ms / 1000));
+    var h = Math.floor(total / 3600);
+    var m = Math.floor((total % 3600) / 60);
+    var s = total % 60;
+    if (h > 0) return h + ':' + pad2(m) + ':' + pad2(s);
+    return pad2(m) + ':' + pad2(s);
+  }
+
+  /** Readable "1 minute 5 seconds" for aria-label. */
+  function fmtReadable(ms) {
+    var total = Math.max(0, Math.round(ms / 1000));
+    var h = Math.floor(total / 3600);
+    var m = Math.floor((total % 3600) / 60);
+    var s = total % 60;
+    var parts = [];
+    if (h) parts.push(h + (h === 1 ? ' hour' : ' hours'));
+    if (m) parts.push(m + (m === 1 ? ' minute' : ' minutes'));
+    if (s && !h) parts.push(s + (s === 1 ? ' second' : ' seconds'));
+    return parts.length ? parts.join(' ') : '0 seconds';
+  }
+
+  /** Compute remaining ms (may be negative when expired). */
+  function remainingMs(t, nowMs) {
+    var n = nowMs || now();
+    var elapsed = (n - t.startedAtMs) - (t.accumulatedPauseMs || 0);
+    if (t.pausedAtMs != null) elapsed -= (n - t.pausedAtMs);
+    return t.durationMs - elapsed;
+  }
+
+  function isPaused(t)  { return t.pausedAtMs != null; }
+  function isExpired(t, nowMs) { return !isPaused(t) && remainingMs(t, nowMs) <= 0; }
+
+  /* ====================================================================
+   * Persistence (sessionStorage only; preferences included)
+   * ==================================================================== */
+
+  // Lifecycle state changes are discrete user actions (add / remove / pause
+  // etc.). Persisting synchronously keeps sessionStorage consistent at all
+  // times and costs ~1 ms for up to MAX_TIMERS small objects. The throttle
+  // knob is retained as a no-op for future high-frequency call sites.
+  function persistSoon() { persistNow(); }
+
+  function persistNow() {
+    try {
+      var payload = {
+        timers: timers,
+        soundEnabled: soundEnabled,
+        vibrateEnabled: vibrateEnabled
+      };
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (_) { /* private mode / quota — non-fatal */ }
+  }
+
+  function hydrate() {
+    try {
+      var raw = sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      if (data && Array.isArray(data.timers)) {
+        timers = data.timers.filter(function (t) {
+          return t && typeof t.id === 'string'
+            && typeof t.label === 'string'
+            && typeof t.startedAtMs === 'number'
+            && typeof t.durationMs === 'number';
+        }).slice(0, MAX_TIMERS).map(function (t) {
+          return {
+            id: t.id,
+            label: t.label,
+            startedAtMs: t.startedAtMs,
+            durationMs: t.durationMs,
+            pausedAtMs: (typeof t.pausedAtMs === 'number') ? t.pausedAtMs : null,
+            accumulatedPauseMs: (typeof t.accumulatedPauseMs === 'number') ? t.accumulatedPauseMs : 0
+          };
+        });
+        // Pre-mark any already-expired timers so we don't spam chime/announce on rehydrate
+        var n = now();
+        timers.forEach(function (t) {
+          if (isExpired(t, n)) {
+            chimedIds.add(t.id);
+            announcedIds.add(t.id);
+          }
+        });
+      }
+      if (typeof data.soundEnabled === 'boolean')   soundEnabled   = data.soundEnabled;
+      if (typeof data.vibrateEnabled === 'boolean') vibrateEnabled = data.vibrateEnabled;
+    } catch (_) { /* corrupt payload — ignore */ }
+  }
+
+  /* ====================================================================
+   * Audio (chime via WebAudio — unlocked on first user gesture)
+   * ==================================================================== */
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      audioCtx = new Ctx();
+      if (audioCtx.state === 'suspended' && audioCtx.resume) audioCtx.resume();
+      audioUnlocked = true;
+    } catch (_) { audioUnlocked = false; }
+  }
+
+  function playChime() {
+    if (!soundEnabled || !audioUnlocked || !audioCtx) return;
+    try {
+      var t0 = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      // Two-tone chime (A5 → E5) for recognisability without startle.
+      osc.frequency.setValueAtTime(880, t0);
+      osc.frequency.setValueAtTime(659.25, t0 + 0.16);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.18, t0 + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.45);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.5);
+    } catch (_) { /* ignore audio hiccups */ }
+  }
+
+  function doVibrate() {
+    if (!vibrateEnabled) return;
+    try {
+      if (typeof navigator.vibrate === 'function') navigator.vibrate([200, 100, 200]);
+    } catch (_) { /* ignore */ }
+  }
+
+  function announce(text) {
+    if (!dom.live) return;
+    // Force re-announce when identical text by clearing first tick.
+    dom.live.textContent = '';
+    /* eslint-disable no-unused-expressions */
+    dom.live.offsetWidth;
+    /* eslint-enable no-unused-expressions */
+    dom.live.textContent = text;
+  }
+
+  /* ====================================================================
+   * Timer lifecycle
+   * ==================================================================== */
+
+  function addTimer(label, minutes) {
+    if (timers.length >= MAX_TIMERS) {
+      dom.max.hidden = false;
+      setTimeout(function () { dom.max.hidden = true; }, 3000);
+      return null;
+    }
+    var safeLabel = (label || '').toString().trim().slice(0, MAX_LABEL_LEN) || 'Timer';
+    var durationMs = Math.round(clamp(Number(minutes) || 0, 0.1, 240 * 1) * 60 * 1000);
+    if (durationMs <= 0) return null;
+    var t = {
+      id: uid(),
+      label: safeLabel,
+      startedAtMs: now(),
+      durationMs: durationMs,
+      pausedAtMs: null,
+      accumulatedPauseMs: 0
+    };
+    timers.push(t);
+    lastInteracted = t.id;
+    render();
+    persistSoon();
+    return t;
+  }
+
+  function removeTimer(id, force) {
+    var idx = indexOf(id);
+    if (idx < 0) return;
+    var t = timers[idx];
+    if (!force && !isExpired(t) && !isPaused(t)) {
+      var card = dom.grid.querySelector('[data-tid="' + CSS.escape(id) + '"]');
+      if (card && !window.confirm('Remove "' + t.label + '"? It is still running.')) return;
+    }
+    timers.splice(idx, 1);
+    chimedIds.delete(id);
+    announcedIds.delete(id);
+    if (lastInteracted === id) lastInteracted = timers.length ? timers[timers.length - 1].id : null;
+    render();
+    persistSoon();
+  }
+
+  function pauseTimer(id) {
+    var t = find(id);
+    if (!t || isPaused(t) || isExpired(t)) return;
+    t.pausedAtMs = now();
+    lastInteracted = id;
+    render();
+    persistSoon();
+  }
+
+  function resumeTimer(id) {
+    var t = find(id);
+    if (!t || !isPaused(t)) return;
+    t.accumulatedPauseMs += (now() - t.pausedAtMs);
+    t.pausedAtMs = null;
+    lastInteracted = id;
+    render();
+    persistSoon();
+  }
+
+  function resetTimer(id) {
+    var t = find(id);
+    if (!t) return;
+    t.startedAtMs = now();
+    t.pausedAtMs = null;
+    t.accumulatedPauseMs = 0;
+    chimedIds.delete(id);
+    announcedIds.delete(id);
+    lastInteracted = id;
+    render();
+    persistSoon();
+  }
+
+  function renameTimer(id, label) {
+    var t = find(id);
+    if (!t) return;
+    var safe = (label || '').toString().trim().slice(0, MAX_LABEL_LEN) || 'Timer';
+    t.label = safe;
+    render();
+    persistSoon();
+  }
+
+  function clearExpired() {
+    var before = timers.length;
+    timers = timers.filter(function (t) { return !isExpired(t); });
+    if (timers.length !== before) {
+      render();
+      persistSoon();
+    }
+  }
+
+  function clearAllTimers() {
+    if (!timers.length) return;
+    if (!window.confirm('Remove all ' + timers.length + ' timer' + (timers.length === 1 ? '' : 's') + '?')) return;
+    timers = [];
+    chimedIds.clear();
+    announcedIds.clear();
+    lastInteracted = null;
+    render();
+    persistSoon();
+  }
+
+  function find(id)    { var i = indexOf(id); return i < 0 ? null : timers[i]; }
+  function indexOf(id) { for (var i = 0; i < timers.length; i++) if (timers[i].id === id) return i; return -1; }
+
+  /* ====================================================================
+   * Rendering
+   * ==================================================================== */
+
+  function render() {
+    renderPresets();
+    renderGrid();
+    renderControls();
+    renderCount();
+  }
+
+  function renderPresets() {
+    if (dom.presets.childElementCount) return;   // static — build once
+    var frag = document.createDocumentFragment();
+    PRESETS.forEach(function (p) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'edt-preset';
+      btn.setAttribute('data-preset', p.id);
+      btn.setAttribute('role', 'listitem');
+      var dur = p.minutes >= 60 ? (p.minutes / 60) + ' h' : p.minutes + ' min';
+      btn.innerHTML =
+        '<span class="edt-preset-dur">' + dur + '</span>' +
+        '<span class="edt-preset-label">' + escapeHTML(p.label) + '</span>';
+      btn.addEventListener('click', function () {
+        unlockAudio();
+        var added = addTimer(p.label, p.minutes);
+        if (added) announce(p.label + ' timer started for ' + dur);
+      });
+      frag.appendChild(btn);
+    });
+    dom.presets.appendChild(frag);
+  }
+
+  function renderControls() {
+    setToggleBtn(dom.btnSound,   soundEnabled,   '🔔', 'Sound');
+    setToggleBtn(dom.btnVibrate, vibrateEnabled, '📳', 'Vibrate');
+    dom.btnClearExpired.disabled = !timers.some(function (t) { return isExpired(t); });
+    dom.btnClearAll.disabled     = !timers.length;
+  }
+
+  function setToggleBtn(btn, on, icon, name) {
+    if (!btn) return;
+    btn.classList.toggle('edt-toggle-on', !!on);
+    btn.setAttribute('aria-pressed', String(!!on));
+    btn.setAttribute('aria-label',
+      name + ' on expiry — currently ' + (on ? 'on' : 'off'));
+    var labelSpan = btn.querySelector('.edt-toggle-label');
+    if (labelSpan) labelSpan.textContent = name;
+    var iconSpan = btn.querySelector('.edt-toggle-icon');
+    if (iconSpan) iconSpan.textContent = icon;
+  }
+
+  function renderCount() {
+    var n = timers.length;
+    dom.count.textContent = n
+      ? '(' + n + ' of ' + MAX_TIMERS + ')'
+      : '';
+    dom.empty.hidden = n > 0;
+    dom.max.hidden = n < MAX_TIMERS;
+  }
+
+  function renderGrid() {
+    var existing = {};
+    Array.prototype.forEach.call(dom.grid.children, function (el) {
+      var id = el.dataset.tid;
+      if (id) existing[id] = el;
+    });
+
+    // Build in declared order.
+    var fragInsert = document.createDocumentFragment();
+    var seen = {};
+    timers.forEach(function (t) {
+      seen[t.id] = true;
+      var card = existing[t.id];
+      if (!card) card = buildCard(t);
+      else updateCardStatic(card, t);
+      fragInsert.appendChild(card);
+    });
+
+    // Remove cards for deleted timers.
+    Object.keys(existing).forEach(function (id) {
+      if (!seen[id]) existing[id].remove();
+    });
+
+    // Reinsert in the correct order.
+    dom.grid.appendChild(fragInsert);
+  }
+
+  function buildCard(t) {
+    var card = document.createElement('article');
+    card.className = 'edt-card';
+    card.setAttribute('data-tid', t.id);
+    card.setAttribute('role', 'timer');
+    card.setAttribute('aria-live', 'off');
+
+    // Header: label (editable) + duration badge
+    var labelRow = document.createElement('div');
+    labelRow.className = 'edt-card-head';
+
+    var labelBtn = document.createElement('button');
+    labelBtn.type = 'button';
+    labelBtn.className = 'edt-label';
+    labelBtn.setAttribute('aria-label', 'Rename timer');
+    labelBtn.textContent = t.label;
+    labelBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      startRename(t.id, card);
+    });
+
+    var durBadge = document.createElement('span');
+    durBadge.className = 'edt-dur-badge';
+    durBadge.textContent = formatDurationBadge(t.durationMs);
+
+    labelRow.appendChild(labelBtn);
+    labelRow.appendChild(durBadge);
+
+    // Display: SVG ring + readout
+    var displayEl = document.createElement('div');
+    displayEl.className = 'edt-display';
+    displayEl.innerHTML =
+      '<svg class="edt-ring" viewBox="0 0 100 100" aria-hidden="true">'
+      + '<circle class="edt-ring-bg" cx="50" cy="50" r="' + RING_R + '"></circle>'
+      + '<circle class="edt-ring-fg" cx="50" cy="50" r="' + RING_R + '"'
+      +   ' stroke-dasharray="' + RING_C.toFixed(2) + '"'
+      +   ' stroke-dashoffset="0"></circle>'
+      + '</svg>'
+      + '<div class="edt-readout">'
+      +   '<span class="edt-time">--:--</span>'
+      +   '<span class="edt-status"></span>'
+      + '</div>';
+
+    // Controls
+    var controls = document.createElement('div');
+    controls.className = 'edt-card-controls';
+    controls.innerHTML =
+      '<button type="button" class="btn-ghost edt-ctl" data-action="pause">Pause</button>'
+      + '<button type="button" class="btn-ghost edt-ctl" data-action="reset">Reset</button>'
+      + '<button type="button" class="btn-ghost edt-ctl edt-ctl-remove"'
+      +   ' data-action="remove" aria-label="Remove timer">✕</button>';
+    controls.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      var action = btn.dataset.action;
+      if (action === 'pause')  { isPaused(t) ? resumeTimer(t.id) : pauseTimer(t.id); }
+      else if (action === 'reset')  resetTimer(t.id);
+      else if (action === 'remove') removeTimer(t.id);
+    });
+
+    card.appendChild(labelRow);
+    card.appendChild(displayEl);
+    card.appendChild(controls);
+
+    return card;
+  }
+
+  function updateCardStatic(card, t) {
+    var labelBtn = card.querySelector('.edt-label');
+    if (labelBtn && labelBtn.textContent !== t.label && renameActiveId !== t.id) {
+      labelBtn.textContent = t.label;
+    }
+    var durBadge = card.querySelector('.edt-dur-badge');
+    if (durBadge) durBadge.textContent = formatDurationBadge(t.durationMs);
+  }
+
+  function formatDurationBadge(durationMs) {
+    var totalMin = Math.round(durationMs / 60000);
+    if (totalMin >= 60 && totalMin % 60 === 0) return (totalMin / 60) + ' h';
+    if (totalMin >= 60) return (totalMin / 60).toFixed(1).replace(/\.0$/, '') + ' h';
+    return totalMin + ' min';
+  }
+
+  /* ====================================================================
+   * Rename-in-place
+   * ==================================================================== */
+
+  function startRename(id, card) {
+    if (renameActiveId) return;
+    var t = find(id); if (!t) return;
+    var labelBtn = card.querySelector('.edt-label');
+    if (!labelBtn) return;
+    renameActiveId = id;
+    var original = t.label;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'edt-label-input';
+    input.value = original;
+    input.maxLength = MAX_LABEL_LEN;
+    labelBtn.replaceWith(input);
+    input.focus();
+    input.setSelectionRange(0, input.value.length);
+
+    var committed = false;
+    function commit(save) {
+      if (committed || renameActiveId !== id) return;
+      committed = true;
+      renameActiveId = null;
+      // Restore a fresh label button in place of the input so subsequent
+      // updateCardStatic passes find it. render() below then rewrites text.
+      if (input.parentNode) {
+        input.replaceWith(labelBtn);
+      }
+      labelBtn.textContent = save ? (input.value.trim().slice(0, MAX_LABEL_LEN) || 'Timer')
+                                  : original;
+      if (save) renameTimer(id, input.value);
+      else      render();
+    }
+    input.addEventListener('blur',    function () { commit(true);  });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter')       { e.preventDefault(); commit(true);  }
+      else if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+    });
+  }
+
+  /* ====================================================================
+   * Per-frame tick (rAF)
+   * ====================================================================
+   * Visual state + expiry detection. Slow aria-label updates happen at
+   * ≤ 1 Hz based on a per-card monotonic second counter.
+   */
+
+  var lastSlowSecondByCard = {};
+
+  function tick() {
+    var n = now();
+    var anyExpiredNow = false;
+
+    timers.forEach(function (t) {
+      var card = dom.grid.querySelector('[data-tid="' + CSS.escape(t.id) + '"]');
+      if (!card) return;
+
+      var remaining = remainingMs(t, n);
+      var fraction  = clamp(remaining / t.durationMs, 0, 1);
+
+      var paused  = isPaused(t);
+      var expired = !paused && remaining <= 0;
+
+      // Card class state
+      var stateClass;
+      if (paused)                      stateClass = 'edt-state-paused';
+      else if (expired)                stateClass = 'edt-state-expired';
+      else if (fraction <= WARNING_FRACTION) stateClass = 'edt-state-warning';
+      else                             stateClass = 'edt-state-running';
+
+      if (card.dataset.state !== stateClass) {
+        card.classList.remove('edt-state-running', 'edt-state-warning', 'edt-state-expired', 'edt-state-paused');
+        card.classList.add(stateClass);
+        card.dataset.state = stateClass;
+      }
+
+      // Ring — offset increases as remaining decreases
+      var ringFg = card.querySelector('.edt-ring-fg');
+      if (ringFg) {
+        var shown = expired ? 0 : fraction;
+        ringFg.setAttribute('stroke-dashoffset', (RING_C * (1 - shown)).toFixed(2));
+      }
+
+      // Readout
+      var timeEl = card.querySelector('.edt-time');
+      var statusEl = card.querySelector('.edt-status');
+      if (timeEl && statusEl) {
+        if (expired) {
+          timeEl.textContent = fmtClock(-remaining);
+          statusEl.textContent = 'EXPIRED ago';
+        } else if (paused) {
+          timeEl.textContent = fmtClock(remaining);
+          statusEl.textContent = 'Paused';
+        } else {
+          timeEl.textContent = fmtClock(remaining);
+          statusEl.textContent = fraction <= WARNING_FRACTION ? 'Less than 20%' : 'Running';
+        }
+      }
+
+      // Control labels track state
+      var pauseBtn = card.querySelector('[data-action="pause"]');
+      if (pauseBtn) {
+        pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+        pauseBtn.disabled = expired;
+      }
+
+      // Once-per-second aria-label update
+      var second = Math.floor(n / 1000);
+      if (lastSlowSecondByCard[t.id] !== second) {
+        lastSlowSecondByCard[t.id] = second;
+        var phrase;
+        if (expired)      phrase = t.label + ' timer expired ' + fmtReadable(-remaining) + ' ago';
+        else if (paused)  phrase = t.label + ' timer paused with ' + fmtReadable(remaining) + ' remaining';
+        else              phrase = t.label + ' timer, ' + fmtReadable(remaining) + ' remaining';
+        card.setAttribute('aria-label', phrase);
+      }
+
+      // Expiry one-shots
+      if (expired) {
+        anyExpiredNow = true;
+        if (!chimedIds.has(t.id)) {
+          chimedIds.add(t.id);
+          playChime();
+          doVibrate();
+        }
+        if (!announcedIds.has(t.id)) {
+          announcedIds.add(t.id);
+          announce(t.label + ' timer has expired');
+        }
+      }
+    });
+
+    // Keep Clear-expired button accuracy in sync cheaply
+    if (dom.btnClearExpired) dom.btnClearExpired.disabled = !anyExpiredNow;
+
+    requestAnimationFrame(tick);
+  }
+
+  /* ====================================================================
+   * Visibility — force an immediate re-evaluate when returning to tab
+   * ==================================================================== */
+
+  function onVisibilityChange() {
+    if (document.visibilityState === 'visible') {
+      // A single synthetic tick is enough — rAF resumes from here.
+      // Expiry one-shots will fire for anything that expired while hidden.
+      // (Intentional: you want to know something expired, even silently.)
+      // Frame-level update happens on next rAF.
+    }
+  }
+
+  /* ====================================================================
+   * Event wiring
+   * ==================================================================== */
+
+  function wire() {
+    // Sound / vibrate toggles — use click to also unlock audio ctx.
+    dom.btnSound.addEventListener('click', function () {
+      unlockAudio();
+      soundEnabled = !soundEnabled;
+      setToggleBtn(dom.btnSound, soundEnabled, '🔔', 'Sound');
+      persistSoon();
+      if (soundEnabled) playChime();   // confirmatory blip
+    });
+    dom.btnVibrate.addEventListener('click', function () {
+      vibrateEnabled = !vibrateEnabled;
+      setToggleBtn(dom.btnVibrate, vibrateEnabled, '📳', 'Vibrate');
+      persistSoon();
+      if (vibrateEnabled) doVibrate();
+    });
+
+    dom.btnClearExpired.addEventListener('click', clearExpired);
+    dom.btnClearAll.addEventListener('click', clearAllTimers);
+
+    // Custom adder form
+    dom.customForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      unlockAudio();
+      var label = dom.customLabel.value;
+      var raw   = Number(dom.customDuration.value);
+      var unit  = getActiveUnit();
+      if (!raw || raw <= 0) {
+        dom.customDuration.focus();
+        return;
+      }
+      var minutes = unit === 'h' ? raw * 60 : raw;
+      minutes = clamp(minutes, 1, 240);
+      var added = addTimer(label || defaultLabelFor(minutes), minutes);
+      if (added) {
+        dom.customLabel.value = '';
+        dom.customDuration.value = unit === 'h' ? 1 : 15;
+        announce(added.label + ' timer started');
+      }
+    });
+
+    // Unit chip toggle (roving radio)
+    dom.customForm.querySelectorAll('[data-unit]').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var unit = chip.dataset.unit;
+        setActiveUnit(unit);
+        adjustDurationInputForUnit(unit);
+      });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', onGlobalKey);
+
+    // Visibility
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    // No beforeunload persist: every state change persists synchronously
+    // via persistSoon -> persistNow, so sessionStorage is always current.
+  }
+
+  function defaultLabelFor(minutes) {
+    if (minutes >= 60 && minutes % 60 === 0) return (minutes / 60) + ' h timer';
+    return minutes + ' min timer';
+  }
+
+  function getActiveUnit() {
+    var active = dom.customForm.querySelector('[data-unit].edt-chip-active');
+    return active ? active.dataset.unit : 'min';
+  }
+
+  function setActiveUnit(unit) {
+    dom.customForm.querySelectorAll('[data-unit]').forEach(function (c) {
+      var on = c.dataset.unit === unit;
+      c.classList.toggle('edt-chip-active', on);
+      c.setAttribute('aria-checked', String(on));
+    });
+  }
+
+  function adjustDurationInputForUnit(unit) {
+    var el = dom.customDuration;
+    if (unit === 'h') {
+      el.min = '0.5'; el.max = '4'; el.step = '0.5';
+      if (!el.value || Number(el.value) > 4) el.value = '1';
+    } else {
+      el.min = '1'; el.max = '240'; el.step = '1';
+      if (!el.value || Number(el.value) > 240) el.value = '15';
+    }
+  }
+
+  function onGlobalKey(e) {
+    // Esc always available for rename cancel
+    if (e.key === 'Escape' && renameActiveId) {
+      // The input's own handler runs first; this is a safety net.
+      return;
+    }
+
+    var target = e.target;
+    var editable = target && (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable
+    );
+    if (editable) return;
+
+    var k = e.key.toLowerCase();
+
+    if (k === 'n') {
+      e.preventDefault();
+      if (dom.customLabel) dom.customLabel.focus();
+    } else if (k === ' ' || e.key === 'Space') {
+      if (!lastInteracted) return;
+      e.preventDefault();
+      var t = find(lastInteracted);
+      if (!t) return;
+      if (isPaused(t)) resumeTimer(t.id);
+      else if (!isExpired(t)) pauseTimer(t.id);
+    } else if (k === 'r') {
+      if (!lastInteracted) return;
+      e.preventDefault();
+      resetTimer(lastInteracted);
+    }
+  }
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[c];
+    });
+  }
+
+  /* ====================================================================
+   * Boot
+   * ==================================================================== */
+
+  function init() {
+    grabDom();
+    hydrate();
+    render();
+    wire();
+    adjustDurationInputForUnit('min');
+    // Warm the single rAF loop.
+    requestAnimationFrame(tick);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>ED Discharge Pack — Clinical Summary &amp; Safety Netting</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/style-variants.css">
+  <link rel="stylesheet" href="../css/ed-discharge-pack.css">
+  <script src="../js/style-system.js"></script>
+  <script src="../js/theme-toggle.js"></script>
+</head>
+<body class="discharge-pack-app">
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
+<div class="container">
+  <header class="app-header-center">
+    <h1>📝 ED Discharge Pack</h1>
+    <p>Editable clinical-summary prose templates + safety-netting for discharge documentation</p>
+  </header>
+
+  <section class="card no-print" aria-labelledby="patient-title">
+    <div class="card-title" id="patient-title">Patient</div>
+    <div class="dp-patient-grid">
+      <div class="field dp-f-name">
+        <label for="p-name">First name <span class="optional">— optional</span></label>
+        <input type="text" id="p-name" maxlength="40" autocomplete="off" placeholder="e.g. Alex">
+      </div>
+    </div>
+  </section>
+
+  <section class="card no-print" aria-labelledby="condition-title">
+    <div class="card-title" id="condition-title">Condition</div>
+    <div class="dp-chip-grid" id="condition-grid" role="radiogroup" aria-label="Discharge condition"></div>
+    <p class="hint">Select a condition, then overwrite the inline &lt;placeholders&gt; with case-specific details before copying into the ED discharge note.</p>
+  </section>
+
+  <section class="card" aria-labelledby="outputs-title">
+    <div class="dp-outputs-header no-print">
+      <div class="card-title" id="outputs-title">Outputs</div>
+      <button type="button" class="btn btn-primary dp-copy-all" id="btn-copy-all">Copy all</button>
+    </div>
+
+    <div class="dp-outputs-stack">
+      <article class="dp-output dp-output-summary">
+        <header class="dp-output-head">
+          <h2>Clinical summary</h2>
+          <button type="button" class="btn btn-reset dp-copy" id="btn-copy-summary" aria-live="polite">Copy clinical summary</button>
+        </header>
+        <p class="dp-placeholder-note">Fill in each inline <code>&lt;placeholder&gt;</code> with case-specific details.</p>
+        <div id="summary-editors"></div>
+      </article>
+
+      <article class="dp-output dp-output-safety">
+        <header class="dp-output-head">
+          <h2>Safety netting</h2>
+          <button type="button" class="btn btn-reset dp-copy" id="btn-copy-safety" aria-live="polite">Copy sentence</button>
+        </header>
+        <pre class="dp-block dp-block-safety" id="out-safety" aria-live="polite">Select a condition to generate the safety-netting sentence.</pre>
+
+        <section class="dp-resources" aria-labelledby="resources-title">
+          <h3 id="resources-title" class="dp-resources-title">Parent resources</h3>
+          <p class="hint dp-resources-hint">Offer the Healthier Together links to the parent — they include the same traffic-light safety-netting in parent-friendly language.</p>
+          <ul class="dp-resource-list" id="resource-list" aria-live="polite">
+            <li class="dp-resource-empty">Select a condition to see curated Healthier Together links.</li>
+          </ul>
+        </section>
+      </article>
+    </div>
+  </section>
+
+  <section class="card no-print" aria-labelledby="ref-title">
+    <details>
+      <summary id="ref-title"><strong>📚 Sources &amp; caveats</strong></summary>
+      <div class="dp-refs">
+        <ul>
+          <li><strong>NICE CG160</strong> — Fever in under 5s, traffic-light assessment and safety-netting items.</li>
+          <li><strong>NICE CG102</strong> — Bacterial meningitis and meningococcal septicaemia red flags.</li>
+          <li><strong>NICE NG41</strong> — Bronchiolitis in children (discharge criteria + parent advice).</li>
+          <li><strong>NICE NG232</strong> — Head injury assessment and early management.</li>
+          <li><strong>BTS/SIGN</strong> — British guideline on the management of asthma.</li>
+          <li><strong>NICE NG224</strong> — Urinary tract infection in under 16s.</li>
+          <li><strong>NICE NG99</strong> — Constipation in children and young people.</li>
+          <li><strong>Healthier Together (Wessex)</strong> — Parent-facing traffic-light advice at <a href="https://www.what0-18.nhs.uk/" target="_blank" rel="noopener noreferrer">what0-18.nhs.uk</a>.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <footer class="app-footer">
+    For clinical decision support only. Always verify content against your trust's local guidance before discharge. Healthier Together resources are maintained by Wessex NHS services — links may change; verify periodically.
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const HT_LANDING = 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell';
+  const SUBSECTIONS = [
+    { key: 'coreSummary', title: 'Clinical course / Management / Discharge criteria' },
+    { key: 'informationAdvice', title: 'Information and advice given' },
+    { key: 'planActions', title: 'Plan / actions' }
+  ];
+
+  const CONDITIONS = {
+    bronchiolitis: { label: 'Bronchiolitis', emoji: '🫁', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Clinical assessment was consistent with bronchiolitis <severity>. Typical features included <coryza/cough/wheeze/crackles> with <work of breathing>. Observations: <RR/HR/SpO2/temp>.\n\nManagement\nObserved in ED with supportive care and minimal handling. Feeding support given: <feeding plan>. <oxygen requirement/none>. No indication for antibiotics, bronchodilators, or steroids.\n\nDischarge criteria\nAt discharge, <patient name> had no respiratory distress at rest, SpO2 <value> in air, feeding <intake>, and was clinically stable for home care.`, informationAdvice: `Parents/carers advised that bronchiolitis often peaks around days 3–5 and then improves. Advice given on hydration, feeding little and often, and monitoring breathing effort. Healthier Together bronchiolitis guidance was discussed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP review if required / routine no planned follow-up>.` }, safetyNet: ['working hard to breathe (ribs sucking in, belly breathing, grunting)','pauses in breathing (apnoea)','poor feeding — less than half usual intake','fewer wet nappies than usual','skin looks blue, grey, or very pale','becomes less responsive, harder to wake, or floppy'], resources: [{ label: 'Healthier Together: Bronchiolitis and RSV', url: 'https://www.what0-18.nhs.uk/popular-topics/bronchiolitis-and-rsv' }] },
+    gastroenteritis: { label: 'Gastroenteritis', emoji: '🤢', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Clinical assessment was consistent with acute gastroenteritis <severity/dehydration status>. Key features: <vomiting/diarrhoea duration>, hydration signs <findings>, and observations <obs>.\n\nManagement\nManaged with oral rehydration strategy <ORS plan>. Tolerated oral intake <yes/no>. <antiemetic used/not used>. No indication for antibiotics.\n\nDischarge criteria\nAt discharge, <patient name> was clinically hydrated, tolerating oral fluids, and had no red-flag abdominal findings requiring admission.`, informationAdvice: `Advice given on fluid replacement, signs of dehydration, and expected symptom duration. Family advised on when to seek urgent reassessment and infection control at home. Healthier Together resources were reviewed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up plan: <GP if not improving / routine>.` }, safetyNet: ['fewer than 4 wet nappies per day or no wee in 8 hours','dry mouth and no tears when crying','drowsy, lethargic, or very difficult to rouse','blood in the stool','green (bile-stained) vomit','unable to keep any fluids down for more than 4 hours','severe or persistent tummy pain'], resources: [{ label: 'Healthier Together: Diarrhoea and vomiting', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/diarrhoea-and-vomiting' }] },
+    'viral-febrile': { label: 'Viral febrile illness', emoji: '🌡️', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Assessment was most consistent with viral febrile illness <focus if known>. No features suggesting serious bacterial infection on current examination. Observations: <obs>.\n\nManagement\nSupportive management with antipyretic advice and oral hydration guidance. Reassessment in ED showed <response/clinical stability>.\n\nDischarge criteria\nAt discharge, <patient name> was alert, perfused, tolerating fluids <status>, and had no red-flag findings mandating admission.`, informationAdvice: `Family advised on fever trajectory, comfort measures, and warning signs requiring urgent return. Clarified age-specific concern thresholds (especially infants). Healthier Together fever advice discussed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP if persistent fever >5 days / routine>.` }, safetyNet: ['fever lasting 5 days or more','any non-blanching rash (do the glass test)','skin looks pale, mottled, blue, or grey','working hard to breathe or breathing very fast','signs of dehydration (dry mouth, no wet nappies/wees)','a fit (seizure)','any fever ≥ 38 °C in a baby under 3 months'], resources: [{ label: 'Healthier Together: Fever / High Temperature', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/fever-high-temperature' }] },
+    'head-injury': { label: 'Minor head injury', emoji: '🤕', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Findings were in keeping with minor head injury <risk category>. No concerning features on assessment: <vomiting/LOC/seizure/neuro signs findings>. Observations and neuro status: <obs/GCS>.\n\nManagement\nObserved in ED for <observation period>. Analgesia given <yes/no>. No indication for CT head based on current risk assessment.\n\nDischarge criteria\nAt discharge, <patient name> remained neurologically stable with no evolving red flags and was suitable for home observation by a responsible carer.`, informationAdvice: `Head injury advice discussed, including what to monitor over the next 24–48 hours, return precautions, and activity guidance. Healthier Together head injury advice reviewed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up plan: <GP / none routinely required>.` }, safetyNet: ['severe or worsening headache not relieved by paracetamol/ibuprofen','vomiting more than once since the injury','unsteady walking, visual disturbance, or slurred/confused speech','becomes persistently sleepy, confused, or hard to wake','a fit (seizure)','weakness or numbness of an arm or leg','clear fluid or fresh blood from the ears or nose','any concern that your child is "not themselves"'], resources: [{ label: 'Healthier Together: Head Injury', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/head-injury' }] },
+    asthma: { label: 'Acute asthma (mild–mod)', emoji: '💨', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Clinical picture was consistent with acute asthma exacerbation <severity>. Initial findings: <wheeze/work of breathing/speech ability>, observations <obs including SpO2>.\n\nManagement\nManaged with inhaled bronchodilator therapy <salbutamol regimen> ± <steroid plan>. Clinical response after treatment: <response>. Spacer/inhaler technique reviewed.\n\nDischarge criteria\nAt discharge, <patient name> was clinically improved, breathing comfortably, with observations suitable for home care and no immediate need for inpatient escalation.`, informationAdvice: `Asthma advice given including reliever use, action plan thresholds, trigger avoidance, and when to seek urgent care. Healthier Together asthma/wheeze links discussed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <asthma nurse/GP review timeframe>.` }, safetyNet: ['needing salbutamol more often than every 4 hours','breathless at rest, or too breathless to talk, eat or drink','unable to speak in full sentences','lips or fingers turning blue','becomes drowsy, confused, or exhausted','salbutamol is no longer helping'], resources: [{ label: 'Healthier Together: Asthma Attack', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/asthma-attack' },{ label: 'Healthier Together: Wheeze & breathing difficulties', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/wheeze-and-breathing-difficulties' }] },
+    uti: { label: 'UTI', emoji: '💧', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Assessment suggested urinary tract infection <site/severity>. Key findings: <urinary symptoms/fever>, urinalysis <dip findings>, observations <obs>.\n\nManagement\nStarted on treatment plan <antibiotic/analgesia/fluids>. Urine sample sent for <culture/none>. Clinical response in ED: <response>.\n\nDischarge criteria\nAt discharge, <patient name> was systemically stable, tolerating oral intake/medication, and had no features of sepsis or pyelonephritis requiring admission.`, informationAdvice: `Advice given on antibiotic adherence, hydration, and signs of upper tract/systemic deterioration. Explained need for review of microbiology where applicable. Parent resources discussed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP review / culture follow-up actions>.` }, safetyNet: ['high fever that persists > 48 hours after starting antibiotics','severe flank (kidney) or back pain','persistent vomiting or unable to keep antibiotics down','very drowsy, lethargic, or systemically unwell','blood in the urine','new or worsening tummy pain'], resources: [{ label: 'Healthier Together: Tummy ache (includes UTI parent info)', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/tummy-ache' },{ label: 'Healthier Together: symptom advice (landing page)', url: HT_LANDING }] },
+    wound: { label: 'Simple wound / laceration', emoji: '🩹', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Examination showed simple wound/laceration <site> with <depth/contamination status>. Neurovascular status: <findings>.\n\nManagement\nWound managed with <cleaning/closure method/dressing>. Tetanus status <up to date/action taken>. Analgesia advice given.\n\nDischarge criteria\nAt discharge, wound was <status>, bleeding controlled, and no concern for deep structural injury requiring operative/inpatient care.`, informationAdvice: `Wound care advice provided including dressing care, infection signs, and expected healing timeline. Return precautions and scar-care advice discussed as appropriate.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <suture removal/wound check plan>.` }, safetyNet: ['increasing redness spreading out from the wound','wound becomes hot, swollen, or leaks pus','wound reopens or bleeds heavily and will not stop with pressure','fever or feeling generally unwell','numbness, tingling, or loss of movement beyond the wound'], resources: [{ label: 'Healthier Together: Cuts and wounds', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/cuts-and-wounds' }] },
+    croup: { label: 'Croup', emoji: '🦁', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Clinical findings were consistent with croup <severity>. Features included <barky cough/stridor/work of breathing>; observations <obs>.\n\nManagement\nManaged with <steroid regimen> and observation. Response to treatment: <response>. Need for nebulised adrenaline: <yes/no>.\n\nDischarge criteria\nAt discharge, <patient name> had no stridor at rest, stable observations, and was suitable for home care with clear return precautions.`, informationAdvice: `Croup advice discussed, including expected course, night-time worsening pattern, and urgent return triggers. Healthier Together croup guidance offered.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP if persistent symptoms / routine>.` }, safetyNet: ['stridor (harsh noisy breathing in) present at rest, not just when upset','working hard to breathe — tracheal tug, recession, grunting','drooling or unable to swallow saliva','becomes quiet, still, or exhausted (tiring)','lips or skin turning blue','fever with rapidly worsening illness'], resources: [{ label: 'Healthier Together: Croup', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/croup' }] },
+    'febrile-convulsion': { label: 'Simple febrile convulsion', emoji: '⚡', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Event was consistent with simple febrile convulsion <single/recurrent>. Seizure history: <duration/type/recovery>. Post-event examination and observations: <findings>.\n\nManagement\nObserved in ED with supportive care and fever management guidance. Assessment for source of fever: <source/none clear>. No ongoing neurological deficits identified.\n\nDischarge criteria\nAt discharge, <patient name> had returned to baseline neurological state, was clinically stable, and had no features requiring inpatient escalation.`, informationAdvice: `Parents/carers given seizure first-aid advice and guidance on fever management. Discussed recurrence risk and clear escalation triggers. Healthier Together febrile seizure/fever resources reviewed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP review if needed / routine>.` }, safetyNet: ['another fit lasting longer than 5 minutes (call 999)','more than one fit in the same 24-hour period','persistently drowsy or difficult to rouse more than 1 hour after the fit','non-blanching rash (do the glass test)','fever not responding to paracetamol/ibuprofen and child looks very unwell','neck stiffness, dislike of bright lights, or severe headache'], resources: [{ label: 'Healthier Together: Seizure / Febrile convulsion', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/seizurefebrile-convulsion' },{ label: 'Healthier Together: Fever / High Temperature', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/fever-high-temperature' }] },
+    constipation: { label: 'Constipation', emoji: '🚽', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Assessment was consistent with constipation <severity/functional pattern>. Features included <stool pattern/pain/bloating>; examination findings <abdomen/PR if done>.\n\nManagement\nManaged with <laxative plan/analgesia/behavioural advice>. Response in ED: <response>. No red-flag features for surgical pathology identified.\n\nDischarge criteria\nAt discharge, <patient name> was clinically stable, pain <status>, and suitable for outpatient/home bowel regimen continuation.`, informationAdvice: `Advice provided on stool-softening regimen, hydration, fibre/toileting routine, and expected timeline to improvement. Red flags requiring urgent reassessment discussed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP constipation review plan>.` }, safetyNet: ['severe tummy pain not relieved by passing stool or analgesia','green (bile-stained) vomit','blood in the stool (more than minor streaks on wiping)','no stool passed at all for more than 5 days despite laxatives','tummy becomes very swollen or hard','child becomes very unwell, pale, or lethargic'], resources: [{ label: 'Healthier Together: Constipation', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/constipation' }] },
+    hfm: { label: 'Hand, foot & mouth', emoji: '🖐️', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Findings were in keeping with hand, foot and mouth disease <severity>. Examination showed <distribution of oral/skin lesions> with observations <obs>.\n\nManagement\nSupportive treatment advised including <analgesia/oral fluid strategy>. Hydration status in ED: <status>. No indication for inpatient treatment.\n\nDischarge criteria\nAt discharge, <patient name> was clinically stable, able to maintain oral intake <status>, and suitable for home care.`, informationAdvice: `Discussed expected course, oral intake strategies with painful ulcers, contagion period, and return-to-school guidance. Healthier Together hand-foot-mouth/rash resources reviewed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP if not improving / routine>.` }, safetyNet: ['unable to drink fluids because of painful mouth ulcers','signs of dehydration (dry mouth, no wet nappies, very few wees)','extensive or rapidly blistering rash','fever lasting longer than 5 days','becomes very drowsy, lethargic, or systemically unwell'], resources: [{ label: 'Healthier Together: Hand, foot and mouth disease', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/hand-foot-and-mouth-disease' },{ label: 'Healthier Together: Rashes', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/rashes' }] },
+    chickenpox: { label: 'Chickenpox', emoji: '🫧', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Clinical assessment was consistent with chickenpox <severity/complication status>. Examination findings: <rash distribution/secondary infection signs if any>. Observations: <obs>.\n\nManagement\nSupportive management advised with <analgesia/itch management/fluid strategy>. Screening for complications/immunocompromise: <findings>. Infection control advice discussed.\n\nDischarge criteria\nAt discharge, <patient name> was clinically stable, tolerating oral intake <status>, and had no complications requiring admission.`, informationAdvice: `Family advised on expected rash progression, itch/comfort measures, isolation considerations, and vulnerable-contact precautions (pregnancy/immunocompromise/newborn exposure).`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP if concerns / routine>.` }, safetyNet: ['skin around spots becomes hot, red, swollen, or leaks pus (secondary infection)','spots becoming very painful or spreading rapidly','difficulty breathing, chest pain, or persistent cough','fever lasting more than 4 days or returning after settling','becomes very drowsy, floppy, or systemically unwell','contact with a pregnant person, newborn, or anyone immunocompromised who has not had chickenpox'], resources: [{ label: 'Healthier Together: Chickenpox', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/chickenpox-new' }] },
+    'scarlet-fever': { label: 'Scarlet fever', emoji: '🔴', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Clinical picture was consistent with scarlet fever <severity/response status>. Typical findings included <throat/rash/systemic findings>. Observations: <obs>.\n\nManagement\nTreatment started with <antibiotic regimen> plus supportive care <analgesia/fluids>. Clinical response in ED: <response>.\n\nDischarge criteria\nAt discharge, <patient name> was clinically stable, tolerating oral medication/fluids, and had no signs of invasive sepsis requiring admission.`, informationAdvice: `Discussed antibiotic adherence, infectivity period, school exclusion timing, and signs of deterioration requiring urgent review. Healthier Together scarlet fever advice reviewed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP review if not improving / routine>.` }, safetyNet: ['becomes very unwell, lethargic, or unusually pale','persistent vomiting or not drinking','neck stiffness, severe headache, or dislike of bright lights','difficulty breathing or breathing very fast','rash worsening or child getting worse despite antibiotics','non-blanching rash (do the glass test)'], resources: [{ label: 'Healthier Together: Strep A and scarlet fever', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/scarlet-fever' }] },
+    'allergic-reaction': { label: 'Mild allergic reaction', emoji: '🌿', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Findings were consistent with mild allergic reaction <trigger if known>. Features included <rash/swelling symptoms>; no systemic compromise observed. Observations: <obs>.\n\nManagement\nManaged with <antihistamine/supportive treatment>. Monitored in ED for progression with <outcome>. No features of anaphylaxis at discharge.\n\nDischarge criteria\nAt discharge, <patient name> was clinically stable with improving symptoms and no airway, breathing, or circulatory concerns.`, informationAdvice: `Advice provided on trigger avoidance where possible, antihistamine use, and signs of progression to severe reaction. Healthier Together allergy guidance discussed.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP/allergy review if indicated>.` }, safetyNet: ['difficulty breathing, wheeze, or noisy breathing (stridor)','swelling of the face, tongue, or lips that is worsening','persistent vomiting or severe tummy pain','widespread hives that are spreading rapidly','feeling dizzy, faint, pale, or floppy','any recurrence of the reaction after the antihistamine wears off'], resources: [{ label: 'Healthier Together: Allergic Reaction', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/allergic-reaction' }] },
+    'abdo-pain': { label: 'Non-specific abdominal pain', emoji: '🩻', templates: { coreSummary: `Clinical course\n<patient name> attended ED with <presenting complaint>. Current assessment is most in keeping with non-specific abdominal pain <working diagnosis>. Examination findings: <abdominal findings>. Observations: <obs>. Differential concerns excluded today: <key negatives>.\n\nManagement\nManaged with <analgesia/observation/fluids/advice>. Response during ED stay: <response>. No immediate indication for imaging/surgical admission at this stage.\n\nDischarge criteria\nAt discharge, <patient name> was clinically stable, pain <status>, oral intake <status>, and safe for home observation.`, informationAdvice: `Family advised that abdominal pain can evolve, with clear warning signs for urgent reassessment explained in detail. Hydration, analgesia, and monitoring advice provided.`, planActions: `Discharge home with parent/carer. Safety-netting advice provided (below). Follow-up: <GP review timeframe / routine>.` }, safetyNet: ['severe pain not relieved by paracetamol/ibuprofen','pain localising to the right lower tummy (possible appendicitis)','persistent vomiting, especially if green (bile-stained)','blood in the stool or urine','developing fever with worsening pain','pain waking the child from sleep','testicular pain or swelling (in boys)'], resources: [{ label: 'Healthier Together: Abdominal pain (tummy ache)', url: 'https://www.what0-18.nhs.uk/parentscarers/worried-your-child-unwell/tummy-ache' }] }
+  };
+
+  const CONDITION_ORDER = ['bronchiolitis','gastroenteritis','viral-febrile','head-injury','asthma','uti','wound','croup','febrile-convulsion','constipation','hfm','chickenpox','scarlet-fever','allergic-reaction','abdo-pain'];
+  const SUB_IDS = {
+    coreSummary: 'sub-core-summary',
+    informationAdvice: 'sub-information-advice',
+    planActions: 'sub-plan-actions'
+  };
+
+  const state = { name: '', condition: null, lastRenderedName: '' };
+  const $ = (id) => document.getElementById(id);
+
+  function safetySentence(cond) { return 'Safety netted to return if: ' + cond.safetyNet.join('; ') + '.'; }
+  function escapeHTML(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function fillNameToken(text) { return text.replaceAll('<patient name>', state.name.trim() || '<patient name>'); }
+  function autosize(el) { if (!el) return; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+  function renderChips() {
+    $('condition-grid').innerHTML = CONDITION_ORDER.map((key) => {
+      const c = CONDITIONS[key];
+      const active = state.condition === key;
+      return `<button type="button" class="dp-chip${active ? ' active' : ''}" role="radio" aria-checked="${active}" data-condition="${key}"><span class="dp-chip-emoji" aria-hidden="true">${c.emoji}</span><span class="dp-chip-label">${c.label}</span></button>`;
+    }).join('');
+  }
+
+  function renderSummaryEditors(cond) {
+    const host = $('summary-editors');
+    if (!cond) {
+      host.innerHTML = '<p class="dp-empty">Select a condition to generate an editable clinical summary.</p>';
+      return;
+    }
+    host.innerHTML = SUBSECTIONS.map((s) => `
+      <section class="dp-subsection">
+        <div class="dp-subhead"><h3>${s.title}</h3><button type="button" class="btn btn-reset dp-copy-sub" data-subkey="${s.key}" aria-live="polite">Copy</button></div>
+        <textarea id="${SUB_IDS[s.key]}" class="dp-sub-textarea" spellcheck="false"></textarea>
+      </section>`).join('');
+
+    SUBSECTIONS.forEach((s) => {
+      const area = $(SUB_IDS[s.key]);
+      area.value = fillNameToken(cond.templates[s.key]);
+      autosize(area);
+      area.addEventListener('input', () => autosize(area));
+    });
+    state.lastRenderedName = state.name.trim();
+  }
+
+  function renderOutputs() {
+    const cond = state.condition ? CONDITIONS[state.condition] : null;
+    renderSummaryEditors(cond);
+    $('out-safety').textContent = cond ? safetySentence(cond) : 'Select a condition to generate the safety-netting sentence.';
+    $('resource-list').innerHTML = cond
+      ? cond.resources.map((r) => `<li class="dp-resource"><div class="dp-resource-main"><div class="dp-resource-label">${escapeHTML(r.label)}</div><a class="dp-resource-url" href="${escapeHTML(r.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(r.url)}</a></div><div class="dp-resource-actions"><button type="button" class="btn btn-reset dp-copy-link" data-url="${escapeHTML(r.url)}" aria-live="polite">Copy link</button><a class="btn btn-reset dp-open-link" href="${escapeHTML(r.url)}" target="_blank" rel="noopener noreferrer">Open ↗</a></div></li>`).join('')
+      : '<li class="dp-resource-empty">Select a condition to see curated Healthier Together links.</li>';
+  }
+
+  function flashBtn(btn, text) {
+    if (!btn) return;
+    const original = btn.dataset.original || btn.textContent;
+    btn.dataset.original = original;
+    btn.textContent = text;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1200);
+  }
+
+  async function copyText(text, btn) {
+    try {
+      await navigator.clipboard.writeText(text);
+      flashBtn(btn, 'Copied ✓');
+    } catch (_) {
+      flashBtn(btn, 'Copy failed');
+    }
+  }
+
+  function buildClinicalSummary() {
+    return SUBSECTIONS.map((s) => {
+      const area = $(SUB_IDS[s.key]);
+      if (s.key === 'coreSummary') {
+        return area ? area.value.trim() : '';
+      }
+      return `${s.title}\n${area ? area.value.trim() : ''}`;
+    }).join('\n\n');
+  }
+
+  function updateNameInEditableSections() {
+    const oldName = state.lastRenderedName;
+    const newName = state.name.trim();
+    SUBSECTIONS.forEach((s) => {
+      const area = $(SUB_IDS[s.key]);
+      if (!area) return;
+      let updated = area.value;
+      if (oldName && updated.includes(oldName)) {
+        updated = updated.replaceAll(oldName, newName || '<patient name>');
+      } else if (!oldName && updated.includes('<patient name>') && newName) {
+        updated = updated.replaceAll('<patient name>', newName);
+      } else if (!newName && oldName && updated.includes(oldName)) {
+        updated = updated.replaceAll(oldName, '<patient name>');
+      }
+      if (updated !== area.value) {
+        area.value = updated;
+        autosize(area);
+      }
+    });
+    state.lastRenderedName = newName;
+  }
+
+  function init() {
+    $('p-name').addEventListener('input', (e) => {
+      state.name = e.target.value.slice(0, 40);
+      updateNameInEditableSections();
+    });
+
+    $('condition-grid').addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-condition]');
+      if (!chip) return;
+      state.condition = state.condition === chip.dataset.condition ? null : chip.dataset.condition;
+      renderChips();
+      renderOutputs();
+    });
+
+    $('btn-copy-summary').addEventListener('click', (e) => {
+      if (!state.condition) return flashBtn(e.currentTarget, 'Pick a condition');
+      copyText(buildClinicalSummary(), e.currentTarget);
+    });
+
+    $('btn-copy-safety').addEventListener('click', (e) => {
+      const cond = state.condition ? CONDITIONS[state.condition] : null;
+      if (!cond) return flashBtn(e.currentTarget, 'Pick a condition');
+      copyText(safetySentence(cond), e.currentTarget);
+    });
+
+    $('btn-copy-all').addEventListener('click', (e) => {
+      const cond = state.condition ? CONDITIONS[state.condition] : null;
+      if (!cond) return flashBtn(e.currentTarget, 'Pick a condition');
+      copyText(`${buildClinicalSummary()}\n\n${safetySentence(cond)}`, e.currentTarget);
+    });
+
+    document.addEventListener('click', (e) => {
+      const copySub = e.target.closest('.dp-copy-sub');
+      if (copySub) {
+        const area = $(SUB_IDS[copySub.dataset.subkey]);
+        return copyText(area ? area.value : '', copySub);
+      }
+      const copyUrl = e.target.closest('.dp-copy-link');
+      if (copyUrl) return copyText(copyUrl.dataset.url, copyUrl);
+    });
+
+    renderChips();
+    renderOutputs();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>
