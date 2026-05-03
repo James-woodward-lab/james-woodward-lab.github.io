@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chaos at 3am</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060e1a;
+      --bg-deep: #030810;
+      --surface: #0d1a2e;
+      --surface-2: #122236;
+      --border: rgba(255,255,255,0.08);
+      --text: #e2eaf4;
+      --text-muted: #7a9ab4;
+      --text-faint: #3d5a7a;
+      --blue: #38BDF8;
+      --blue-dim: rgba(56,189,248,0.12);
+      --blue-border: rgba(56,189,248,0.3);
+      --green: #22C55E;
+      --green-dim: rgba(34,197,94,0.1);
+      --green-border: rgba(34,197,94,0.35);
+      --amber: #F59E0B;
+      --amber-dim: rgba(245,158,11,0.1);
+      --amber-border: rgba(245,158,11,0.35);
+      --red: #EF4444;
+      --red-dim: rgba(239,68,68,0.1);
+      --red-border: rgba(239,68,68,0.35);
+      --font-display: "Instrument Serif", Georgia, serif;
+      --font-body: "Inter", system-ui, sans-serif;
+      --font-mono: "Courier New", monospace;
+      --radius: 10px;
+      --transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: var(--font-body);
+      background: radial-gradient(circle at top, #0b1527, var(--bg));
+      color: var(--text);
+    }
+
+    .app-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      background: rgba(3, 8, 16, 0.95);
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
+      backdrop-filter: blur(8px);
+    }
+
+    .head-left { display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
+    .logo { font-size: 1.1rem; }
+    .title-wrap { display: flex; flex-direction: column; min-width: 0; }
+    .title-wrap h1 {
+      margin: 0;
+      font: 400 1rem/1.1 var(--font-display);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter {
+      margin-top: 0.12rem;
+      color: var(--blue);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .head-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.78rem; }
+    .score-badge {
+      display: none;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--blue-border);
+      border-radius: 999px;
+      background: var(--blue-dim);
+      color: var(--blue);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+      z-index: 19;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--blue);
+      transition: width 0.5s ease;
+    }
+
+    .content {
+      margin-top: 58px;
+      margin-bottom: 56px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .content-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      animation: fadeSlideIn 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .content-inner.is-leaving {
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+
+    .app-footer {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 56px;
+      border-top: 1px solid var(--border);
+      background: rgba(3, 8, 16, 0.95);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.65rem;
+      padding: 0.45rem 0.75rem;
+      z-index: 20;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--text);
+      font: 600 0.84rem/1 var(--font-body);
+      cursor: pointer;
+      transition: all var(--transition);
+      min-height: 40px;
+    }
+    button:hover { filter: brightness(1.09); }
+    button:active { transform: translateY(1px) scale(0.99); filter: brightness(1.15); }
+    button:disabled { opacity: 0.55; cursor: default; transform: none; filter: none; }
+    button:focus-visible,
+    .choice-btn:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .btn-back { justify-self: start; width: 100%; }
+    .btn-reveal {
+      background: var(--amber-dim);
+      border-color: var(--amber-border);
+      color: var(--amber);
+    }
+    .btn-reveal.done {
+      background: var(--green-dim);
+      border-color: var(--green-border);
+      color: var(--green);
+    }
+    .btn-continue {
+      background: var(--blue-dim);
+      border-color: var(--blue-border);
+      color: var(--blue);
+      justify-self: end;
+      width: 100%;
+    }
+
+    .chapter-label {
+      color: var(--blue);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+    }
+
+    h2.section-title {
+      margin: 0 0 1rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 400;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .narrative {
+      background: var(--surface);
+      border-left: 3px solid var(--blue);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+    .narrative strong { color: var(--blue); font-style: normal; font-weight: 600; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .detail-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .detail-item b { display: block; color: var(--text); margin-bottom: 0.15rem; }
+
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .vital-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      padding: 0.75rem 0.45rem;
+    }
+    .vital-card.abnormal { background: var(--red-dim); border-color: var(--red-border); }
+    .vital-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    .vital-value { font-size: 1.2rem; font-weight: 700; color: var(--blue); }
+    .vital-card.abnormal .vital-value { color: var(--red); }
+
+    .question {
+      margin: 1rem 0 0.75rem;
+      font-size: 0.92rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .choices { display: grid; gap: 0.65rem; }
+    .choice-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.78rem;
+      text-align: left;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .choice-btn:hover { background: var(--blue-dim); border-color: var(--blue-border); }
+    .choice-btn:active { background: rgba(56,189,248,0.2); }
+    .choice-btn.selected { background: rgba(56,189,248,0.08); border-color: var(--blue-border); }
+    .choice-btn.correct { background: var(--green-dim); border-color: var(--green-border); }
+    .choice-btn.wrong { background: var(--red-dim); border-color: var(--red-border); }
+    .choice-btn[disabled] { cursor: default; }
+
+    .letter {
+      flex: 0 0 1.75rem;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: var(--blue-dim);
+      color: var(--blue);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .choice-btn.correct .letter { color: var(--green); background: var(--green-dim); }
+    .choice-btn.wrong .letter { color: var(--red); background: var(--red-dim); }
+    .choice-text { flex: 1; }
+    .result-badge { font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+    .choice-btn.correct .result-badge { color: var(--green); }
+    .choice-btn.wrong .result-badge { color: var(--red); }
+
+    .reveal {
+      margin-top: 0.8rem;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 500ms ease, opacity 500ms ease;
+    }
+    .reveal.show { max-height: 1000px; opacity: 1; }
+    .box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.8rem 0.95rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+    .box .label {
+      font-size: 0.67rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .box.correct { background: var(--green-dim); border-color: var(--green-border); }
+    .box.correct .label { color: var(--green); }
+    .box.teaching { background: var(--amber-dim); border-left: 3px solid var(--amber); }
+    .box.teaching .label { color: var(--amber); }
+    .box.danger { background: var(--red-dim); border-left: 3px solid var(--red); }
+    .box.danger .label { color: var(--red); }
+    .box.flag { background: var(--blue-dim); border-color: var(--blue-border); }
+    .box.flag .label { color: var(--blue); }
+
+    .vbg {
+      background: #020910;
+      border: 1px solid rgba(56,189,248,0.25);
+      border-radius: var(--radius);
+      box-shadow: 0 0 30px rgba(56,189,248,0.1);
+      padding: 0.95rem;
+      margin: 0.9rem 0;
+      animation: pulseBorder 4s ease-in-out infinite;
+    }
+    .vbg-head {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-faint);
+      margin-bottom: 0.7rem;
+    }
+    .vbg-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem 1rem;
+    }
+    .vbg-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .vbg-key { font: 0.8rem var(--font-mono); color: #78a7c8; }
+    .vbg-value { font-size: 0.85rem; font-weight: 700; }
+    .val-red { color: var(--red); }
+    .val-amber { color: var(--amber); }
+    .val-blue { color: var(--blue); }
+    .ag-box {
+      margin-top: 0.8rem;
+      border: 1px solid var(--red-border);
+      background: var(--red-dim);
+      border-radius: var(--radius);
+      padding: 0.7rem;
+      font: 0.76rem/1.55 var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.8rem;
+    }
+    .comparison th {
+      text-align: left;
+      background: rgba(56,189,248,0.1);
+      color: var(--blue);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+    }
+    .comparison td {
+      padding: 0.58rem 0.6rem;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      vertical-align: top;
+    }
+    .comparison td:first-child { color: var(--text); font-weight: 600; width: 22%; }
+    .match-row { background: rgba(34,197,94,0.05); }
+    .highlight { color: var(--green); font-weight: 600; }
+
+    .ammonia-wrap { text-align: center; padding: 1.4rem 0; }
+    .ammo-value {
+      font-size: clamp(3.5rem, 10vw, 6rem);
+      font-weight: 900;
+      line-height: 1;
+      animation: ammoniaPulse 2s infinite;
+    }
+    .ammo-unit {
+      margin-top: 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .ammo-norm { margin-top: 0.35rem; color: var(--text-faint); font-size: 0.8rem; }
+
+    .divider-screen { text-align: center; padding: 1.4rem 0 0.3rem; }
+    .divider-emoji {
+      font-size: 3rem;
+      animation: floaty 2.2s ease-in-out infinite;
+      margin-bottom: 0.4rem;
+    }
+    .divider-title { font: 400 clamp(2rem, 5vw, 3rem)/1.1 var(--font-display); margin: 0.35rem 0; }
+    .divider-desc {
+      max-width: 650px;
+      margin: 0.55rem auto 1rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .pill-row { display: flex; gap: 0.45rem; justify-content: center; flex-wrap: wrap; }
+    .pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.73rem;
+      letter-spacing: 0.08em;
+    }
+
+    .hero {
+      text-align: center;
+      padding-top: 0.8rem;
+    }
+    .hero-emoji { font-size: 4rem; animation: floaty 2.5s ease-in-out infinite; }
+    .hero h2 {
+      margin: 0.55rem 0;
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      background: linear-gradient(135deg, #38BDF8, #F59E0B, #38BDF8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 400;
+    }
+    .hero-sub {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .hero-tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .hero-tags span {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-2);
+      padding: 0.36rem 0.75rem;
+      font-size: 0.77rem;
+    }
+    .instructions {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: left;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .instructions h3 { margin: 0 0 0.5rem; color: var(--blue); font-size: 0.95rem; }
+    .instructions ol { margin: 0 0 0.75rem; padding-left: 1.1rem; font-size: 0.84rem; line-height: 1.6; color: var(--text-muted); }
+    .instructions p { margin: 0; color: var(--amber); font-size: 0.8rem; line-height: 1.5; }
+
+    .resource-grid, .learn-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .learn-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .resource-card, .learn-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.8rem;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+    }
+    .resource-card h4 { margin: 0.15rem 0 0.35rem; color: var(--text); font-size: 0.86rem; }
+    .resource-card.blue { border-color: var(--blue-border); }
+    .resource-card.amber { border-color: var(--amber-border); }
+    .resource-card.green { border-color: var(--green-border); }
+
+    .score-card {
+      text-align: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem;
+      margin-bottom: 0.9rem;
+    }
+    .score-big { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .score-msg { color: var(--text-muted); font-size: 0.86rem; line-height: 1.55; }
+    .score-red { color: var(--red); }
+    .score-amber { color: var(--amber); }
+    .score-blue { color: var(--blue); }
+    .score-green { color: var(--green); }
+
+    .debrief {
+      background: var(--amber-dim);
+      border: 1px solid var(--amber-border);
+      border-radius: var(--radius);
+      padding: 0.9rem;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .timeline-page {
+      text-align: center;
+      padding: 1.2rem 0.2rem;
+    }
+    .timeline-emoji {
+      font-size: 2.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .timeline-page h3 {
+      margin: 0.2rem 0 0.65rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 400;
+    }
+    .timeline-page p {
+      margin: 0 auto 0.9rem;
+      max-width: 640px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      font-size: 0.9rem;
+    }
+    .rewind-btn {
+      width: auto;
+      min-width: 220px;
+      padding: 0.7rem 1rem;
+      background: var(--blue-dim);
+      border: 1px solid var(--blue-border);
+      color: var(--blue);
+      border-radius: var(--radius);
+      font-weight: 700;
+    }
+    .debrief b { display: block; color: var(--amber); margin-bottom: 0.4rem; font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; }
+
+    @media (max-width: 900px) {
+      .vitals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .learn-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+      .content { padding: 1rem; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .resource-grid { grid-template-columns: 1fr; }
+      .app-footer {
+        height: auto;
+        grid-template-columns: 1fr;
+        padding: 0.5rem;
+      }
+      .content { margin-bottom: 156px; }
+      .head-right { gap: 0.4rem; }
+      .score-badge { font-size: 0.7rem; }
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseBorder {
+      0%, 100% { box-shadow: 0 0 20px rgba(56,189,248,0.08); }
+      50% { box-shadow: 0 0 35px rgba(56,189,248,0.2); }
+    }
+    @keyframes ammoniaPulse {
+      0%, 100% { color: #F59E0B; text-shadow: 0 0 12px rgba(245,158,11,0.55); }
+      50% { color: #EF4444; text-shadow: 0 0 20px rgba(239,68,68,0.65); }
+    }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="head-left">
+      <span class="logo" aria-hidden="true">🧬</span>
+      <div class="title-wrap">
+        <h1>Chaos at 3am</h1>
+        <span id="chapter-label" class="chapter">THE CASE BEGINS</span>
+      </div>
+    </div>
+    <div class="head-right">
+      <span id="score-badge" class="score-badge">0/8 correct</span>
+      <span id="progress-text">1 / 18</span>
+    </div>
+  </header>
+  <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+
+  <main id="main-content" class="content" aria-live="polite">
+    <div id="content-inner" class="content-inner"></div>
+  </main>
+
+  <footer class="app-footer">
+    <button id="back-btn" class="btn-back" aria-label="Go to previous section">← Back</button>
+    <button id="reveal-btn" class="btn-reveal" aria-label="Reveal answer">Reveal Answer</button>
+    <button id="continue-btn" class="btn-continue" aria-label="Go to next section">Continue →</button>
+  </footer>
+
+  <script>
+    const CHOICE_SECTIONS = [3, 5, 7, 9, 10, 11, 13, 15];
+    let currentSection = 0;
+    let selectedChoice = null;
+    let revealShown = false;
+    let score = 0;
+    let totalChoicesMade = 0;
+    let wrongTimeline = null;
+
+    const sectionState = {};
+
+    const sections = [
+      { type: "title", chapter: "THE OPENING", title: "Chaos at 3am" },
+      {
+        type: "meet",
+        chapter: "THE CASE BEGINS",
+        title: "Meet Theo",
+        narrative: "It's 03:17 Tuesday morning. The ED red phone goes off - it's a paramedic with a pre-alert.",
+        details: [
+          ["Age", "12 days old"], ["Presenting complaint", "Floppy, not feeding since yesterday"], ["Delivery", "Unassisted home birth"],
+          ["Antenatal care", "None"], ["Newborn screening", "Not done"], ["Vitamin K", "Not given"],
+          ["Obsevartions", "Crew havent been able to get a good set"], ["ETA", "5 mins"]
+        ]
+      },
+      {
+        type: "info",
+        chapter: "BEFORE YOU PROCEED",
+        title: "The significance"
+      },
+      {
+        type: "choice",
+        chapter: "ACT 1",
+        title: "The Paramedic Adds",
+        narrative: "The paramedic adds: <strong>'Oh the BM is 1.7, where would you like us to meet you?'</strong>",
+        question: "Where do you direct the crew?",
+        choices: {
+          a: "Resus",
+          b: "Acute",
+          c: "Triage"
+        },
+        correctChoice: "a",
+        correct: "A — Meet in resus",
+        teaching: "BM 1.7 in a floppy neonate is an emergency. Resus gives priority to this unwell baby, prepares a team to start investigation and treatment in parrallel, and provides adequate space and resource if the patient deteriorates",
+        danger: "Meeting in acute assessment or triage risks delayed handover, fragmented monitoring, and slower access to resuscitation equipment. In possible neonatal collapse the safest default is straight to resus with the team pre-alerted.",
+        wrongOutcomes: {
+          b: "The paramedics arrive in acute and Theo is put in bay 1. The unit is very busy and it takes a few minutes to get Theo booked in and for the ambulance to handover. By the time observations are done Theo is now completely unresponsive worht alarming observations",
+          c: "The paramedics arrive to triage, unfortunately its 3am and there is no one in triage so after waiting a couple of minutes they come round to acute. By this time the baby is now completely unresponsive and you rush round to resus"
+        }
+      },
+      {
+        type: "assessment",
+        chapter: "RESUS BAY — 03:22",
+        title: "Primary Survey & Clinical Findings",
+        narrative: "Theo arrives in resus. He is pale, jaundiced, floppy. Mum is distressed. You begin your assessment.",
+        vitals: [
+          ["HR", "178 /min", true], ["RR", "68 /min", true], ["SpO₂", "96% on air", false],
+          ["Temp", "36.2°C", false], ["Cap refill", "3s", true], ["BM", "1.0 mmol/L", true]
+        ],
+        exam: [
+          "Tone: globally reduced — weak cry, head lag",
+          "Jaundice: visible +2, scleral icterus present",
+          "Fontanelle: flat (not bulging)",
+          "Moving all limbs spontaneously but sluggish",
+          "No dysmorphic features, no focal neurology",
+          "Abdomen: soft, no organomegaly detected"
+        ],
+        keyFlag: "⚠️ You note: no newborn bloodspot screening card in the hand-held notes. No Vitamin K documentation. No GP registration. Parents unsure of birth weight."
+      },
+      {
+        type: "choice",
+        chapter: "ACT 1",
+        title: "Blood Tests",
+        narrative: "You have IV access and enough blood for some but not all of the tests you want. Which bloods do you request?",
+        question: "What blood tests do you request?",
+        choices: {
+          a: "FBC, U&E, CRP, LFTs, Glucose",
+          b: "FBC, U&E, CRP, Blood gas, Ammonia, Amino acids",
+          c: "FBC, U&E, CRP, Blood culture, Blood gas"
+        },
+        correctChoice: "b",
+        correct: "B includes work up for sepsis, including a gas, as well as screening for IEM",
+        teaching: "A blood gas is not just a respiratory tool, in a sick neonate, it is your fastest, most information-dense investigation. Including ammonia must be requested explicitly and handled urgently",
+        danger: "Option A leaves you without a rapid bedside biochemical picture — in a peri-arrest neonate that can delay recognition of septic shock, marked acid–base disturbance, hyperkalaemia, and crises-level hypoglycaemia while you wait for lab turnaround. Option C rightly prioritises culture, but microbiology positivity takes hours to days — on its own this panel does not give you immediate targets for resuscitation and escalation in real time.",
+        keyFlag: "📞 Practical tip: Call the biochemistry lab before sending the sample. Warn them ammonia is coming — it needs to be spun and processed immediately. Plasma amino acids need a separate EDTA tube. Urine organic acids need the first catch — save everything.",
+        wrongOutcomes: {
+          a: "A blood gas is not just a respiratory tool, in a sick neonate, it is your fastest, most information-dense investigation. Results are back in under 90 seconds from a single sample. Without it you could be left waiting a significant time for lab results. Time that you don't have",
+          c: "A blood culture is highly useful, however the result will take significant time to return and there are other results which could change the initial management now"
+        }
+      },
+      {
+        type: "vbg",
+        chapter: "03:31 — BLOOD GAS RESULT",
+        title: "The Blood Gas Returns",
+        narrative: "The nurse hands you the VBG printout. You study the result. The numbers are worse than you expected."
+      },
+      {
+        type: "choice",
+        chapter: "VIGNETTE 3",
+        title: "Interpret the Blood Gas",
+        narrative: "pH 7.04 | pCO₂ 1.9 kPa | HCO₃ 4 | BE −28 | Na 131 | Lactate 11.2 | <strong>Anion Gap: 29 mmol/L</strong>",
+        question: "What is your primary interpretation?",
+        choices: {
+          a: "Severe HAGMA — almost certainly neonatal sepsis; treat empirically and reassess",
+          b: "Severe HAGMA — consistent with IEM, sepsis, or both; treat both simultaneously",
+          c: "Respiratory acidosis — his primary problem is ventilatory failure, call anaesthetics urgently"
+        },
+        correctChoice: "b",
+        correct: "B — Severe high-anion-gap metabolic acidosis with possible concurrent IEM and/or sepsis",
+        teaching: "The pCO₂ of 1.9 kPa is NOT respiratory failure — it is Kussmaul breathing. He is maximally hyperventilating to compensate for catastrophic metabolic acidosis. The primary problem is metabolic, not respiratory. An anion gap of 29 mmol/L (normal <12) means a massive unmeasured anion — organic acids, lactate, or ketoacids — is accumulating. This is IEM territory until proven otherwise.",
+        danger: "Option C is a critical error. The low pCO₂ is compensatory hyperventilation — intubating this child (and raising their pCO₂ to 'normal') would remove their only compensatory mechanism and cause rapid cardiovascular collapse. Ventilation should be avoided unless airway protection is absolutely necessary.",
+        keyFlag: "📖 Rule: In any encephalopathic neonate with HAGMA — treat for sepsis AND investigate for IEM simultaneously. They are not mutually exclusive diagnoses. Sepsis can trigger IEM decompensation and vice versa."
+      },
+      { type: "divider", chapter: "THE MOST DANGEROUS MINUTE", title: "Three Questions. 60 Seconds." },
+      {
+        type: "choice",
+        chapter: "DECISION 1 — FLUIDS",
+        title: "Fluid Management",
+        narrative: "<strong>'Doctor, what fluids do you want?'</strong> Theo's BM is 1.0 mmol/L. He is hypotonic with HR 178 and cap refill of 3 seconds.",
+        question: "What do you prescribe?",
+        choices: {
+          a: "0.9% NaCl 10ml/kg bolus — address the circulatory compromise first",
+          b: "2ml/kg of 10% dextrose IV bolus, then 10% dextrose maintenance at 1.5× the normal rate for weight",
+          c: "Wait for the metabolic team to advise before starting any fluids — you might make it worse"
+        },
+        correctChoice: "b",
+        correct: "B — 10% dextrose bolus + high-rate dextrose maintenance",
+        teaching: "The single most important acute intervention in IEM decompensation is stopping catabolism by providing a glucose infusion rate (GIR) of 8–10mg/kg/min. This suppresses endogenous protein breakdown, reducing further organic acid and ammonia production. Even once glucose normalises, maintain the high-dextrose infusion — the goal is anabolic suppression, not just glycaemia correction. GIR formula: [rate (ml/hr) × dextrose% × 10] ÷ [weight(kg) × 6] = mg/kg/min.",
+        danger: "Option A provides volume but no substrate — insufficient for the metabolic crisis. If there is haemodynamic shock, a saline bolus is acceptable, but the dextrose load must follow immediately. Option C — waiting for metabolics before starting fluids — is dangerous. This treatment is time-critical.",
+        keyFlag: "⚡ GIR target: 8–10 mg/kg/min. For a 3.5kg neonate on 10% dextrose at 1.5× maintenance (~15ml/hr): GIR = [15 × 10 × 10] ÷ [3.5 × 6] = 7.1 mg/kg/min. Increase rate or dextrose concentration as needed."
+      },
+      {
+        type: "choice",
+        chapter: "DECISION 2 — FEEDS",
+        title: "The Feed Question",
+        narrative: "<strong>Mum steps forward: 'Can I breastfeed him? It might settle him. He loves his feeds.'</strong> She looks exhausted and frightened. Everyone in the room is watching you.",
+        question: "What do you say?",
+        choices: {
+          a: "Yes — breast milk provides comfort and nutrients, no harm in trying whilst you wait",
+          b: "Let him have a small amount whilst the results come back — just enough to settle him",
+          c: "Stop all feeds now — explain gently that you need the results first before it is safe to give him anything"
+        },
+        correctChoice: "c",
+        correct: "C — Stop all feeds immediately",
+        teaching: "This is the most dangerous trap in the entire case. Breast milk contains BOTH protein and galactose. In urea cycle defects, protein drives ammonia production — a single large feed can tip a borderline child into cerebral oedema. In galactosaemia, galactose in breast milk is directly hepatotoxic and neurotoxic. You do not yet have a diagnosis. Until you do, nothing enters the gut. This is a hard conversation to have with a distressed mother, but it is one of the most important.",
+        danger: "Options A and B are both potentially lethal. There is no clinically 'safe small amount' when IEM is suspected. The guilt and difficulty of this conversation does not outweigh the risk of feeding.",
+        keyFlag: "🧱 THE THREE PILLARS OF ACUTE IEM MANAGEMENT: (1) STOP ALL FEEDS → (2) PROVIDE HIGH-RATE DEXTROSE → (3) CALL THE METABOLIC TEAM. These three actions, done simultaneously, are the foundation of acute stabilisation for any suspected IEM."
+      },
+      {
+        type: "choice",
+        chapter: "DECISION 3 — ANTIBIOTICS",
+        title: "Empirical Antibiotics",
+        narrative: "<strong>'Do you want to prescribe antibiotics?'</strong> asks the junior doctor. The blood culture is in. The CRP is pending. The sepsis screen is running.",
+        question: "Do you give empirical antibiotics?",
+        choices: {
+          a: "Yes — treat empirically for neonatal sepsis alongside the metabolic workup. Benzylpenicillin + gentamicin per local protocol",
+          b: "No — the clinical picture is overwhelmingly metabolic, this is not sepsis",
+          c: "Wait for the CRP and WBC results before committing to antibiotics"
+        },
+        correctChoice: "a",
+        correct: "A — Yes, give antibiotics immediately",
+        teaching: "IEM and sepsis are not mutually exclusive — they frequently coexist, and each can trigger the other. You cannot clinically distinguish them at this stage. Any sick neonate requires empirical antimicrobials under the neonatal sepsis bundle. Critically: galactosaemia specifically predisposes to E. coli septicaemia — a well-described association that makes antibiotics doubly important if galactosaemia is in the differential.",
+        danger: "Options B and C are both dangerous. CRP is a late inflammatory marker — it will be unhelpful within the first 12 hours and must never be used to gate antibiotic prescribing in an unwell neonate. The decision to treat is clinical.",
+        keyFlag: "⏱ Antibiotic prescribing in neonatal sepsis follows the 1-hour bundle. In a sick neonate the decision is clinical — do not wait for inflammatory markers. Document your clinical reasoning and review the culture results at 36–48 hours."
+      },
+      { type: "ammonia", chapter: "03:47 — THE BIOCHEMISTRY LAB CALLS", title: "The Ammonia Result" },
+      {
+        type: "choice",
+        chapter: "VIGNETTE 5",
+        title: "What Type of IEM?",
+        narrative: "Ammonia 412 µmol/L (normal <50). pH 7.04, severe HAGMA, anion gap 29. Lactate 11.2. Glucose 1.0. <strong>What category of inborn error of metabolism best fits this clinical picture?</strong>",
+        question: "Your most likely diagnosis category is:",
+        choices: {
+          a: "Urea Cycle Defect — e.g. OTC deficiency, citrullinaemia, argininosuccinic aciduria",
+          b: "Organic Acidaemia — e.g. propionic acidaemia, methylmalonic acidaemia, isovaleric acidaemia",
+          c: "MCADD — medium-chain acyl-CoA dehydrogenase deficiency"
+        },
+        correctChoice: "b",
+        correct: "B — Organic Acidaemia (most likely propionic or methylmalonic acidaemia)",
+        teaching: "The discriminator is the metabolic acidosis. Urea cycle defects cause hyperammonaemia but classically present with NORMAL pH or RESPIRATORY ALKALOSIS — the ammonia drives hyperventilation without generating a primary acidosis. The severe HAGMA in Theo's picture is produced by accumulated organic acids. The additional features — elevated lactate, neutropenia on FBC (check it), and hypoglycaemia — are characteristic of organic acidaemia. Propionic acidaemia and methylmalonic acidaemia are the two most common severe organic acidaemias presenting in the newborn period.",
+        danger: "Option A (UCD) is the most common wrong answer at the bedside. The single differentiating question: Is there a metabolic acidosis? UCD = no acidosis. OA = severe acidosis. Option C (MCADD) causes hypoketotic hypoglycaemia — it does not cause hyperammonaemia or acidosis of this severity.",
+        keyFlag: "🔬 See the comparison table on the next screen. This discriminating table is the most important single concept for acute IEM management — learn it."
+      },
+      { type: "comparison", chapter: "TEACHING — IEM DISCRIMINATORS", title: "Urea Cycle Defect vs Organic Acidaemia" },
+      {
+        type: "choice",
+        chapter: "VIGNETTE 6 — ESCALATION",
+        title: "Haemofiltration Decision",
+        narrative: "Repeat ammonia 30 minutes later: <strong>480 µmol/L — rising despite dextrose infusion and feeds stopped.</strong> Theo is now obtunded, responding only to pain. Tone is almost absent. PICU is on the phone.",
+        question: "At what ammonia threshold do you advocate for haemofiltration/continuous renal replacement therapy?",
+        choices: {
+          a: "Ammonia >150 µmol/L — dialyse early and aggressively at every case",
+          b: "Ammonia >350 µmol/L unresponsive to medical treatment, or >500 µmol/L regardless of response, or rapid rise with clinical deterioration",
+          c: "Wait until the metabolic consultant advises — this is their decision, not yours"
+        },
+        correctChoice: "b",
+        correct: "B — >350 µmol/L unresponsive to medical treatment or >500 µmol/L regardless",
+        teaching: "Haemofiltration (CRRT) is the most effective method of rapidly reducing ammonia — far faster than any drug alone. At ammonia levels above 350–500 µmol/L, cerebral oedema and permanent neurological injury become likely without rapid clearance. This is a time-critical PICU transfer. Medical treatment (dextrose, N-carbamylglutamate, sodium benzoate, arginine) continues alongside CRRT — it is not either/or.",
+        danger: "Option C — waiting for the metabolic consultant before initiating the escalation conversation — costs time and brain cells. You should be calling PICU and the metabolic team in parallel. The metabolic consultant guides drug therapy and long-term management; the immediate PICU escalation decision is yours.",
+        keyFlag: "☎️ The BIMDG (British Inherited Metabolic Disease Group) provides 24/7 emergency guidance at bimdg.org.uk. The NPIS (National Poisons Information Service) also supports IEM queries: 0344 892 0111. The on-call metabolic consultant expects your call at 3am — do not hesitate."
+      },
+      { type: "resources", chapter: "CLINICAL RESOURCES", title: "Tools for the Real 3am" },
+      { type: "end", chapter: "THE RESOLUTION", title: "What Happened to Theo" }
+    ];
+
+    const contentInner = document.getElementById("content-inner");
+    const mainContent = document.getElementById("main-content");
+    const chapterLabel = document.getElementById("chapter-label");
+    const progressText = document.getElementById("progress-text");
+    const progressFill = document.getElementById("progress-fill");
+    const scoreBadge = document.getElementById("score-badge");
+    const backBtn = document.getElementById("back-btn");
+    const revealBtn = document.getElementById("reveal-btn");
+    const continueBtn = document.getElementById("continue-btn");
+
+    function renderSection() {
+      const section = sections[currentSection];
+      const inWrongTimeline = Boolean(wrongTimeline);
+      chapterLabel.textContent = inWrongTimeline ? "ALTERNATE TIMELINE" : section.chapter;
+      progressText.textContent = `${currentSection + 1} / ${sections.length}`;
+      progressFill.style.width = `${((currentSection + 1) / sections.length) * 100}%`;
+      scoreBadge.style.display = totalChoicesMade > 0 ? "inline-flex" : "none";
+      scoreBadge.textContent = `${score}/8 correct`;
+
+      backBtn.disabled = currentSection === 0 || inWrongTimeline;
+      backBtn.style.visibility = inWrongTimeline ? "hidden" : "visible";
+
+      selectedChoice = sectionState[currentSection]?.selected ?? null;
+      revealShown = sectionState[currentSection]?.revealed ?? false;
+
+      const isChoice = section.type === "choice" && !inWrongTimeline;
+      revealBtn.style.display = isChoice ? "block" : "none";
+      continueBtn.style.display = inWrongTimeline ? "none" : ((!isChoice || revealShown) ? "block" : "none");
+      continueBtn.textContent = currentSection === sections.length - 1 ? "Restart" : "Continue →";
+
+      revealBtn.disabled = !selectedChoice || revealShown;
+      revealBtn.classList.toggle("done", revealShown);
+      revealBtn.textContent = revealShown ? "✓ Answer Revealed" : "Reveal Answer";
+
+      contentInner.classList.add("is-leaving");
+      setTimeout(() => {
+        contentInner.innerHTML = inWrongTimeline ? renderWrongTimeline() : renderByType(section);
+        bindChoiceButtons();
+        bindRewindButton();
+        contentInner.classList.remove("is-leaving");
+      }, 200);
+
+      mainContent.scrollTop = 0;
+    }
+
+    function renderByType(section) {
+      switch (section.type) {
+        case "title": return renderTitle();
+        case "meet": return renderMeet(section);
+        case "info": return renderInfo(section);
+        case "choice": return renderChoice(section);
+        case "assessment": return renderAssessment(section);
+        case "vbg": return renderVbg(section);
+        case "divider": return renderDivider(section);
+        case "ammonia": return renderAmmonia(section);
+        case "comparison": return renderComparison(section);
+        case "resources": return renderResources(section);
+        case "end": return renderEnd(section);
+        default: return "<p>Unknown section</p>";
+      }
+    }
+
+    function renderWrongTimeline() {
+      const source = sections[wrongTimeline.sectionIndex];
+      const pickedText = source.choices[wrongTimeline.choiceId];
+      const briefConsequence = (source.wrongOutcomes && source.wrongOutcomes[wrongTimeline.choiceId]) || source.danger || "Theo deteriorates quickly and the team loses critical time before the correct pathway is started.";
+      return `
+        <section class="timeline-page">
+          <div class="timeline-emoji" aria-hidden="true">⏳</div>
+          <div class="chapter-label">Wrong Turn</div>
+          <h3>What happened next?</h3>
+          <div class="box danger" style="text-align:left;max-width:700px;margin:0 auto 0.75rem;">
+            <div class="label">Chosen path</div>
+            ${pickedText}
+          </div>
+          <p>${briefConsequence}</p>
+          <button id="rewind-btn" class="rewind-btn" aria-label="Go back in time to correct path">↩ Go back in time</button>
+        </section>`;
+    }
+
+    function frame(section, body) {
+      return `<section><div class="chapter-label">${section.chapter}</div><h2 class="section-title">${section.title}</h2>${body}</section>`;
+    }
+
+    function renderTitle() {
+      const s = sections[0];
+      return frame(s, `
+        <div class="hero">
+          <div class="hero-emoji">🧬</div>
+          <h2>Chaos at 3am</h2>
+          <div class="hero-sub">A Paediatric Choose Your Own Adventure</div>
+          <div class="hero-tags">
+            <span>🏥 Neonatal IEM</span><span>⚗️ Blood Gas Interpretation</span><span>🚨 Metabolic Emergency</span>
+          </div>
+          <div class="instructions">
+            <h3>How This Works</h3>
+            <ol>
+              <li>Read each vignette aloud to the group</li>
+              <li>Discuss the choices before committing</li>
+              <li>Click your chosen option, then click Reveal Answer</li>
+              <li>Correct path and teaching points will appear</li>
+              <li>Click Continue to advance the case</li>
+            </ol>
+            <p>💡 Best played in groups of 3–5. Wrong-answer paths contain the most teaching — embrace them.</p>
+          </div>
+        </div>`);
+    }
+
+    function renderMeet(s) {
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="detail-grid">${s.details.map(([k, v]) => `<div class="detail-item"><b>${k}</b>${v}</div>`).join("")}</div>
+        ${s.keyFlag ? `<div class="box flag"><div class="label">KEY FLAG</div>${s.keyFlag}</div>` : ""}`);
+    }
+
+    function renderInfo(s) {
+      return frame(s, `
+        <div class="card" style="font-size:1rem;color:var(--text);line-height:1.5;font-weight:600;">What are you most worried about?</div>
+        <details class="card">
+          <summary style="cursor:pointer;color:var(--red);font-weight:700;">Red Flags 🚩</summary>
+          <ul style="margin:.7rem 0 0;padding-left:1.1rem;color:var(--text-muted);font-size:.9rem;line-height:1.7;">
+            <li>Home birth with no antenatal care</li>
+            <li>No vitamin K</li>
+            <li>12 days old</li>
+            <li>Floppy and not feeding</li>
+          </ul>
+        </details>
+        <details class="card">
+          <summary style="cursor:pointer;color:var(--amber);font-weight:700;">Differentials ⁉️</summary>
+          <ul style="margin:.7rem 0 0;padding-left:1.1rem;color:var(--text-muted);font-size:.9rem;line-height:1.7;">
+            <li>Sepsis</li>
+            <li>Hypoglycemia</li>
+            <li>VKBD Encephalopathy</li>
+            <li>IEM</li>
+            <li>Neonatal seizure</li>
+            <li>Cardiac</li>
+            <li>NAI</li>
+          </ul>
+        </details>`);
+    }
+
+    function renderChoice(s) {
+      const letters = { a: "A", b: "B", c: "C" };
+      const disabled = revealShown ? "disabled" : "";
+      const choicesHtml = Object.entries(s.choices).map(([id, txt]) => {
+        const isSelected = selectedChoice === id;
+        const isCorrect = revealShown && id === s.correctChoice;
+        const isWrong = revealShown && isSelected && id !== s.correctChoice;
+        const klass = ["choice-btn", isSelected ? "selected" : "", isCorrect ? "correct" : "", isWrong ? "wrong" : ""].join(" ").trim();
+        const badge = isCorrect ? '<span class="result-badge">✓ Correct</span>' : (isWrong ? '<span class="result-badge">✗ Wrong</span>' : "");
+        return `<button class="${klass}" data-choice="${id}" ${disabled} aria-label="Select option ${letters[id]}"><span class="letter">${letters[id]}</span><span class="choice-text">${txt}</span>${badge}</button>`;
+      }).join("");
+
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="question">${s.question}</div>
+        <div class="choices">${choicesHtml}</div>
+        <div class="reveal ${revealShown ? "show" : ""}">
+          ${revealShown ? `
+            <div class="box correct"><div class="label">CORRECT PATH</div>${s.correct}</div>
+            <div class="box teaching"><div class="label">TEACHING POINT</div>${s.teaching}</div>
+            ${s.danger ? `<div class="box danger"><div class="label">⚠ DANGER</div>${s.danger}</div>` : ""}
+            ${s.keyFlag ? `<div class="box flag"><div class="label">🔑 KEY FLAG</div>${s.keyFlag}</div>` : ""}
+          ` : ""}
+        </div>`);
+    }
+
+    function renderAssessment(s) {
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="vitals-grid">
+          ${s.vitals.map(([k, v, abnormal]) => `<div class="vital-card ${abnormal ? "abnormal" : ""}"><div class="vital-label">${k}</div><div class="vital-value">${v}</div></div>`).join("")}
+        </div>
+        <div class="card"><h3 style="margin:0 0 .4rem;color:var(--blue);font-size:0.78rem;letter-spacing:.11em;text-transform:uppercase;">Examination</h3><ul style="margin:0;padding-left:1.1rem;color:var(--text-muted);font-size:0.86rem;line-height:1.7;">${s.exam.map(i => `<li>${i}</li>`).join("")}</ul></div>
+        <div class="box flag"><div class="label">KEY FLAG</div>${s.keyFlag}</div>`);
+    }
+
+    function renderVbg(s) {
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="vbg">
+          <div class="vbg-head">VENOUS BLOOD GAS — 03:31 | THEO, DOB [12 days ago]</div>
+          <div class="vbg-grid">
+            <div class="vbg-row"><span class="vbg-key">pH</span><span class="vbg-value val-red">7.04</span></div>
+            <div class="vbg-row"><span class="vbg-key">Na</span><span class="vbg-value val-amber">131 mmol/L</span></div>
+            <div class="vbg-row"><span class="vbg-key">pCO₂</span><span class="vbg-value val-red">1.9 kPa</span></div>
+            <div class="vbg-row"><span class="vbg-key">K</span><span class="vbg-value val-amber">6.4 mmol/L</span></div>
+            <div class="vbg-row"><span class="vbg-key">HCO₃</span><span class="vbg-value val-red">4 mmol/L</span></div>
+            <div class="vbg-row"><span class="vbg-key">Glucose</span><span class="vbg-value val-red">1.0 mmol/L</span></div>
+            <div class="vbg-row"><span class="vbg-key">BE</span><span class="vbg-value val-red">−28 mmol/L</span></div>
+            <div class="vbg-row"><span class="vbg-key">Lactate</span><span class="vbg-value val-red">11.2 mmol/L</span></div>
+          </div>
+          <div class="ag-box">
+            ANION GAP = Na − (HCO₃ + Cl*)<br>
+            AG = 131 − (4 + 98*) = 29 mmol/L<br>
+            Normal: &lt; 12 mmol/L | This result: GROSSLY ELEVATED<br>
+            *Cl assumed 98 mmol/L pending formal U&amp;E
+          </div>
+        </div>
+        <div class="box teaching"><div class="label">TEACHING POINT</div>pCO₂ 1.9 kPa = maximal respiratory compensation (Kussmaul breathing) — this child is fighting to stay alive.</div>`);
+    }
+
+    function renderDivider(s) {
+      return frame(s, `
+        <div class="divider-screen">
+          <div class="divider-emoji">⚡</div>
+          <div class="chapter-label">${s.chapter}</div>
+          <h3 class="divider-title">${s.title}</h3>
+          <p class="divider-desc">The nurse turns to you. Three questions in quick succession. Your answers in the next 60 seconds could save Theo — or make things catastrophically worse.</p>
+          <div class="pill-row"><span class="pill">💧 FLUIDS</span><span class="pill">🍼 FEEDS</span><span class="pill">💊 ANTIBIOTICS</span></div>
+        </div>`);
+    }
+
+    function renderAmmonia(s) {
+      return frame(s, `
+        <div class="narrative">Your phone rings. It's the biochemist on call. They rarely call at this hour.</div>
+        <div class="box danger" style="font-style:italic;font-size:1rem;">"I have an ammonia result here for your patient... I wanted to call you directly."</div>
+        <div class="ammonia-wrap">
+          <div class="ammo-value">412</div>
+          <div class="ammo-unit">µmol/L</div>
+          <div class="ammo-norm">Normal: &lt; 50 µmol/L</div>
+        </div>
+        <div class="detail-grid">
+          <div class="box danger"><div class="label">CONTEXT</div>412 µmol/L = 8× the upper limit of normal</div>
+          <div class="box teaching"><div class="label">RISK</div>At this level: risk of cerebral oedema, raised ICP, and seizures</div>
+          <div class="box flag" style="grid-column:1/-1;"><div class="label">NEXT</div>This result changes everything. You need a diagnosis — fast.</div>
+        </div>`);
+    }
+
+    function renderComparison(s) {
+      return frame(s, `
+        <div class="card" style="padding:0;overflow-x:auto;">
+          <table class="comparison">
+            <thead><tr><th>Feature</th><th>Urea Cycle Defect</th><th>Organic Acidaemia</th></tr></thead>
+            <tbody>
+              <tr class="match-row"><td>Ammonia</td><td>Very high (&gt;500 µmol/L)</td><td class="highlight">High (200–500 µmol/L) ✓</td></tr>
+              <tr class="match-row"><td>pH / Acid-base</td><td>Normal or resp. alkalosis</td><td class="highlight">Severe metabolic acidosis ✓</td></tr>
+              <tr class="match-row"><td>Anion gap</td><td>Normal</td><td class="highlight">Elevated (&gt;12 mmol/L) ✓</td></tr>
+              <tr class="match-row"><td>Ketones</td><td>Low / absent</td><td class="highlight">High ✓</td></tr>
+              <tr class="match-row"><td>Lactate</td><td>Normal or mildly elevated</td><td class="highlight">Elevated ✓</td></tr>
+              <tr class="match-row"><td>Neutrophils</td><td>Normal</td><td class="highlight">Neutropenia common ✓</td></tr>
+              <tr class="match-row"><td>Glucose</td><td>Normal</td><td class="highlight">Often hypoglycaemia ✓</td></tr>
+              <tr class="match-row"><td>Typical onset</td><td>Days 2–5 (protein load early)</td><td class="highlight">Days 5–14 ✓</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box correct"><div class="label">THEO'S PICTURE</div>pH 7.04 (severe acidosis) | HAGMA | AG 29 | Lactate 11.2 | Glucose 1.0 | Onset day 10–14 → Consistent with ORGANIC ACIDAEMIA</div>
+        <div class="box teaching"><div class="label">TEACHING POINT</div>Most likely specific diagnoses: propionic acidaemia (PA) or methylmalonic acidaemia (MMA). Plasma amino acids (↑ glycine) and urine organic acids will differentiate. Do NOT wait for this result — treatment is the same acutely.</div>`);
+    }
+
+    function renderResources(s) {
+      return frame(s, `
+        <div class="resource-grid">
+          <div class="resource-card blue"><div>🌐</div><h4>BIMDG Emergency Protocols</h4>bimdg.org.uk — Free emergency protocols for all major IEMs. Print one tonight. Available 24/7.</div>
+          <div class="resource-card amber"><div>☎️</div><h4>NPIS — Poisons Information</h4>0344 892 0111 — 24/7 specialist support for metabolic emergencies and toxic ingestions. IEM queries accepted.</div>
+          <div class="resource-card blue"><div>📋</div><h4>Three Pillars — Aide Memoire</h4>1. STOP FEEDS  2. HIGH-RATE DEXTROSE  3. CALL METABOLIC TEAM — in any suspected IEM, these three actions save lives.</div>
+          <div class="resource-card green"><div>🧪</div><h4>Metabolic Crisis Sample Set</h4>Plasma amino acids (EDTA), ammonia (EDTA, on ice, process immediately), lactate (fluoride), urine OA + reducing substances. Send at time of decompensation.</div>
+        </div>
+        <div class="box teaching"><div class="label">TEACHING POINT</div>BIMDG emergency treatment guidelines are diagnosis-specific. Once plasma amino acids / urine OA confirm the IEM subtype, switch from generic management to the BIMDG pathway for that condition. Transfer to a metabolic centre should be arranged in parallel with acute stabilisation.</div>`);
+    }
+
+    function renderEnd(s) {
+      let scoreClass = "score-red";
+      let msg = "Every wrong turn is a learning opportunity. Review the teaching points and run it again.";
+      if (score >= 8) {
+        scoreClass = "score-green";
+        msg = "Perfect. Theo is in good hands. Now teach this case to someone else.";
+      } else if (score >= 6) {
+        scoreClass = "score-blue";
+        msg = "Strong performance. One more run and you'll be ready for the real 3am.";
+      } else if (score >= 4) {
+        scoreClass = "score-amber";
+        msg = "Solid foundation. The dangerous traps — feeds and VBG misinterpretation — are the key areas to revisit.";
+      }
+
+      return frame(s, `
+        <div class="narrative" style="font-family:var(--font-display);font-size:1.02rem;">Theo was stabilised on high-rate 10% dextrose, empirical antibiotics, and N-carbamylglutamate whilst awaiting CRRT. Plasma amino acids showed marked hyperglycinaemia. Urine organic acids confirmed propionic acidaemia. He was transferred to the regional metabolic centre at 06:40, accompanied by his parents and a retrieval team.</div>
+        <div class="score-card">
+          <div class="score-big ${scoreClass}">${score} / 8</div>
+          <div class="score-msg">${msg}</div>
+        </div>
+        <div class="learn-grid">
+          <div class="learn-card">No newborn screening = high IEM pre-test probability. Ask about home birth and screening status in every sick neonate.</div>
+          <div class="learn-card">Ammonia is never on a standard panel. Order it explicitly. Process on ice immediately. Best captured at the time of decompensation.</div>
+          <div class="learn-card">Severe HAGMA in a neonate = organic acidaemia until proven otherwise. The anion gap is your discriminator.</div>
+          <div class="learn-card">Stop all feeds the moment IEM is suspected. Protein drives ammonia. Galactose is hepatotoxic. No safe small amount.</div>
+          <div class="learn-card">The Three Pillars: Stop feeds → High-rate dextrose (GIR 8–10 mg/kg/min) → Call metabolic team. Do all three simultaneously.</div>
+          <div class="learn-card">Haemofiltration threshold: ammonia >350 µmol/L unresponsive to treatment, or >500 µmol/L regardless. BIMDG and NPIS are available 24/7.</div>
+        </div>
+        <div class="debrief"><b>Facilitator Debrief Prompts</b>
+          → "What was the first red flag you noticed?"<br>
+          → "Why does the pCO₂ being 1.9 not mean he needs intubation?"<br>
+          → "What would have happened if mum had breastfed?"<br>
+          → "Why does galactosaemia cause E. coli sepsis?"<br>
+          → "What is the BIMDG and when do you call them?"
+        </div>`);
+    }
+
+    function bindChoiceButtons() {
+      document.querySelectorAll(".choice-btn").forEach(btn => {
+        btn.addEventListener("click", () => selectChoice(btn.dataset.choice));
+      });
+    }
+
+    function bindRewindButton() {
+      const rewindBtn = document.getElementById("rewind-btn");
+      if (rewindBtn) rewindBtn.addEventListener("click", goBackInTime);
+    }
+
+    function selectChoice(choiceId) {
+      if (revealShown) return;
+      selectedChoice = choiceId;
+      sectionState[currentSection] = sectionState[currentSection] || {};
+      sectionState[currentSection].selected = choiceId;
+      renderSection();
+    }
+
+    function revealAnswer() {
+      const section = sections[currentSection];
+      if (section.type !== "choice" || !selectedChoice || revealShown) return;
+
+      revealShown = true;
+      sectionState[currentSection] = sectionState[currentSection] || {};
+      sectionState[currentSection].revealed = true;
+      sectionState[currentSection].selected = selectedChoice;
+
+      if (!sectionState[currentSection].counted) {
+        totalChoicesMade += 1;
+        if (selectedChoice === section.correctChoice) score += 1;
+        sectionState[currentSection].counted = true;
+      }
+
+      if (selectedChoice !== section.correctChoice) {
+        wrongTimeline = { sectionIndex: currentSection, choiceId: selectedChoice };
+      }
+      renderSection();
+    }
+
+    function goBackInTime() {
+      if (!wrongTimeline) return;
+      const sourceSection = sections[wrongTimeline.sectionIndex];
+      const sourceIndex = wrongTimeline.sectionIndex;
+
+      currentSection = sourceIndex;
+      sectionState[sourceIndex] = sectionState[sourceIndex] || {};
+      sectionState[sourceIndex].selected = sourceSection.correctChoice;
+      sectionState[sourceIndex].revealed = true;
+      wrongTimeline = null;
+      renderSection();
+    }
+
+    function nextSection() {
+      if (wrongTimeline) return;
+      if (currentSection === sections.length - 1) {
+        currentSection = 0;
+        selectedChoice = null;
+        revealShown = false;
+        score = 0;
+        totalChoicesMade = 0;
+        wrongTimeline = null;
+        Object.keys(sectionState).forEach(k => delete sectionState[k]);
+        renderSection();
+        return;
+      }
+      currentSection += 1;
+      selectedChoice = null;
+      revealShown = false;
+      renderSection();
+    }
+
+    function prevSection() {
+      if (wrongTimeline) return;
+      if (currentSection === 0) return;
+      currentSection -= 1;
+      selectedChoice = null;
+      revealShown = false;
+      renderSection();
+    }
+
+    backBtn.addEventListener("click", prevSection);
+    revealBtn.addEventListener("click", revealAnswer);
+    continueBtn.addEventListener("click", nextSection);
+
+    renderSection();
+  </script>
+</body>
+</html>
