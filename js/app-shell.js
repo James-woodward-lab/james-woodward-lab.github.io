@@ -1,12 +1,12 @@
-/*
- * James Woodward Lab — shared app shell.
+﻿/*
+ * James Woodward Lab - shared app shell.
  *
  * Injected on every page via theme-toggle.js (which every page already
  * loads). Responsibilities:
  *
- *   1. Install the PWA surface — manifest <link>, theme-color, apple-touch-
+ *   1. Install the PWA surface - manifest <link>, theme-color, apple-touch-
  *      icon and favicon references, registering the service worker.
- *   2. Command Palette (Ctrl/Cmd+K) — fuzzy-search across every tool, every
+ *   2. Command Palette (Ctrl/Cmd+K) - fuzzy-search across every tool, every
  *      external quick link, and a handful of global actions. Fully keyboard-
  *      driven with ARIA roles and a focus trap.
  *   3. Install prompt wiring (Chromium beforeinstallprompt) and an "offline
@@ -22,7 +22,7 @@
   window.__jwlAppShellLoaded = true;
 
   /* ================================================================
-   * 1. Catalogue — canonical list of tools + actions for the palette.
+   * 1. Catalogue - canonical list of tools + actions for the palette.
    * ================================================================ */
 
   const TOOLS = [
@@ -116,7 +116,7 @@
     if (!/^https?:$/.test(location.protocol)) return;
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js').catch(() => {
-        // Silent failure is fine — page still works.
+        // Silent failure is fine - page still works.
       });
     });
   }
@@ -128,7 +128,7 @@
     });
     window.addEventListener('appinstalled', () => {
       deferredInstallPrompt = null;
-      showToast('Installed — look for "JW Lab" on your home screen');
+      showToast('Installed - look for "JW Lab" on your home screen');
     });
   }
 
@@ -152,7 +152,7 @@
   }
 
   /* ================================================================
-   * 5. Command Palette — markup, styles, fuzzy search, keyboard nav.
+   * 5. Command Palette - markup, styles, fuzzy search, keyboard nav.
    * ================================================================ */
 
   const STYLE_ID = 'jwl-cmdk-style';
@@ -570,7 +570,7 @@
         }
         break;
       case 'clear':
-        clearCaches().then(() => showToast('Offline cache cleared — reload to refetch'));
+        clearCaches().then(() => showToast('Offline cache cleared - reload to refetch'));
         break;
       case 'about':
         showToast('James Woodward Lab · paediatric clinical tools · github.com/James-woodward-lab');
@@ -673,3 +673,4 @@
     init();
   }
 })();
+

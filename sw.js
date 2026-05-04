@@ -1,5 +1,5 @@
-/*
- * James Woodward Lab — service worker.
+﻿/*
+ * James Woodward Lab - service worker.
  *
  * Strategy:
  *   - Precache the app shell (theme/CSS/JS/icons/manifest and the homepage)
@@ -47,7 +47,7 @@ self.addEventListener('install', (event) => {
         if (res && (res.ok || res.type === 'opaque')) {
           await cache.put(url, res.clone());
         }
-      } catch (_) { /* ignore — runtime fetch will repair if possible */ }
+      } catch (_) { /* ignore - runtime fetch will repair if possible */ }
     }));
     self.skipWaiting();
   })());
@@ -77,7 +77,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // HTML / navigations — network-first, cache fallback, then offline shell.
+  // HTML / navigations - network-first, cache fallback, then offline shell.
   const isNavigation = req.mode === 'navigate'
     || (req.headers.get('accept') || '').includes('text/html');
   if (isNavigation) {
@@ -85,7 +85,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static same-origin assets — stale-while-revalidate.
+  // Static same-origin assets - stale-while-revalidate.
   event.respondWith(staleWhileRevalidate(req));
 });
 
@@ -124,7 +124,7 @@ async function staleWhileRevalidate(req) {
 
 function offlineFallbackHTML() {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
-    <title>Offline — James Woodward Lab</title>
+    <title>Offline - James Woodward Lab</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       body { font: 16px/1.5 -apple-system, 'Segoe UI', system-ui, sans-serif;
@@ -144,3 +144,4 @@ function offlineFallbackHTML() {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
+

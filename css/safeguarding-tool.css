@@ -1,5 +1,5 @@
-/* ==========================================================================
-   NAI Fracture Checker — layered on app-theme.css tokens.
+﻿/* ==========================================================================
+   NAI Fracture Checker - layered on app-theme.css tokens.
    Tool-local aliases map the domain language (red / amber / green) onto the
    shared status tokens so nothing is hardcoded twice.
    ========================================================================== */
@@ -567,3 +567,4 @@ body.safeguarding-app {
     flex-direction: column;
   }
 }
+

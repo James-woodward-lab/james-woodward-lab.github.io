@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -53,7 +53,7 @@
       <div class="sec-meta"><h2>Ingestion setup</h2><p>Weight, timing, and how the exposure was identified</p></div>
     </div>
     <div class="field">
-      <label>Child&apos;s weight (kg) — required for calculations</label>
+      <label>Child&apos;s weight (kg) - required for calculations</label>
       <input type="number" class="weight-input" id="weightKg" min="0.1" max="200" step="0.1" placeholder="e.g. 20" oninput="onAnyChange()">
     </div>
     <div class="field">
@@ -68,7 +68,7 @@
         <button type="button" class="hdr-btn" onclick="estWeight(3)">6–12 yr: 3 &times; age</button>
       </div>
       <p class="hint">Uses age in months for the first button, years for the other two. Verify against growth charts if possible.</p>
-      <div class="est-flag" id="estFlag">Estimated weight — verify if possible.</div>
+      <div class="est-flag" id="estFlag">Estimated weight - verify if possible.</div>
     </div>
     <div class="field">
       <label>Time of ingestion</label>
@@ -90,16 +90,16 @@
           </div>
         </div>
         <div>
-          <span class="elapsed-live" id="elapsedLive">Elapsed: —</span>
+          <span class="elapsed-live" id="elapsedLive">Elapsed: -</span>
         </div>
       </div>
     </div>
     <div class="field">
       <label>Witnessed / found</label>
       <div class="wit-row" id="witRow">
-        <button type="button" class="wit-opt active" data-w="witnessed" onclick="setWitnessed('witnessed',this)">Witnessed — exact amount known</button>
-        <button type="button" class="wit-opt" data-w="found" onclick="setWitnessed('found',this)">Found with tablets/container — amount estimated</button>
-        <button type="button" class="wit-opt" data-w="unknown" onclick="setWitnessed('unknown',this)">Unknown — worst-case calculation</button>
+        <button type="button" class="wit-opt active" data-w="witnessed" onclick="setWitnessed('witnessed',this)">Witnessed - exact amount known</button>
+        <button type="button" class="wit-opt" data-w="found" onclick="setWitnessed('found',this)">Found with tablets/container - amount estimated</button>
+        <button type="button" class="wit-opt" data-w="unknown" onclick="setWitnessed('unknown',this)">Unknown - worst-case calculation</button>
       </div>
     </div>
   </div>
@@ -148,14 +148,14 @@
         <p class="hint" id="rangeHint"></p>
       </div>
       <div class="field hidden" id="ironElementalNote"></div>
-      <div class="dose-total-big" id="doseTotalLine">Total dose: —</div>
+      <div class="dose-total-big" id="doseTotalLine">Total dose: -</div>
       <div class="dose-bar-wrap">
-        <div class="dose-bar-label"><span id="doseBarPct">—</span><span id="doseBarThresh">Toxic threshold: —</span></div>
+        <div class="dose-bar-label"><span id="doseBarPct">-</span><span id="doseBarThresh">Toxic threshold: -</span></div>
         <div class="dose-bar-track"><div class="dose-bar-fill" id="doseBarFill"></div></div>
       </div>
       <div class="field hidden" id="mrField">
         <label class="chk-item"><input type="checkbox" id="mrToggle" onchange="onAnyChange()"> Modified release formulation</label>
-        <div class="mr-warn" id="mrWarn">Modified release formulation — standard decontamination windows and nomogram thresholds do not apply. Contact NPIS for specific guidance.</div>
+        <div class="mr-warn" id="mrWarn">Modified release formulation - standard decontamination windows and nomogram thresholds do not apply. Contact NPIS for specific guidance.</div>
       </div>
       <div class="field">
         <label class="chk-item"><input type="checkbox" id="coIngestToggle" onchange="toggleCoIngest()"> Other substances also ingested</label>
@@ -179,7 +179,7 @@
       </div>
     </div>
     <div class="symptom-panel" id="symptomPanel">
-      <p class="hint" style="margin-bottom:10px;">Tick features that apply — toxidrome is inferred for quick reference only.</p>
+      <p class="hint" style="margin-bottom:10px;">Tick features that apply - toxidrome is inferred for quick reference only.</p>
       <div class="toxi-group">
         <h4>Opioid</h4>
         <label class="chk-item"><input type="checkbox" class="toxi-cb" data-tx="opioid"> Miosis, reduced GCS, respiratory depression, bradycardia</label>
@@ -250,7 +250,7 @@
   <div class="card output-card" id="cardSec4">
     <div class="sec-ind">
       <div class="sec-num">4</div>
-      <div class="sec-meta"><h2>Risk stratification &amp; management</h2><p>Real-time output — verify with TOXBASE/NPIS</p></div>
+      <div class="sec-meta"><h2>Risk stratification &amp; management</h2><p>Real-time output - verify with TOXBASE/NPIS</p></div>
     </div>
     <div id="riskPill" class="risk-pill low">Complete substance and weight to see risk.</div>
     <div class="npis-banner" id="npisBanner"></div>
@@ -277,3 +277,4 @@
 <script src="tox-tool.js"></script>
 </body>
 </html>
+

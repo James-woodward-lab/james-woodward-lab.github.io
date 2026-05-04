@@ -1,5 +1,5 @@
-/**
- * Paediatric Seizure Timer — status epilepticus escalation prompts
+﻿/**
+ * Paediatric Seizure Timer - status epilepticus escalation prompts
  */
 
 .seizure-timer-app .container {
@@ -404,3 +404,4 @@
   font-size: 0.75rem;
   color: var(--muted);
 }
+

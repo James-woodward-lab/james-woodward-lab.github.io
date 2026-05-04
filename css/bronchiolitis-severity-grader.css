@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Bronchiolitis Severity Grader — tokens from app-theme.css
+﻿/* ==========================================================================
+   Bronchiolitis Severity Grader - tokens from app-theme.css
    ========================================================================== */
 
 .bronch-app .input-grid {
@@ -233,3 +233,4 @@
 
   .bronch-app .card { break-inside: avoid; }
 }
+

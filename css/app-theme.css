@@ -1,7 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 /* ==========================================================================
-   James Woodward Lab — shared UI theme
+   James Woodward Lab - shared UI theme
    ==========================================================================
 
    Table of contents
@@ -27,10 +27,10 @@
 
 
 /* ==========================================================================
-   1. Design tokens — Original Classic palette (dark by default)
+   1. Design tokens - Original Classic palette (dark by default)
    ========================================================================== */
 :root {
-  /* Colour — surfaces */
+  /* Colour - surfaces */
   --bg: #0f1117;
   --bg-elevated: #141827;
   --surface: #1a1d27;
@@ -39,23 +39,23 @@
   --border: #2e3246;
   --border-strong: #3e445c;
 
-  /* Colour — text */
+  /* Colour - text */
   --text: #e2e8f0;
   --text-soft: #bac3d2;
   --muted: #8892a4;
 
-  /* Colour — brand */
+  /* Colour - brand */
   --accent: #20b2aa;
   --accent2: #4ecdc4;
   --accent-on: #0f1117;
 
-  /* Colour — status */
+  /* Colour - status */
   --success: #22c55e;
   --warn: #f59e0b;
   --danger: #ef4444;
   --info: #38bdf8;
 
-  /* Status translucent companions — used by alerts, stats, callouts */
+  /* Status translucent companions - used by alerts, stats, callouts */
   --success-surface: color-mix(in srgb, var(--success) 10%, transparent);
   --success-border:  color-mix(in srgb, var(--success) 30%, transparent);
   --warn-surface:    color-mix(in srgb, var(--warn) 10%, transparent);
@@ -71,13 +71,13 @@
   --focus-ring-width:  3px;
   --focus-ring-offset: 2px;
 
-  /* Typography — stacks */
+  /* Typography - stacks */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
                system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas,
                "Liberation Mono", monospace;
 
-  /* Typography — fluid scale (min → preferred → max) */
+  /* Typography - fluid scale (min → preferred → max) */
   --fs-xs:   clamp(0.72rem, 0.70rem + 0.10vw, 0.78rem);   /* ~11.5–12.5 */
   --fs-sm:   clamp(0.82rem, 0.78rem + 0.15vw, 0.90rem);   /* ~13–14.5  */
   --fs-base: clamp(0.95rem, 0.90rem + 0.20vw, 1.05rem);   /* ~15–17    */
@@ -87,25 +87,25 @@
   --fs-2xl:  clamp(1.50rem, 1.25rem + 1.00vw, 2.00rem);   /* ~24–32    */
   --fs-3xl:  clamp(1.80rem, 1.45rem + 1.50vw, 2.50rem);   /* ~29–40    */
 
-  /* Typography — rhythm */
+  /* Typography - rhythm */
   --lh-tight:  1.2;
   --lh-snug:   1.35;
   --lh-normal: 1.5;
   --lh-loose:  1.7;
 
-  /* Typography — weight */
+  /* Typography - weight */
   --fw-regular:  400;
   --fw-medium:   500;
   --fw-semibold: 600;
   --fw-bold:     700;
 
-  /* Typography — tracking */
+  /* Typography - tracking */
   --tracking-tight:  -0.01em;
   --tracking-normal: 0;
   --tracking-wide:   0.06em;
   --tracking-caps:   0.1em;
 
-  /* Spacing — 4 px scale */
+  /* Spacing - 4 px scale */
   --sp-0:  4px;
   --sp-1:  8px;
   --sp-2:  12px;
@@ -117,7 +117,7 @@
   --sp-8:  48px;
   --sp-9:  64px;
 
-  /* Spacing — fluid section rhythm */
+  /* Spacing - fluid section rhythm */
   --sp-gutter: clamp(var(--sp-2), 3.5vw, var(--sp-5));
 
   /* Layout */
@@ -828,14 +828,14 @@ footer.app-footer a:focus-visible {
   border: 0;
 }
 
-/* Tabular numbers — clinical values */
+/* Tabular numbers - clinical values */
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
 
 /* ==========================================================================
-   13. Fixed controls — theme toggle, back-home, skip-to-content
+   13. Fixed controls - theme toggle, back-home, skip-to-content
    ========================================================================== */
 .theme-toggle {
   position: fixed;
@@ -911,7 +911,7 @@ footer.app-footer a:focus-visible {
   }
 }
 
-/* Skip-to-content — hidden until focused */
+/* Skip-to-content - hidden until focused */
 .skip-link {
   position: fixed;
   top: var(--sp-1);
@@ -1011,3 +1011,4 @@ html.theme-light .fluid-app .desktop-nav,
 html.theme-light .desktop-nav {
   background: rgba(241, 245, 249, 0.95);
 }
+

@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Decending Silence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050a12;
+      --bg-deep: #02050a;
+      --surface: #0c1725;
+      --surface-2: #111f32;
+      --border: rgba(255,255,255,0.09);
+      --text: #e5edf7;
+      --muted: #8aa1b8;
+      --faint: #526b85;
+      --blue: #38bdf8;
+      --blue-dim: rgba(56,189,248,0.12);
+      --blue-border: rgba(56,189,248,0.34);
+      --green: #22c55e;
+      --green-dim: rgba(34,197,94,0.12);
+      --green-border: rgba(34,197,94,0.36);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --amber-border: rgba(245,158,11,0.36);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.12);
+      --red-border: rgba(239,68,68,0.36);
+      --purple: #a78bfa;
+      --font-display: "Instrument Serif", Georgia, serif;
+      --font-body: "Inter", system-ui, sans-serif;
+      --radius: 12px;
+      --transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: var(--font-body);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(56,189,248,0.16), transparent 34rem),
+        radial-gradient(circle at 80% 10%, rgba(167,139,250,0.12), transparent 30rem),
+        linear-gradient(180deg, #07111e, var(--bg));
+      color: var(--text);
+    }
+
+    .app-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0 1rem;
+      background: rgba(2, 5, 10, 0.94);
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .head-left { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+    .logo { font-size: 1.2rem; }
+    .title-wrap { min-width: 0; }
+    .title-wrap h1 {
+      margin: 0;
+      font: 400 1rem/1.1 var(--font-display);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter {
+      margin-top: 0.12rem;
+      color: var(--blue);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .head-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .score-badge {
+      display: none;
+      padding: 0.28rem 0.55rem;
+      border: 1px solid var(--blue-border);
+      border-radius: 999px;
+      background: var(--blue-dim);
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .progress-track {
+      position: fixed;
+      top: 58px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+      z-index: 19;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      transition: width 0.45s ease;
+    }
+
+    .content {
+      margin-top: 60px;
+      margin-bottom: 58px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 1.4rem;
+    }
+    .content-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      animation: fadeSlideIn 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .content-inner.is-leaving {
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .app-footer {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 58px;
+      border-top: 1px solid var(--border);
+      background: rgba(2, 5, 10, 0.94);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.65rem;
+      padding: 0.45rem 0.75rem;
+      z-index: 20;
+    }
+
+    button {
+      min-height: 42px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--text);
+      font: 700 0.84rem/1 var(--font-body);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    button:hover { filter: brightness(1.09); }
+    button:active { transform: translateY(1px) scale(0.99); }
+    button:disabled { opacity: 0.5; cursor: default; transform: none; filter: none; }
+    button:focus-visible,
+    .choice-btn:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .btn-back { justify-self: start; width: 100%; }
+    .btn-reveal {
+      background: var(--amber-dim);
+      border-color: var(--amber-border);
+      color: var(--amber);
+    }
+    .btn-reveal.done {
+      background: var(--green-dim);
+      border-color: var(--green-border);
+      color: var(--green);
+    }
+    .btn-continue {
+      justify-self: end;
+      width: 100%;
+      background: var(--blue-dim);
+      border-color: var(--blue-border);
+      color: var(--blue);
+    }
+
+    .chapter-label {
+      color: var(--blue);
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.65rem;
+      font-weight: 800;
+    }
+    h2.section-title {
+      margin: 0 0 1rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.45rem);
+      font-weight: 400;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(17,31,50,0.94), rgba(12,23,37,0.96));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .narrative {
+      background: var(--surface);
+      border-left: 3px solid var(--blue);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      font-style: italic;
+      font-size: 0.93rem;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+    .narrative strong { color: var(--blue); font-style: normal; font-weight: 800; }
+
+    .hero {
+      text-align: center;
+      padding-top: 0.8rem;
+    }
+    .hero-emoji { font-size: 4rem; animation: floaty 2.7s ease-in-out infinite; }
+    .hero h2 {
+      margin: 0.55rem 0;
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      background: linear-gradient(135deg, #38bdf8, #a78bfa, #f59e0b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 400;
+    }
+    .hero-sub {
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+    .hero-tags,
+    .pill-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .hero-tags span,
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.42rem 0.78rem;
+      background: rgba(255,255,255,0.03);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+    .instructions {
+      max-width: 620px;
+      margin: 1.2rem auto 0;
+      text-align: left;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+    }
+    .instructions h3 { margin: 0 0 0.55rem; color: var(--blue); font-size: 0.9rem; }
+    .instructions ol { margin: 0; padding-left: 1.25rem; color: var(--muted); line-height: 1.75; font-size: 0.88rem; }
+    .instructions p { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.86rem; }
+
+    .detail-grid,
+    .learn-grid,
+    .resource-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .detail-item,
+    .learn-card,
+    .resource-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.82rem;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .detail-item b,
+    .resource-card h4 {
+      display: block;
+      color: var(--text);
+      margin: 0 0 0.22rem;
+      font-size: 0.88rem;
+    }
+
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .vital-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      padding: 0.76rem 0.45rem;
+    }
+    .vital-card.watch { background: var(--amber-dim); border-color: var(--amber-border); }
+    .vital-label {
+      font-size: 0.64rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+      font-weight: 800;
+    }
+    .vital-value { font-size: 1.05rem; font-weight: 800; color: var(--blue); }
+    .vital-card.watch .vital-value { color: var(--amber); }
+
+    .question {
+      margin: 1rem 0 0.75rem;
+      font-size: 0.94rem;
+      color: var(--text);
+      font-weight: 800;
+    }
+    .choices { display: grid; gap: 0.65rem; }
+    .choice-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.82rem;
+      text-align: left;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .choice-btn:hover { background: var(--blue-dim); border-color: var(--blue-border); }
+    .choice-btn.selected { background: rgba(56,189,248,0.09); border-color: var(--blue-border); }
+    .choice-btn.correct { background: var(--green-dim); border-color: var(--green-border); }
+    .choice-btn.wrong { background: var(--red-dim); border-color: var(--red-border); }
+    .letter {
+      flex: 0 0 1.75rem;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: var(--blue-dim);
+      color: var(--blue);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+    .choice-btn.correct .letter { color: var(--green); background: var(--green-dim); }
+    .choice-btn.wrong .letter { color: var(--red); background: var(--red-dim); }
+    .choice-text { flex: 1; }
+    .result-badge { font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
+    .choice-btn.correct .result-badge { color: var(--green); }
+    .choice-btn.wrong .result-badge { color: var(--red); }
+
+    .reveal {
+      margin-top: 0.85rem;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 500ms ease, opacity 500ms ease;
+    }
+    .reveal.show { max-height: 1600px; opacity: 1; }
+    .box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 0.98rem;
+      margin-bottom: 0.65rem;
+      font-size: 0.84rem;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+    .box .label {
+      font-size: 0.67rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+    .box.correct { background: var(--green-dim); border-color: var(--green-border); }
+    .box.correct .label { color: var(--green); }
+    .box.teaching { background: var(--amber-dim); border-left: 3px solid var(--amber); }
+    .box.teaching .label { color: var(--amber); }
+    .box.danger { background: var(--red-dim); border-left: 3px solid var(--red); }
+    .box.danger .label { color: var(--red); }
+    .box.flag { background: var(--blue-dim); border-color: var(--blue-border); }
+    .box.flag .label { color: var(--blue); }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.8rem;
+    }
+    .comparison th {
+      text-align: left;
+      background: rgba(56,189,248,0.1);
+      color: var(--blue);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.62rem;
+      border: 1px solid var(--border);
+    }
+    .comparison td {
+      padding: 0.62rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+      vertical-align: top;
+    }
+    .comparison td:first-child { color: var(--text); font-weight: 800; width: 22%; }
+    .match-row { background: rgba(34,197,94,0.05); }
+    .highlight { color: var(--green); font-weight: 800; }
+
+    .divider-screen { text-align: center; padding: 1.6rem 0 0.5rem; }
+    .divider-emoji { font-size: 3.2rem; animation: floaty 2.4s ease-in-out infinite; margin-bottom: 0.35rem; }
+    .divider-title { font: 400 clamp(2rem, 5vw, 3rem)/1.1 var(--font-display); margin: 0.35rem 0; }
+    .divider-desc {
+      max-width: 700px;
+      margin: 0.6rem auto 1rem;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 0.93rem;
+    }
+
+    .pathway {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.55rem;
+      margin: 1rem 0;
+    }
+    .pathway-step {
+      background: var(--surface);
+      border: 1px solid var(--blue-border);
+      border-radius: var(--radius);
+      padding: 0.72rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    .pathway-step b { display: block; color: var(--blue); margin-bottom: 0.2rem; }
+
+    .score-card {
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .score-big { font-size: 3rem; font-weight: 900; line-height: 1; }
+    .score-green { color: var(--green); }
+    .score-blue { color: var(--blue); }
+    .score-amber { color: var(--amber); }
+    .score-red { color: var(--red); }
+    .score-msg { margin-top: 0.55rem; color: var(--muted); font-size: 0.9rem; }
+
+    .debrief {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.8;
+    }
+    .debrief b { color: var(--blue); }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @media (max-width: 760px) {
+      .content { padding: 1.2rem 0.9rem; }
+      .app-header { padding: 0 0.75rem; }
+      .head-right { gap: 0.4rem; font-size: 0.72rem; }
+      .score-badge { display: none !important; }
+      .detail-grid,
+      .learn-grid,
+      .resource-grid,
+      .pathway { grid-template-columns: 1fr; }
+      .vitals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .app-footer { grid-template-columns: 0.8fr 1fr 0.9fr; gap: 0.4rem; padding-inline: 0.45rem; }
+      button { font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="head-left">
+      <div class="logo" aria-hidden="true">🧠</div>
+      <div class="title-wrap">
+        <h1>The Decending Silence</h1>
+        <div class="chapter" id="chapter-label">Infant Botulism</div>
+      </div>
+    </div>
+    <div class="head-right">
+      <span id="score-badge" class="score-badge">0 / 6</span>
+      <span id="progress-text">1 / 16</span>
+    </div>
+  </header>
+
+  <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
+
+  <main class="content" id="main-content">
+    <div class="content-inner" id="content-inner"></div>
+  </main>
+
+  <footer class="app-footer">
+    <button id="back-btn" class="btn-back" type="button">← Back</button>
+    <button id="reveal-btn" class="btn-reveal" type="button">Reveal Answer</button>
+    <button id="continue-btn" class="btn-continue" type="button">Continue →</button>
+  </footer>
+
+  <script>
+    const sections = [
+      { type: "title", chapter: "Infant Botulism", title: "The Decending Silence" },
+      {
+        type: "meet",
+        chapter: "The Case Begins",
+        title: "Meet Freddie",
+        narrative: "Freddie is 4 months old. His parents bring him to the paediatric ED at 11am because he has been <strong>'not quite himself'</strong> for five days. It began with constipation. Then feeding became harder. Yesterday his cry changed. This morning, mum noticed his eyelids looked droopy.",
+        details: [
+          ["Age", "4 months old"],
+          ["Background", "Term infant, normal development to date"],
+          ["Presenting concern", "Constipation, poor feeding, weak cry, droopy eyelids"],
+          ["Time course", "Progressive change over 5 days"],
+          ["Environment", "Rural smallholding, vegetable garden, compost heap"]
+        ],
+        keyFlag: "The pattern matters more than any single clue: constipation first, then bulbar symptoms, then descending flaccid weakness."
+      },
+      {
+        type: "choice",
+        chapter: "Vignette 1",
+        title: "The Story So Far",
+        narrative: "Parents report five days of progressive change. It started with constipation. Then poor feeding. His cry has become quieter. This morning they noticed bilateral eyelid droop. No fever. No rash. No sick contacts.",
+        question: "Which feature of this history is MOST clinically significant?",
+        choices: {
+          a: "The bilateral ptosis appearing acutely in a 4-month-old - this suggests a space-occupying intracranial lesion",
+          b: "The temporal sequence: constipation first, then descending weakness, then cranial nerve involvement over days",
+          c: "The absence of fever - this makes sepsis less likely and is reassuring"
+        },
+        correctChoice: "b",
+        correct: "B - The temporal sequence is the diagnostic clue: constipation, then bulbar/cranial nerve signs, then descending weakness.",
+        teaching: "Constipation is often the first symptom in infant botulism because toxin affects cholinergic transmission in the gut before somatic neuromuscular weakness becomes obvious. The cranial nerves are then affected early: ptosis, weak cry, poor suck, reduced facial expression, and diminished gag. Weakness descends from bulbar muscles to limbs and respiratory muscles.",
+        danger: "Option C is a dangerous anchor. Botulinum toxin does not cause a systemic inflammatory response, so absence of fever is not reassuring in a progressively floppy infant."
+      },
+      {
+        type: "assessment",
+        chapter: "Freddie's Examination",
+        title: "The Quiet Baby",
+        narrative: "Freddie is awake but unusually still. He tracks briefly, then tires. His face is hypomimic and his cry is weak and monotone.",
+        vitals: [
+          ["HR", "132", false],
+          ["RR", "38", false],
+          ["SpO2", "97%", false],
+          ["Temp", "36.4", false],
+          ["CRT", "2 sec", false],
+          ["BM", "4.8", false]
+        ],
+        exam: [
+          "Tone: generalised hypotonia with marked head lag",
+          "Face: reduced expression, bilateral mild ptosis",
+          "Bulbar: weak suck, poor latch, dribbling, diminished gag",
+          "Pupils: 5mm bilaterally with sluggish light response",
+          "Reflexes: present but diminished throughout",
+          "Limb movement: spontaneous but reduced amplitude",
+          "No fever, no rash, no focal neurological signs"
+        ],
+        keyFlag: "This is a neuromuscular pattern, not a sleepy baby pattern. Ptosis + weak suck + constipation + hypotonia should trigger botulism."
+      },
+      {
+        type: "choice",
+        chapter: "Vignette 2",
+        title: "Normal Bloods",
+        narrative: "FBC, CRP, metabolic panel, blood culture, glucose, and gas are sent. The results return: FBC normal, CRP <1, glucose 4.6, pH 7.38, pCO2 4.8 kPa, base excess +1.",
+        question: "The normal bloods are:",
+        choices: {
+          a: "Reassuring - no significant pathology, safe to observe and discharge with safety-net advice",
+          b: "A red flag - progressive neurological signs with normal inflammatory markers suggest a non-inflammatory neuromuscular cause",
+          c: "Incomplete - repeat an expanded metabolic panel before forming a view"
+        },
+        correctChoice: "b",
+        correct: "B - Normal bloods are a red flag in a neurologically abnormal infant.",
+        teaching: "Infant botulism is a toxin-mediated neuromuscular disorder. Routine bloods, CRP, glucose, and gas can be normal. That normality should increase suspicion when the examination is clearly abnormal. Send stool for C. botulinum toxin and spore culture, and involve microbiology/public health early.",
+        danger: "Option A is how cases are missed. Normal inflammatory markers do not neutralise the neurological examination."
+      },
+      {
+        type: "mechanism",
+        chapter: "The Science",
+        title: "What the Toxin Does"
+      },
+      {
+        type: "choice",
+        chapter: "Vignette 3",
+        title: "What Is the Pattern?",
+        narrative: "Freddie has bilateral ptosis, weak facial movement, poor suck, diminished gag, sluggish pupils, constipation, and generalised hypotonia. A colleague asks whether this is Guillain-Barre Syndrome.",
+        question: "Which feature best separates infant botulism from Guillain-Barre Syndrome?",
+        choices: {
+          a: "Botulism starts with cranial nerve signs and descends; GBS typically starts distally and ascends",
+          b: "In botulism the CSF protein is elevated; in GBS it is normal",
+          c: "In botulism the pupils are normal; in GBS they are dilated"
+        },
+        correctChoice: "a",
+        correct: "A - Direction of spread is the key bedside discriminator.",
+        teaching: "Botulism is classically descending: cranial nerve/bulbar signs first, then limbs, then respiratory muscles. GBS is usually ascending with absent reflexes and may show albuminocytological dissociation in CSF. Botulism CSF is usually normal.",
+        danger: "Option B is reversed. Raised CSF protein with normal white cells supports GBS, not botulism. Do not delay botulism treatment waiting for LP or EMG if the clinical picture is classic.",
+        keyFlag: "Pupillary involvement is a strong botulism clue: parasympathetic blockade can cause sluggish or dilated pupils."
+      },
+      {
+        type: "comparison",
+        chapter: "Pattern Recognition",
+        title: "Botulism vs GBS vs Myasthenia"
+      },
+      {
+        type: "divider",
+        chapter: "Freddie Has Botulism",
+        title: "You Have Your Diagnosis",
+        description: "You do not have a stool toxin result. You do not need one. A 4-month-old with constipation, descending flaccid weakness, cranial nerve palsies, sluggish pupils, and relevant exposure history has infant botulism until proven otherwise.",
+        pills: ["Treat now", "Monitor airway", "Notify public health"]
+      },
+      {
+        type: "choice",
+        chapter: "Decision 1 - Treatment",
+        title: "What Do You Give?",
+        narrative: "Freddie is admitted. He is maintaining his airway for now, SpO2 97%, RR 42. The registrar asks what to prescribe.",
+        question: "What is the first-line treatment?",
+        choices: {
+          a: "BabyBIG (Botulism Immune Globulin Intravenous) plus intensive supportive care",
+          b: "IV benzylpenicillin and gentamicin - cover for bacterial toxin-producing infection",
+          c: "IV pyridostigmine - the same approach as used in myasthenia gravis"
+        },
+        correctChoice: "a",
+        correct: "A - BabyBIG plus supportive care is the treatment.",
+        teaching: "BabyBIG neutralises circulating unbound botulinum toxin before it binds more nerve terminals. It does not reverse toxin already bound at the neuromuscular junction, so speed matters. In the UK, contact the duty microbiologist and UKHSA/HPT urgently for advice and procurement.",
+        danger: "Gentamicin and other aminoglycosides potentiate neuromuscular blockade by reducing presynaptic acetylcholine release. In suspected botulism, they can precipitate respiratory failure. Anticholinesterases do not solve the problem because there is little acetylcholine being released to preserve.",
+        keyFlag: "Do not wait for stool toxin confirmation before starting the treatment pathway."
+      },
+      {
+        type: "choice",
+        chapter: "Decision 2 - Airway",
+        title: "Is Freddie Safe?",
+        narrative: "Four hours later, SpO2 is 94% on 1L nasal cannula. RR 48. His chest and abdomen are moving in opposite directions. His cry is now barely audible.",
+        question: "What do you do?",
+        choices: {
+          a: "Increase oxygen to 4L/min and recheck in 1 hour",
+          b: "Wait for a blood gas showing respiratory acidosis before escalating",
+          c: "Escalate urgently to PICU - respiratory muscle failure signs mandate intubation before oxygenation deteriorates"
+        },
+        correctChoice: "c",
+        correct: "C - This is impending respiratory failure and needs urgent PICU/anaesthetic escalation.",
+        teaching: "In infant botulism, hypoxia is late. The warning signs are ventilatory and bulbar: paradoxical breathing, weakening cry, poor cough, pooling secretions, tachypnoea, and increasing work of breathing. Infants cannot reliably perform FVC/NIF, so clinical assessment drives escalation.",
+        danger: "Supplemental oxygen can hide deterioration while ventilation fails. Waiting for SpO2 to crash or CO2 to rise loses the window for controlled intubation.",
+        keyFlag: "Paradoxical breathing + weakening cry in botulism means act now."
+      },
+      {
+        type: "choice",
+        chapter: "Decision 3 - Notification",
+        title: "Public Health",
+        narrative: "Freddie is intubated in PICU and BabyBIG is being sourced. Mum asks whether his 7-year-old sister could be at risk because she had the same honey.",
+        question: "What are your immediate public health actions?",
+        choices: {
+          a: "Notify UKHSA/HPT immediately on clinical suspicion, retain the honey, investigate sources, and assess exposed contacts",
+          b: "Notify only once the stool toxin result confirms the diagnosis",
+          c: "No action is required unless there is evidence of a foodborne outbreak"
+        },
+        correctChoice: "a",
+        correct: "A - Notify immediately on clinical suspicion.",
+        teaching: "Botulism is notifiable. Public health needs early notification to investigate possible sources, arrange specialist testing, advise the household, and identify whether a commercial product or environmental source could put other infants at risk.",
+        danger: "Waiting for laboratory confirmation delays source control. If honey or another product is implicated, other infants may be exposed while the team waits.",
+        keyFlag: "Infant botulism is not spread person-to-person. Standard precautions are appropriate, but nappies can contain spores, so hand hygiene still matters."
+      },
+      {
+        type: "timeline",
+        chapter: "The Resolution",
+        title: "What Happened to Freddie"
+      },
+      {
+        type: "resources",
+        chapter: "Clinical Resources",
+        title: "Useful References"
+      },
+      {
+        type: "end",
+        chapter: "Learning Summary",
+        title: "Take-Home Points"
+      }
+    ];
+
+    let currentSection = 0;
+    let selectedChoice = null;
+    let revealShown = false;
+    let score = 0;
+    let totalChoicesMade = 0;
+    const sectionState = {};
+    const totalChoices = sections.filter(s => s.type === "choice").length;
+
+    const contentInner = document.getElementById("content-inner");
+    const mainContent = document.getElementById("main-content");
+    const chapterLabel = document.getElementById("chapter-label");
+    const progressText = document.getElementById("progress-text");
+    const progressFill = document.getElementById("progress-fill");
+    const scoreBadge = document.getElementById("score-badge");
+    const backBtn = document.getElementById("back-btn");
+    const revealBtn = document.getElementById("reveal-btn");
+    const continueBtn = document.getElementById("continue-btn");
+
+    function frame(section, body) {
+      return `<section><div class="chapter-label">${section.chapter}</div><h2 class="section-title">${section.title}</h2>${body}</section>`;
+    }
+
+    function renderSection() {
+      const section = sections[currentSection];
+      chapterLabel.textContent = section.chapter;
+      progressText.textContent = `${currentSection + 1} / ${sections.length}`;
+      progressFill.style.width = `${((currentSection + 1) / sections.length) * 100}%`;
+      scoreBadge.style.display = totalChoicesMade > 0 ? "inline-flex" : "none";
+      scoreBadge.textContent = `${score} / ${totalChoices} correct`;
+
+      selectedChoice = sectionState[currentSection]?.selected ?? null;
+      revealShown = sectionState[currentSection]?.revealed ?? false;
+
+      const isChoice = section.type === "choice";
+      backBtn.disabled = currentSection === 0;
+      revealBtn.style.display = isChoice ? "block" : "none";
+      continueBtn.style.display = (!isChoice || revealShown) ? "block" : "none";
+      continueBtn.textContent = currentSection === sections.length - 1 ? "Restart" : "Continue →";
+      revealBtn.disabled = !selectedChoice || revealShown;
+      revealBtn.classList.toggle("done", revealShown);
+      revealBtn.textContent = revealShown ? "✓ Answer Revealed" : "Reveal Answer";
+
+      contentInner.classList.add("is-leaving");
+      setTimeout(() => {
+        contentInner.innerHTML = renderByType(section);
+        bindChoiceButtons();
+        contentInner.classList.remove("is-leaving");
+      }, 180);
+
+      mainContent.scrollTop = 0;
+    }
+
+    function renderByType(section) {
+      switch (section.type) {
+        case "title": return renderTitle(section);
+        case "meet": return renderMeet(section);
+        case "assessment": return renderAssessment(section);
+        case "choice": return renderChoice(section);
+        case "mechanism": return renderMechanism(section);
+        case "comparison": return renderComparison(section);
+        case "divider": return renderDivider(section);
+        case "timeline": return renderTimeline(section);
+        case "resources": return renderResources(section);
+        case "end": return renderEnd(section);
+        default: return "<p>Unknown section</p>";
+      }
+    }
+
+    function renderTitle(s) {
+      return frame(s, `
+        <div class="hero">
+          <div class="hero-emoji" aria-hidden="true">🧠</div>
+          <h2>The Decending Silence</h2>
+          <div class="hero-sub">Infant Botulism Choose Your Own Adventure</div>
+          <div class="hero-tags">
+            <span>Floppy Infant</span><span>Descending Paralysis</span><span>NMJ Pharmacology</span><span>Notifiable Disease</span>
+          </div>
+          <div class="instructions">
+            <h3>How This Works</h3>
+            <ol>
+              <li>Read each vignette aloud to the group.</li>
+              <li>Discuss the options before committing.</li>
+              <li>Select an answer, then reveal the teaching.</li>
+              <li>Use wrong answers as debrief prompts.</li>
+              <li>Continue through treatment, airway, and public health decisions.</li>
+            </ol>
+            <p>Best played with a facilitator. The high-stakes trap is aminoglycoside prescribing in suspected botulism.</p>
+          </div>
+        </div>`);
+    }
+
+    function renderMeet(s) {
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="detail-grid">${s.details.map(([k, v]) => `<div class="detail-item"><b>${k}</b>${v}</div>`).join("")}</div>
+        <div class="box flag"><div class="label">Key Flag</div>${s.keyFlag}</div>`);
+    }
+
+    function renderAssessment(s) {
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="vitals-grid">
+          ${s.vitals.map(([k, v, watch]) => `<div class="vital-card ${watch ? "watch" : ""}"><div class="vital-label">${k}</div><div class="vital-value">${v}</div></div>`).join("")}
+        </div>
+        <div class="card"><h3 style="margin:0 0 .45rem;color:var(--blue);font-size:.78rem;letter-spacing:.11em;text-transform:uppercase;">Neurological Examination</h3><ul style="margin:0;padding-left:1.1rem;color:var(--muted);font-size:.86rem;line-height:1.75;">${s.exam.map(item => `<li>${item}</li>`).join("")}</ul></div>
+        <div class="box flag"><div class="label">Key Flag</div>${s.keyFlag}</div>`);
+    }
+
+    function renderChoice(s) {
+      const letters = { a: "A", b: "B", c: "C" };
+      const disabled = revealShown ? "disabled" : "";
+      const choicesHtml = Object.entries(s.choices).map(([id, text]) => {
+        const isSelected = selectedChoice === id;
+        const isCorrect = revealShown && id === s.correctChoice;
+        const isWrong = revealShown && isSelected && id !== s.correctChoice;
+        const klass = ["choice-btn", isSelected ? "selected" : "", isCorrect ? "correct" : "", isWrong ? "wrong" : ""].join(" ").trim();
+        const badge = isCorrect ? '<span class="result-badge">✓ Correct</span>' : (isWrong ? '<span class="result-badge">✗ Wrong</span>' : "");
+        return `<button class="${klass}" data-choice="${id}" ${disabled} type="button"><span class="letter">${letters[id]}</span><span class="choice-text">${text}</span>${badge}</button>`;
+      }).join("");
+
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="question">${s.question}</div>
+        <div class="choices">${choicesHtml}</div>
+        <div class="reveal ${revealShown ? "show" : ""}">
+          ${revealShown ? `
+            <div class="box correct"><div class="label">Correct Path</div>${s.correct}</div>
+            <div class="box teaching"><div class="label">Teaching Point</div>${s.teaching}</div>
+            <div class="box danger"><div class="label">Danger</div>${s.danger}</div>
+            ${s.keyFlag ? `<div class="box flag"><div class="label">Key Flag</div>${s.keyFlag}</div>` : ""}
+          ` : ""}
+        </div>`);
+    }
+
+    function renderMechanism(s) {
+      return frame(s, `
+        <div class="narrative">Botulinum toxin is not damaging the muscle. It is silencing the nerve terminal before acetylcholine can be released.</div>
+        <div class="pathway">
+          <div class="pathway-step"><b>1. Ingestion</b>Spores germinate in the infant gut and produce toxin.</div>
+          <div class="pathway-step"><b>2. Binding</b>Toxin binds presynaptic cholinergic nerve terminals.</div>
+          <div class="pathway-step"><b>3. SNARE Cleavage</b>Vesicles cannot dock or fuse, so ACh is not released.</div>
+          <div class="pathway-step"><b>4. Flaccid Paralysis</b>Muscle and postsynaptic receptors are intact, but no signal arrives.</div>
+        </div>
+        <div class="detail-grid">
+          <div class="box teaching"><div class="label">Why Anticholinesterases Fail</div>Pyridostigmine preserves acetylcholine in the synapse. In botulism, there is little acetylcholine being released to preserve.</div>
+          <div class="box danger"><div class="label">Why Aminoglycosides Harm</div>Gentamicin, tobramycin, and amikacin reduce presynaptic acetylcholine release and can worsen the NMJ block.</div>
+          <div class="box flag"><div class="label">Why EMG Facilitates</div>High-frequency stimulation can partially overcome the block by calcium accumulation at the terminal.</div>
+          <div class="box correct"><div class="label">Why BabyBIG Works</div>Antibody neutralises unbound circulating toxin before it reaches additional nerve terminals.</div>
+        </div>`);
+    }
+
+    function renderComparison(s) {
+      return frame(s, `
+        <div class="card" style="padding:0;overflow-x:auto;">
+          <table class="comparison">
+            <thead><tr><th>Feature</th><th>Infant Botulism</th><th>GBS</th><th>Myasthenia</th></tr></thead>
+            <tbody>
+              <tr class="match-row"><td>Direction</td><td class="highlight">Descending: CN to limbs to respiratory</td><td>Usually ascending</td><td>Fatigable ocular/bulbar weakness</td></tr>
+              <tr><td>Constipation</td><td class="highlight">Very common early clue</td><td>Not typical</td><td>Not typical</td></tr>
+              <tr><td>Pupils</td><td class="highlight">Sluggish or dilated</td><td>Usually normal</td><td>Normal</td></tr>
+              <tr><td>CSF</td><td>Normal</td><td class="highlight">Raised protein, normal cells</td><td>Normal</td></tr>
+              <tr><td>EMG/NCS</td><td class="highlight">Low CMAP, incremental response at high frequency</td><td>Demyelinating or axonal pattern</td><td>Decrement at low-frequency stimulation</td></tr>
+              <tr><td>Treatment</td><td class="highlight">BabyBIG + supportive care</td><td>IVIG/plasma exchange</td><td>Pyridostigmine, immunotherapy depending on cause</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box teaching"><div class="label">Pattern Rule</div>Constipation + cranial nerve signs + sluggish pupils + descending weakness = botulism until proven otherwise.</div>`);
+    }
+
+    function renderDivider(s) {
+      return frame(s, `
+        <div class="divider-screen">
+          <div class="divider-emoji" aria-hidden="true">⚠️</div>
+          <div class="chapter-label">${s.chapter}</div>
+          <h3 class="divider-title">${s.title}</h3>
+          <p class="divider-desc">${s.description}</p>
+          <div class="pill-row">${s.pills.map(pill => `<span class="pill">${pill}</span>`).join("")}</div>
+        </div>`);
+    }
+
+    function renderTimeline(s) {
+      const events = [
+        ["Day 0", "Admission. Diagnosis made clinically from constipation, cranial nerve signs, hypotonia, and exposure history."],
+        ["Day 1", "UKHSA/HPT notified. Honey retained for testing. BabyBIG sourced."],
+        ["Day 2", "BabyBIG administered as a single IV dose."],
+        ["Day 3", "Intubated for progressive respiratory muscle failure."],
+        ["Day 10", "Stool confirms C. botulinum type B spores."],
+        ["Day 16", "Extubated with slow improvement in tone and bulbar function."],
+        ["Week 8", "Discharged home with follow-up."],
+        ["Month 4", "Full neurological recovery."]
+      ];
+      return frame(s, `
+        <div class="narrative">Freddie's course is slow, but recognisable. BabyBIG prevents further toxin binding; recovery still requires nerve terminal regeneration.</div>
+        <div class="detail-grid">${events.map(([day, event]) => `<div class="detail-item"><b>${day}</b>${event}</div>`).join("")}</div>
+        <div class="box flag"><div class="label">Public Health Outcome</div>Honey testing confirmed type B contamination. A food safety alert was issued. No linked cases were identified.</div>`);
+    }
+
+    function renderResources(s) {
+      return frame(s, `
+        <div class="resource-grid">
+          <div class="resource-card"><h4>UKHSA/HPT</h4>Notify immediately on clinical suspicion. Do not wait for stool confirmation.</div>
+          <div class="resource-card"><h4>Duty Microbiologist</h4>Contact early for testing, antibiotic advice, and BabyBIG route.</div>
+          <div class="resource-card"><h4>IBTPP BabyBIG</h4>International 24/7 programme: +1 510-231-7600.</div>
+          <div class="resource-card"><h4>TOXBASE / NPIS</h4>Use local access pathways for toxicology and botulism management support.</div>
+        </div>
+        <div class="box teaching"><div class="label">Facilitator Note</div>Discuss what to say to the parents: honey exposure is a risk factor, but blame is not useful. The key safety message is no honey for infants under 12 months.</div>`);
+    }
+
+    function renderEnd(s) {
+      let scoreClass = "score-red";
+      let msg = "Review the dangerous traps: normal bloods, aminoglycosides, and waiting for hypoxia.";
+      if (score === totalChoices) {
+        scoreClass = "score-green";
+        msg = "Excellent. You recognised the pattern and acted before confirmation.";
+      } else if (score >= 4) {
+        scoreClass = "score-blue";
+        msg = "Strong run. Revisit any missed decision and focus on the airway and prescribing traps.";
+      } else if (score >= 2) {
+        scoreClass = "score-amber";
+        msg = "Good learning case. The temporal sequence and NMJ pharmacology are the key takeaways.";
+      }
+
+      const points = [
+        "Constipation followed by descending weakness and cranial nerve palsies is the classic pattern.",
+        "Honey is a risk factor, but soil and dust exposures are common; absence of honey does not exclude botulism.",
+        "Normal FBC, CRP, glucose, and gas are not reassuring when the neurological examination is abnormal.",
+        "Avoid aminoglycosides in suspected botulism because they worsen neuromuscular blockade.",
+        "Treat early with BabyBIG and supportive care. Do not wait for stool toxin confirmation.",
+        "Respiratory failure is clinical. Weak cry, paradoxical breathing, and poor secretion handling matter more than SpO2."
+      ];
+
+      return frame(s, `
+        <div class="score-card">
+          <div class="score-big ${scoreClass}">${score} / ${totalChoices}</div>
+          <div class="score-msg">${msg}</div>
+        </div>
+        <div class="learn-grid">${points.map(point => `<div class="learn-card">${point}</div>`).join("")}</div>
+        <div class="debrief"><b>Facilitator Debrief Prompts</b><br>
+          What was the first clue that made you think of botulism?<br>
+          Why can a normal CRP be falsely reassuring?<br>
+          Why does pyridostigmine not work mechanistically?<br>
+          Which antibiotics are dangerous here, and why?<br>
+          When should you intubate a baby whose SpO2 still looks acceptable?
+        </div>`);
+    }
+
+    function bindChoiceButtons() {
+      document.querySelectorAll(".choice-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          if (revealShown) return;
+          selectedChoice = button.dataset.choice;
+          sectionState[currentSection] = sectionState[currentSection] || {};
+          sectionState[currentSection].selected = selectedChoice;
+          renderSection();
+        });
+      });
+    }
+
+    function revealAnswer() {
+      const section = sections[currentSection];
+      if (section.type !== "choice" || !selectedChoice || revealShown) return;
+      revealShown = true;
+      sectionState[currentSection] = sectionState[currentSection] || {};
+      sectionState[currentSection].revealed = true;
+      sectionState[currentSection].selected = selectedChoice;
+      if (!sectionState[currentSection].counted) {
+        totalChoicesMade += 1;
+        if (selectedChoice === section.correctChoice) score += 1;
+        sectionState[currentSection].counted = true;
+      }
+      renderSection();
+    }
+
+    function nextSection() {
+      if (currentSection === sections.length - 1) {
+        currentSection = 0;
+        selectedChoice = null;
+        revealShown = false;
+        score = 0;
+        totalChoicesMade = 0;
+        Object.keys(sectionState).forEach(key => delete sectionState[key]);
+        renderSection();
+        return;
+      }
+      currentSection += 1;
+      selectedChoice = null;
+      revealShown = false;
+      renderSection();
+    }
+
+    function prevSection() {
+      if (currentSection === 0) return;
+      currentSection -= 1;
+      selectedChoice = null;
+      revealShown = false;
+      renderSection();
+    }
+
+    backBtn.addEventListener("click", prevSection);
+    revealBtn.addEventListener("click", revealAnswer);
+    continueBtn.addEventListener("click", nextSection);
+
+    renderSection();
+  </script>
+</body>
+</html>

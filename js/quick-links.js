@@ -1,5 +1,5 @@
-/**
- * Homepage Quick Links — renders a filterable set of external reference
+﻿/**
+ * Homepage Quick Links - renders a filterable set of external reference
  * shortcuts (BNFc, MDCalc, local pathways, etc.). Add new items by
  * appending to QUICK_LINKS below; the search matches on label, tags and URL.
  */
@@ -79,3 +79,4 @@
     init();
   }
 })();
+

@@ -1,5 +1,5 @@
-/**
- * Paediatric tox triage — substance database (educational; verify with TOXBASE/NPIS).
+﻿/**
+ * Paediatric tox triage - substance database (educational; verify with TOXBASE/NPIS).
  * strength_mg + unit: per_5ml | per_ml | tablet | elemental_tablet (iron)
  */
 var SUBSTANCES = [
@@ -86,7 +86,7 @@ var SUBSTANCES = [
   { id: 'amlodipine', name: 'Amlodipine', aliases: ['amlodipine', 'istin'], category: 'Prescription',
     formulations: [{ name: '5mg tablet', strength_mg: 5, unit: 'tablet' }, { name: '10mg tablet', strength_mg: 10, unit: 'tablet' }],
     toxic_dose_mg_per_kg: 0.3, serious_dose_mg_per_kg: 0.5, lethal_dose_mg_per_kg: null,
-    antidote: 'Calcium / glucagon / lipids — per NPIS', antidote_fn: 'ccb_note',
+    antidote: 'Calcium / glucagon / lipids - per NPIS', antidote_fn: 'ccb_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: true, caustic: false, hydrocarbon: false, special: null,
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['Hypotension', 'bradycardia', 'shock'],
@@ -108,7 +108,7 @@ var SUBSTANCES = [
   { id: 'bisoprolol', name: 'Bisoprolol', aliases: ['bisoprolol'], category: 'Prescription',
     formulations: [{ name: '2.5mg tablet', strength_mg: 2.5, unit: 'tablet' }, { name: '5mg tablet', strength_mg: 5, unit: 'tablet' }],
     toxic_dose_mg_per_kg: 0.5, serious_dose_mg_per_kg: 1, lethal_dose_mg_per_kg: null,
-    antidote: 'Glucagon / adrenaline — per NPIS', antidote_fn: 'bb_note',
+    antidote: 'Glucagon / adrenaline - per NPIS', antidote_fn: 'bb_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: true, caustic: false, hydrocarbon: false, special: null,
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['Bradycardia', 'hypotension', 'hypoglycaemia', 'seizures'],
@@ -119,7 +119,7 @@ var SUBSTANCES = [
   { id: 'atenolol', name: 'Atenolol', aliases: ['atenolol', 'tenormin'], category: 'Prescription',
     formulations: [{ name: '25mg tablet', strength_mg: 25, unit: 'tablet' }, { name: '50mg tablet', strength_mg: 50, unit: 'tablet' }],
     toxic_dose_mg_per_kg: 0.5, serious_dose_mg_per_kg: 1, lethal_dose_mg_per_kg: null,
-    antidote: 'Glucagon / adrenaline — per NPIS', antidote_fn: 'bb_note',
+    antidote: 'Glucagon / adrenaline - per NPIS', antidote_fn: 'bb_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: true, caustic: false, hydrocarbon: false, special: null,
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['Bradycardia', 'hypotension', 'hypoglycaemia'],
@@ -130,12 +130,12 @@ var SUBSTANCES = [
   { id: 'amitriptyline', name: 'Amitriptyline', aliases: ['amitriptyline', 'triptafen'], category: 'Prescription',
     formulations: [{ name: '10mg tablet', strength_mg: 10, unit: 'tablet' }, { name: '25mg tablet', strength_mg: 25, unit: 'tablet' }, { name: '50mg tablet', strength_mg: 50, unit: 'tablet' }],
     toxic_dose_mg_per_kg: 5, serious_dose_mg_per_kg: 10, lethal_dose_mg_per_kg: null,
-    antidote: 'Sodium bicarbonate for wide QRS — discuss NPIS', antidote_fn: 'tca_note',
+    antidote: 'Sodium bicarbonate for wide QRS - discuss NPIS', antidote_fn: 'tca_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: true, caustic: false, hydrocarbon: false, special: null,
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['Any symptomatic child', 'QRS widening', 'seizures', 'arrhythmia'],
     key_features_to_monitor: ['ECG QRS/QT', 'GCS', 'seizures'],
-    risk_notes: 'TCA: any childhood ingestion — discuss NPIS.',
+    risk_notes: 'TCA: any childhood ingestion - discuss NPIS.',
     modified_release_available: false, investigation_profile: 'tca', tca: true, npis_immediate: true, high_risk_substance: true
   },
   { id: 'sertraline', name: 'Sertraline', aliases: ['sertraline', 'lustral'], category: 'Prescription',
@@ -212,7 +212,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 8, observation_hrs_high: 12,
     npis_criteria: ['Bradycardia', 'hypotension', 'altered consciousness'],
     key_features_to_monitor: ['HR', 'BP', 'GCS'],
-    risk_notes: 'Alpha-2 agonist; toxicity at low doses in children — easily missed.',
+    risk_notes: 'Alpha-2 agonist; toxicity at low doses in children - easily missed.',
     modified_release_available: false, investigation_profile: 'general', tca: false, npis_immediate: false, high_risk_substance: true
   },
   { id: 'lithium', name: 'Lithium', aliases: ['lithium', 'priadel'], category: 'Prescription',
@@ -223,13 +223,13 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['Acute vs chronic context', 'tremor', 'CK', 'renal impairment'],
     key_features_to_monitor: ['U&E', 'lithium level', 'hydration'],
-    risk_notes: 'Charcoal poor adsorption; chronic vs acute differs — NPIS.',
+    risk_notes: 'Charcoal poor adsorption; chronic vs acute differs - NPIS.',
     modified_release_available: false, investigation_profile: 'lithium', tca: false, npis_immediate: false, high_risk_substance: true
   },
   { id: 'valproate', name: 'Sodium valproate', aliases: ['valproate', 'valproic', 'epilim', 'depakote'], category: 'Prescription',
     formulations: [{ name: '200mg tablet', strength_mg: 200, unit: 'tablet' }, { name: '500mg tablet', strength_mg: 500, unit: 'tablet' }, { name: '200mg/5ml liquid', strength_mg: 200, unit: 'per_5ml' }],
     toxic_dose_mg_per_kg: 100, serious_dose_mg_per_kg: 200, lethal_dose_mg_per_kg: null,
-    antidote: 'L-carnitine in severe cases — NPIS', antidote_fn: 'valproate_note',
+    antidote: 'L-carnitine in severe cases - NPIS', antidote_fn: 'valproate_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: true, caustic: false, hydrocarbon: false, special: null,
     specific_questions: [], observation_hrs_low: 8, observation_hrs_high: 12,
     npis_criteria: ['Encephalopathy', 'hyperammonaemia', 'liver dysfunction'],
@@ -245,7 +245,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 8, observation_hrs_high: 12,
     npis_criteria: ['Ataxia', 'nystagmus', 'arrhythmia'],
     key_features_to_monitor: ['ECG', 'phenytoin level'],
-    risk_notes: 'Enzyme inducer — paracetamol interaction context.',
+    risk_notes: 'Enzyme inducer - paracetamol interaction context.',
     modified_release_available: false, investigation_profile: 'anticonvulsant', tca: false, npis_immediate: false, high_risk_substance: false
   },
   { id: 'carbamazepine', name: 'Carbamazepine', aliases: ['carbamazepine', 'tegretol'], category: 'Prescription',
@@ -262,12 +262,12 @@ var SUBSTANCES = [
   { id: 'warfarin', name: 'Warfarin', aliases: ['warfarin', 'marevan'], category: 'Prescription',
     formulations: [{ name: '1mg tablet', strength_mg: 1, unit: 'tablet' }, { name: '3mg tablet', strength_mg: 3, unit: 'tablet' }, { name: '5mg tablet', strength_mg: 5, unit: 'tablet' }],
     toxic_dose_mg_per_kg: 0.5, serious_dose_mg_per_kg: 1, lethal_dose_mg_per_kg: null,
-    antidote: 'Vitamin K / PCC — per NPIS', antidote_fn: 'warfarin_note',
+    antidote: 'Vitamin K / PCC - per NPIS', antidote_fn: 'warfarin_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: true, caustic: false, hydrocarbon: false, special: null,
     specific_questions: [], observation_hrs_low: 24, observation_hrs_high: 48,
     npis_criteria: ['Bleeding', 'large ingestion'],
     key_features_to_monitor: ['INR', 'bleeding'],
-    risk_notes: 'Delayed effect — INR monitoring.',
+    risk_notes: 'Delayed effect - INR monitoring.',
     modified_release_available: false, investigation_profile: 'anticoag', tca: false, npis_immediate: false, high_risk_substance: false
   },
   { id: 'doac', name: 'DOAC (dabigatran/apixaban/rivaroxaban)', aliases: ['dabigatran', 'apixaban', 'rivaroxaban', 'xarelto', 'eliquis', 'pradaxa'], category: 'Prescription',
@@ -333,7 +333,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 0, observation_hrs_high: 0,
     npis_criteria: ['All significant ingestions'],
     key_features_to_monitor: ['airway', 'oral burns', 'pain'],
-    risk_notes: 'Severe oesophageal injury risk — urgent surgical/endoscopy discussion.',
+    risk_notes: 'Severe oesophageal injury risk - urgent surgical/endoscopy discussion.',
     modified_release_available: false, investigation_profile: 'caustic', tca: false, npis_immediate: true, high_risk_substance: true
   },
   { id: 'button_battery', name: 'Button battery', aliases: ['battery', 'cr2032', 'lithium battery'], category: 'Household',
@@ -344,7 +344,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 0, observation_hrs_high: 0,
     npis_criteria: ['Oesophageal impaction'],
     key_features_to_monitor: ['airway', 'CXR location'],
-    risk_notes: 'Not a pharmacological ingestion — location-based pathway.',
+    risk_notes: 'Not a pharmacological ingestion - location-based pathway.',
     modified_release_available: false, investigation_profile: 'battery', tca: false, npis_immediate: true, high_risk_substance: true
   },
   { id: 'magnets', name: 'Magnets (multiple)', aliases: ['magnet', 'buckyballs'], category: 'Household',
@@ -409,7 +409,7 @@ var SUBSTANCES = [
       { name: 'Liquid (labelled elemental mg/5ml)', strength_mg: 24, unit: 'per_5ml' }
     ],
     toxic_dose_mg_per_kg: 20, serious_dose_mg_per_kg: 40, lethal_dose_mg_per_kg: null,
-    antidote: 'Desferrioxamine — NPIS', antidote_fn: 'iron_note',
+    antidote: 'Desferrioxamine - NPIS', antidote_fn: 'iron_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: false, caustic: false, hydrocarbon: false, special: 'iron',
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['Serum iron', 'symptoms', 'large elemental dose'],
@@ -475,7 +475,7 @@ var SUBSTANCES = [
   { id: 'foxglove', name: 'Foxglove (Digitalis)', aliases: ['foxglove', 'digitalis'], category: 'Plants',
     formulations: [{ name: 'Plant parts', strength_mg: 1, unit: 'tablet' }],
     toxic_dose_mg_per_kg: null, serious_dose_mg_per_kg: null, lethal_dose_mg_per_kg: null,
-    antidote: 'Digoxin-specific antibodies — NPIS', antidote_fn: 'digoxin_note',
+    antidote: 'Digoxin-specific antibodies - NPIS', antidote_fn: 'digoxin_note',
     decontamination_eligible: false, decontamination_window_hrs: 0, charcoal_adsorbs: false, caustic: false, hydrocarbon: false, special: 'plant', plant_key: 'foxglove',
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['All ingestions'],
@@ -486,7 +486,7 @@ var SUBSTANCES = [
   { id: 'belladonna', name: 'Deadly nightshade (Atropa belladonna)', aliases: ['belladonna', 'deadly nightshade'], category: 'Plants',
     formulations: [{ name: 'Berries/leaves', strength_mg: 1, unit: 'tablet' }],
     toxic_dose_mg_per_kg: null, serious_dose_mg_per_kg: null, lethal_dose_mg_per_kg: null,
-    antidote: 'Physostigmine rarely — NPIS', antidote_fn: 'anticholinergic_note',
+    antidote: 'Physostigmine rarely - NPIS', antidote_fn: 'anticholinergic_note',
     decontamination_eligible: true, decontamination_window_hrs: 1, charcoal_adsorbs: true, caustic: false, hydrocarbon: false, special: 'plant', plant_key: 'belladonna',
     specific_questions: [], observation_hrs_low: 8, observation_hrs_high: 12,
     npis_criteria: ['Anticholinergic syndrome'],
@@ -494,7 +494,7 @@ var SUBSTANCES = [
     risk_notes: 'Anticholinergic toxidrome.',
     modified_release_available: false, investigation_profile: 'plant', tca: false, npis_immediate: false, high_risk_substance: true
   },
-  { id: 'berries_unknown', name: 'Berries — unknown identity', aliases: ['unknown berry', 'berries'], category: 'Plants',
+  { id: 'berries_unknown', name: 'Berries - unknown identity', aliases: ['unknown berry', 'berries'], category: 'Plants',
     formulations: [{ name: 'Unknown', strength_mg: 1, unit: 'tablet' }],
     toxic_dose_mg_per_kg: null, serious_dose_mg_per_kg: null, lethal_dose_mg_per_kg: null,
     antidote: null, antidote_fn: null,
@@ -502,7 +502,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 0, observation_hrs_high: 0,
     npis_criteria: ['Cannot identify'],
     key_features_to_monitor: [],
-    risk_notes: 'Use visual ID panel; if none match — NPIS.',
+    risk_notes: 'Use visual ID panel; if none match - NPIS.',
     modified_release_available: false, investigation_profile: 'plant', tca: false, npis_immediate: true, high_risk_substance: false
   },
   { id: 'ivy', name: 'Ivy', aliases: ['ivy', 'hedera'], category: 'Plants',
@@ -546,7 +546,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 4, observation_hrs_high: 8,
     npis_criteria: ['Oral irritation', 'airway swelling'],
     key_features_to_monitor: ['airway', 'pain'],
-    risk_notes: 'Oxalate needles — mucosal irritation.',
+    risk_notes: 'Oxalate needles - mucosal irritation.',
     modified_release_available: false, investigation_profile: 'plant', tca: false, npis_immediate: false, high_risk_substance: true
   },
   { id: 'monkshood', name: 'Monkshood (Aconitum)', aliases: ['monkshood', 'aconitum', 'wolfsbane'], category: 'Plants',
@@ -557,7 +557,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['All ingestions'],
     key_features_to_monitor: ['ECG', 'rhythm', 'tingling'],
-    risk_notes: 'Cardiotoxic — urgent NPIS.',
+    risk_notes: 'Cardiotoxic - urgent NPIS.',
     modified_release_available: false, investigation_profile: 'plant', tca: false, npis_immediate: true, high_risk_substance: true
   },
   { id: 'laburnum', name: 'Laburnum', aliases: ['laburnum', 'golden chain'], category: 'Plants',
@@ -574,7 +574,7 @@ var SUBSTANCES = [
   { id: 'lily_valley', name: 'Lily of the valley', aliases: ['lily of the valley', 'convallaria'], category: 'Plants',
     formulations: [{ name: 'Plant parts', strength_mg: 1, unit: 'tablet' }],
     toxic_dose_mg_per_kg: null, serious_dose_mg_per_kg: null, lethal_dose_mg_per_kg: null,
-    antidote: 'Digoxin antibodies — NPIS', antidote_fn: 'digoxin_note',
+    antidote: 'Digoxin antibodies - NPIS', antidote_fn: 'digoxin_note',
     decontamination_eligible: false, decontamination_window_hrs: 0, charcoal_adsorbs: false, caustic: false, hydrocarbon: false, special: 'plant', plant_key: 'lily_valley',
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['Bradycardia', 'hyperkalaemia'],
@@ -590,7 +590,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 4, observation_hrs_high: 8,
     npis_criteria: ['Bradycardia', 'hypotension'],
     key_features_to_monitor: ['HR', 'BP'],
-    risk_notes: 'Viscotoxins — variable toxicity.',
+    risk_notes: 'Viscotoxins - variable toxicity.',
     modified_release_available: false, investigation_profile: 'plant', tca: false, npis_immediate: false, high_risk_substance: true
   },
   { id: 'hemlock', name: 'Hemlock (Conium)', aliases: ['hemlock', 'conium', 'poison hemlock'], category: 'Plants',
@@ -601,7 +601,7 @@ var SUBSTANCES = [
     specific_questions: [], observation_hrs_low: 12, observation_hrs_high: 24,
     npis_criteria: ['All suspected ingestions'],
     key_features_to_monitor: ['GCS', 'respiratory depression'],
-    risk_notes: 'Nicotinic toxicity — respiratory failure.',
+    risk_notes: 'Nicotinic toxicity - respiratory failure.',
     modified_release_available: false, investigation_profile: 'plant', tca: false, npis_immediate: true, high_risk_substance: true
   },
   { id: 'black_bryony', name: 'Black bryony', aliases: ['black bryony', 'tamus'], category: 'Plants',
@@ -616,3 +616,4 @@ var SUBSTANCES = [
     modified_release_available: false, investigation_profile: 'plant', tca: false, npis_immediate: false, high_risk_substance: true
   }
 ];
+

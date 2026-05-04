@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    WETFLAG Paediatric Resuscitation Calculator
    All colour/spacing/radius/shadow values reference tokens from app-theme.css.
    ========================================================================== */
@@ -120,7 +120,7 @@
   line-height: 1;
 }
 
-/* Distinct accent hues per letter — visual aid only, not status-meaningful.
+/* Distinct accent hues per letter - visual aid only, not status-meaningful.
    Kept as explicit hex to preserve the clinical at-a-glance colour cue. */
 .wetflag-app .wf-w .wf-letter { background: #0ea5e9; color: #fff; }
 .wetflag-app .wf-e .wf-letter { background: #f59e0b; color: #1a1300; }
@@ -327,3 +327,4 @@
   .wetflag-app .stat .val { color: #000 !important; }
   .wetflag-app .stat .sub { color: #444 !important; }
 }
+

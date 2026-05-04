@@ -1,5 +1,5 @@
-/**
- * Paediatric Poisoning Triage — tool-specific styles (uses ../css/app-theme.css)
+﻿/**
+ * Paediatric Poisoning Triage - tool-specific styles (uses ../css/app-theme.css)
  */
 
 .tox-wrap {
@@ -76,7 +76,7 @@
   color: var(--danger);
 }
 
-/* Amber disclaimer — non-dismissible */
+/* Amber disclaimer - non-dismissible */
 .disclaimer-banner {
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.45);
@@ -368,7 +368,7 @@ html.theme-light .disclaimer-banner {
   font-size: 0.86rem;
 }
 
-/* Obs — match SBAR */
+/* Obs - match SBAR */
 .obs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -754,3 +754,4 @@ html.theme-light .risk-pill.npis {
     display: none !important;
   }
 }
+

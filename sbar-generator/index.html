@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -482,7 +482,7 @@
     </div>
 
     <div class="field">
-      <label>Clinical concern &mdash; &quot;I am concerned because...&quot;</label>
+      <label>Clinical concern - &quot;I am concerned because...&quot;</label>
       <textarea id="clinicalConcern" rows="2" oninput="generateOutput()" placeholder="What specifically concerns you about this patient" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:1rem;resize:vertical;font-family:inherit;"></textarea>
     </div>
 
@@ -575,7 +575,7 @@ var SPEC = {
     name: 'Paediatric Surgery',
     chips: ['Surgical review', 'Admission under surgical team', 'Theatre assessment'],
     invSuggest: ['FBC', 'CRP', 'U&E', 'AXR', 'USS abdomen', 'Group & Save'],
-    asks: ['Surgical review in ED', 'Admission under surgical team', 'Consent for theatre', 'USS abdomen arranged \u2014 please review when available'],
+    asks: ['Surgical review in ED', 'Admission under surgical team', 'Consent for theatre', 'USS abdomen arranged - please review when available'],
     bg: ['surgery']
   },
   'cardiology': {
@@ -1088,7 +1088,7 @@ function updateObsHints() {
 
   var spo2 = parseInt(document.getElementById('obsSpO2').value);
   if (spo2 && spo2 < 94) {
-    hintSpO2.textContent = 'SpO\u2082 < 94% — abnormal';
+    hintSpO2.textContent = 'SpO\u2082 < 94% - abnormal';
     hintSpO2.className = 'obs-hint warn-hint';
   } else {
     hintSpO2.textContent = '';
@@ -1101,7 +1101,7 @@ function updatePewsHint() {
   var threshold = parseInt(localStorage.getItem('sbar-pews-threshold')) || 4;
   var hint = document.getElementById('hintPews');
   if (pews >= threshold) {
-    hint.textContent = 'PEWS \u2265' + threshold + ' \u2014 escalation threshold met';
+    hint.textContent = 'PEWS \u2265' + threshold + ' - escalation threshold met';
     hint.className = 'obs-hint warn-hint';
   } else {
     hint.textContent = '';
@@ -1206,9 +1206,9 @@ function getAgeString() {
 
 /* ── Urgency phrase ──────────────────────────────────────────── */
 function getUrgencyPhrase() {
-  if (state.urgency === 'immediate') return 'This is an immediate referral \u2014 life-threatening, needs to attend now';
-  if (state.urgency === 'urgent') return 'This is an urgent referral \u2014 needs review within 1\u20134 hours';
-  if (state.urgency === 'routine') return 'This is a routine referral \u2014 next available slot';
+  if (state.urgency === 'immediate') return 'This is an immediate referral - life-threatening, needs to attend now';
+  if (state.urgency === 'urgent') return 'This is an urgent referral - needs review within 1\u20134 hours';
+  if (state.urgency === 'routine') return 'This is a routine referral - next available slot';
   return '';
 }
 
@@ -1429,7 +1429,7 @@ function generateOutput() {
     if (i < sections.length - 1) {
       var sep = document.createElement('span');
       sep.className = 'out-sep';
-      sep.textContent = ' \u2014 ';
+      sep.textContent = ' - ';
       body.appendChild(sep);
     }
   }
@@ -1590,3 +1590,5 @@ onSpecialtyChange();
 </script>
 </body>
 </html>
+
+

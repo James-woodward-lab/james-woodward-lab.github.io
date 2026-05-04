@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Simple Analgesia Dose Calculator — tokens from app-theme.css
+﻿/* ==========================================================================
+   Simple Analgesia Dose Calculator - tokens from app-theme.css
    ========================================================================== */
 
 .dose-app .result-card { padding-top: var(--sp-3); }
@@ -88,3 +88,4 @@
 }
 
 .source-line a { color: var(--accent2); }
+

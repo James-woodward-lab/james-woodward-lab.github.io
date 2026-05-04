@@ -1,5 +1,5 @@
-/**
- * Paediatric Poisoning Triage — application logic (ES5).
+﻿/**
+ * Paediatric Poisoning Triage - application logic (ES5).
  * Depends on global SUBSTANCES from substances-data.js
  */
 (function() {
@@ -21,7 +21,7 @@
   }
 
   function fmt2sf(x) {
-    if (x === null || x === undefined || isNaN(x)) return '—';
+    if (x === null || x === undefined || isNaN(x)) return '-';
     var ax = Math.abs(Number(x));
     if (ax === 0) return '0';
     var mag = Math.floor(Math.log10(ax));
@@ -245,7 +245,7 @@
     opts = opts || {};
     var level = 'low';
     var pillClass = 'low';
-    var message = 'LOW RISK — dose below toxic threshold, context favourable.';
+    var message = 'LOW RISK - dose below toxic threshold, context favourable.';
     var actions = [];
 
     if (!sub) {
@@ -255,7 +255,7 @@
     if (sub.npis_immediate || sub.id === 'methadone' || sub.id === 'yew' || sub.tca) {
       level = 'npis';
       pillClass = 'npis';
-      message = 'DISCUSS NPIS IMMEDIATELY — high-risk agent or guideline trigger.';
+      message = 'DISCUSS NPIS IMMEDIATELY - high-risk agent or guideline trigger.';
       actions.push('0344 892 0111');
       return { level: level, pillClass: pillClass, message: message, actions: actions };
     }
@@ -263,7 +263,7 @@
     if (sub.id === 'unknown_rec' && opts.symptomatic) {
       level = 'npis';
       pillClass = 'npis';
-      message = 'DISCUSS NPIS IMMEDIATELY — unknown recreational agent with symptoms.';
+      message = 'DISCUSS NPIS IMMEDIATELY - unknown recreational agent with symptoms.';
       return { level: level, pillClass: pillClass, message: message, actions: actions };
     }
 
@@ -272,7 +272,7 @@
       if (loc === 'oesophagus' || loc === 'unknown') {
         level = 'npis';
         pillClass = 'npis';
-        message = 'DISCUSS NPIS IMMEDIATELY — oesophageal or unknown location button battery.';
+        message = 'DISCUSS NPIS IMMEDIATELY - oesophageal or unknown location button battery.';
         return { level: level, pillClass: pillClass, message: message, actions: ['Endoscopy'] };
       }
     }
@@ -285,7 +285,7 @@
     if (haemo) {
       level = 'npis';
       pillClass = 'npis';
-      message = 'DISCUSS NPIS IMMEDIATELY — haemodynamic or major consciousness compromise.';
+      message = 'DISCUSS NPIS IMMEDIATELY - haemodynamic or major consciousness compromise.';
       return { level: level, pillClass: pillClass, message: message, actions: [] };
     }
 
@@ -293,11 +293,11 @@
       if (sub.high_risk_substance || symp) {
         level = 'high';
         pillClass = 'high';
-        message = 'HIGH RISK — threshold unavailable or high-risk substance; verify with NPIS/TOXBASE.';
+        message = 'HIGH RISK - threshold unavailable or high-risk substance; verify with NPIS/TOXBASE.';
       } else {
         level = 'mod';
         pillClass = 'mod';
-        message = 'MODERATE RISK — confirm dose/threshold with TOXBASE/NPIS.';
+        message = 'MODERATE RISK - confirm dose/threshold with TOXBASE/NPIS.';
       }
       return { level: level, pillClass: pillClass, message: message, actions: [] };
     }
@@ -306,15 +306,15 @@
     if (ratio >= 1 || (symp && ratio > 0.5)) {
       level = 'high';
       pillClass = 'high';
-      message = 'HIGH RISK — dose above threshold or symptomatic with significant exposure.';
+      message = 'HIGH RISK - dose above threshold or symptomatic with significant exposure.';
     } else if (ratio >= 0.7 || worst || symp) {
       level = 'mod';
       pillClass = 'mod';
-      message = 'MODERATE RISK — approaching threshold, uncertain quantity, or symptoms.';
+      message = 'MODERATE RISK - approaching threshold, uncertain quantity, or symptoms.';
     } else {
       level = 'low';
       pillClass = 'low';
-      message = 'LOW RISK — dose below toxic threshold on this model.';
+      message = 'LOW RISK - dose below toxic threshold on this model.';
     }
 
     return { level: level, pillClass: pillClass, message: message, actions: actions };
@@ -355,7 +355,7 @@
     var hydrocarbon = sub.hydrocarbon || sub.special === 'hydrocarbon';
     results.push({
       ok: !caustic && !hydrocarbon,
-      text: caustic || hydrocarbon ? 'Caustic/hydrocarbon — charcoal contraindicated' : 'Not caustic/hydrocarbon for this entry'
+      text: caustic || hydrocarbon ? 'Caustic/hydrocarbon - charcoal contraindicated' : 'Not caustic/hydrocarbon for this entry'
     });
 
     var gcsOk = true;
@@ -367,7 +367,7 @@
     }
     results.push({
       ok: gcsOk,
-      text: gcsOk ? 'Airway/GCS acceptable for charcoal consideration' : 'Reduced consciousness — aspiration risk; discuss NPIS'
+      text: gcsOk ? 'Airway/GCS acceptable for charcoal consideration' : 'Reduced consciousness - aspiration risk; discuss NPIS'
     });
 
     var ads = sub.charcoal_adsorbs !== false && !sub.caustic && sub.id !== 'lithium' && sub.id !== 'iron' && sub.special !== 'iron';
@@ -381,7 +381,7 @@
     var summary = '';
     if (allOk) {
       summary =
-        'Activated charcoal 1 g/kg (max 50 g) may be appropriate — confirm with NPIS/TOXBASE.';
+        'Activated charcoal 1 g/kg (max 50 g) may be appropriate - confirm with NPIS/TOXBASE.';
     } else if (inWin && !ads) {
       summary = 'Within time window but charcoal not appropriate for this substance.';
     } else if (inWin && (caustic || hydrocarbon)) {
@@ -413,9 +413,9 @@
     naloxone: function(weightKg) {
       var d = Math.min(0.01 * weightKg, 0.4);
       return [
-        'Naloxone: ' + fmt2sf(d) + ' mg/kg IV/IM/IN (max 0.4 mg initial adult-style ceiling for quick calculator — titrate)',
+        'Naloxone: ' + fmt2sf(d) + ' mg/kg IV/IM/IN (max 0.4 mg initial adult-style ceiling for quick calculator - titrate)',
         'Repeat every 2–3 minutes to effect',
-        'Duration of naloxone may be shorter than opioid effect — infusion may be needed (NPIS).'
+        'Duration of naloxone may be shorter than opioid effect - infusion may be needed (NPIS).'
       ];
     },
     salicylate_note: function() {
@@ -425,37 +425,37 @@
       return ['CCB poisoning: calcium, high-dose insulin/euglycaemia, lipid emulsion per NPIS.', 'Discuss early with NPIS/PICU.'];
     },
     bb_note: function() {
-      return ['Beta-blocker overdose: glucagon, adrenaline, pacing — per NPIS.', 'Glucose monitoring essential.'];
+      return ['Beta-blocker overdose: glucagon, adrenaline, pacing - per NPIS.', 'Glucose monitoring essential.'];
     },
     tca_note: function() {
       return ['TCA: sodium bicarbonate for QRS widening; supportive care.', 'Discuss all significant ingestions with NPIS.'];
     },
     clonidine_note: function() {
-      return ['Clonidine: supportive; bradycardia and hypotension may need specific therapy — NPIS.'];
+      return ['Clonidine: supportive; bradycardia and hypotension may need specific therapy - NPIS.'];
     },
     lithium_note: function() {
-      return ['Lithium: poor charcoal binding; whole bowel irrigation may be considered — NPIS.', 'Levels and renal function critical.'];
+      return ['Lithium: poor charcoal binding; whole bowel irrigation may be considered - NPIS.', 'Levels and renal function critical.'];
     },
     valproate_note: function() {
-      return ['Severe valproate: consider L-carnitine — NPIS.', 'Monitor ammonia and liver function.'];
+      return ['Severe valproate: consider L-carnitine - NPIS.', 'Monitor ammonia and liver function.'];
     },
     warfarin_note: function() {
-      return ['Warfarin: vitamin K and PCC per bleeding risk — NPIS.', 'Delayed INR rise possible.'];
+      return ['Warfarin: vitamin K and PCC per bleeding risk - NPIS.', 'Delayed INR rise possible.'];
     },
     doac_note: function() {
-      return ['DOAC reversal agent-specific — NPIS.', 'Renal function guides risk.'];
+      return ['DOAC reversal agent-specific - NPIS.', 'Renal function guides risk.'];
     },
     iron_note: function() {
-      return ['Iron: desferrioxamine in severe toxicity — NPIS.', 'Serum iron and clinical picture guide management.'];
+      return ['Iron: desferrioxamine in severe toxicity - NPIS.', 'Serum iron and clinical picture guide management.'];
     },
     ethanol_note: function() {
       return ['Ethanol: supportive; glucose monitoring critical in children.', 'Charcoal not routinely used for ethanol.'];
     },
     digoxin_note: function() {
-      return ['Digoxin-specific antibody fragments — NPIS if cardiac glycoside toxicity.'];
+      return ['Digoxin-specific antibody fragments - NPIS if cardiac glycoside toxicity.'];
     },
     anticholinergic_note: function() {
-      return ['Anticholinergic toxidrome: supportive; physostigmine rarely — NPIS only.'];
+      return ['Anticholinergic toxidrome: supportive; physostigmine rarely - NPIS only.'];
     },
     cocaine_note: function() {
       return ['Cocaine: benzodiazepines first-line for agitation and seizures.', 'Cooling, BP and ECG monitoring.'];
@@ -665,7 +665,7 @@
     $('acDropdown').classList.remove('open');
     $('selectedSubstanceDisplay').style.display = 'block';
     $('selectedSubstanceDisplay').innerHTML =
-      '<strong>Selected:</strong> ' + escapeHtml(sub.name) + ' — ' + escapeHtml(sub.risk_notes || '');
+      '<strong>Selected:</strong> ' + escapeHtml(sub.name) + ' - ' + escapeHtml(sub.risk_notes || '');
     var hideDose = sub.special === 'battery' || sub.special === 'plant' || sub.id === 'magnets';
     $('cardSec2').classList.toggle('hidden', hideDose);
     if (!hideDose) {
@@ -729,7 +729,7 @@
   function getParacetamolPanelHtml() {
     return (
       '<div class="card" style="margin-top:12px;border-style:dashed;">' +
-      '<div class="card-title">Paracetamol nomogram (UK-style single line — verify with local guideline)</div>' +
+      '<div class="card-title">Paracetamol nomogram (UK-style single line - verify with local guideline)</div>' +
       '<div class="field"><label>Serum paracetamol</label>' +
       '<div class="row2"><input type="number" id="pamLevel" min="0" step="1" placeholder="Level" oninput="onAnyChange()">' +
       '<select id="pamUnit" onchange="onAnyChange()"><option value="mgl">mg/L</option><option value="umol">µmol/L</option></select></div></div>' +
@@ -752,7 +752,7 @@
   function getSalicylatePanelHtml() {
     return (
       '<div class="card" style="margin-top:12px;border-style:dashed;">' +
-      '<div class="card-title">Salicylate assessment (simplified — NPIS)</div>' +
+      '<div class="card-title">Salicylate assessment (simplified - NPIS)</div>' +
       '<div class="row2"><div class="field"><label>Serum salicylate (mg/L)</label><input type="number" id="salLevel" oninput="onAnyChange()"></div>' +
       '<div class="field"><label>Hours post-ingestion</label><input type="number" id="salHours" oninput="onAnyChange()"></div></div>' +
       '<div class="field"><label>Urine pH (if measured)</label><input type="number" id="salUph" step="0.01" min="4" max="8" oninput="onAnyChange()"></div>' +
@@ -811,9 +811,9 @@
     var html =
       '<div class="card" style="margin-top:12px;border-style:dashed;">' +
       '<div class="card-title">Plant &amp; berry identification aid (illustrative)</div>' +
-      '<p class="hint">Does it match any of these? If none match or uncertain — contact NPIS.</p>' +
-      '<div class="field"><label>Unknown berries — colour</label><select id="berryColour" onchange="onAnyChange()">' +
-      '<option value="">—</option><option value="red">Red</option><option value="black">Black</option><option value="white">White</option></select></div>' +
+      '<p class="hint">Does it match any of these? If none match or uncertain - contact NPIS.</p>' +
+      '<div class="field"><label>Unknown berries - colour</label><select id="berryColour" onchange="onAnyChange()">' +
+      '<option value="">-</option><option value="red">Red</option><option value="black">Black</option><option value="white">White</option></select></div>' +
       '<div class="plant-grid" id="plantGrid"></div>' +
       '<div id="plantSelOut" class="hint" style="margin-top:10px;"></div>' +
       '</div>';
@@ -838,7 +838,7 @@
           $('plantSelOut').innerHTML =
             'Selected match: <strong>' +
             escapeHtml(key) +
-            '</strong> — still verify with TOXBASE/NPIS; images are illustrative only.';
+            '</strong> - still verify with TOXBASE/NPIS; images are illustrative only.';
           onAnyChange();
         };
       })(p.name);
@@ -923,7 +923,7 @@
       hSp.classList.remove('warn-hint');
       hSp.textContent = '';
       if (spo2 && spo2 < 94) {
-        hSp.textContent = 'Low — target ≥94%';
+        hSp.textContent = 'Low - target ≥94%';
         hSp.classList.add('warn-hint');
       }
     }
@@ -933,7 +933,7 @@
       hG.classList.remove('warn-hint');
       hG.textContent = '';
       if (glu && glu < 3.5) {
-        hG.textContent = 'Hypoglycaemia — common with several toxins';
+        hG.textContent = 'Hypoglycaemia - common with several toxins';
         hG.classList.add('warn-hint');
       }
     }
@@ -1008,10 +1008,10 @@
       if (sid) ids.push(sid);
     }
     if (ids.indexOf('paracetamol') >= 0 && (ids.indexOf('ethanol') >= 0 || ids.indexOf('unknown_rec') >= 0)) {
-      notes.push('Paracetamol + alcohol or unknown sedative: enhanced hepatotoxicity risk — NPIS.');
+      notes.push('Paracetamol + alcohol or unknown sedative: enhanced hepatotoxicity risk - NPIS.');
     }
     if (ids.indexOf('amitriptyline') >= 0 && (ids.indexOf('sertraline') >= 0 || ids.indexOf('fluoxetine') >= 0)) {
-      notes.push('TCA + SSRI: seizure and serotonin toxicity risk — NPIS.');
+      notes.push('TCA + SSRI: seizure and serotonin toxicity risk - NPIS.');
     }
     return notes;
   }
@@ -1035,9 +1035,9 @@
       sev +
       '</strong>. ' +
       'Urinary alkalinisation: often considered if acidotic / moderate–severe and pH goals per NPIS. ' +
-      'Haemodialysis indicators include salicylate &gt;700 mg/L (context-dependent), renal failure, pulmonary oedema, severe CNS — discuss NPIS.';
+      'Haemodialysis indicators include salicylate &gt;700 mg/L (context-dependent), renal failure, pulmonary oedema, severe CNS - discuss NPIS.';
     if (uph && uph < 7.45 && (sev === 'moderate' || sev === 'severe' || sev.indexOf('fatal') >= 0)) {
-      html += ' Consider sodium bicarbonate 1–2 mmol/kg IV for alkalinisation — NPIS.';
+      html += ' Consider sodium bicarbonate 1–2 mmol/kg IV for alkalinisation - NPIS.';
     }
     out.innerHTML = html;
     return html;
@@ -1051,14 +1051,14 @@
     var html = '';
     if (loc === 'oesophagus' || loc === 'unknown') {
       html =
-        '<strong>IMMEDIATE endoscopic removal</strong> — do not wait for symptoms. Contact NPIS. ' +
-        'Honey: for oesophageal batteries in children <strong>&gt;1 year</strong> not at aspiration risk, 2 teaspoons every 10 minutes (up to 6 doses pre-endoscopy) may reduce injury — <strong>not &lt;1 year</strong> (botulism risk). Evidence context per local NPIS.';
+        '<strong>IMMEDIATE endoscopic removal</strong> - do not wait for symptoms. Contact NPIS. ' +
+        'Honey: for oesophageal batteries in children <strong>&gt;1 year</strong> not at aspiration risk, 2 teaspoons every 10 minutes (up to 6 doses pre-endoscopy) may reduce injury - <strong>not &lt;1 year</strong> (botulism risk). Evidence context per local NPIS.';
     } else if (loc === 'stomach') {
       html =
         'Gastric location: lower risk if asymptomatic and older infant/child. ' +
-        'Serial imaging and NPIS guidance; single battery &lt;20 mm may be observed in selected cases — confirm.';
+        'Serial imaging and NPIS guidance; single battery &lt;20 mm may be observed in selected cases - confirm.';
     } else {
-      html = 'Beyond stomach: if passes uneventfully, lower risk — still NPIS if symptoms.';
+      html = 'Beyond stomach: if passes uneventfully, lower risk - still NPIS if symptoms.';
     }
     if (age && age < 1 && html.indexOf('Honey') >= 0) {
       html += ' <strong>Do not give honey under 1 year.</strong>';
@@ -1077,24 +1077,24 @@
     var th = parseFloat($('pamHours').value, 10);
     var stag = $('pamStagger') && $('pamStagger').checked;
     if (stag) {
-      return 'Staggered / ongoing ingestion — standard nomogram unreliable. Discuss with NPIS.';
+      return 'Staggered / ongoing ingestion - standard nomogram unreliable. Discuss with NPIS.';
     }
     if (!v || th === undefined || th === null || isNaN(th)) {
       return 'Enter level and hours post-ingestion.';
     }
     if (th < 4) {
-      return 'Sample taken too early — repeat at ≥4 hours post-ingestion (unless protocol states otherwise).';
+      return 'Sample taken too early - repeat at ≥4 hours post-ingestion (unless protocol states otherwise).';
     }
     var line = nomogramThresholdMgL(th);
     var above = v > line;
     if (above) {
-      out = 'N-acetylcysteine indicated by this plot — see antidote panel. Confirm with NPIS/TOXBASE.';
+      out = 'N-acetylcysteine indicated by this plot - see antidote panel. Confirm with NPIS/TOXBASE.';
     } else {
       out =
         'NAC not indicated based on this single level vs treatment line. If clinical concern, repeat level or discuss NPIS.';
     }
     if ($('hrfInducer') && $('hrfInducer').checked) {
-      out += ' High-risk factors: standard line may underestimate risk — discuss NPIS.';
+      out += ' High-risk factors: standard line may underestimate risk - discuss NPIS.';
     }
     plotNomogram(v, th);
     return out;
@@ -1130,7 +1130,7 @@
     npisBanner.textContent = '';
 
     if (risk.level === 'npis') {
-      npisBanner.textContent = '⚠ NPIS escalation — contact NPIS now: 0344 892 0111';
+      npisBanner.textContent = '⚠ NPIS escalation - contact NPIS now: 0344 892 0111';
       npisBanner.classList.add('show');
     } else if (
       selectedSub &&
@@ -1142,7 +1142,7 @@
       doseInfo.perKg >= selectedSub.serious_dose_mg_per_kg
     ) {
       npisBanner.textContent =
-        '⚠ NPIS escalation criteria may apply — contact NPIS now: 0344 892 0111';
+        '⚠ NPIS escalation criteria may apply - contact NPIS now: 0344 892 0111';
       npisBanner.classList.add('show');
     }
 
@@ -1152,13 +1152,13 @@
     html += '<div class="card-title" style="margin-top:0;">Toxic dose summary</div>';
     html +=
       '<p>Ingested dose: ' +
-      (doseInfo.single !== null ? fmt2sf(doseInfo.single) + ' mg' : '—') +
+      (doseInfo.single !== null ? fmt2sf(doseInfo.single) + ' mg' : '-') +
       ' → ' +
-      (doseInfo.perKg !== null ? fmt2sf(doseInfo.perKg) + ' mg/kg' : '—') +
+      (doseInfo.perKg !== null ? fmt2sf(doseInfo.perKg) + ' mg/kg' : '-') +
       '</p>';
     html +=
       '<p>Toxic threshold: ' +
-      (tox !== null ? fmt2sf(tox) + ' mg/kg' : '—') +
+      (tox !== null ? fmt2sf(tox) + ' mg/kg' : '-') +
       (threshMg ? ' (' + fmt2sf(threshMg) + ' mg for this child)' : '') +
       '</p>';
     if (tox && doseInfo.perKg) {
@@ -1203,7 +1203,7 @@
         obsLow +
         ' h (guide). Extended if symptomatic, MR, or co-ingestion.</p>';
       html +=
-        '<p>Discharge criteria (guide): asymptomatic, haemodynamically stable, eating and drinking — senior review.</p>';
+        '<p>Discharge criteria (guide): asymptomatic, haemodynamically stable, eating and drinking - senior review.</p>';
 
       html += '<div class="card-title">Investigations to consider</div><ul style="margin-left:1.2em;">';
       var inv = getInvestigations(selectedSub);
@@ -1242,8 +1242,8 @@
       bb: ['12-lead ECG', 'glucose', 'monitoring'],
       ccb: ['12-lead ECG', 'glucose', 'continuous monitoring'],
       opioid: ['Observe RR', 'glucose'],
-      general: ['Guided by clinical picture — NPIS'],
-      plant: ['As per plant toxin — ECG/electrolytes if indicated'],
+      general: ['Guided by clinical picture - NPIS'],
+      plant: ['As per plant toxin - ECG/electrolytes if indicated'],
       caustic: ['Airway assessment', 'consider endoscopy timing per NPIS'],
       battery: ['XR localisation', 'urgent ENT/surgical as per pathway'],
       ethanol: ['Glucose', 'VBG if reduced GCS'],
@@ -1266,9 +1266,9 @@
     var th = $('doseBarThresh');
     if (!selectedSub) {
       fill.style.width = '0%';
-      pct.textContent = '—';
-      th.textContent = 'Toxic threshold: —';
-      $('doseTotalLine').textContent = 'Total dose: —';
+      pct.textContent = '-';
+      th.textContent = 'Toxic threshold: -';
+      $('doseTotalLine').textContent = 'Total dose: -';
       return;
     }
     var d = computePrimaryDoseMg();
@@ -1277,14 +1277,14 @@
       'Total dose: ' +
       (d.single !== null ? fmt2sf(d.single) + ' mg' : 'unknown') +
       ' → ' +
-      (d.perKg !== null ? fmt2sf(d.perKg) + ' mg/kg' : '—');
+      (d.perKg !== null ? fmt2sf(d.perKg) + ' mg/kg' : '-');
     th.textContent =
       tox !== null ? 'Toxic threshold: ' + fmt2sf(tox) + ' mg/kg' : 'Toxic threshold: refer NPIS';
     var pctVal = 0;
     if (tox && d.perKg) pctVal = Math.min(100, (d.perKg / tox) * 100);
     fill.style.width = pctVal + '%';
     pct.textContent =
-      tox && d.perKg ? fmt2sf((d.perKg / tox) * 100) + '% of toxic threshold' : '—';
+      tox && d.perKg ? fmt2sf((d.perKg / tox) * 100) + '% of toxic threshold' : '-';
   }
 
   function buildSummary() {
@@ -1297,7 +1297,7 @@
       lines.push(
         'INGESTION: ' +
           selectedSub.name +
-          ' — ' +
+          ' - ' +
           (d.single !== null ? fmt2sf(d.single) + ' mg' : 'dose unknown') +
           (d.perKg ? ' (' + fmt2sf(d.perKg) + ' mg/kg)' : '')
       );
@@ -1337,7 +1337,7 @@
     var hosp = localStorage.getItem(STORAGE_PREFIX + 'hospital') || '';
     if (name || grade || hosp) {
       lines.push('');
-      lines.push('Clinician: ' + name + ' ' + grade + (hosp ? ' — ' + hosp : ''));
+      lines.push('Clinician: ' + name + ' ' + grade + (hosp ? ' - ' + hosp : ''));
     }
     $('summaryPre').textContent = lines.join('\n');
   }
@@ -1382,7 +1382,7 @@
     if (selectedSub && selectedSub.special === 'iron') {
       el.classList.remove('hidden');
       el.innerHTML =
-        '<p class="hint"><strong>Elemental iron:</strong> toxic ~20 mg/kg; serious ~40 mg/kg — use elemental mg in mg/kg calculations.</p>';
+        '<p class="hint"><strong>Elemental iron:</strong> toxic ~20 mg/kg; serious ~40 mg/kg - use elemental mg in mg/kg calculations.</p>';
     } else {
       el.classList.add('hidden');
       el.innerHTML = '';
@@ -1463,7 +1463,7 @@
           tr.innerHTML =
             '<strong>Inferred pattern:</strong> ' +
             escapeHtml(best) +
-            ' — correlate clinically; supportive care and NPIS as needed.';
+            ' - correlate clinically; supportive care and NPIS as needed.';
         }
         onAnyChange();
       };
@@ -1512,3 +1512,4 @@
   window.updateObsHints = updateObsHints;
   window.toggleCoIngest = toggleCoIngest;
 })();
+

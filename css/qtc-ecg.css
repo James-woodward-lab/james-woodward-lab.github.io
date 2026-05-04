@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Paediatric QTc / ECG tool — uses app-theme.css tokens
+﻿/* ==========================================================================
+   Paediatric QTc / ECG tool - uses app-theme.css tokens
    ========================================================================== */
 
 html {
@@ -595,3 +595,4 @@ body {
     padding: 18px calc(var(--sp-4) + var(--safe-r)) var(--sp-1) calc(var(--sp-4) + var(--safe-l));
   }
 }
+

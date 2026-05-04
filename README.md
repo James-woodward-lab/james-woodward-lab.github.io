@@ -1,9 +1,9 @@
-# James Woodward Lab
+﻿# James Woodward Lab
 
 A collection of lightweight, single-page paediatric clinical tools and
 calculators hosted at **[jameswoodward.co.uk](https://jameswoodward.co.uk)**.
 
-Everything here is pure static HTML/CSS/JS — no build step, no framework,
+Everything here is pure static HTML/CSS/JS - no build step, no framework,
 no tracking. Works offline once loaded. Designed for fast use at the
 bedside on a phone or trust PC.
 
@@ -13,16 +13,16 @@ bedside on a phone or trust PC.
 ## Tools
 
 ### Top
-- **🚨 [WETFLAG Resuscitation Card](wetflag-calculator/)** — APLS weight-based
+- **🚨 [WETFLAG Resuscitation Card](wetflag-calculator/)** - APLS weight-based
   emergency doses (Weight, Energy, Tube, Fluids, Lorazepam, Adrenaline,
   Glucose) plus the full resus drug set and a print-friendly layout.
-- **🧾 [Examination notes](infant-exam-notes/)** — structured infant
+- **🧾 [Examination notes](infant-exam-notes/)** - structured infant
   examination documentation helper.
-- **💧 [Fluid Calculator](fluid-calculator/)** — maintenance &
+- **💧 [Fluid Calculator](fluid-calculator/)** - maintenance &
   replacement fluids.
-- **🫀 [QTc Calculator](qtc-calculator/)** — Bazett / Fridericia with
+- **🫀 [QTc Calculator](qtc-calculator/)** - Bazett / Fridericia with
   ECG reference.
-- **💊 [Simple Analgesia Dosing](bnfc-dose-calculator/)** — paracetamol
+- **💊 [Simple Analgesia Dosing](bnfc-dose-calculator/)** - paracetamol
   & ibuprofen dosing.
 
 ### Works in progress
@@ -60,7 +60,7 @@ from Google Fonts with a fluid `clamp()`-based scale.
 
 ## Local development
 
-No tooling required — just open `index.html` in a browser. For a quick
+No tooling required - just open `index.html` in a browser. For a quick
 local server:
 
 ```bash
@@ -73,3 +73,4 @@ python -m http.server 8000
 Clinical content is based on publicly available guidance (APLS, NICE,
 Resuscitation Council UK, BNFc). This repository is provided as-is for
 educational purposes. Always apply senior clinical judgement.
+

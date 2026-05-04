@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="css/app-theme.css">
   <script src="js/theme-toggle.js"></script>
   <style>
-    /* Tool-local aliases over shared design tokens — lets the bespoke
+    /* Tool-local aliases over shared design tokens - lets the bespoke
        wound-closure markup read fluently while all values stay tokenised. */
     .wound-closure {
       --color-bg:              var(--bg);
@@ -522,10 +522,10 @@
                 <div class="chip-grid">
                   <label class="chip"><input type="checkbox" name="mechanism" value="Sharp (glass/blade)"><span>Sharp (glass/blade)</span></label>
                   <label class="chip"><input type="checkbox" name="mechanism" value="Blunt/crush"><span>Blunt/crush</span></label>
-                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — human"><span>Bite — human</span></label>
-                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — cat"><span>Bite — cat</span></label>
-                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — dog"><span>Bite — dog</span></label>
-                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite — other animal"><span>Bite — other animal</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite - human"><span>Bite - human</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite - cat"><span>Bite - cat</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite - dog"><span>Bite - dog</span></label>
+                  <label class="chip"><input type="checkbox" name="mechanism" value="Bite - other animal"><span>Bite - other animal</span></label>
                   <label class="chip"><input type="checkbox" name="mechanism" value="Puncture"><span>Puncture</span></label>
                   <label class="chip"><input type="checkbox" name="mechanism" value="Degloving/avulsion"><span>Degloving/avulsion</span></label>
                   <label class="chip"><input type="checkbox" name="mechanism" value="Burns"><span>Burns (redirect to burns tool)</span></label>
@@ -559,10 +559,10 @@
                 <select id="site" name="site">
                   <option value="">Select site...</option>
                   <optgroup label="Face">
-                    <option value="Face — forehead/cheek">Face — forehead/cheek</option>
-                    <option value="Face — periorbital">Face — periorbital</option>
-                    <option value="Face — lip/vermillion">Face — lip/vermillion</option>
-                    <option value="Face — nose">Face — nose</option>
+                    <option value="Face - forehead/cheek">Face - forehead/cheek</option>
+                    <option value="Face - periorbital">Face - periorbital</option>
+                    <option value="Face - lip/vermillion">Face - lip/vermillion</option>
+                    <option value="Face - nose">Face - nose</option>
                   </optgroup>
                   <optgroup label="Other">
                     <option value="Scalp">Scalp</option>
@@ -963,9 +963,9 @@
     function classifyClosureMethod(inputs) {
       const reasons = [];
       const isBite = inputs.mechanisms.some((m) => m.startsWith("Bite"));
-      const isHumanBite = inputs.mechanisms.includes("Bite — human");
-      const isCatBite = inputs.mechanisms.includes("Bite — cat");
-      const isDogBite = inputs.mechanisms.includes("Bite — dog");
+      const isHumanBite = inputs.mechanisms.includes("Bite - human");
+      const isCatBite = inputs.mechanisms.includes("Bite - cat");
+      const isDogBite = inputs.mechanisms.includes("Bite - dog");
       const isBurn = inputs.mechanisms.includes("Burns");
       const hasInfection = inputs.woundEdges.includes("Active signs of infection");
       const tendonBoneConcern = inputs.depth === "Possible tendon/bone/joint involvement";
@@ -986,7 +986,7 @@
       if (tendonBoneConcern || hasInfection) {
         reasons.push("Possible tendon/bone/joint involvement or active infection requires specialist assessment.");
         return {
-          recommendation: "Do not close in ED — urgent referral",
+          recommendation: "Do not close in ED - urgent referral",
           severity: "red",
           summary: "Primary closure contraindicated. Refer for specialist review and definitive management.",
           rationale: reasons,
@@ -1065,7 +1065,7 @@
       const gaping = inputs.woundEdges.includes("Gaping (>5mm)");
       const ragged = inputs.woundEdges.includes("Ragged/irregular");
       const tissueLoss = inputs.woundEdges.includes("Tissue loss");
-      const lowTensionSite = ["Face — forehead/cheek", "Face — periorbital", "Face — nose", "Scalp", "Trunk", "Limb", "Neck"].includes(inputs.site);
+      const lowTensionSite = ["Face - forehead/cheek", "Face - periorbital", "Face - nose", "Scalp", "Trunk", "Limb", "Neck"].includes(inputs.site);
       const adhesiveTimeWindow = isFaceSite(inputs.site) ? (inputs.timeHours || 99) < 12 : (inputs.timeHours || 99) < 8;
 
       if (
@@ -1252,17 +1252,17 @@
     // Sources: Sheffield Wounds guidance and specialty referral criteria listed in prompt.
     function checkReferral(inputs) {
       const triggers = [];
-      const isLipVermillion = inputs.site === "Face — lip/vermillion";
+      const isLipVermillion = inputs.site === "Face - lip/vermillion";
       const complexFace = isFaceSite(inputs.site) && (inputs.depth === "Deep (fat/fascia visible)" || inputs.woundEdges.includes("Ragged/irregular") || (inputs.lengthCm || 0) > 4);
       const earCartilageConcern = inputs.site === "Ear" && inputs.depth !== "Superficial (skin only)";
-      const noseCartilageConcern = inputs.site === "Face — nose" && inputs.depth !== "Superficial (skin only)";
+      const noseCartilageConcern = inputs.site === "Face - nose" && inputs.depth !== "Superficial (skin only)";
       const nerveConcern = inputs.depth === "Possible tendon/bone/joint involvement";
       const handTendonConcern = (inputs.site === "Hand/finger" || inputs.site === "Limb") && inputs.depth === "Possible tendon/bone/joint involvement";
       const jointConcern = inputs.depth === "Possible tendon/bone/joint involvement";
       const foreignBodyJoint = inputs.woundEdges.includes("Glass/foreign body suspected") && jointConcern;
       const nailComplex = inputs.site === "Nail bed" && (inputs.lengthCm || 0) > 1;
-      const periorbitalConcern = inputs.site === "Face — periorbital" && (inputs.depth !== "Superficial (skin only)" || inputs.woundEdges.includes("Glass/foreign body suspected"));
-      const humanBite = inputs.mechanisms.includes("Bite — human");
+      const periorbitalConcern = inputs.site === "Face - periorbital" && (inputs.depth !== "Superficial (skin only)" || inputs.woundEdges.includes("Glass/foreign body suspected"));
+      const humanBite = inputs.mechanisms.includes("Bite - human");
 
       if (isLipVermillion) triggers.push("Refer plastics/maxfax: lip laceration involving vermillion border.");
       if (complexFace) triggers.push("Refer plastics/maxfax: complex facial laceration requiring high cosmetic precision.");
@@ -1275,7 +1275,7 @@
       if (nailComplex) triggers.push("Refer hand surgery: nail bed injury may need formal repair under ring block.");
       if (periorbitalConcern) triggers.push("Refer ophthalmology: periorbital wound where globe injury cannot be excluded.");
       if (humanBite) triggers.push("Safeguarding flag: human bite in a child requires safeguarding consideration and documentation.");
-      if (inputs.historyMismatch) triggers.push("Safeguarding flag: injury history inconsistent with wound pattern — follow local safeguarding pathway.");
+      if (inputs.historyMismatch) triggers.push("Safeguarding flag: injury history inconsistent with wound pattern - follow local safeguarding pathway.");
 
       return {
         required: triggers.length > 0,
@@ -1334,10 +1334,10 @@
       const mechanism = inputs.mechanisms.length ? inputs.mechanisms.join(", ") : "Not recorded";
       const lengthText = inputs.lengthCm ? inputs.lengthCm.toFixed(1) : "Not recorded";
       const referralText = outputs.referral.required ? outputs.referral.triggers.join(" | ") : "None required";
-      const antibioticLabel = outputs.antibiotics.required ? `Required — ${outputs.antibiotics.text}` : "Not indicated";
+      const antibioticLabel = outputs.antibiotics.required ? `Required - ${outputs.antibiotics.text}` : "Not indicated";
 
       return [
-        `WOUND CLOSURE DECISION AID — ${ts}`,
+        `WOUND CLOSURE DECISION AID - ${ts}`,
         `Site: ${inputs.site || "Not recorded"} | Mechanism: ${mechanism} | Length: ${lengthText}cm | Depth: ${inputs.depth || "Not recorded"}`,
         `Time since injury: ${formatTimeForCopy(inputs)} | Contamination: ${inputs.contamination}`,
         "",
@@ -1455,3 +1455,4 @@
   </script>
 </body>
 </html>
+

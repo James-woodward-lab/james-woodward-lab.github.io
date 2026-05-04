@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -222,7 +222,7 @@ const SECTIONS = [
   {
     id:'airway', title:'Airway & Mediastinum', icon:'🫁',
     ageTips:{
-      neonate:{text:'The thymus is prominent in neonates — look for the "sail sign" or "wave sign". A wide superior mediastinum is often normal thymus, not pathology.',type:'blue',title:'Neonatal thymus'},
+      neonate:{text:'The thymus is prominent in neonates - look for the "sail sign" or "wave sign". A wide superior mediastinum is often normal thymus, not pathology.',type:'blue',title:'Neonatal thymus'},
       infant:{text:'Thymic shadow is normal up to ~2 years. It can change shape with respiration. Do not mistake normal thymus for mediastinal mass or cardiomegaly.',type:'blue',title:'Infant thymus'},
       child:{text:'Thymus is usually involuted by school age. A prominent anterior mediastinal shadow in an older child warrants investigation.',type:'amber',title:'Older child'}
     },
@@ -268,8 +268,8 @@ const SECTIONS = [
   {
     id:'heart', title:'Heart & Great Vessels', icon:'❤️',
     ageTips:{
-      neonate:{text:'CTR <0.6 is normal for neonates. AP supine projection magnifies the heart — correlate with clinical exam. Boot-shaped heart → consider Tetralogy of Fallot. Egg-on-side → consider TGA.',type:'blue',title:'Neonatal cardiac'},
-      infant:{text:'CTR <0.55–0.6 is normal for infants. AP projection overestimates heart size. Assess the cardiac borders — loss of clarity (silhouette sign) suggests adjacent pathology.',type:'blue',title:'Infant cardiac'},
+      neonate:{text:'CTR <0.6 is normal for neonates. AP supine projection magnifies the heart - correlate with clinical exam. Boot-shaped heart → consider Tetralogy of Fallot. Egg-on-side → consider TGA.',type:'blue',title:'Neonatal cardiac'},
+      infant:{text:'CTR <0.55–0.6 is normal for infants. AP projection overestimates heart size. Assess the cardiac borders - loss of clarity (silhouette sign) suggests adjacent pathology.',type:'blue',title:'Infant cardiac'},
       child:{text:'CTR <0.5 is normal on PA film for children >2 years. On AP film, up to 0.55 may be acceptable. Assess cardiac shape and borders.',type:'blue',title:'Cardiac assessment'}
     },
     items:[
@@ -711,7 +711,7 @@ function updateReport() {
   const el = document.getElementById('reportText');
   let lines = [];
 
-  lines.push('PAEDIATRIC CHEST X-RAY — SYSTEMATIC REVIEW');
+  lines.push('PAEDIATRIC CHEST X-RAY - SYSTEMATIC REVIEW');
   lines.push('═'.repeat(48));
 
   if (ageGroup) {
@@ -727,7 +727,7 @@ function updateReport() {
       const val = state[key];
       if (val) {
         let line = item.label + ': ' + val;
-        if (itemNotes[key]) line += ' — ' + itemNotes[key];
+        if (itemNotes[key]) line += ' - ' + itemNotes[key];
         secItems.push(line);
       }
     });
@@ -774,7 +774,7 @@ function updateReport() {
       const opt = item.opts.find(o => o.v === val);
       if (opt && (opt.t === 'abnormal' || opt.t === 'critical')) {
         let desc = item.label+': '+val;
-        if (itemNotes[key]) desc += ' — '+itemNotes[key];
+        if (itemNotes[key]) desc += ' - '+itemNotes[key];
         abnormals.push(desc);
       }
     });
@@ -853,3 +853,4 @@ document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
+

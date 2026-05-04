@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -15,7 +15,7 @@
 <div class="container">
   <header class="app-header-center">
     <h1>🚨 WETFLAG</h1>
-    <p>Paediatric resuscitation card &mdash; APLS weight-based doses at a glance</p>
+    <p>Paediatric resuscitation card - APLS weight-based doses at a glance</p>
   </header>
 
   <section class="card no-print">
@@ -30,7 +30,7 @@
         <input type="number" id="age-months" min="0" max="11" step="1" inputmode="numeric" placeholder="0-11">
       </div>
       <div class="field">
-        <label for="weight-override">Actual weight (kg) <span class="optional">— optional</span></label>
+        <label for="weight-override">Actual weight (kg) <span class="optional">- optional</span></label>
         <input type="number" id="weight-override" min="0.5" max="120" step="0.1" inputmode="decimal" placeholder="overrides estimate">
       </div>
     </div>
@@ -50,7 +50,7 @@
         <div class="wf-letter">W</div>
         <div class="wf-body">
           <div class="wf-name">Weight</div>
-          <div class="wf-value" id="out-weight">—</div>
+          <div class="wf-value" id="out-weight">-</div>
           <div class="wf-sub" id="out-weight-sub">APLS formula by age band</div>
         </div>
       </div>
@@ -58,7 +58,7 @@
         <div class="wf-letter">E</div>
         <div class="wf-body">
           <div class="wf-name">Energy</div>
-          <div class="wf-value" id="out-energy">—</div>
+          <div class="wf-value" id="out-energy">-</div>
           <div class="wf-sub">Defib / pVT &amp; VF: 4 J/kg</div>
         </div>
       </div>
@@ -66,7 +66,7 @@
         <div class="wf-letter">T</div>
         <div class="wf-body">
           <div class="wf-name">Tube (ETT)</div>
-          <div class="wf-value" id="out-tube">—</div>
+          <div class="wf-value" id="out-tube">-</div>
           <div class="wf-sub" id="out-tube-sub">Internal diameter (mm) &amp; length at lip (cm)</div>
         </div>
       </div>
@@ -74,7 +74,7 @@
         <div class="wf-letter">F</div>
         <div class="wf-body">
           <div class="wf-name">Fluids</div>
-          <div class="wf-value" id="out-fluids">—</div>
+          <div class="wf-value" id="out-fluids">-</div>
           <div class="wf-sub">10 mL/kg crystalloid bolus (5 mL/kg in trauma)</div>
         </div>
       </div>
@@ -82,7 +82,7 @@
         <div class="wf-letter">L</div>
         <div class="wf-body">
           <div class="wf-name">Lorazepam</div>
-          <div class="wf-value" id="out-lorazepam">—</div>
+          <div class="wf-value" id="out-lorazepam">-</div>
           <div class="wf-sub">0.1 mg/kg IV (max 4 mg). Buccal midazolam 0.3 mg/kg if no IV.</div>
         </div>
       </div>
@@ -90,7 +90,7 @@
         <div class="wf-letter">A</div>
         <div class="wf-body">
           <div class="wf-name">Adrenaline</div>
-          <div class="wf-value" id="out-adrenaline">—</div>
+          <div class="wf-value" id="out-adrenaline">-</div>
           <div class="wf-sub">10 mcg/kg = 0.1 mL/kg of 1:10,000. Every 3-5 min in arrest.</div>
         </div>
       </div>
@@ -98,7 +98,7 @@
         <div class="wf-letter">G</div>
         <div class="wf-body">
           <div class="wf-name">Glucose</div>
-          <div class="wf-value" id="out-glucose">—</div>
+          <div class="wf-value" id="out-glucose">-</div>
           <div class="wf-sub">2 mL/kg 10% dextrose IV for documented hypoglycaemia</div>
         </div>
       </div>
@@ -110,32 +110,32 @@
     <div class="stat-grid cols3">
       <div class="stat">
         <div class="lbl">ETT uncuffed</div>
-        <div class="val" id="ett-uncuffed">—</div>
+        <div class="val" id="ett-uncuffed">-</div>
         <div class="sub">age/4 + 4 (&gt;2 yr)</div>
       </div>
       <div class="stat">
         <div class="lbl">ETT cuffed</div>
-        <div class="val" id="ett-cuffed">—</div>
+        <div class="val" id="ett-cuffed">-</div>
         <div class="sub">age/4 + 3.5</div>
       </div>
       <div class="stat">
         <div class="lbl">ETT length (oral)</div>
-        <div class="val" id="ett-length-oral">—</div>
+        <div class="val" id="ett-length-oral">-</div>
         <div class="sub">age/2 + 12 cm</div>
       </div>
       <div class="stat">
         <div class="lbl">ETT length (nasal)</div>
-        <div class="val" id="ett-length-nasal">—</div>
+        <div class="val" id="ett-length-nasal">-</div>
         <div class="sub">age/2 + 15 cm</div>
       </div>
       <div class="stat">
         <div class="lbl">LMA size</div>
-        <div class="val" id="lma-size">—</div>
+        <div class="val" id="lma-size">-</div>
         <div class="sub">weight-based</div>
       </div>
       <div class="stat">
         <div class="lbl">DC cardioversion</div>
-        <div class="val" id="dc-sync">—</div>
+        <div class="val" id="dc-sync">-</div>
         <div class="sub">1 J/kg then 2 J/kg (synchronised)</div>
       </div>
     </div>
@@ -181,7 +181,7 @@
         </ul>
       </div>
       <div class="wf-ref-block">
-        <h3>Reversible causes &mdash; 4 Hs &amp; 4 Ts</h3>
+        <h3>Reversible causes - 4 Hs &amp; 4 Ts</h3>
         <ul>
           <li>Hypoxia &middot; Hypovolaemia &middot; Hypo/Hyperkalaemia &middot; Hypothermia</li>
           <li>Tension pneumothorax &middot; Tamponade &middot; Toxins &middot; Thromboembolism</li>
@@ -201,7 +201,7 @@
 
   const $ = (id) => document.getElementById(id);
   const fmt = (n, dp = 1) => {
-    if (n === null || n === undefined || !isFinite(n)) return "—";
+    if (n === null || n === undefined || !isFinite(n)) return "-";
     const rounded = Number(n.toFixed(dp));
     return (dp === 0) ? String(Math.round(n)) : String(rounded);
   };
@@ -239,7 +239,7 @@
     return years / 2 + 15;
   }
   function lmaSize(weight) {
-    if (weight == null) return "—";
+    if (weight == null) return "-";
     if (weight < 5) return "1";
     if (weight < 10) return "1.5";
     if (weight < 20) return "2";
@@ -249,101 +249,101 @@
     return "5";
   }
 
-  // Drug list — each computes text & notes based on weight
+  // Drug list - each computes text & notes based on weight
   function buildDrugs(w) {
     const cap = (val, max) => (val != null && max != null) ? Math.min(val, max) : val;
-    const show = (val, unit, dp = 2) => (val == null) ? "—" : `${fmt(val, dp)} ${unit}`;
+    const show = (val, unit, dp = 2) => (val == null) ? "-" : `${fmt(val, dp)} ${unit}`;
     return [
       {
         name: "Adrenaline (arrest)",
         dose: "10 mcg/kg IV/IO",
-        calc: w ? `${fmt(w * 10, 0)} mcg  (${fmt(w * 0.1, 1)} mL of 1:10,000)` : "—",
+        calc: w ? `${fmt(w * 10, 0)} mcg  (${fmt(w * 0.1, 1)} mL of 1:10,000)` : "-",
         notes: "Every 3–5 min. Max 1 mg/dose.",
         critical: true
       },
       {
         name: "Adrenaline (anaphylaxis)",
         dose: "10 mcg/kg IM 1:1,000",
-        calc: w ? `${fmt(w * 0.01, 2)} mL of 1:1,000  (${fmt(w * 10, 0)} mcg)` : "—",
+        calc: w ? `${fmt(w * 0.01, 2)} mL of 1:1,000  (${fmt(w * 10, 0)} mcg)` : "-",
         notes: "Max 500 mcg. <6 yr 150 mcg; 6–12 yr 300 mcg; >12 yr 500 mcg."
       },
       {
         name: "Amiodarone",
         dose: "5 mg/kg IV/IO bolus",
-        calc: w ? `${fmt(cap(w * 5, 300), 0)} mg` : "—",
+        calc: w ? `${fmt(cap(w * 5, 300), 0)} mg` : "-",
         notes: "Pulseless VT/VF after 3rd shock. Max 300 mg.",
         critical: true
       },
       {
         name: "Atropine",
         dose: "20 mcg/kg IV/IO",
-        calc: w ? `${fmt(clamp(w * 20, 100, 600), 0)} mcg` : "—",
+        calc: w ? `${fmt(clamp(w * 20, 100, 600), 0)} mcg` : "-",
         notes: "Min 100 mcg, max 600 mcg (1.2 mg in adolescent)."
       },
       {
         name: "Adenosine (1st dose)",
         dose: "100 mcg/kg rapid IV",
-        calc: w ? `${fmt(cap(w * 100, 6000), 0)} mcg  (${fmt(cap(w * 0.1, 6), 1)} mL of 1 mg/mL)` : "—",
+        calc: w ? `${fmt(cap(w * 100, 6000), 0)} mcg  (${fmt(cap(w * 0.1, 6), 1)} mL of 1 mg/mL)` : "-",
         notes: "Then 200 mcg/kg, then 300 mcg/kg. Max 6 mg → 12 mg → 12 mg."
       },
       {
         name: "Lorazepam",
         dose: "0.1 mg/kg IV",
-        calc: w ? `${fmt(Math.min(w * 0.1, 4), 1)} mg` : "—",
+        calc: w ? `${fmt(Math.min(w * 0.1, 4), 1)} mg` : "-",
         notes: "Max 4 mg. Repeat once after 10 min."
       },
       {
         name: "Midazolam (buccal)",
         dose: "0.3 mg/kg",
-        calc: w ? `${fmt(Math.min(w * 0.3, 10), 1)} mg` : "—",
+        calc: w ? `${fmt(Math.min(w * 0.3, 10), 1)} mg` : "-",
         notes: "Use if no IV. Max 10 mg."
       },
       {
         name: "10% Glucose",
         dose: "2 mL/kg IV",
-        calc: w ? `${fmt(w * 2, 0)} mL` : "—",
+        calc: w ? `${fmt(w * 2, 0)} mL` : "-",
         notes: "For documented hypoglycaemia."
       },
       {
         name: "Salbutamol IV bolus",
         dose: "15 mcg/kg over 10 min",
-        calc: w ? `${fmt(cap(w * 15, 250), 0)} mcg` : "—",
+        calc: w ? `${fmt(cap(w * 15, 250), 0)} mcg` : "-",
         notes: "Severe asthma. Max 250 mcg. Needs cardiac monitoring."
       },
       {
         name: "Magnesium sulphate",
         dose: "50 mg/kg IV over 20 min",
-        calc: w ? `${fmt(Math.min(w * 50, 2000), 0)} mg` : "—",
+        calc: w ? `${fmt(Math.min(w * 50, 2000), 0)} mg` : "-",
         notes: "Max 2 g. Severe asthma / torsades."
       },
       {
         name: "Hydrocortisone",
         dose: "4 mg/kg IV",
-        calc: w ? `${fmt(Math.min(w * 4, 200), 0)} mg` : "—",
+        calc: w ? `${fmt(Math.min(w * 4, 200), 0)} mg` : "-",
         notes: "Anaphylaxis, adrenal crisis. Max 200 mg."
       },
       {
         name: "Naloxone",
         dose: "10 mcg/kg IV/IM",
-        calc: w ? `${fmt(Math.min(w * 10, 400), 0)} mcg` : "—",
+        calc: w ? `${fmt(Math.min(w * 10, 400), 0)} mcg` : "-",
         notes: "Repeat or up-titrate to 100 mcg/kg if no response. Max 2 mg."
       },
       {
         name: "Ceftriaxone (meningitis)",
         dose: "80 mg/kg IV",
-        calc: w ? `${fmt(Math.min(w * 80, 4000), 0)} mg` : "—",
+        calc: w ? `${fmt(Math.min(w * 80, 4000), 0)} mg` : "-",
         notes: "Max 4 g. Add aciclovir if encephalitis suspected."
       },
       {
         name: "Tranexamic acid",
         dose: "15 mg/kg IV over 10 min",
-        calc: w ? `${fmt(Math.min(w * 15, 1000), 0)} mg` : "—",
+        calc: w ? `${fmt(Math.min(w * 15, 1000), 0)} mg` : "-",
         notes: "Trauma haemorrhage within 3 h. Max 1 g loading."
       },
       {
         name: "Morphine (analgesia)",
         dose: "100 mcg/kg IV",
-        calc: w ? `${fmt(Math.min(w * 100, 10000), 0)} mcg` : "—",
+        calc: w ? `${fmt(Math.min(w * 100, 10000), 0)} mcg` : "-",
         notes: "Titrate to effect. Max 10 mg."
       }
     ];
@@ -405,23 +405,23 @@
     }
 
     // WETFLAG outputs
-    $("out-weight").textContent = w != null ? `${fmt(w, 1)} kg` : "—";
+    $("out-weight").textContent = w != null ? `${fmt(w, 1)} kg` : "-";
     $("out-weight-sub").textContent = source === "entered" ? "Actual weight entered" : (months != null ? "APLS estimate by age band" : "APLS formula by age band");
 
-    $("out-energy").textContent = w != null ? `${fmt(w * 4, 0)} J` : "—";
+    $("out-energy").textContent = w != null ? `${fmt(w * 4, 0)} J` : "-";
 
     if (w != null) {
       const ettU = ettUncuffed(years);
       const lenO = ettLengthOral(years, w);
-      $("out-tube").innerHTML = `${fmt(ettU, 1)} mm <span class="wf-sep">·</span> ${lenO != null ? fmt(lenO, 0) : "—"} cm`;
+      $("out-tube").innerHTML = `${fmt(ettU, 1)} mm <span class="wf-sep">·</span> ${lenO != null ? fmt(lenO, 0) : "-"} cm`;
     } else {
-      $("out-tube").textContent = "—";
+      $("out-tube").textContent = "-";
     }
 
-    $("out-fluids").textContent = w != null ? `${fmt(w * 10, 0)} mL` : "—";
-    $("out-lorazepam").textContent = w != null ? `${fmt(Math.min(w * 0.1, 4), 1)} mg` : "—";
-    $("out-adrenaline").textContent = w != null ? `${fmt(w * 0.1, 1)} mL (${fmt(w * 10, 0)} mcg)` : "—";
-    $("out-glucose").textContent = w != null ? `${fmt(w * 2, 0)} mL` : "—";
+    $("out-fluids").textContent = w != null ? `${fmt(w * 10, 0)} mL` : "-";
+    $("out-lorazepam").textContent = w != null ? `${fmt(Math.min(w * 0.1, 4), 1)} mg` : "-";
+    $("out-adrenaline").textContent = w != null ? `${fmt(w * 0.1, 1)} mL (${fmt(w * 10, 0)} mcg)` : "-";
+    $("out-glucose").textContent = w != null ? `${fmt(w * 2, 0)} mL` : "-";
 
     // Airway detail
     if (w != null) {
@@ -429,13 +429,13 @@
       $("ett-cuffed").textContent = `${fmt(ettCuffed(years), 1)} mm`;
       const oral = ettLengthOral(years, w);
       const nasal = ettLengthNasal(years, w);
-      $("ett-length-oral").textContent = oral != null ? `${fmt(oral, 0)} cm` : "—";
-      $("ett-length-nasal").textContent = nasal != null ? `${fmt(nasal, 0)} cm` : "—";
+      $("ett-length-oral").textContent = oral != null ? `${fmt(oral, 0)} cm` : "-";
+      $("ett-length-nasal").textContent = nasal != null ? `${fmt(nasal, 0)} cm` : "-";
       $("lma-size").textContent = lmaSize(w);
       $("dc-sync").textContent = `${fmt(w * 1, 0)} J → ${fmt(w * 2, 0)} J`;
     } else {
       ["ett-uncuffed", "ett-cuffed", "ett-length-oral", "ett-length-nasal", "lma-size", "dc-sync"]
-        .forEach((id) => { $(id).textContent = "—"; });
+        .forEach((id) => { $(id).textContent = "-"; });
     }
 
     // Drug table
@@ -488,10 +488,10 @@
       const w = weight;
       const years = (getAgeMonths() || 0) / 12;
       const lines = [
-        `WETFLAG — ${fmt(w, 1)} kg` + (state.weightOverride ? " (actual)" : " (APLS est.)"),
+        `WETFLAG - ${fmt(w, 1)} kg` + (state.weightOverride ? " (actual)" : " (APLS est.)"),
         `W  Weight     : ${fmt(w, 1)} kg`,
         `E  Energy     : ${fmt(w * 4, 0)} J (4 J/kg)`,
-        `T  Tube       : ${fmt(ettUncuffed(years), 1)} mm uncuffed, length ${ettLengthOral(years, w) != null ? fmt(ettLengthOral(years, w), 0) : "—"} cm oral`,
+        `T  Tube       : ${fmt(ettUncuffed(years), 1)} mm uncuffed, length ${ettLengthOral(years, w) != null ? fmt(ettLengthOral(years, w), 0) : "-"} cm oral`,
         `F  Fluids     : ${fmt(w * 10, 0)} mL (10 mL/kg)`,
         `L  Lorazepam  : ${fmt(Math.min(w * 0.1, 4), 1)} mg (0.1 mg/kg, max 4 mg)`,
         `A  Adrenaline : ${fmt(w * 0.1, 1)} mL 1:10,000 (${fmt(w * 10, 0)} mcg)`,
@@ -535,3 +535,5 @@
 </script>
 </body>
 </html>
+
+

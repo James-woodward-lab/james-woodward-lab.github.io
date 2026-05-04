@@ -1,5 +1,5 @@
-/* -----------------------------------------------------------
-   Paediatric Vitals — age-aware observation interpreter
+﻿/* -----------------------------------------------------------
+   Paediatric Vitals - age-aware observation interpreter
    Pairs with app-theme.css / style-variants.css
    ----------------------------------------------------------- */
 
@@ -487,3 +487,4 @@
   }
   .vitals-app .pv-flag { border-color: #333 !important; color: #000 !important; background: #f7f7f7 !important; }
 }
+

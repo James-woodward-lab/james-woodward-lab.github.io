@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -14,12 +14,12 @@
 <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">☀️</button>
 <header>
   <h1>🦴 NAI Fracture Red Flag Checker</h1>
-  <p>Non-Accidental Injury Risk Stratification Tool — Paediatric Emergency Department</p>
+  <p>Non-Accidental Injury Risk Stratification Tool - Paediatric Emergency Department</p>
 </header>
 
 <div class="warning-banner">
   <span>⚠️</span>
-  <div><strong>Clinical decision support only.</strong> This tool does not diagnose NAI. Output must be interpreted alongside full clinical assessment, senior review, and local safeguarding pathways. All sessions are stateless — no patient data is stored.</div>
+  <div><strong>Clinical decision support only.</strong> This tool does not diagnose NAI. Output must be interpreted alongside full clinical assessment, senior review, and local safeguarding pathways. All sessions are stateless - no patient data is stored.</div>
 </div>
 
 <main>
@@ -103,7 +103,7 @@
       </div>
 
       <div class="fracture-tier tier-moderate">
-        <div class="tier-label"><div class="tier-dot"></div>Moderate Specificity — Context Dependent</div>
+        <div class="tier-label"><div class="tier-dot"></div>Moderate Specificity - Context Dependent</div>
         <div class="fracture-item moderate" onclick="toggleFracture(this)">
           <input type="checkbox" data-tier="moderate" data-key="multi_age">
           <div><div class="fracture-name">Multiple fractures at different stages of healing</div><div class="fracture-note">Implies repeated injury episodes. Requires correlation with history.</div></div>
@@ -127,7 +127,7 @@
       </div>
 
       <div class="fracture-tier tier-lower">
-        <div class="tier-label"><div class="tier-dot"></div>Lower Specificity — Highly Context Dependent</div>
+        <div class="tier-label"><div class="tier-dot"></div>Lower Specificity - Highly Context Dependent</div>
         <div class="fracture-item lower" onclick="toggleFracture(this)">
           <input type="checkbox" data-tier="lower" data-key="skull">
           <div><div class="fracture-name">Skull fracture</div><div class="fracture-note">Can occur accidentally. Complex, bilateral, or depressed pattern raises concern. Correlate with mechanism.</div></div>
@@ -243,8 +243,8 @@
     </div>
 
     <div class="caveat-box">
-      <strong>⚖️ Important:</strong> This tool supports clinical decision-making — it does not diagnose non-accidental injury. 
-      High-specificity fractures (e.g. CML, posterior ribs) can rarely occur in osteogenesis imperfecta, metabolic bone disease, and birth trauma — these conditions must be considered and excluded. 
+      <strong>⚖️ Important:</strong> This tool supports clinical decision-making - it does not diagnose non-accidental injury. 
+      High-specificity fractures (e.g. CML, posterior ribs) can rarely occur in osteogenesis imperfecta, metabolic bone disease, and birth trauma - these conditions must be considered and excluded. 
       All concerns must be escalated to a senior paediatrician and managed through your local safeguarding / MASH pathway. Document your reasoning fully in the clinical notes.
       <button class="copy-btn" id="copyBtn" onclick="copyNotes()">📋 Copy clinical note to clipboard</button>
     </div>
@@ -372,8 +372,8 @@
     ) {
       level = 'very-high';
       icon = '🚨';
-      title = 'Very High Index of Suspicion — Immediate Senior Escalation Required';
-      subtitle = 'High-specificity fracture(s) combined with significant contextual flags. Senior consultant and safeguarding review must happen now — do not discharge.';
+      title = 'Very High Index of Suspicion - Immediate Senior Escalation Required';
+      subtitle = 'High-specificity fracture(s) combined with significant contextual flags. Senior consultant and safeguarding review must happen now - do not discharge.';
 
     // HIGH: any single high-specificity fracture (without other flags),
     //       OR moderate fracture + 3+ flags, OR 3+ associated features
@@ -385,7 +385,7 @@
     ) {
       level = 'high';
       icon = '🔴';
-      title = 'High Index of Suspicion — Urgent Safeguarding Review Required';
+      title = 'High Index of Suspicion - Urgent Safeguarding Review Required';
       subtitle = 'High-specificity fracture or multiple significant flags present. Escalate to senior paediatrician before any discharge decision.';
 
     // MODERATE: any fracture + 2 or more other flags (history or associated)
@@ -396,14 +396,14 @@
     ) {
       level = 'moderate';
       icon = '🟡';
-      title = 'Moderate Concern — Senior Review and Safeguarding Discussion Required';
+      title = 'Moderate Concern - Senior Review and Safeguarding Discussion Required';
       subtitle = 'Fracture present alongside contextual flags. Formal senior review and consideration of skeletal survey required.';
 
     // LOWER: fracture with fewer than 2 flags, or no fracture
     } else {
       level = 'lower';
       icon = '🟢';
-      title = 'Lower Concern — Assess Further and Safety-Net';
+      title = 'Lower Concern - Assess Further and Safety-Net';
       subtitle = 'Insufficient flags to raise formal concern at this time. Continue clinical assessment; discuss with senior if any uncertainty remains.';
     }
 
@@ -424,8 +424,8 @@
     if (state.age !== null && state.age < 18) flagsHTML += `<span class="flag-tag amber">👶 Age under 18 months (${state.age}mo)</span>`;
     if (nonMobile && state.mobility) flagsHTML += `<span class="flag-tag amber">🚶 Non-ambulant: ${state.mobility.replace('_',' ')}</span>`;
     if (state.incidental === 'yes') flagsHTML += `<span class="flag-tag amber">🔍 Fracture found incidentally</span>`;
-    if (state.boneFragility === 'yes') flagsHTML += `<span class="flag-tag" style="background:#e8f0fe;color:#1a56db;border:1px solid #b3c6f7">ℹ️ Bone fragility condition noted — does not exclude NAI</span>`;
-    if (state.cpr === 'yes') flagsHTML += `<span class="flag-tag" style="background:#e8f0fe;color:#1a56db;border:1px solid #b3c6f7">ℹ️ Recent CPR — note: rarely causes rib fractures in children</span>`;
+    if (state.boneFragility === 'yes') flagsHTML += `<span class="flag-tag" style="background:#e8f0fe;color:#1a56db;border:1px solid #b3c6f7">ℹ️ Bone fragility condition noted - does not exclude NAI</span>`;
+    if (state.cpr === 'yes') flagsHTML += `<span class="flag-tag" style="background:#e8f0fe;color:#1a56db;border:1px solid #b3c6f7">ℹ️ Recent CPR - note: rarely causes rib fractures in children</span>`;
     if (!flagsHTML) flagsHTML = '<span style="color:var(--muted);font-size:0.85rem">No specific flags triggered.</span>';
     document.getElementById('flagsContainer').innerHTML = flagsHTML;
 
@@ -433,33 +433,33 @@
     const actions = [];
 
     if (level === 'very-high') {
-      actions.push({ icon: '🚨', text: '<strong>Immediate consultant paediatrician review</strong> — this should happen now, not at the next opportunity' });
-      actions.push({ icon: '🛡️', text: '<strong>Immediate safeguarding referral via local MASH/children's social care pathway</strong> — do not delay for investigation results' });
-      actions.push({ icon: '🏠', text: '<strong>Do not discharge</strong> — child must remain in a safe environment until safeguarding plan in place' });
+      actions.push({ icon: '🚨', text: '<strong>Immediate consultant paediatrician review</strong> - this should happen now, not at the next opportunity' });
+      actions.push({ icon: '🛡️', text: '<strong>Immediate safeguarding referral via local MASH/children's social care pathway</strong> - do not delay for investigation results' });
+      actions.push({ icon: '🏠', text: '<strong>Do not discharge</strong> - child must remain in a safe environment until safeguarding plan in place' });
     } else if (level === 'high') {
       actions.push({ icon: '👨‍⚕️', text: '<strong>Urgent senior/consultant paediatrician review</strong> before any discharge decision' });
-      actions.push({ icon: '🛡️', text: '<strong>Safeguarding referral via local MASH pathway</strong> — do not delay pending investigation results' });
+      actions.push({ icon: '🛡️', text: '<strong>Safeguarding referral via local MASH pathway</strong> - do not delay pending investigation results' });
       actions.push({ icon: '🏠', text: 'Do not discharge until senior review and safeguarding plan in place' });
     } else if (level === 'moderate') {
-      actions.push({ icon: '👨‍⚕️', text: 'Senior/registrar review required — discuss safeguarding concern formally before discharge' });
-      actions.push({ icon: '🛡️', text: 'Consider safeguarding referral — discuss with your named safeguarding doctor' });
+      actions.push({ icon: '👨‍⚕️', text: 'Senior/registrar review required - discuss safeguarding concern formally before discharge' });
+      actions.push({ icon: '🛡️', text: 'Consider safeguarding referral - discuss with your named safeguarding doctor' });
     } else {
       actions.push({ icon: '👨‍⚕️', text: 'Discuss with senior paediatrician or registrar if any clinical uncertainty remains' });
       actions.push({ icon: '📞', text: 'Safety-net parents/carers with clear return instructions and document reasoning for discharge' });
     }
 
     if (level === 'very-high' || level === 'high' || level === 'moderate') {
-      if (state.age !== null && state.age <= 24) actions.push({ icon: '🩻', text: '<strong>Skeletal survey to RCR standards</strong> (if not already performed) — standard of care under age 2' });
-      if (state.age !== null && state.age > 24 && state.age <= 60) actions.push({ icon: '🩻', text: 'Consider skeletal survey — discuss with radiology and safeguarding team for age 2–5' });
+      if (state.age !== null && state.age <= 24) actions.push({ icon: '🩻', text: '<strong>Skeletal survey to RCR standards</strong> (if not already performed) - standard of care under age 2' });
+      if (state.age !== null && state.age > 24 && state.age <= 60) actions.push({ icon: '🩻', text: 'Consider skeletal survey - discuss with radiology and safeguarding team for age 2–5' });
       if (highFractures.length > 0 || modFractures.find(([k]) => k === 'multi_age')) actions.push({ icon: '📅', text: 'Repeat skeletal survey at <strong>10–14 days</strong> to identify occult/healing fractures' });
     }
 
     if (state.assocFlags.retinal_haem || state.assocFlags.intracranial) actions.push({ icon: '👁️', text: 'Urgent <strong>ophthalmology review</strong> for formal retinal haemorrhage assessment' });
-    if (state.assocFlags.intracranial) actions.push({ icon: '🧠', text: 'Neurosurgery/neurology review for intracranial injury — consider CT/MRI head if not already done' });
+    if (state.assocFlags.intracranial) actions.push({ icon: '🧠', text: 'Neurosurgery/neurology review for intracranial injury - consider CT/MRI head if not already done' });
 
     actions.push({ icon: '📝', text: 'Document full history (verbatim where possible), examination findings, and clinical reasoning clearly in the notes' });
-    if (state.boneFragility === 'yes') actions.push({ icon: 'ℹ️', text: 'Consider metabolic bone disease workup (Ca, PO4, ALP, PTH, Vit D) — bone fragility does not exclude inflicted injury' });
-    actions.push({ icon: '📞', text: 'Contact your named/designated safeguarding doctor if unsure — it is always better to discuss' });
+    if (state.boneFragility === 'yes') actions.push({ icon: 'ℹ️', text: 'Consider metabolic bone disease workup (Ca, PO4, ALP, PTH, Vit D) - bone fragility does not exclude inflicted injury' });
+    actions.push({ icon: '📞', text: 'Contact your named/designated safeguarding doctor if unsure - it is always better to discuss' });
 
     document.getElementById('actionsContainer').innerHTML = actions.map(a => `<div class="action-item"><div class="action-icon">${a.icon}</div><div>${a.text}</div></div>`).join('');
 
@@ -511,7 +511,7 @@ This tool provides clinical decision support only and does not constitute a diag
       setTimeout(() => { btn.textContent = '📋 Copy clinical note to clipboard'; btn.classList.remove('copied'); }, 2500);
     };
     const showFailed = () => {
-      btn.textContent = '⚠️ Copy failed — try again';
+      btn.textContent = '⚠️ Copy failed - try again';
       setTimeout(() => { btn.textContent = '📋 Copy clinical note to clipboard'; }, 2500);
     };
 

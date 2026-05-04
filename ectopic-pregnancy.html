@@ -1,0 +1,1050 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unusual abdominal pain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #140a0f;
+      --bg-deep: #090508;
+      --surface: #1c1018;
+      --surface-2: #26141f;
+      --border: rgba(255,255,255,0.08);
+      --text: #f4e8ee;
+      --text-muted: #c4a8b5;
+      --text-faint: #7a5f6c;
+      --rose: #fb7185;
+      --rose-dim: rgba(251,113,133,0.12);
+      --rose-border: rgba(251,113,133,0.35);
+      --green: #22C55E;
+      --green-dim: rgba(34,197,94,0.1);
+      --green-border: rgba(34,197,94,0.35);
+      --amber: #F59E0B;
+      --amber-dim: rgba(245,158,11,0.1);
+      --amber-border: rgba(245,158,11,0.35);
+      --red: #EF4444;
+      --red-dim: rgba(239,68,68,0.1);
+      --red-border: rgba(239,68,68,0.35);
+      --font-display: "Instrument Serif", Georgia, serif;
+      --font-body: "Inter", system-ui, sans-serif;
+      --radius: 10px;
+      --transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: var(--font-body);
+      background: radial-gradient(circle at top, #221018, var(--bg));
+      color: var(--text);
+    }
+
+    .app-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      background: rgba(9, 5, 8, 0.95);
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
+      backdrop-filter: blur(8px);
+    }
+
+    .head-left { display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
+    .logo { font-size: 1.1rem; }
+    .title-wrap { display: flex; flex-direction: column; min-width: 0; }
+    .title-wrap h1 {
+      margin: 0;
+      font: 400 1rem/1.1 var(--font-display);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter {
+      margin-top: 0.12rem;
+      color: var(--rose);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .head-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.78rem; }
+    .score-badge {
+      display: none;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--rose-border);
+      border-radius: 999px;
+      background: var(--rose-dim);
+      color: var(--rose);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+      z-index: 19;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--rose);
+      transition: width 0.5s ease;
+    }
+
+    .content {
+      margin-top: 58px;
+      margin-bottom: 56px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .content-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      animation: fadeSlideIn 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .content-inner.is-leaving {
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+
+    .app-footer {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 56px;
+      border-top: 1px solid var(--border);
+      background: rgba(9, 5, 8, 0.95);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.65rem;
+      padding: 0.45rem 0.75rem;
+      z-index: 20;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--text);
+      font: 600 0.84rem/1 var(--font-body);
+      cursor: pointer;
+      transition: all var(--transition);
+      min-height: 40px;
+    }
+    button:hover { filter: brightness(1.09); }
+    button:active { transform: translateY(1px) scale(0.99); filter: brightness(1.15); }
+    button:disabled { opacity: 0.55; cursor: default; transform: none; filter: none; }
+    button:focus-visible,
+    .choice-btn:focus-visible {
+      outline: 2px solid var(--rose);
+      outline-offset: 2px;
+    }
+
+    .btn-back { justify-self: start; width: 100%; }
+    .btn-reveal {
+      background: var(--amber-dim);
+      border-color: var(--amber-border);
+      color: var(--amber);
+    }
+    .btn-reveal.done {
+      background: var(--green-dim);
+      border-color: var(--green-border);
+      color: var(--green);
+    }
+    .btn-continue {
+      background: var(--rose-dim);
+      border-color: var(--rose-border);
+      color: var(--rose);
+      justify-self: end;
+      width: 100%;
+    }
+
+    .chapter-label {
+      color: var(--rose);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+    }
+
+    h2.section-title {
+      margin: 0 0 1rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 400;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .narrative {
+      background: var(--surface);
+      border-left: 3px solid var(--rose);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+    .narrative strong { color: var(--rose); font-style: normal; font-weight: 600; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .detail-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .detail-item b { display: block; color: var(--text); margin-bottom: 0.15rem; }
+
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .vital-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      padding: 0.75rem 0.45rem;
+    }
+    .vital-card.abnormal { background: var(--red-dim); border-color: var(--red-border); }
+    .vital-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    .vital-value { font-size: 1.15rem; font-weight: 700; color: var(--rose); }
+    .vital-card.abnormal .vital-value { color: var(--red); }
+
+    .question {
+      margin: 1rem 0 0.75rem;
+      font-size: 0.92rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .choices { display: grid; gap: 0.65rem; }
+    .choice-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.78rem;
+      text-align: left;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .choice-btn:hover { background: var(--rose-dim); border-color: var(--rose-border); }
+    .choice-btn.selected { background: rgba(251,113,133,0.08); border-color: var(--rose-border); }
+    .choice-btn.correct { background: var(--green-dim); border-color: var(--green-border); }
+    .choice-btn.wrong { background: var(--red-dim); border-color: var(--red-border); }
+    .choice-btn[disabled] { cursor: default; }
+
+    .letter {
+      flex: 0 0 1.75rem;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: var(--rose-dim);
+      color: var(--rose);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .choice-btn.correct .letter { color: var(--green); background: var(--green-dim); }
+    .choice-btn.wrong .letter { color: var(--red); background: var(--red-dim); }
+    .choice-text { flex: 1; }
+    .result-badge { font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+    .choice-btn.correct .result-badge { color: var(--green); }
+    .choice-btn.wrong .result-badge { color: var(--red); }
+
+    .reveal {
+      margin-top: 0.8rem;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 500ms ease, opacity 500ms ease;
+    }
+    .reveal.show { max-height: 1200px; opacity: 1; }
+    .box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.8rem 0.95rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+    .box .label {
+      font-size: 0.67rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .box.correct { background: var(--green-dim); border-color: var(--green-border); }
+    .box.correct .label { color: var(--green); }
+    .box.teaching { background: var(--amber-dim); border-left: 3px solid var(--amber); }
+    .box.teaching .label { color: var(--amber); }
+    .box.danger { background: var(--red-dim); border-left: 3px solid var(--red); }
+    .box.danger .label { color: var(--red); }
+    .box.flag { background: var(--rose-dim); border-color: var(--rose-border); }
+    .box.flag .label { color: var(--rose); }
+
+    .hero {
+      text-align: center;
+      padding-top: 0.8rem;
+    }
+    .hero-emoji { font-size: 4rem; animation: floaty 2.5s ease-in-out infinite; }
+    .hero h2,
+    .hero-title.section-title {
+      margin: 0.55rem 0;
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      background: linear-gradient(135deg, #fb7185, #f472b6, #fb7185);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 400;
+    }
+    .hero-sub {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .hero-tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .hero-tags span {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-2);
+      padding: 0.36rem 0.75rem;
+      font-size: 0.77rem;
+    }
+    .instructions {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: left;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .instructions h3 { margin: 0 0 0.5rem; color: var(--rose); font-size: 0.95rem; }
+    .instructions ol { margin: 0 0 0.75rem; padding-left: 1.1rem; font-size: 0.84rem; line-height: 1.6; color: var(--text-muted); }
+    .instructions p { margin: 0; color: var(--amber); font-size: 0.8rem; line-height: 1.5; }
+
+    .score-card {
+      text-align: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem;
+      margin-bottom: 0.9rem;
+    }
+    .score-big { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .score-msg { color: var(--text-muted); font-size: 0.86rem; line-height: 1.55; }
+    .score-red { color: var(--red); }
+    .score-amber { color: var(--amber); }
+    .score-rose { color: var(--rose); }
+    .score-green { color: var(--green); }
+
+    .learn-grid {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .learn-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.8rem;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+    }
+
+    .debrief {
+      background: var(--amber-dim);
+      border: 1px solid var(--amber-border);
+      border-radius: var(--radius);
+      padding: 0.9rem;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .timeline-page {
+      text-align: center;
+      padding: 1.2rem 0.2rem;
+    }
+    .timeline-emoji {
+      font-size: 2.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .timeline-page h3 {
+      margin: 0.2rem 0 0.65rem;
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 400;
+    }
+    .timeline-page p {
+      margin: 0 auto 0.9rem;
+      max-width: 640px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      font-size: 0.9rem;
+    }
+    .rewind-btn {
+      width: auto;
+      min-width: 220px;
+      padding: 0.7rem 1rem;
+      background: var(--rose-dim);
+      border: 1px solid var(--rose-border);
+      color: var(--rose);
+      border-radius: var(--radius);
+      font-weight: 700;
+    }
+    .debrief b { display: block; color: var(--amber); margin-bottom: 0.4rem; font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; }
+
+    .hcg-banner {
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .hcg-value {
+      font-size: clamp(3rem, 9vw, 5rem);
+      font-weight: 800;
+      color: var(--rose);
+      line-height: 1;
+    }
+    .hcg-unit { margin-top: 0.35rem; color: var(--text-muted); font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .dialogue {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+    .dialogue p { margin: 0 0 0.75rem; }
+    .dialogue .speaker { color: var(--rose); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 0.2rem; }
+
+    @media (max-width: 900px) {
+      .learn-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+      .content { padding: 1rem; margin-bottom: 156px; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .app-footer {
+        height: auto;
+        grid-template-columns: 1fr;
+        padding: 0.5rem;
+      }
+      .learn-grid { grid-template-columns: 1fr; }
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="head-left">
+      <span class="logo" aria-hidden="true">🩺</span>
+      <div class="title-wrap">
+        <h1>Unusual abdominal pain</h1>
+        <span id="chapter-label" class="chapter">THE CASE BEGINS</span>
+      </div>
+    </div>
+    <div class="head-right">
+      <span id="score-badge" class="score-badge">0/4 correct</span>
+      <span id="progress-text">1 / 15</span>
+    </div>
+  </header>
+  <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+
+  <main id="main-content" class="content" aria-live="polite">
+    <div id="content-inner" class="content-inner"></div>
+  </main>
+
+  <footer class="app-footer">
+    <button id="back-btn" class="btn-back" aria-label="Go to previous section">← Back</button>
+    <button id="reveal-btn" class="btn-reveal" aria-label="Reveal answer">Reveal Answer</button>
+    <button id="continue-btn" class="btn-continue" aria-label="Go to next section">Continue →</button>
+  </footer>
+
+  <script>
+    const TOTAL_CHOICES = 4;
+    let currentSection = 0;
+    let selectedChoice = null;
+    let revealShown = false;
+    let score = 0;
+    let totalChoicesMade = 0;
+    let wrongTimeline = null;
+
+    const sectionState = {};
+
+    const sections = [
+      { type: "title", chapter: "THE OPENING", title: "Unusual abdominal pain" },
+      {
+        type: "meet",
+        chapter: "THE CASE BEGINS",
+        title: "Meet Lizzie",
+        narrative: "You are <strong>Will</strong>, the paediatric ED SHO on nights. You’re asked to see a young person who has been triaged to the children’s emergency area.",
+        details: [
+          ["Patient", "Lizzie, 17 years old (with her mother present)"],
+          ["Presenting complaint", "Sudden, severe abdominal cramping, nausea, shoulder-tip pain, then light-headedness while watching TV"]
+        ]
+      },
+      {
+        type: "info",
+        chapter: "BEFORE YOU PROCEED",
+        title: "First thoughts"
+      },
+      {
+        type: "choice",
+        chapter: "FIRST MOVE",
+        title: "What do you do first?",
+        narrative: "Lizzie looks pale and uncomfortable; her mother is worried beside her. The nurse is waiting for your instruction.",
+        question: "What is your immediate priority?",
+        choices: {
+          a: "Start with an A–E assessment and treat life threats before anything else",
+          b: "Ask for urine β-hCG first - you need to rule in or out pregnancy rapidly",
+          c: "Take a full history at the bedside before examining - obs can wait a minute"
+        },
+        correctChoice: "a",
+        correct: "A - A–E assessment first",
+        teaching: "In any sick child or young person with pain, syncope or haemodynamic compromise, stabilisation and resuscitation come first - same as adults. Pregnancy tests and imaging support diagnosis; they do not replace identification of shock, bleeding or peritonism.",
+        danger: "Sending β-hCG alone while she is unstable can delay recognition of circulatory collapse and intra-abdominal catastrophe. A long history before examination risks missing a peri-arrest patient.",
+        wrongOutcomes: {
+          b: "The urine β-hCG comes back negative while Lizzie becomes unresponsive with cold, clammy peripheries and no palpable pulse. You put out a 2222 and start CPR. A negative urine test does not exclude ectopic pregnancy - especially early or with dilute urine - and it should never replace assessment of the shocked patient.",
+          c: "While you finish clerking, Lizzie becomes peripherally shut down and hypotensive. Significant time passes before shock and peritonism are acted on."
+        }
+      },
+      {
+        type: "assessment",
+        chapter: "A–E COMPLETE",
+        title: "Primary findings",
+        narrative: "You complete an A–E assessment and establish IV access.",
+        vitals: [
+          ["BP", "Low", true],
+          ["HR", "Tachycardic", true],
+          ["Abdomen", "Guarding + rebound", true]
+        ],
+        exam: [
+          "Patient pale, distressed",
+          "Abdominal guarding and rebound tenderness",
+          "Consider free fluid / ruptured ectopic until proven otherwise"
+        ],
+        keyFlag: "Treat suspected significant intra-abdominal bleeding as an emergency: IV access, bloods including serum β-hCG, cross-match / group & save, urgent senior input, and early liaison with paediatric gynaecology / on-call OG per local pathway."
+      },
+      {
+        type: "info",
+        chapter: "DIFFERENTIALS",
+        title: "What are your differentials?"
+      },
+      {
+        type: "choice",
+        chapter: "INVESTIGATIONS",
+        title: "What do you order?",
+        narrative: "You need enough information to rule in pregnancy of unknown location / ectopic pregnancy <strong>without</strong> sending Lizzie home unsafe.",
+        question: "Which approach matches ED best practice here?",
+        choices: {
+          a: "FBC, U&Es, clotting, group & save; serum β-hCG; urine dip + urine β-hCG - and do not discharge on a negative urine test alone",
+          b: "Urine β-hCG only - if negative, reassure and discharge with analgesia",
+          c: "VBG and abdominal ultrasound only - skip serum β-hCG because urine testing was quicker to organise"
+        },
+        correctChoice: "a",
+        correct: "A - Full baseline bloods, serum β-hCG, and urine testing",
+        teaching: "Urine β-hCG can be falsely negative early or with dilute urine. Serum β-hCG is more sensitive and supports interpretation alongside ultrasound and clinical risk - especially in adolescents where history may be incomplete. Clotting and group & save prepare for theatre if bleeding is catastrophic.",
+        danger: "Discharging on a negative urine β-hCG alone can miss ectopic pregnancy and rupture. Omitting serum β-hCG while organising scans fragments the pathway for pregnancy of unknown location.",
+        wrongOutcomes: {
+          b: "You rule out pregnancy on the basis of urine testing and send Lizzie home with analgesia. She returns days later critically unwell - the initial pathway never included serum β-hCG or senior safety-netting appropriate for a shocked young person with an acute abdomen.",
+          c: "You scatter investigations without the core biochemical pregnancy discrimination. Serum β-hCG remains central for correlating ultrasound findings and gestational expectations."
+        }
+      },
+      {
+        type: "meet",
+        chapter: "RESULTS & HISTORY",
+        title: "The plot thickens",
+        narrative: "Initial urine dip and urine β-hCG are negative. Blood tests are still processing - so you go back to the history.",
+        details: [
+          ["Contraception", "Mirena coil inserted 6 months ago"],
+          ["Bleeding", "Brown discharge and spotting over the past week"],
+          ["LMP", "Reported as 6 months ago - pregnancy easily dismissed without serum β-hCG"]
+        ],
+        keyFlag: "A negative urine pregnancy test does not exclude ectopic pregnancy. Clinical suspicion + serum β-hCG + imaging pathway remain essential."
+      },
+      {
+        type: "choice",
+        chapter: "ESCALATION",
+        title: "What do you do next?",
+        narrative: "Lizzie remains unwell with a tender abdomen and worrying observations.",
+        question: "What is the safest next step?",
+        choices: {
+          a: "Phone the ED consultant / senior clinician now with a structured handover",
+          b: "Wait for formal blood results before bothering the consultant",
+          c: "Move to short stay for observation without senior review - she is stable enough"
+        },
+        correctChoice: "a",
+        correct: "A - Escalate early with a clear SBAR",
+        teaching: "If you are worried, say so. An ectopic pregnancy can deteriorate rapidly; seniors need early situational awareness to arrange ultrasound, paediatric gynaecology / OG input (per local pathway) and definitive management.",
+        danger: "Delaying escalation while you wait for results can cost minutes you do not have in rupture or massive intra-abdominal bleeding.",
+        wrongOutcomes: {
+          b: "While you wait for bloods and grab a coffee, Lizzie deteriorates catastrophically. Resuscitation is unsuccessful. Early consultant involvement matters.",
+          c: "Short stay without senior review risks inadequate escalation for a young person who needs urgent diagnostics and potential theatre."
+        }
+      },
+      {
+        type: "sbar",
+        chapter: "HANDOVER",
+        title: "Calling the consultant"
+      },
+      {
+        type: "shoulder",
+        chapter: "CLINICAL PEARL",
+        title: "Shoulder-tip pain"
+      },
+      {
+        type: "labs",
+        chapter: "BLOODS BACK",
+        title: "Serum β-hCG"
+      },
+      {
+        type: "choice",
+        chapter: "MANAGEMENT",
+        title: "How do you treat it?",
+        narrative: "Lizzie remains clinically unstable with signs of intra-abdominal bleeding. Imaging and labs now support a ruptured ectopic pregnancy.",
+        question: "What is definitive management in this context?",
+        choices: {
+          a: "Emergency surgical management - theatre",
+          b: "Medical management with methotrexate",
+          c: "Expectant management with outpatient repeat β-hCG"
+        },
+        correctChoice: "a",
+        correct: "A - Emergency surgery for ruptured ectopic",
+        teaching: "Haemodynamic instability, peritonism or suspected rupture requires urgent surgical management. Methotrexate is for selected stable, unruptured cases who meet strict criteria.",
+        danger: "Medical or expectant pathways are unsafe when rupture or significant bleeding is suspected - delay risks massive haemorrhage and death.",
+        wrongOutcomes: {
+          b: "You discuss methotrexate, but the consultant stops you: ruptured ectopic pregnancy is a surgical emergency. Trying to medicalise a rupture wastes critical minutes.",
+          c: "Watchful waiting is inappropriate with shock, free fluid and suspected rupture."
+        }
+      },
+      {
+        type: "resolution",
+        chapter: "OUTCOME",
+        title: "After theatre"
+      },
+      {
+        type: "end",
+        chapter: "WRAP-UP",
+        title: "Teaching summary"
+      }
+    ];
+
+    const contentInner = document.getElementById("content-inner");
+    const mainContent = document.getElementById("main-content");
+    const chapterLabel = document.getElementById("chapter-label");
+    const progressText = document.getElementById("progress-text");
+    const progressFill = document.getElementById("progress-fill");
+    const scoreBadge = document.getElementById("score-badge");
+    const backBtn = document.getElementById("back-btn");
+    const revealBtn = document.getElementById("reveal-btn");
+    const continueBtn = document.getElementById("continue-btn");
+
+    function renderSection() {
+      const section = sections[currentSection];
+      const inWrongTimeline = Boolean(wrongTimeline);
+      chapterLabel.textContent = inWrongTimeline ? "ALTERNATE TIMELINE" : section.chapter;
+      progressText.textContent = `${currentSection + 1} / ${sections.length}`;
+      progressFill.style.width = `${((currentSection + 1) / sections.length) * 100}%`;
+      scoreBadge.style.display = totalChoicesMade > 0 ? "inline-flex" : "none";
+      scoreBadge.textContent = `${score}/${TOTAL_CHOICES} correct`;
+
+      backBtn.disabled = currentSection === 0 || inWrongTimeline;
+      backBtn.style.visibility = inWrongTimeline ? "hidden" : "visible";
+
+      selectedChoice = sectionState[currentSection]?.selected ?? null;
+      revealShown = sectionState[currentSection]?.revealed ?? false;
+
+      const isChoice = section.type === "choice" && !inWrongTimeline;
+      revealBtn.style.display = isChoice ? "block" : "none";
+      continueBtn.style.display = inWrongTimeline ? "none" : ((!isChoice || revealShown) ? "block" : "none");
+      continueBtn.textContent = currentSection === sections.length - 1 ? "Restart" : "Continue →";
+
+      revealBtn.disabled = !selectedChoice || revealShown;
+      revealBtn.classList.toggle("done", revealShown);
+      revealBtn.textContent = revealShown ? "✓ Answer Revealed" : "Reveal Answer";
+
+      contentInner.classList.add("is-leaving");
+      setTimeout(() => {
+        contentInner.innerHTML = inWrongTimeline ? renderWrongTimeline() : renderByType(section);
+        bindChoiceButtons();
+        bindRewindButton();
+        contentInner.classList.remove("is-leaving");
+      }, 200);
+
+      mainContent.scrollTop = 0;
+    }
+
+    function renderByType(section) {
+      switch (section.type) {
+        case "title": return renderTitle();
+        case "meet": return renderMeet(section);
+        case "info": return renderInfo(section);
+        case "choice": return renderChoice(section);
+        case "assessment": return renderAssessment(section);
+        case "sbar": return renderSbar(section);
+        case "shoulder": return renderShoulder(section);
+        case "labs": return renderLabs(section);
+        case "resolution": return renderResolution(section);
+        case "end": return renderEnd(section);
+        default: return "<p>Unknown section</p>";
+      }
+    }
+
+    function renderWrongTimeline() {
+      const source = sections[wrongTimeline.sectionIndex];
+      const pickedText = source.choices[wrongTimeline.choiceId];
+      const briefConsequence = (source.wrongOutcomes && source.wrongOutcomes[wrongTimeline.choiceId]) || source.danger || "Lizzie deteriorates and critical time is lost - escalation and resuscitation-first principles apply at any age.";
+      return `
+        <section class="timeline-page">
+          <div class="timeline-emoji" aria-hidden="true">⏳</div>
+          <div class="chapter-label">Wrong turn</div>
+          <h3>What happened next?</h3>
+          <div class="box danger" style="text-align:left;max-width:700px;margin:0 auto 0.75rem;">
+            <div class="label">Chosen path</div>
+            ${pickedText}
+          </div>
+          <p>${briefConsequence}</p>
+          <button id="rewind-btn" class="rewind-btn" aria-label="Go back in time to correct path">↩ Go back in time</button>
+        </section>`;
+    }
+
+    function frame(section, body) {
+      return `<section><div class="chapter-label">${section.chapter}</div><h2 class="section-title">${section.title}</h2>${body}</section>`;
+    }
+
+    function renderTitle() {
+      const s = sections[0];
+      return `<section><div class="chapter-label">${s.chapter}</div>
+        <div class="hero">
+          <div class="hero-emoji" aria-hidden="true">🫀</div>
+          <h2 class="section-title hero-title">${s.title}</h2>
+          <div class="hero-sub">A paediatric ED Choose Your Own Adventure</div>
+          <div class="hero-tags">
+            <span>👧 Adolescent</span><span>🩸 Shock &amp; bleeding</span><span>🎯 Escalation</span>
+          </div>
+          <div class="instructions">
+            <h3>How this works</h3>
+            <ol>
+              <li>Read each vignette as a group</li>
+              <li>Choose an option, then tap Reveal answer</li>
+              <li>Use Continue to move forward on the safe pathway</li>
+            </ol>
+            <p>Framed for trainees in paediatric emergency care.</p>
+          </div>
+        </div></section>`;
+    }
+
+    function renderMeet(s) {
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="detail-grid">${s.details.map(([k, v]) => `<div class="detail-item"><b>${k}</b>${v}</div>`).join("")}</div>
+        ${s.keyFlag ? `<div class="box flag"><div class="label">Key point</div>${s.keyFlag}</div>` : ""}`);
+    }
+
+    function renderInfo(s) {
+      if (s.title === "First thoughts") {
+        return frame(s, `
+          <div class="card" style="font-size:0.95rem;color:var(--text);line-height:1.55;font-weight:600;">In any adolescent who could be pregnant, ectopic pregnancy belongs on the differential when they present with pain, bleeding or syncope - even when pregnancy feels “unlikely.”</div>
+          <details class="card">
+            <summary style="cursor:pointer;color:var(--red);font-weight:700;">Red flags</summary>
+            <ul style="margin:.7rem 0 0;padding-left:1.1rem;color:var(--text-muted);font-size:.9rem;line-height:1.7;">
+              <li>Shoulder-tip pain (diaphragmatic irritation)</li>
+              <li>Syncope or presyncope</li>
+              <li>Peritonism / rebound</li>
+              <li>Haemodynamic instability</li>
+            </ul>
+          </details>
+          <details class="card">
+            <summary style="cursor:pointer;color:var(--amber);font-weight:700;">Differentials to hold in mind</summary>
+            <ul style="margin:.7rem 0 0;padding-left:1.1rem;color:var(--text-muted);font-size:.9rem;line-height:1.7;">
+              <li>Ectopic pregnancy / PUL</li>
+              <li>Ovarian pathology (torsion, bleed)</li>
+              <li>PID / tubo-ovarian abscess</li>
+              <li>Miscarriage</li>
+              <li>Appendicitis, renal colic, other acute abdomen</li>
+            </ul>
+          </details>`);
+      }
+      return frame(s, `
+        <div class="card" style="font-size:0.9rem;line-height:1.65;color:var(--text-muted);">
+          <p style="margin:0 0 0.6rem;color:var(--text);font-weight:600;">Build a structured list: pregnancy-related causes (miscarriage, ectopic, molar), adolescent gynaecology emergencies (torsion, bleeding cyst, infection), and general surgical mimics.</p>
+          <p style="margin:0;">The slide deck reminds us: history and examination alone are not specific - investigations must match risk.</p>
+        </div>`);
+    }
+
+    function renderChoice(s) {
+      const letters = { a: "A", b: "B", c: "C" };
+      const disabled = revealShown ? "disabled" : "";
+      const choicesHtml = Object.entries(s.choices).map(([id, txt]) => {
+        const isSelected = selectedChoice === id;
+        const isCorrect = revealShown && id === s.correctChoice;
+        const isWrong = revealShown && isSelected && id !== s.correctChoice;
+        const klass = ["choice-btn", isSelected ? "selected" : "", isCorrect ? "correct" : "", isWrong ? "wrong" : ""].join(" ").trim();
+        const badge = isCorrect ? '<span class="result-badge">✓ Correct</span>' : (isWrong ? '<span class="result-badge">✗ Wrong</span>' : "");
+        return `<button type="button" class="${klass}" data-choice="${id}" ${disabled} aria-label="Select option ${letters[id]}"><span class="letter">${letters[id]}</span><span class="choice-text">${txt}</span>${badge}</button>`;
+      }).join("");
+
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="question">${s.question}</div>
+        <div class="choices">${choicesHtml}</div>
+        <div class="reveal ${revealShown ? "show" : ""}">
+          ${revealShown ? `
+            <div class="box correct"><div class="label">Correct path</div>${s.correct}</div>
+            <div class="box teaching"><div class="label">Teaching point</div>${s.teaching}</div>
+            ${s.danger ? `<div class="box danger"><div class="label">Danger</div>${s.danger}</div>` : ""}
+            ${s.keyFlag ? `<div class="box flag"><div class="label">Key flag</div>${s.keyFlag}</div>` : ""}
+          ` : ""}
+        </div>`);
+    }
+
+    function renderAssessment(s) {
+      return frame(s, `
+        <div class="narrative">${s.narrative}</div>
+        <div class="vitals-grid">
+          ${s.vitals.map(([k, v, abnormal]) => `<div class="vital-card ${abnormal ? "abnormal" : ""}"><div class="vital-label">${k}</div><div class="vital-value">${v}</div></div>`).join("")}
+        </div>
+        <div class="card"><h3 style="margin:0 0 .4rem;color:var(--rose);font-size:0.78rem;letter-spacing:.11em;text-transform:uppercase;">Examination</h3><ul style="margin:0;padding-left:1.1rem;color:var(--text-muted);font-size:0.86rem;line-height:1.7;">${s.exam.map(i => `<li>${i}</li>`).join("")}</ul></div>
+        <div class="box flag"><div class="label">Key flag</div>${s.keyFlag}</div>`);
+    }
+
+    function renderSbar(s) {
+      return frame(s, `
+        <div class="narrative">You call Mr Gardner, the ED consultant. You keep it concise - <strong>Situation, Background, Assessment, Recommendation</strong>.</div>
+        <div class="card dialogue">
+          <p><span class="speaker">You</span> “Hi - it’s Will, paediatric ED SHO. I’m calling about Lizzie, a 17-year-old who had pre-syncope while sitting. Mum’s here. She reports brown discharge for about a week. Her last menstrual period was 6 months ago - she had a Mirena coil inserted 6 months ago. On abdominal examination she’s diffusely tender with guarding. Blood pressure is low and I’ve started IV fluids. Urine pregnancy dip and urine β-hCG were negative. I’m waiting on FBC, serum β-hCG and clotting. I’m worried - could you review and advise what I should do meanwhile?”</p>
+          <p><span class="speaker">Consultant</span> “Thanks - clear handover. Do you think she’s appropriate for short stay?”</p>
+          <p><span class="speaker">You</span> “I don’t think so - she’s quite sick and I’m really worried.”</p>
+          <p><span class="speaker">Consultant</span> “Good call. Continue serial observations, keep her nil by mouth if we might be heading to theatre, and I’ll speak with radiology for an urgent ultrasound and with paediatric gynaecology / OG as per our pathway. I’ll come down now.”</p>
+          <p><span class="speaker">You</span> “Thank you - we’ll keep monitoring her.”</p>
+        </div>
+        <div class="box teaching"><div class="label">Teaching point</div>A worried junior who escalates early with a structured story saves time. Risk of ectopic remains despite “negative” urine testing and contraception history. In adolescents, involve seniors early and follow local safeguarding-aware pathways for specialist review.</div>`);
+    }
+
+    function renderShoulder(s) {
+      return frame(s, `
+        <div class="narrative">The slide deck pairs shoulder-tip pain with upper abdominal anatomy - <strong>RUQ vs LUQ</strong> - as a visual anchor.</div>
+        <div class="card" style="font-size:0.88rem;line-height:1.65;color:var(--text-muted);">
+          <p style="margin:0 0 0.75rem;">Referred shoulder pain can occur when blood or fluid irritates the diaphragm (phrenic nerve, C3–C5). It is <strong>not</strong> pathognomonic for ectopic pregnancy - but in this context it raises suspicion for intra-abdominal bleeding alongside abdominal findings.</p>
+          <p style="margin:0;">Correlate shoulder symptoms with haemodynamic status, abdomen and β-hCG - do not dismiss serious pathology because urine testing is negative.</p>
+        </div>
+        <div class="box flag"><div class="label">Pearl</div>Shoulder-tip pain + unstable observations + peritonism = senior help, serum β-hCG, urgent ultrasound arranged via radiology / specialists, and paediatric gynaecology or OG team per protocol.</div>`);
+    }
+
+    function renderLabs(s) {
+      return frame(s, `
+        <div class="narrative">The formal serum result arrives - and changes your risk stratification completely.</div>
+        <div class="hcg-banner">
+          <div class="hcg-value">600</div>
+          <div class="hcg-unit">IU/L serum β-hCG (example result)</div>
+        </div>
+        <div class="box correct"><div class="label">Interpretation</div>Pregnancy is confirmed biochemically despite negative urine testing. Combined with peritonism and instability, the consultant’s concern for <strong>ruptured ectopic pregnancy</strong> is now supported.</div>
+        <div class="box teaching"><div class="label">Teaching point</div>Always interpret β-hCG alongside ultrasound and clinical status - especially when urine tests underperform or history is complex (e.g. contraception, bleeding patterns).</div>`);
+    }
+
+    function renderResolution(s) {
+      return frame(s, `
+        <div class="narrative" style="font-family:var(--font-display);font-size:1.02rem;">Lizzie goes to theatre urgently with paediatric anaesthetic and surgical teams as per local practice. Bleeding is controlled surgically. She makes a good recovery - but only because resuscitation-first care, blood tests and early senior escalation happened in time.</div>
+        <div class="learn-grid" style="grid-template-columns:1fr;">
+          <div class="learn-card" style="border-color:var(--rose-border);">
+            <strong style="color:var(--text);">From the deck</strong><br>
+            Ruptured ectopic needs emergency surgery. Methotrexate is for selected stable, unruptured disease - not for haemodynamic compromise.
+          </div>
+        </div>`);
+    }
+
+    function renderEnd(s) {
+      let scoreClass = "score-red";
+      let msg = "Review the teaching cards and run the case again - wrong turns carry the most memorable lessons.";
+      if (score >= TOTAL_CHOICES) {
+        scoreClass = "score-green";
+        msg = "Strong decisions across the pathway. Teach someone else the urine-test trap.";
+      } else if (score >= 3) {
+        scoreClass = "score-rose";
+        msg = "Solid performance. Revisit any missed step where timing matters most.";
+      } else if (score >= 2) {
+        scoreClass = "score-amber";
+        msg = "Good foundation - focus on escalation and definitive management of rupture.";
+      }
+
+      return frame(s, `
+        <div class="score-card">
+          <div class="score-big ${scoreClass}">${score} / ${TOTAL_CHOICES}</div>
+          <div class="score-msg">${msg}</div>
+        </div>
+        <div class="learn-grid">
+          <div class="learn-card"><strong style="color:var(--text);">Definition</strong><br>Ectopic pregnancy: implantation outside the uterine cavity (most often tubal).</div>
+          <div class="learn-card"><strong style="color:var(--text);">Symptoms</strong><br>Pain, bleeding, amenorrhoea or unusual bleeding, syncope, shoulder-tip pain - overlap widely with other pathology.</div>
+          <div class="learn-card"><strong style="color:var(--text);">Signs</strong><br>Peritonism, abdominal tenderness, pallor, tachycardia, hypotension - shock can dominate; the abdominal examination alone cannot confirm or exclude ectopic pregnancy.</div>
+          <div class="learn-card"><strong style="color:var(--text);">Diagnosis</strong><br>Ultrasound (often transabdominal first in younger patients) arranged with radiology / specialist teams; interpret with serum β-hCG trends and clinical risk. Definitive imaging views are decided in secondary care.</div>
+          <div class="learn-card"><strong style="color:var(--text);">Management outline</strong><br>Expectant / medical / surgical options depend on stability, β-hCG, scan findings and symptoms - rupture mandates urgent surgery.</div>
+          <div class="learn-card"><strong style="color:var(--text);">Complications</strong><br>Tubal or uterine rupture, massive haemorrhage, DIC, death - respect early escalation.</div>
+        </div>
+        <div class="debrief"><b>Facilitator prompts</b>
+          Why can urine β-hCG be falsely negative?<br>
+          When would methotrexate ever be appropriate?<br>
+          What features force theatre regardless of β-hCG?<br>
+          How does shoulder-tip pain fit into your risk picture?
+        </div>`);
+    }
+
+    function bindChoiceButtons() {
+      document.querySelectorAll(".choice-btn").forEach(btn => {
+        btn.addEventListener("click", () => selectChoice(btn.dataset.choice));
+      });
+    }
+
+    function bindRewindButton() {
+      const rewindBtn = document.getElementById("rewind-btn");
+      if (rewindBtn) rewindBtn.addEventListener("click", goBackInTime);
+    }
+
+    function selectChoice(choiceId) {
+      if (revealShown) return;
+      selectedChoice = choiceId;
+      sectionState[currentSection] = sectionState[currentSection] || {};
+      sectionState[currentSection].selected = choiceId;
+      renderSection();
+    }
+
+    function revealAnswer() {
+      const section = sections[currentSection];
+      if (section.type !== "choice" || !selectedChoice || revealShown) return;
+
+      revealShown = true;
+      sectionState[currentSection] = sectionState[currentSection] || {};
+      sectionState[currentSection].revealed = true;
+      sectionState[currentSection].selected = selectedChoice;
+
+      if (!sectionState[currentSection].counted) {
+        totalChoicesMade += 1;
+        if (selectedChoice === section.correctChoice) score += 1;
+        sectionState[currentSection].counted = true;
+      }
+
+      if (selectedChoice !== section.correctChoice) {
+        wrongTimeline = { sectionIndex: currentSection, choiceId: selectedChoice };
+      }
+      renderSection();
+    }
+
+    function goBackInTime() {
+      if (!wrongTimeline) return;
+      const sourceSection = sections[wrongTimeline.sectionIndex];
+      const sourceIndex = wrongTimeline.sectionIndex;
+
+      currentSection = sourceIndex;
+      sectionState[sourceIndex] = sectionState[sourceIndex] || {};
+      sectionState[sourceIndex].selected = sourceSection.correctChoice;
+      sectionState[sourceIndex].revealed = true;
+      wrongTimeline = null;
+      renderSection();
+    }
+
+    function nextSection() {
+      if (wrongTimeline) return;
+      if (currentSection === sections.length - 1) {
+        currentSection = 0;
+        selectedChoice = null;
+        revealShown = false;
+        score = 0;
+        totalChoicesMade = 0;
+        wrongTimeline = null;
+        Object.keys(sectionState).forEach(k => delete sectionState[k]);
+        renderSection();
+        return;
+      }
+      currentSection += 1;
+      selectedChoice = null;
+      revealShown = false;
+      renderSection();
+    }
+
+    function prevSection() {
+      if (wrongTimeline) return;
+      if (currentSection === 0) return;
+      currentSection -= 1;
+      selectedChoice = null;
+      revealShown = false;
+      renderSection();
+    }
+
+    backBtn.addEventListener("click", prevSection);
+    revealBtn.addEventListener("click", revealAnswer);
+    continueBtn.addEventListener("click", nextSection);
+
+    renderSection();
+  </script>
+</body>
+</html>
+

@@ -82,7 +82,20 @@
       font-weight: 600;
     }
 
-    .head-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.78rem; }
+    .head-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.78rem; flex-wrap: wrap; justify-content: flex-end; }
+    .header-reset {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font: 600 0.72rem/1 var(--font-body);
+      padding: 0.32rem 0.65rem;
+      min-height: 32px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .header-reset:hover { color: var(--text); border-color: var(--blue-border); background: var(--blue-dim); }
+    .header-reset:active { transform: translateY(1px) scale(0.99); }
     .score-badge {
       display: none;
       padding: 0.3rem 0.5rem;
@@ -529,16 +542,6 @@
     .score-blue { color: var(--blue); }
     .score-green { color: var(--green); }
 
-    .debrief {
-      background: var(--amber-dim);
-      border: 1px solid var(--amber-border);
-      border-radius: var(--radius);
-      padding: 0.9rem;
-      font-size: 0.84rem;
-      line-height: 1.6;
-      color: var(--text);
-    }
-
     .timeline-page {
       text-align: center;
       padding: 1.2rem 0.2rem;
@@ -560,6 +563,146 @@
       line-height: 1.65;
       font-size: 0.9rem;
     }
+    .wrong-path-split {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.85rem;
+      max-width: 920px;
+      margin: 0.35rem auto 0.9rem;
+      text-align: left;
+    }
+    .wrong-path-split .wrong-path-copy p {
+      margin: 0;
+      max-width: none;
+    }
+    .wrong-path-photo-wrap {
+      flex: 1 1 auto;
+      margin: 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg-deep);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+    }
+    .wrong-path-photo {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .choice-vignette-split {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .choice-vignette-split .narrative {
+      margin-bottom: 0;
+    }
+    .choice-vignette-image-wrap {
+      margin: 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .choice-vignette-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    @media (min-width: 768px) {
+      .wrong-path-split {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      .wrong-path-photo-wrap {
+        flex: 0 0 min(46%, 420px);
+      }
+      .wrong-path-copy {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .choice-vignette-split {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      .choice-vignette-copy {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .choice-vignette-image-wrap {
+        flex: 0 0 min(44%, 380px);
+      }
+    }
+
+    .assessment-intro-split {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .assessment-intro-text { flex: 1 1 auto; min-width: 0; }
+    .assessment-intro-text .narrative { margin-bottom: 0; }
+    .resus-monitor-wrap {
+      flex: 1 1 auto;
+      margin: 0;
+      border-radius: var(--radius);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      overflow: hidden;
+      background: #020910;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.12);
+    }
+    .resus-monitor {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    @media (min-width: 768px) {
+      .assessment-intro-split {
+        flex-direction: row;
+        align-items: stretch;
+      }
+      .resus-monitor-wrap {
+        flex: 0 0 min(44%, 380px);
+      }
+    }
+
+    .exam-split {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 1rem;
+      align-items: stretch;
+    }
+    .exam-photo-wrap {
+      margin: 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .exam-photo {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    @media (min-width: 768px) {
+      .exam-split {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+      .exam-list-card {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .exam-photo-wrap {
+        flex: 0 0 min(44%, 380px);
+      }
+    }
     .rewind-btn {
       width: auto;
       min-width: 220px;
@@ -570,7 +713,6 @@
       border-radius: var(--radius);
       font-weight: 700;
     }
-    .debrief b { display: block; color: var(--amber); margin-bottom: 0.4rem; font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; }
 
     @media (max-width: 900px) {
       .vitals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -620,7 +762,8 @@
     </div>
     <div class="head-right">
       <span id="score-badge" class="score-badge">0/8 correct</span>
-      <span id="progress-text">1 / 18</span>
+      <span id="progress-text">1 / 20</span>
+      <button type="button" id="reset-btn" class="header-reset" aria-label="Reset case to the start">Reset</button>
     </div>
   </header>
   <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
@@ -636,7 +779,7 @@
   </footer>
 
   <script>
-    const CHOICE_SECTIONS = [3, 5, 7, 9, 10, 11, 13, 15];
+    const CHOICE_SECTIONS = [4, 6, 8, 10, 11, 12, 14, 17];
     let currentSection = 0;
     let selectedChoice = null;
     let revealShown = false;
@@ -676,32 +819,53 @@
           c: "Triage"
         },
         correctChoice: "a",
-        correct: "A — Meet in resus",
+        correct: "A: Meet in resus",
         teaching: "BM 1.7 in a floppy neonate is an emergency. Resus gives priority to this unwell baby, prepares a team to start investigation and treatment in parrallel, and provides adequate space and resource if the patient deteriorates",
         danger: "Meeting in acute assessment or triage risks delayed handover, fragmented monitoring, and slower access to resuscitation equipment. In possible neonatal collapse the safest default is straight to resus with the team pre-alerted.",
         wrongOutcomes: {
           b: "The paramedics arrive in acute and Theo is put in bay 1. The unit is very busy and it takes a few minutes to get Theo booked in and for the ambulance to handover. By the time observations are done Theo is now completely unresponsive worht alarming observations",
           c: "The paramedics arrive to triage, unfortunately its 3am and there is no one in triage so after waiting a couple of minutes they come round to acute. By this time the baby is now completely unresponsive and you rush round to resus"
+        },
+        wrongOutcomeImages: {
+          b: {
+            src: "images/acute-assessment-corridor.png",
+            alt: "Hospital corridor with acute assessment bays and equipment staged along the walls"
+          },
+          c: {
+            src: "images/emergency-department-exterior.png",
+            alt: "Hospital emergency department exterior with separate children's and adults' entrances"
+          }
         }
       },
       {
         type: "assessment",
-        chapter: "RESUS BAY — 03:22",
+        chapter: "RESUS BAY: 03:22",
         title: "Primary Survey & Clinical Findings",
         narrative: "Theo arrives in resus. He is pale, jaundiced, floppy. Mum is distressed. You begin your assessment.",
         vitals: [
           ["HR", "178 /min", true], ["RR", "68 /min", true], ["SpO₂", "96% on air", false],
           ["Temp", "36.2°C", false], ["Cap refill", "3s", true], ["BM", "1.0 mmol/L", true]
-        ],
+        ]
+      },
+      {
+        type: "assessment-exam",
+        chapter: "RESUS BAY: 03:22",
+        title: "Primary Survey & Clinical Findings",
         exam: [
-          "Tone: globally reduced — weak cry, head lag",
+          "Tone: globally reduced; weak cry, head lag",
           "Jaundice: visible +2, scleral icterus present",
           "Fontanelle: flat (not bulging)",
           "Moving all limbs spontaneously but sluggish",
           "No dysmorphic features, no focal neurology",
-          "Abdomen: soft, no organomegaly detected"
+          "Abdomen: soft, no organomegaly detected",
+          "Femorals equal and good pulse",
+          "Skin pink, warm well perfused"
         ],
-        keyFlag: "⚠️ You note: no newborn bloodspot screening card in the hand-held notes. No Vitamin K documentation. No GP registration. Parents unsure of birth weight."
+        keyFlag: "⚠️ You note: no newborn bloodspot screening card in the hand-held notes. No Vitamin K documentation. No GP registration. Parents unsure of birth weight.",
+        examImage: {
+          src: "images/neonatal-examination.png",
+          alt: "Newborn infant being examined with a stethoscope in a hospital bassinet"
+        }
       },
       {
         type: "choice",
@@ -717,89 +881,146 @@
         correctChoice: "b",
         correct: "B includes work up for sepsis, including a gas, as well as screening for IEM",
         teaching: "A blood gas is not just a respiratory tool, in a sick neonate, it is your fastest, most information-dense investigation. Including ammonia must be requested explicitly and handled urgently",
-        danger: "Option A leaves you without a rapid bedside biochemical picture — in a peri-arrest neonate that can delay recognition of septic shock, marked acid–base disturbance, hyperkalaemia, and crises-level hypoglycaemia while you wait for lab turnaround. Option C rightly prioritises culture, but microbiology positivity takes hours to days — on its own this panel does not give you immediate targets for resuscitation and escalation in real time.",
-        keyFlag: "📞 Practical tip: Call the biochemistry lab before sending the sample. Warn them ammonia is coming — it needs to be spun and processed immediately. Plasma amino acids need a separate EDTA tube. Urine organic acids need the first catch — save everything.",
+        danger: "Option A leaves you without a rapid bedside biochemical picture; in a peri-arrest neonate that can delay recognition of septic shock, marked acid–base disturbance, hyperkalaemia, and crises-level hypoglycaemia while you wait for lab turnaround. Option C rightly prioritises culture, but microbiology positivity takes hours to days; on its own this panel does not give you immediate targets for resuscitation and escalation in real time.",
+        keyFlag: "📞 Practical tip: Call the biochemistry lab before sending the sample. Warn them ammonia is coming: it needs to be spun and processed immediately. Plasma amino acids need a separate EDTA tube. Urine organic acids need the first catch; save everything.",
         wrongOutcomes: {
           a: "A blood gas is not just a respiratory tool, in a sick neonate, it is your fastest, most information-dense investigation. Results are back in under 90 seconds from a single sample. Without it you could be left waiting a significant time for lab results. Time that you don't have",
-          c: "A blood culture is highly useful, however the result will take significant time to return and there are other results which could change the initial management now"
+          c: "A blood culture is important, and sepsis still needs treating, but it will not help you in the next few minutes. Cultures take hours to days to become positive. In a crashing neonate, you also need tests that change immediate management: a gas for acid-base status, glucose and electrolytes, and ammonia when metabolic disease is possible. Send cultures, but do not spend your limited blood only on tests that cannot guide the first resuscitation decisions."
+        },
+        wrongOutcomeImages: {
+          a: {
+            src: "images/blood-gas-printout.png",
+            alt: "Blood gas printout showing severe abnormalities"
+          },
+          c: {
+            src: "images/blood-culture-plate.png",
+            alt: "Blood agar culture plate showing bacterial colonies"
+          }
         }
       },
       {
         type: "vbg",
-        chapter: "03:31 — BLOOD GAS RESULT",
+        chapter: "03:31: BLOOD GAS RESULT",
         title: "The Blood Gas Returns",
         narrative: "The nurse hands you the VBG printout. You study the result. The numbers are worse than you expected."
       },
       {
         type: "choice",
-        chapter: "VIGNETTE 3",
+        chapter: "ACT 1",
         title: "Interpret the Blood Gas",
         narrative: "pH 7.04 | pCO₂ 1.9 kPa | HCO₃ 4 | BE −28 | Na 131 | Lactate 11.2 | <strong>Anion Gap: 29 mmol/L</strong>",
         question: "What is your primary interpretation?",
         choices: {
-          a: "Severe HAGMA — almost certainly neonatal sepsis; treat empirically and reassess",
-          b: "Severe HAGMA — consistent with IEM, sepsis, or both; treat both simultaneously",
-          c: "Respiratory acidosis — his primary problem is ventilatory failure, call anaesthetics urgently"
+          a: "Severe raised AG metabolic acidosis almost certainly sepsis; treat with antibiotics first",
+          b: "Severe raised AG metabolic acidosis; consider all causes and treat simultaneously",
+          c: "Respiratory failure - call anaethetics urgently for I+V"
         },
         correctChoice: "b",
-        correct: "B — Severe high-anion-gap metabolic acidosis with possible concurrent IEM and/or sepsis",
-        teaching: "The pCO₂ of 1.9 kPa is NOT respiratory failure — it is Kussmaul breathing. He is maximally hyperventilating to compensate for catastrophic metabolic acidosis. The primary problem is metabolic, not respiratory. An anion gap of 29 mmol/L (normal <12) means a massive unmeasured anion — organic acids, lactate, or ketoacids — is accumulating. This is IEM territory until proven otherwise.",
-        danger: "Option C is a critical error. The low pCO₂ is compensatory hyperventilation — intubating this child (and raising their pCO₂ to 'normal') would remove their only compensatory mechanism and cause rapid cardiovascular collapse. Ventilation should be avoided unless airway protection is absolutely necessary.",
-        keyFlag: "📖 Rule: In any encephalopathic neonate with HAGMA — treat for sepsis AND investigate for IEM simultaneously. They are not mutually exclusive diagnoses. Sepsis can trigger IEM decompensation and vice versa."
+        correct: "B: Severe raised anion-gap metabolic acidosis; treat sepsis and investigate/treat other causes in parallel",
+        teaching: "The pCO₂ of 1.9 kPa is NOT isolated respiratory failure: it is maximal respiratory compensation (Kussmaul breathing) for a catastrophic metabolic acidosis. The primary problem is metabolic, not ventilatory failure. An anion gap of 29 mmol/L (normal <12) means a large unmeasured anion burden (e.g. lactate, ketoacids, renal failure anions); your management must address the acidosis and its drivers while keeping sepsis and other time-critical diagnoses in play.",
+        danger: "Option C is a critical error. The low pCO₂ reflects compensatory hyperventilation; routine intubation to 'fix ventilation' can remove compensation and precipitate rapid deterioration unless airway protection is truly required. Option A risks anchoring on sepsis alone and under-treating other immediately dangerous contributors while the gas picture is still evolving.",
+        keyFlag: "📖 Rule: In any encephalopathic neonate with HAGMA, treat for sepsis AND investigate for IEM simultaneously. They are not mutually exclusive diagnoses. Sepsis can trigger IEM decompensation and vice versa.",
+        wrongOutcomes: {
+          a: "Sepsis treatment is essential, but anchoring on sepsis first creates a dangerous delay. This gas shows a severe raised anion-gap metabolic acidosis, profound bicarbonate depletion, hypoglycaemia, and high lactate. Those abnormalities need immediate parallel action: correct glucose, support circulation, escalate early, and keep metabolic and toxic causes in play while antibiotics are given. If you wait to see whether sepsis treatment works before widening the differential, Theo can deteriorate further while the underlying driver remains untreated.",
+          c: "The low pCO₂ is not the problem: it is Theo's compensation. He is blowing off CO₂ to keep the pH barely compatible with life. If you intubate and ventilate him without matching that very high minute ventilation, the CO₂ rises quickly, the pH falls further, and cardiovascular collapse can follow. Airway support may still be needed if he cannot protect his airway, but intubation must be planned as part of metabolic resuscitation, with senior help and ventilation targets that preserve compensation."
+        },
+        wrongOutcomeImages: {
+          a: {
+            src: "images/ceftriaxone-package.png",
+            alt: "Ceftriaxone injection packaging with vial and sodium chloride diluent ampoule"
+          },
+          c: {
+            src: "images/neonatal-intubation.png",
+            alt: "Clinician intubating a neonate during resuscitation"
+          }
+        }
       },
       { type: "divider", chapter: "THE MOST DANGEROUS MINUTE", title: "Three Questions. 60 Seconds." },
       {
         type: "choice",
-        chapter: "DECISION 1 — FLUIDS",
+        chapter: "DECISION 1: FLUIDS",
         title: "Fluid Management",
-        narrative: "<strong>'Doctor, what fluids do you want?'</strong> Theo's BM is 1.0 mmol/L. He is hypotonic with HR 178 and cap refill of 3 seconds.",
+        narrative: "<strong>'Doctor, what fluids do you want?'</strong> Theo's BM is 1.0 mmol/L. He is hypotensive with HR 178 and cap refill of 3 seconds.",
         question: "What do you prescribe?",
         choices: {
-          a: "0.9% NaCl 10ml/kg bolus — address the circulatory compromise first",
-          b: "2ml/kg of 10% dextrose IV bolus, then 10% dextrose maintenance at 1.5× the normal rate for weight",
-          c: "Wait for the metabolic team to advise before starting any fluids — you might make it worse"
+          a: "0.9% NaCl 5ml/kg bolus first followed by dextrose bolus",
+          b: "10% dextrose 2ml/kg IV bolus followed by 0.9% saline bolus",
+          c: "Call SORT and ask for their advice before proceeding"
         },
         correctChoice: "b",
-        correct: "B — 10% dextrose bolus + high-rate dextrose maintenance",
-        teaching: "The single most important acute intervention in IEM decompensation is stopping catabolism by providing a glucose infusion rate (GIR) of 8–10mg/kg/min. This suppresses endogenous protein breakdown, reducing further organic acid and ammonia production. Even once glucose normalises, maintain the high-dextrose infusion — the goal is anabolic suppression, not just glycaemia correction. GIR formula: [rate (ml/hr) × dextrose% × 10] ÷ [weight(kg) × 6] = mg/kg/min.",
-        danger: "Option A provides volume but no substrate — insufficient for the metabolic crisis. If there is haemodynamic shock, a saline bolus is acceptable, but the dextrose load must follow immediately. Option C — waiting for metabolics before starting fluids — is dangerous. This treatment is time-critical.",
-        keyFlag: "⚡ GIR target: 8–10 mg/kg/min. For a 3.5kg neonate on 10% dextrose at 1.5× maintenance (~15ml/hr): GIR = [15 × 10 × 10] ÷ [3.5 × 6] = 7.1 mg/kg/min. Increase rate or dextrose concentration as needed."
+        correct: "B: 10% dextrose 2ml/kg IV bolus, then a saline bolus if still shocked",
+        teaching: "Theo has two immediate problems that may have different causes: a dangerously low glucose and signs of poor perfusion. Sepsis, dehydration, cardiac disease, adrenal problems, seizures, and metabolic disease can all sit in the differential, but the first minutes are about treating what you can see. Give dextrose to protect the brain, then reassess circulation and give isotonic saline if he remains hypotensive or poorly perfused.",
+        danger: "Do not let one diagnosis or one treatment crowd out the others. A saline bolus alone does not correct hypoglycaemia. Dextrose alone may not be enough if the child is truly shocked. The safest approach is parallel resuscitation: correct glucose, support circulation, call for senior help, and keep reassessing as new information arrives.",
+        wrongOutcomes: {
+          a: "A saline bolus first is not automatically wrong: if Theo is shocked or peri-arrest, circulation has to be supported immediately and a cautious 0.9% sodium chloride bolus is appropriate. The key is not to let volume resuscitation delay glucose. In this scenario the blood glucose is critically low, so if he is not collapsed or in severe shock, giving 10% dextrose first is often the better first move, followed by reassessment and saline if perfusion remains poor.",
+          c: "Calling SORT is absolutely appropriate, but it must happen in parallel with treatment, not before treatment. Theo is hypoglycaemic and clinically unstable now. Waiting on the phone delays the two interventions already in your hands: giving 10% dextrose and supporting circulation. Make the call, but allocate someone else to do it while you start resuscitation."
+        },
+        wrongOutcomeImages: {
+          a: {
+            src: "images/saline-bolus.png",
+            alt: "0.9% sodium chloride infusion connected to an intravenous access device"
+          },
+          c: {
+            src: "images/sort-ambulance-team.png",
+            alt: "Southampton Oxford Retrieval Team standing beside an emergency ambulance"
+          }
+        }
       },
       {
         type: "choice",
-        chapter: "DECISION 2 — FEEDS",
+        chapter: "DECISION 2: FEEDS",
         title: "The Feed Question",
         narrative: "<strong>Mum steps forward: 'Can I breastfeed him? It might settle him. He loves his feeds.'</strong> She looks exhausted and frightened. Everyone in the room is watching you.",
         question: "What do you say?",
         choices: {
-          a: "Yes — breast milk provides comfort and nutrients, no harm in trying whilst you wait",
-          b: "Let him have a small amount whilst the results come back — just enough to settle him",
-          c: "Stop all feeds now — explain gently that you need the results first before it is safe to give him anything"
+          a: "Yes: breast milk provides comfort and nutrients, no harm in trying whilst you wait",
+          b: "Let him have a small amount whilst the results come back: just enough to settle him",
+          c: "Stop all feeds now: explain gently that you need the results first before it is safe to give him anything"
         },
         correctChoice: "c",
-        correct: "C — Stop all feeds immediately",
-        teaching: "This is the most dangerous trap in the entire case. Breast milk contains BOTH protein and galactose. In urea cycle defects, protein drives ammonia production — a single large feed can tip a borderline child into cerebral oedema. In galactosaemia, galactose in breast milk is directly hepatotoxic and neurotoxic. You do not yet have a diagnosis. Until you do, nothing enters the gut. This is a hard conversation to have with a distressed mother, but it is one of the most important.",
-        danger: "Options A and B are both potentially lethal. There is no clinically 'safe small amount' when IEM is suspected. The guilt and difficulty of this conversation does not outweigh the risk of feeding.",
-        keyFlag: "🧱 THE THREE PILLARS OF ACUTE IEM MANAGEMENT: (1) STOP ALL FEEDS → (2) PROVIDE HIGH-RATE DEXTROSE → (3) CALL THE METABOLIC TEAM. These three actions, done simultaneously, are the foundation of acute stabilisation for any suspected IEM."
+        correct: "C: Stop all feeds immediately",
+        teaching: "A floppy, acidotic, hypoglycaemic neonate is not safe to feed until you understand what is driving the collapse. In sepsis, gut perfusion may be poor and feeds increase aspiration risk. If the baby is tiring or encephalopathic, they may not protect their airway. If they are using very fast breathing to blow off CO₂ and compensate for severe acidosis, feeding can interrupt that work of breathing and tip them into deterioration. Some metabolic conditions can also be worsened by protein or sugar substrates in milk. Comfort matters, but at this point safety means nil by mouth, IV glucose, and a clear explanation to mum.",
+        danger: "Feeding is not just a metabolic risk. If Theo is septic or poorly perfused, milk in the gut can increase vomiting and aspiration risk, and a tiring baby can lose their airway while feeding. If the differential includes seizures or encephalopathy, sucking and swallowing may be unsafe. There is no useful 'small test feed' in a collapsing neonate.",
+        keyFlag: "🔑 KEY FLAG: In any sick neonate with altered consciousness, respiratory compensation, shock, or hypoglycaemia, stop enteral feeds until airway, breathing, circulation, and glucose are stabilised. Reassess feeding only once the immediate cause is clearer.",
+        wrongOutcomeImages: {
+          a: {
+            src: "images/breastfeeding.png",
+            alt: "Mother breastfeeding an infant"
+          },
+          b: {
+            src: "images/breastfeeding.png",
+            alt: "Mother breastfeeding an infant"
+          }
+        }
       },
       {
         type: "choice",
-        chapter: "DECISION 3 — ANTIBIOTICS",
+        chapter: "DECISION 3: ANTIBIOTICS",
         title: "Empirical Antibiotics",
         narrative: "<strong>'Do you want to prescribe antibiotics?'</strong> asks the junior doctor. The blood culture is in. The CRP is pending. The sepsis screen is running.",
         question: "Do you give empirical antibiotics?",
         choices: {
-          a: "Yes — treat empirically for neonatal sepsis alongside the metabolic workup. Benzylpenicillin + gentamicin per local protocol",
-          b: "No — the clinical picture is overwhelmingly metabolic, this is not sepsis",
+          a: "Yes, treat empirically for neonatal espsis along side other treatments with cefotaxime and amoxicillin",
+          b: "No, the picture is OBVIOUSLY metabolic, this isnt sepsis and they dont even have a fever",
           c: "Wait for the CRP and WBC results before committing to antibiotics"
         },
         correctChoice: "a",
-        correct: "A — Yes, give antibiotics immediately",
-        teaching: "IEM and sepsis are not mutually exclusive — they frequently coexist, and each can trigger the other. You cannot clinically distinguish them at this stage. Any sick neonate requires empirical antimicrobials under the neonatal sepsis bundle. Critically: galactosaemia specifically predisposes to E. coli septicaemia — a well-described association that makes antibiotics doubly important if galactosaemia is in the differential.",
-        danger: "Options B and C are both dangerous. CRP is a late inflammatory marker — it will be unhelpful within the first 12 hours and must never be used to gate antibiotic prescribing in an unwell neonate. The decision to treat is clinical.",
-        keyFlag: "⏱ Antibiotic prescribing in neonatal sepsis follows the 1-hour bundle. In a sick neonate the decision is clinical — do not wait for inflammatory markers. Document your clinical reasoning and review the culture results at 36–48 hours."
+        correct: "A: Yes, give antibiotics immediately",
+        teaching: "Sepsis is a differential in any systemically unwell neonate, even when another diagnosis also seems likely. It is not mutually exclusive with other conditions and can trigger or worsen decompensation, so empirical antibiotics should be considered in any very unwell newborn and only withheld with a clear, defensible reason.",
+        danger: "Options B and C are both dangerous. CRP is a late inflammatory marker; it will be unhelpful within the first 12 hours and must never be used to gate antibiotic prescribing in an unwell neonate. The decision to treat is clinical.",
+        keyFlag: "🔑 KEY FLAG: In neonates, absence of fever does not rule out sepsis. Take cultures before antibiotics if this does not delay treatment, document the indication, and build in a 36–48 hour review once cultures and the clinical trajectory are clearer.",
+        wrongOutcomes: {
+          b: "Neonatal sepsis can present without fever, and a normal or low temperature can be just as concerning in a sick newborn. Theo is floppy, not feeding, hypoglycaemic, acidotic, and clinically unstable; that is enough to cover sepsis immediately while you investigate other causes in parallel.",
+          c: "CRP and WBC can be normal early in neonatal sepsis, so waiting for them can delay antibiotics in a baby who is already clinically unwell. Send the tests, but the decision to treat is clinical and should happen now."
+        },
+        wrongOutcomeImages: {
+          c: {
+            src: "images/blood-results-tube.png",
+            alt: "Blood sample tube and blood film slide on laboratory results"
+          }
+        }
       },
-      { type: "ammonia", chapter: "03:47 — THE BIOCHEMISTRY LAB CALLS", title: "The Ammonia Result" },
+      { type: "ammonia", chapter: "03:47: THE BIOCHEMISTRY LAB CALLS", title: "The Ammonia Result" },
       {
         type: "choice",
         chapter: "VIGNETTE 5",
@@ -807,33 +1028,62 @@
         narrative: "Ammonia 412 µmol/L (normal <50). pH 7.04, severe HAGMA, anion gap 29. Lactate 11.2. Glucose 1.0. <strong>What category of inborn error of metabolism best fits this clinical picture?</strong>",
         question: "Your most likely diagnosis category is:",
         choices: {
-          a: "Urea Cycle Defect — e.g. OTC deficiency, citrullinaemia, argininosuccinic aciduria",
-          b: "Organic Acidaemia — e.g. propionic acidaemia, methylmalonic acidaemia, isovaleric acidaemia",
-          c: "MCADD — medium-chain acyl-CoA dehydrogenase deficiency"
+          a: "Urea Cycle Defect: e.g. OTC deficiency, citrullinaemia, argininosuccinic aciduria",
+          b: "Organic Acidaemia: e.g. propionic acidaemia, methylmalonic acidaemia, isovaleric acidaemia",
+          c: "MCADD: medium-chain acyl-CoA dehydrogenase deficiency"
         },
         correctChoice: "b",
-        correct: "B — Organic Acidaemia (most likely propionic or methylmalonic acidaemia)",
-        teaching: "The discriminator is the metabolic acidosis. Urea cycle defects cause hyperammonaemia but classically present with NORMAL pH or RESPIRATORY ALKALOSIS — the ammonia drives hyperventilation without generating a primary acidosis. The severe HAGMA in Theo's picture is produced by accumulated organic acids. The additional features — elevated lactate, neutropenia on FBC (check it), and hypoglycaemia — are characteristic of organic acidaemia. Propionic acidaemia and methylmalonic acidaemia are the two most common severe organic acidaemias presenting in the newborn period.",
-        danger: "Option A (UCD) is the most common wrong answer at the bedside. The single differentiating question: Is there a metabolic acidosis? UCD = no acidosis. OA = severe acidosis. Option C (MCADD) causes hypoketotic hypoglycaemia — it does not cause hyperammonaemia or acidosis of this severity.",
-        keyFlag: "🔬 See the comparison table on the next screen. This discriminating table is the most important single concept for acute IEM management — learn it."
+        correct: "B: Organic Acidaemia (most likely propionic or methylmalonic acidaemia)",
+        teaching: "The key clue is the severe metabolic acidosis. Urea cycle defects mainly cause ammonia to rise, but they usually do not cause a very low bicarbonate or a high anion gap. Theo has pH 7.04, bicarbonate 4, base excess minus 28, anion gap 29, lactate 11.2 and hypoglycaemia. That means acids are accumulating in the blood. This pattern fits an organic acidaemia much better than a primary urea cycle defect or MCADD.",
+        danger: "The management danger is treating this as a single-label diagnosis. If you assume this is only sepsis, only a urea cycle defect, or only hypoglycaemia, you can miss parallel actions that need to happen now: stop feeds, give glucose, treat possible sepsis, send metabolic samples, call metabolic/PICU support, and escalate ammonia management if it keeps rising.",
+        keyFlag: "🔬 See the comparison table on the next screen. This discriminating table is the most important single concept for acute IEM management; learn it.",
+        wrongOutcomes: {
+          a: "A urea cycle defect is a very reasonable thought when you see a neonate with a high ammonia, but it does not best explain this whole gas. Primary urea cycle defects impair ammonia disposal, so ammonia rises, often very high, but they do not usually generate a severe primary metabolic acidosis; early gases are often normal pH or respiratory alkalosis because ammonia stimulates hyperventilation. Theo has pH 7.04, bicarbonate 4, base excess −28, anion gap 29, high lactate, and hypoglycaemia. That pattern means a large acid burden is present, which points much more strongly toward an organic acidaemia such as propionic or methylmalonic acidaemia. Organic acids can also secondarily inhibit ammonia handling, so hyperammonaemia plus severe raised anion-gap acidosis should make you think organic acidaemia first.",
+          c: "MCADD is a fatty-acid oxidation disorder and is an important cause of hypoketotic hypoglycaemia, usually triggered by fasting or intercurrent illness. It can cause lethargy, seizures, liver dysfunction, and sudden collapse, but the classic biochemical pattern is low glucose with inappropriately low ketones, not a profound raised anion-gap metabolic acidosis. Mild acidosis or lactate rise can occur during severe decompensation, but Theo's pH 7.04, bicarbonate 4, base excess −28, anion gap 29, lactate 11.2, and ammonia 412 are much more typical of accumulated organic acids. MCADD is still on a neonatal collapse differential, but it does not best explain the combination of severe acidosis plus hyperammonaemia here."
+        },
+        wrongOutcomeImages: {
+          a: {
+            src: "images/urea-cycle-diagram.png",
+            alt: "Diagram of the urea cycle showing ammonia conversion through carbamoyl phosphate, citrulline, argininosuccinate, arginine and urea"
+          },
+          c: {
+            src: "images/mcad-fatty-acid-oxidation.png",
+            alt: "Diagram of fatty acid oxidation showing an MCAD enzyme defect in the mitochondrion"
+          }
+        }
       },
-      { type: "comparison", chapter: "TEACHING — IEM DISCRIMINATORS", title: "Urea Cycle Defect vs Organic Acidaemia" },
+      { type: "comparison", chapter: "TEACHING: IEM DISCRIMINATORS", title: "Urea Cycle Defect vs Organic Acidaemia" },
+      {
+        type: "treatment-commonalities",
+        chapter: "ACUTE TREATMENT",
+        title: "What Both Pathways Need"
+      },
       {
         type: "choice",
-        chapter: "VIGNETTE 6 — ESCALATION",
+        chapter: "VIGNETTE 6: ESCALATION",
         title: "Haemofiltration Decision",
-        narrative: "Repeat ammonia 30 minutes later: <strong>480 µmol/L — rising despite dextrose infusion and feeds stopped.</strong> Theo is now obtunded, responding only to pain. Tone is almost absent. PICU is on the phone.",
+        narrative: "Repeat ammonia 30 minutes later: <strong>480 µmol/L - rising despite dextrose infusion and feeds stopped.</strong> Theo is now obtunded, responding only to pain. Tone is almost absent. Dr Nurse is on the phone and asks you a question, your reputation relies on the answer.",
+        narrativeImage: {
+          src: "images/haemofiltration-decision.png",
+          alt: "Fatty acid oxidation diagram displayed during escalation teaching"
+        },
         question: "At what ammonia threshold do you advocate for haemofiltration/continuous renal replacement therapy?",
         choices: {
-          a: "Ammonia >150 µmol/L — dialyse early and aggressively at every case",
+          a: "Ammonia >150 µmol/L: dialyse early and aggressively at every case",
           b: "Ammonia >350 µmol/L unresponsive to medical treatment, or >500 µmol/L regardless of response, or rapid rise with clinical deterioration",
-          c: "Wait until the metabolic consultant advises — this is their decision, not yours"
+          c: "Suggest he calls the Evelina"
         },
         correctChoice: "b",
-        correct: "B — >350 µmol/L unresponsive to medical treatment or >500 µmol/L regardless",
-        teaching: "Haemofiltration (CRRT) is the most effective method of rapidly reducing ammonia — far faster than any drug alone. At ammonia levels above 350–500 µmol/L, cerebral oedema and permanent neurological injury become likely without rapid clearance. This is a time-critical PICU transfer. Medical treatment (dextrose, N-carbamylglutamate, sodium benzoate, arginine) continues alongside CRRT — it is not either/or.",
-        danger: "Option C — waiting for the metabolic consultant before initiating the escalation conversation — costs time and brain cells. You should be calling PICU and the metabolic team in parallel. The metabolic consultant guides drug therapy and long-term management; the immediate PICU escalation decision is yours.",
-        keyFlag: "☎️ The BIMDG (British Inherited Metabolic Disease Group) provides 24/7 emergency guidance at bimdg.org.uk. The NPIS (National Poisons Information Service) also supports IEM queries: 0344 892 0111. The on-call metabolic consultant expects your call at 3am — do not hesitate."
+        correct: "B: >350 µmol/L unresponsive to medical treatment or >500 µmol/L regardless",
+        teaching: "Haemofiltration (CRRT) is the most effective method of rapidly reducing ammonia. It works far faster than medication alone. At ammonia levels above 350 to 500 µmol/L, cerebral oedema and permanent neurological injury become likely without rapid clearance. This is a time-critical PICU transfer. Medical treatment continues alongside CRRT. It is not either/or.",
+        danger: "Option C delays the escalation conversation. You should be calling PICU, retrieval and the metabolic team in parallel rather than passing the decision elsewhere. The longer ammonia remains high, the greater the risk of cerebral oedema, seizures and permanent neurological injury.",
+        keyFlag: "☎️ The BIMDG (British Inherited Metabolic Disease Group) provides 24/7 emergency guidance at bimdg.org.uk. NPIS also supports IEM queries: 0344 892 0111. The on-call metabolic consultant expects your call at 3am, so do not hesitate.",
+        wrongOutcomeImages: {
+          c: {
+            src: "images/haemofiltration-wrong-evelina.png",
+            alt: "Clinician in a blue shirt with an NHS-style lanyard, smiling; used here to represent senior telephone advice while you coordinate local escalation"
+          }
+        }
       },
       { type: "resources", chapter: "CLINICAL RESOURCES", title: "Tools for the Real 3am" },
       { type: "end", chapter: "THE RESOLUTION", title: "What Happened to Theo" }
@@ -848,6 +1098,7 @@
     const backBtn = document.getElementById("back-btn");
     const revealBtn = document.getElementById("reveal-btn");
     const continueBtn = document.getElementById("continue-btn");
+    const resetBtn = document.getElementById("reset-btn");
 
     function renderSection() {
       const section = sections[currentSection];
@@ -891,10 +1142,12 @@
         case "info": return renderInfo(section);
         case "choice": return renderChoice(section);
         case "assessment": return renderAssessment(section);
+        case "assessment-exam": return renderAssessmentExam(section);
         case "vbg": return renderVbg(section);
         case "divider": return renderDivider(section);
         case "ammonia": return renderAmmonia(section);
         case "comparison": return renderComparison(section);
+        case "treatment-commonalities": return renderTreatmentCommonalities(section);
         case "resources": return renderResources(section);
         case "end": return renderEnd(section);
         default: return "<p>Unknown section</p>";
@@ -905,6 +1158,13 @@
       const source = sections[wrongTimeline.sectionIndex];
       const pickedText = source.choices[wrongTimeline.choiceId];
       const briefConsequence = (source.wrongOutcomes && source.wrongOutcomes[wrongTimeline.choiceId]) || source.danger || "Theo deteriorates quickly and the team loses critical time before the correct pathway is started.";
+      const imgMeta = source.wrongOutcomeImages && source.wrongOutcomeImages[wrongTimeline.choiceId];
+      const imgHtml = imgMeta
+        ? `<figure class="wrong-path-photo-wrap"><img class="wrong-path-photo" src="${imgMeta.src}" alt="${imgMeta.alt}" loading="lazy" decoding="async"></figure>`
+        : "";
+      const bodyHtml = imgHtml
+        ? `<div class="wrong-path-split">${imgHtml}<div class="wrong-path-copy"><p>${briefConsequence}</p></div></div>`
+        : `<p>${briefConsequence}</p>`;
       return `
         <section class="timeline-page">
           <div class="timeline-emoji" aria-hidden="true">⏳</div>
@@ -914,7 +1174,7 @@
             <div class="label">Chosen path</div>
             ${pickedText}
           </div>
-          <p>${briefConsequence}</p>
+          ${bodyHtml}
           <button id="rewind-btn" class="rewind-btn" aria-label="Go back in time to correct path">↩ Go back in time</button>
         </section>`;
     }
@@ -942,7 +1202,7 @@
               <li>Correct path and teaching points will appear</li>
               <li>Click Continue to advance the case</li>
             </ol>
-            <p>💡 Best played in groups of 3–5. Wrong-answer paths contain the most teaching — embrace them.</p>
+            <p>💡 Best played in groups of 3–5. Wrong-answer paths contain the most teaching; embrace them.</p>
           </div>
         </div>`);
     }
@@ -991,9 +1251,12 @@
         const badge = isCorrect ? '<span class="result-badge">✓ Correct</span>' : (isWrong ? '<span class="result-badge">✗ Wrong</span>' : "");
         return `<button class="${klass}" data-choice="${id}" ${disabled} aria-label="Select option ${letters[id]}"><span class="letter">${letters[id]}</span><span class="choice-text">${txt}</span>${badge}</button>`;
       }).join("");
+      const narrativeHtml = s.narrativeImage
+        ? `<div class="choice-vignette-split"><div class="choice-vignette-copy"><div class="narrative">${s.narrative}</div></div><figure class="choice-vignette-image-wrap"><img class="choice-vignette-image" src="${s.narrativeImage.src}" alt="${s.narrativeImage.alt}" loading="lazy" decoding="async"></figure></div>`
+        : `<div class="narrative">${s.narrative}</div>`;
 
       return frame(s, `
-        <div class="narrative">${s.narrative}</div>
+        ${narrativeHtml}
         <div class="question">${s.question}</div>
         <div class="choices">${choicesHtml}</div>
         <div class="reveal ${revealShown ? "show" : ""}">
@@ -1008,11 +1271,28 @@
 
     function renderAssessment(s) {
       return frame(s, `
-        <div class="narrative">${s.narrative}</div>
+        <div class="assessment-intro-split">
+          <div class="assessment-intro-text">
+            <div class="narrative">${s.narrative}</div>
+          </div>
+          <figure class="resus-monitor-wrap">
+            <img class="resus-monitor" src="images/resus-monitor.png" alt="Bedside monitor displaying waveforms and numerical vital signs in a resuscitation bay" loading="lazy" decoding="async">
+          </figure>
+        </div>
         <div class="vitals-grid">
           ${s.vitals.map(([k, v, abnormal]) => `<div class="vital-card ${abnormal ? "abnormal" : ""}"><div class="vital-label">${k}</div><div class="vital-value">${v}</div></div>`).join("")}
+        </div>`);
+    }
+
+    function renderAssessmentExam(s) {
+      const fig = s.examImage
+        ? `<figure class="exam-photo-wrap"><img class="exam-photo" src="${s.examImage.src}" alt="${s.examImage.alt}" loading="lazy" decoding="async"></figure>`
+        : "";
+      return frame(s, `
+        <div class="exam-split">
+          <div class="card exam-list-card"><h3 style="margin:0 0 .4rem;color:var(--blue);font-size:0.78rem;letter-spacing:.11em;text-transform:uppercase;">Examination</h3><ul style="margin:0;padding-left:1.1rem;color:var(--text-muted);font-size:0.86rem;line-height:1.7;">${s.exam.map(i => `<li>${i}</li>`).join("")}</ul></div>
+          ${fig}
         </div>
-        <div class="card"><h3 style="margin:0 0 .4rem;color:var(--blue);font-size:0.78rem;letter-spacing:.11em;text-transform:uppercase;">Examination</h3><ul style="margin:0;padding-left:1.1rem;color:var(--text-muted);font-size:0.86rem;line-height:1.7;">${s.exam.map(i => `<li>${i}</li>`).join("")}</ul></div>
         <div class="box flag"><div class="label">KEY FLAG</div>${s.keyFlag}</div>`);
     }
 
@@ -1020,7 +1300,7 @@
       return frame(s, `
         <div class="narrative">${s.narrative}</div>
         <div class="vbg">
-          <div class="vbg-head">VENOUS BLOOD GAS — 03:31 | THEO, DOB [12 days ago]</div>
+          <div class="vbg-head">VENOUS BLOOD GAS | 03:31 | THEO, DOB [12 days ago]</div>
           <div class="vbg-grid">
             <div class="vbg-row"><span class="vbg-key">pH</span><span class="vbg-value val-red">7.04</span></div>
             <div class="vbg-row"><span class="vbg-key">Na</span><span class="vbg-value val-amber">131 mmol/L</span></div>
@@ -1038,7 +1318,7 @@
             *Cl assumed 98 mmol/L pending formal U&amp;E
           </div>
         </div>
-        <div class="box teaching"><div class="label">TEACHING POINT</div>pCO₂ 1.9 kPa = maximal respiratory compensation (Kussmaul breathing) — this child is fighting to stay alive.</div>`);
+        <div class="box teaching"><div class="label">TEACHING POINT</div>pCO₂ 1.9 kPa = maximal respiratory compensation (Kussmaul breathing); this child is fighting to stay alive.</div>`);
     }
 
     function renderDivider(s) {
@@ -1047,7 +1327,7 @@
           <div class="divider-emoji">⚡</div>
           <div class="chapter-label">${s.chapter}</div>
           <h3 class="divider-title">${s.title}</h3>
-          <p class="divider-desc">The nurse turns to you. Three questions in quick succession. Your answers in the next 60 seconds could save Theo — or make things catastrophically worse.</p>
+          <p class="divider-desc">The nurse turns to you. Three questions in quick succession. Your answers in the next 60 seconds could save Theo, or make things catastrophically worse.</p>
           <div class="pill-row"><span class="pill">💧 FLUIDS</span><span class="pill">🍼 FEEDS</span><span class="pill">💊 ANTIBIOTICS</span></div>
         </div>`);
     }
@@ -1064,7 +1344,7 @@
         <div class="detail-grid">
           <div class="box danger"><div class="label">CONTEXT</div>412 µmol/L = 8× the upper limit of normal</div>
           <div class="box teaching"><div class="label">RISK</div>At this level: risk of cerebral oedema, raised ICP, and seizures</div>
-          <div class="box flag" style="grid-column:1/-1;"><div class="label">NEXT</div>This result changes everything. You need a diagnosis — fast.</div>
+          <div class="box flag" style="grid-column:1/-1;"><div class="label">NEXT</div>This result changes everything. You need a diagnosis, fast.</div>
         </div>`);
     }
 
@@ -1086,15 +1366,49 @@
           </table>
         </div>
         <div class="box correct"><div class="label">THEO'S PICTURE</div>pH 7.04 (severe acidosis) | HAGMA | AG 29 | Lactate 11.2 | Glucose 1.0 | Onset day 10–14 → Consistent with ORGANIC ACIDAEMIA</div>
-        <div class="box teaching"><div class="label">TEACHING POINT</div>Most likely specific diagnoses: propionic acidaemia (PA) or methylmalonic acidaemia (MMA). Plasma amino acids (↑ glycine) and urine organic acids will differentiate. Do NOT wait for this result — treatment is the same acutely.</div>`);
+        <div class="box teaching"><div class="label">TEACHING POINT</div>Most likely specific diagnoses: propionic acidaemia (PA) or methylmalonic acidaemia (MMA). Plasma amino acids (↑ glycine) and urine organic acids will differentiate. Do NOT wait for this result: treatment is the same acutely.</div>`);
+    }
+
+    function renderTreatmentCommonalities(s) {
+      return frame(s, `
+        <div class="box teaching">
+          <div class="label">IMPORTANT DIFFERENCE</div>
+          Organic acidaemia often needs correction of severe acidaemia, including bicarbonate when clinically indicated. Urea cycle defects usually focus more directly on ammonia removal. Be more cautious with ammonia scavengers in organic acidaemia and use metabolic specialist advice, because the priority is not identical across the two pathways.
+        </div>
+        <div class="narrative">
+          Urea cycle defects and organic acidaemias have different biochemistry, but the first emergency moves overlap. You do not need the final diagnosis before starting these stabilising steps.
+        </div>
+        <div class="resource-grid">
+          <div class="resource-card amber">
+            <div>🥛</div>
+            <h4>Stop protein intake</h4>
+            Stop enteral protein while the baby is unstable. Protein breakdown and protein intake can worsen nitrogen load and ammonia generation.
+          </div>
+          <div class="resource-card blue">
+            <div>🍬</div>
+            <h4>High caloric intake with IV glucose</h4>
+            Give glucose to reduce catabolism and provide an alternative energy source. The aim is to stop the body breaking down its own protein stores.
+          </div>
+          <div class="resource-card green">
+            <div>🧪</div>
+            <h4>Ammonia scavengers</h4>
+            If ammonia is significantly raised, specialist teams may start scavengers such as sodium benzoate or related agents to help remove nitrogen.
+          </div>
+          <div class="resource-card amber">
+            <div>🩸</div>
+            <h4>Dialysis</h4>
+            When ammonia is very high, rising, or not responding quickly, dialysis or haemofiltration is the fastest way to remove it and protect the brain.
+          </div>
+        </div>
+        <div class="box flag"><div class="label">KEY FLAG</div>Diagnosis-specific drugs matter, but early stabilisation is shared: stop protein, give glucose, reduce ammonia, and escalate early.</div>`);
     }
 
     function renderResources(s) {
       return frame(s, `
         <div class="resource-grid">
-          <div class="resource-card blue"><div>🌐</div><h4>BIMDG Emergency Protocols</h4>bimdg.org.uk — Free emergency protocols for all major IEMs. Print one tonight. Available 24/7.</div>
-          <div class="resource-card amber"><div>☎️</div><h4>NPIS — Poisons Information</h4>0344 892 0111 — 24/7 specialist support for metabolic emergencies and toxic ingestions. IEM queries accepted.</div>
-          <div class="resource-card blue"><div>📋</div><h4>Three Pillars — Aide Memoire</h4>1. STOP FEEDS  2. HIGH-RATE DEXTROSE  3. CALL METABOLIC TEAM — in any suspected IEM, these three actions save lives.</div>
+          <div class="resource-card blue"><div>🌐</div><h4>BIMDG Emergency Protocols</h4>bimdg.org.uk: free emergency protocols for all major IEMs. Print one tonight. Available 24/7.</div>
+          <div class="resource-card amber"><div>☎️</div><h4>NPIS: Poisons Information</h4>0344 892 0111, 24/7 specialist support for metabolic emergencies and toxic ingestions. IEM queries accepted.</div>
+          <div class="resource-card blue"><div>📋</div><h4>Three Pillars: Aide Memoire</h4>1. STOP FEEDS  2. HIGH-RATE DEXTROSE  3. CALL METABOLIC TEAM. In any suspected IEM, these three actions save lives.</div>
           <div class="resource-card green"><div>🧪</div><h4>Metabolic Crisis Sample Set</h4>Plasma amino acids (EDTA), ammonia (EDTA, on ice, process immediately), lactate (fluoride), urine OA + reducing substances. Send at time of decompensation.</div>
         </div>
         <div class="box teaching"><div class="label">TEACHING POINT</div>BIMDG emergency treatment guidelines are diagnosis-specific. Once plasma amino acids / urine OA confirm the IEM subtype, switch from generic management to the BIMDG pathway for that condition. Transfer to a metabolic centre should be arranged in parallel with acute stabilisation.</div>`);
@@ -1111,7 +1425,7 @@
         msg = "Strong performance. One more run and you'll be ready for the real 3am.";
       } else if (score >= 4) {
         scoreClass = "score-amber";
-        msg = "Solid foundation. The dangerous traps — feeds and VBG misinterpretation — are the key areas to revisit.";
+        msg = "Solid foundation. The dangerous traps (feeds and VBG misinterpretation) are the key areas to revisit.";
       }
 
       return frame(s, `
@@ -1127,13 +1441,6 @@
           <div class="learn-card">Stop all feeds the moment IEM is suspected. Protein drives ammonia. Galactose is hepatotoxic. No safe small amount.</div>
           <div class="learn-card">The Three Pillars: Stop feeds → High-rate dextrose (GIR 8–10 mg/kg/min) → Call metabolic team. Do all three simultaneously.</div>
           <div class="learn-card">Haemofiltration threshold: ammonia >350 µmol/L unresponsive to treatment, or >500 µmol/L regardless. BIMDG and NPIS are available 24/7.</div>
-        </div>
-        <div class="debrief"><b>Facilitator Debrief Prompts</b>
-          → "What was the first red flag you noticed?"<br>
-          → "Why does the pCO₂ being 1.9 not mean he needs intubation?"<br>
-          → "What would have happened if mum had breastfed?"<br>
-          → "Why does galactosaemia cause E. coli sepsis?"<br>
-          → "What is the BIMDG and when do you call them?"
         </div>`);
     }
 
@@ -1190,17 +1497,21 @@
       renderSection();
     }
 
+    function fullReset() {
+      currentSection = 0;
+      selectedChoice = null;
+      revealShown = false;
+      score = 0;
+      totalChoicesMade = 0;
+      wrongTimeline = null;
+      Object.keys(sectionState).forEach(k => delete sectionState[k]);
+      renderSection();
+    }
+
     function nextSection() {
       if (wrongTimeline) return;
       if (currentSection === sections.length - 1) {
-        currentSection = 0;
-        selectedChoice = null;
-        revealShown = false;
-        score = 0;
-        totalChoicesMade = 0;
-        wrongTimeline = null;
-        Object.keys(sectionState).forEach(k => delete sectionState[k]);
-        renderSection();
+        fullReset();
         return;
       }
       currentSection += 1;
@@ -1221,6 +1532,7 @@
     backBtn.addEventListener("click", prevSection);
     revealBtn.addEventListener("click", revealAnswer);
     continueBtn.addEventListener("click", nextSection);
+    resetBtn.addEventListener("click", fullReset);
 
     renderSection();
   </script>

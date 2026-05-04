@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f1117">
   <meta name="color-scheme" content="dark light">
-  <title>Stop the Clock — Paediatric ED Timer Dashboard</title>
+  <title>Stop the Clock - Paediatric ED Timer Dashboard</title>
   <link rel="stylesheet" href="../css/app-theme.css">
   <link rel="stylesheet" href="../css/ed-timers.css">
   <script src="../js/theme-toggle.js"></script>
@@ -27,7 +27,7 @@
               class="btn-ghost edt-toggle-btn edt-toggle-on"
               id="btn-sound"
               aria-pressed="true"
-              aria-label="Sound on expiry — currently on">
+              aria-label="Sound on expiry - currently on">
         <span class="edt-toggle-icon" aria-hidden="true">🔔</span>
         <span class="edt-toggle-label">Sound</span>
       </button>
@@ -35,7 +35,7 @@
               class="btn-ghost edt-toggle-btn edt-toggle-on"
               id="btn-vibrate"
               aria-pressed="true"
-              aria-label="Vibration on expiry — currently on">
+              aria-label="Vibration on expiry - currently on">
         <span class="edt-toggle-icon" aria-hidden="true">📳</span>
         <span class="edt-toggle-label">Vibrate</span>
       </button>
@@ -90,7 +90,7 @@
       No timers running. Tap a preset above or add a custom timer.
     </p>
     <p class="hint edt-max-warning" id="edt-max" hidden>
-      Maximum of 12 timers reached — remove or reset one to add another.
+      Maximum of 12 timers reached - remove or reset one to add another.
     </p>
   </section>
 
@@ -241,7 +241,7 @@
         vibrateEnabled: vibrateEnabled
       };
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch (_) { /* private mode / quota — non-fatal */ }
+    } catch (_) { /* private mode / quota - non-fatal */ }
   }
 
   function hydrate() {
@@ -276,11 +276,11 @@
       }
       if (typeof data.soundEnabled === 'boolean')   soundEnabled   = data.soundEnabled;
       if (typeof data.vibrateEnabled === 'boolean') vibrateEnabled = data.vibrateEnabled;
-    } catch (_) { /* corrupt payload — ignore */ }
+    } catch (_) { /* corrupt payload - ignore */ }
   }
 
   /* ====================================================================
-   * Audio (chime via WebAudio — unlocked on first user gesture)
+   * Audio (chime via WebAudio - unlocked on first user gesture)
    * ==================================================================== */
 
   function unlockAudio() {
@@ -450,7 +450,7 @@
   }
 
   function renderPresets() {
-    if (dom.presets.childElementCount) return;   // static — build once
+    if (dom.presets.childElementCount) return;   // static - build once
     var frag = document.createDocumentFragment();
     PRESETS.forEach(function (p) {
       var btn = document.createElement('button');
@@ -484,7 +484,7 @@
     btn.classList.toggle('edt-toggle-on', !!on);
     btn.setAttribute('aria-pressed', String(!!on));
     btn.setAttribute('aria-label',
-      name + ' on expiry — currently ' + (on ? 'on' : 'off'));
+      name + ' on expiry - currently ' + (on ? 'on' : 'off'));
     var labelSpan = btn.querySelector('.edt-toggle-label');
     if (labelSpan) labelSpan.textContent = name;
     var iconSpan = btn.querySelector('.edt-toggle-icon');
@@ -688,7 +688,7 @@
         card.dataset.state = stateClass;
       }
 
-      // Ring — offset increases as remaining decreases
+      // Ring - offset increases as remaining decreases
       var ringFg = card.querySelector('.edt-ring-fg');
       if (ringFg) {
         var shown = expired ? 0 : fraction;
@@ -751,12 +751,12 @@
   }
 
   /* ====================================================================
-   * Visibility — force an immediate re-evaluate when returning to tab
+   * Visibility - force an immediate re-evaluate when returning to tab
    * ==================================================================== */
 
   function onVisibilityChange() {
     if (document.visibilityState === 'visible') {
-      // A single synthetic tick is enough — rAF resumes from here.
+      // A single synthetic tick is enough - rAF resumes from here.
       // Expiry one-shots will fire for anything that expired while hidden.
       // (Intentional: you want to know something expired, even silently.)
       // Frame-level update happens on next rAF.
@@ -768,7 +768,7 @@
    * ==================================================================== */
 
   function wire() {
-    // Sound / vibrate toggles — use click to also unlock audio ctx.
+    // Sound / vibrate toggles - use click to also unlock audio ctx.
     dom.btnSound.addEventListener('click', function () {
       unlockAudio();
       soundEnabled = !soundEnabled;
@@ -921,3 +921,4 @@
 </script>
 </body>
 </html>
+

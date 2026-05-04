@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +24,7 @@
 <div class="page active" id="page-qtc">
   <div class="page-header">
     <h1>&#9889; QTc Calculator</h1>
-    <p>Paediatric QT interval correction &mdash; all four validated formulae</p>
+    <p>Paediatric QT interval correction - all four validated formulae</p>
   </div>
 
   <div class="card">
@@ -68,7 +68,7 @@
       <div class="field">
         <label>Primary Formula</label>
         <select id="defFormula">
-          <option value="bazett">Bazett (default &mdash; most widely used)</option>
+          <option value="bazett">Bazett (default - most widely used)</option>
           <option value="fridericia">Fridericia (better at high HR)</option>
           <option value="framingham">Framingham</option>
           <option value="hodges">Hodges</option>
@@ -80,27 +80,27 @@
   </div>
 
   <div class="card" id="qtcOut" style="display:none;">
-    <div class="card-title">QTc Results &mdash; All Formulae</div>
+    <div class="card-title">QTc Results - All Formulae</div>
     <div class="stat-grid" id="fgrid"></div>
     <div id="qtcMsg"></div>
   </div>
 
   <div class="card">
     <div class="card-title">QT-Prolonging Causes Checklist</div>
-    <p style="font-size:0.79rem;color:var(--muted);margin-bottom:14px;">Tick all potential contributing causes. Reference aid only &mdash; does not affect the calculation.</p>
+    <p style="font-size:0.79rem;color:var(--muted);margin-bottom:14px;">Tick all potential contributing causes. Reference aid only - does not affect the calculation.</p>
 
     <div class="sl">Drugs</div>
     <div class="cause-grid">
-      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Ondansetron</div><div class="ds">5-HT&#8323; antagonist &mdash; common in ED</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Ondansetron</div><div class="ds">5-HT&#8323; antagonist - common in ED</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Amiodarone</div><div class="ds">Class III antiarrhythmic</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Sotalol</div><div class="ds">Class II/III antiarrhythmic</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Macrolides</div><div class="ds">Erythromycin, azithromycin, clarithromycin</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Fluconazole / Azoles</div><div class="ds">Dose-dependent QT effect</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Quinolones</div><div class="ds">Ciprofloxacin, levofloxacin</div></div></div>
-      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Domperidone</div><div class="ds">Prokinetic &mdash; common in paediatrics</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Domperidone</div><div class="ds">Prokinetic - common in paediatrics</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Antipsychotics</div><div class="ds">Haloperidol, quetiapine, olanzapine</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Tricyclic antidepressants</div><div class="ds">Amitriptyline, imipramine</div></div></div>
-      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Methadone</div><div class="ds">Opioid &mdash; significant QT effect</div></div></div>
+      <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Methadone</div><div class="ds">Opioid - significant QT effect</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Chloroquine / Hydroxychloroquine</div><div class="ds">Antimalarial</div></div></div>
       <div class="ci" onclick="togCause(this)"><div class="chk">&#10003;</div><div><div class="dn">Trimethoprim / Co-trimoxazole</div><div class="ds">Mild effect</div></div></div>
     </div>
@@ -134,7 +134,7 @@
 <div class="page" id="page-ecg">
   <div class="page-header">
     <h1>&#10003; ECG Checklist</h1>
-    <p>Glasgow Paediatric ECG Systematic Review &mdash; answer YES if finding is normal</p>
+    <p>Glasgow Paediatric ECG Systematic Review - answer YES if finding is normal</p>
   </div>
 
   <figure class="card ecg-reference">
@@ -155,12 +155,12 @@
     </div>
   </div>
 
-  <div class="hint-text"><strong>YES = normal.</strong> NO = abnormal &mdash; discuss with senior / cardiology.</div>
+  <div class="hint-text"><strong>YES = normal.</strong> NO = abnormal - discuss with senior / cardiology.</div>
   <div class="prog-wrap"><div class="prog-fill" id="prog" style="width:0%"></div></div>
 
   <div class="eq" id="eq1">
     <div class="eq-hd"><span class="ecat">Rate</span><div><div class="eq-q">Is the heart rate <strong>appropriate for the age</strong> of the child?</div><div class="eq-note" id="hrNorm">Enter patient age above to see the normal HR range.</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq1','yes',this)">&#10003; YES &mdash; Normal for age</button><button class="eqb nb" onclick="ansQ('eq1','no',this)">&#10007; NO &mdash; Abnormal rate</button></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq1','yes',this)">&#10003; YES - Normal for age</button><button class="eqb nb" onclick="ansQ('eq1','no',this)">&#10007; NO - Abnormal rate</button></div>
     <div class="eq-flag">Rate abnormal for age. Consider: sinus tachycardia (fever, pain, shock, SVT), sinus bradycardia (raised ICP, heart block, hypothyroidism, medication). Discuss with senior / cardiology.</div>
   </div>
 
@@ -172,70 +172,70 @@
 
   <div class="eq" id="eq3">
     <div class="eq-hd"><span class="ecat">P-Waves</span><div><div class="eq-q">Is the P-wave amplitude <strong>less than 3 small boxes</strong>?</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq3','yes',this)">&#10003; YES &mdash; &lt;3 boxes</button><button class="eqb nb" onclick="ansQ('eq3','no',this)">&#10007; NO &mdash; Tall P-waves (&ge;3 boxes)</button></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq3','yes',this)">&#10003; YES - &lt;3 boxes</button><button class="eqb nb" onclick="ansQ('eq3','no',this)">&#10007; NO - Tall P-waves (&ge;3 boxes)</button></div>
     <div class="eq-flag">Tall P-waves (&gt;3 small boxes / &gt;0.25 mV) suggest right atrial hypertrophy (P pulmonale). Associated with pulmonary hypertension or right heart disease. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq4">
     <div class="eq-hd"><span class="ecat">Axis</span><div><div class="eq-q">Is the QRS complex <strong>positive in both leads I and aVF</strong>?</div><div class="eq-note" id="axisNote">Normal axis = positive in leads I and aVF.</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq4','yes',this)">&#10003; YES &mdash; Normal axis</button><button class="eqb nb" onclick="ansQ('eq4','no',this)">&#10007; NO &mdash; Axis deviation</button></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq4','yes',this)">&#10003; YES - Normal axis</button><button class="eqb nb" onclick="ansQ('eq4','no',this)">&#10007; NO - Axis deviation</button></div>
     <div class="eq-flag" id="axisFlag">Abnormal axis. Left axis deviation may indicate LBBB, LVH, or inferior MI pattern. Right axis deviation (after age 1) may indicate RVH, RBBB, or pulmonary disease. Discuss with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq5">
-    <div class="eq-hd"><span class="ecat">PR Interval</span><div><div class="eq-q">Is the PR interval <strong>more than 2 but less than 4 small boxes?</strong> <span style="font-weight:400;color:var(--muted)">(80&ndash;200 ms)</span></div><div class="eq-note">If shorter than 2 boxes: check for delta wave and broad QRS &mdash; possible WPW.</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq5','yes',this)">&#10003; YES &mdash; Normal PR</button><button class="eqb nb" onclick="ansQ('eq5','no',this)">&#10007; NO &mdash; Short or long PR</button></div>
-    <div class="eq-flag">Short PR (&lt;80 ms) with delta wave and broad QRS &rarr; consider WPW &mdash; urgent cardiology referral. Long PR (&gt;200 ms) &rarr; consider 1st, 2nd, or 3rd degree heart block. Discuss with senior / cardiology.</div>
+    <div class="eq-hd"><span class="ecat">PR Interval</span><div><div class="eq-q">Is the PR interval <strong>more than 2 but less than 4 small boxes?</strong> <span style="font-weight:400;color:var(--muted)">(80&ndash;200 ms)</span></div><div class="eq-note">If shorter than 2 boxes: check for delta wave and broad QRS - possible WPW.</div></div></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq5','yes',this)">&#10003; YES - Normal PR</button><button class="eqb nb" onclick="ansQ('eq5','no',this)">&#10007; NO - Short or long PR</button></div>
+    <div class="eq-flag">Short PR (&lt;80 ms) with delta wave and broad QRS &rarr; consider WPW - urgent cardiology referral. Long PR (&gt;200 ms) &rarr; consider 1st, 2nd, or 3rd degree heart block. Discuss with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq6">
     <div class="eq-hd"><span class="ecat">QRS Interval</span><div><div class="eq-q">Are the QRS complexes <strong>less than 2 small boxes</strong> in duration? <span style="font-weight:400;color:var(--muted)">(&lt;80 ms)</span></div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq6','yes',this)">&#10003; YES &mdash; Narrow QRS</button><button class="eqb nb" onclick="ansQ('eq6','no',this)">&#10007; NO &mdash; Broad QRS (&ge;2 boxes)</button></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq6','yes',this)">&#10003; YES - Narrow QRS</button><button class="eqb nb" onclick="ansQ('eq6','no',this)">&#10007; NO - Broad QRS (&ge;2 boxes)</button></div>
     <div class="eq-flag">Broad QRS indicates bundle branch block, ventricular rhythm, accessory pathway (WPW), hyperkalaemia, or sodium channel toxicity. Discuss urgently with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq7">
     <div class="eq-hd"><span class="ecat">QT Interval</span><div><div class="eq-q">Is the QTc <strong>less than 460 ms</strong>?</div><div class="eq-note">Corrected QT = QT &divide; &radic;RR (Bazett). Use the QTc Calculator for full analysis.</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq7','yes',this)">&#10003; YES &mdash; QTc &lt;460 ms</button><button class="eqb nb" onclick="ansQ('eq7','no',this)">&#10007; NO &mdash; QTc &ge;460 ms</button></div>
-    <div class="eq-flag">Prolonged QTc &ge;460 ms &mdash; risk of torsades de pointes and VF. Review drug chart, electrolytes, and family history. Use the QTc Calculator for full analysis. Discuss with senior / cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq7','yes',this)">&#10003; YES - QTc &lt;460 ms</button><button class="eqb nb" onclick="ansQ('eq7','no',this)">&#10007; NO - QTc &ge;460 ms</button></div>
+    <div class="eq-flag">Prolonged QTc &ge;460 ms - risk of torsades de pointes and VF. Review drug chart, electrolytes, and family history. Use the QTc Calculator for full analysis. Discuss with senior / cardiology.</div>
   </div>
 
   <div class="eq" id="eq8">
-    <div class="eq-hd"><span class="ecat">VH &mdash; V1</span><div><div class="eq-q">Is the <strong>R wave smaller than the S wave in V1</strong>?</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq8','yes',this)">&#10003; YES &mdash; R &lt; S in V1 (normal)</button><button class="eqb nb" onclick="ansQ('eq8','no',this)">&#10007; NO &mdash; Dominant R in V1</button></div>
+    <div class="eq-hd"><span class="ecat">VH - V1</span><div><div class="eq-q">Is the <strong>R wave smaller than the S wave in V1</strong>?</div></div></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq8','yes',this)">&#10003; YES - R &lt; S in V1 (normal)</button><button class="eqb nb" onclick="ansQ('eq8','no',this)">&#10007; NO - Dominant R in V1</button></div>
     <div class="eq-flag">Dominant R wave in V1 suggests right ventricular hypertrophy (RVH). Associated with pulmonary hypertension, pulmonary stenosis, ASD, or Ebstein&apos;s anomaly. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq9">
-    <div class="eq-hd"><span class="ecat">VH &mdash; V5/V6</span><div><div class="eq-q">Is there <strong>separation with no overlap</strong> between the R-wave of V6 and the S-wave of V5?</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq9','yes',this)">&#10003; YES &mdash; No overlap (normal)</button><button class="eqb nb" onclick="ansQ('eq9','no',this)">&#10007; NO &mdash; Overlap present</button></div>
+    <div class="eq-hd"><span class="ecat">VH - V5/V6</span><div><div class="eq-q">Is there <strong>separation with no overlap</strong> between the R-wave of V6 and the S-wave of V5?</div></div></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq9','yes',this)">&#10003; YES - No overlap (normal)</button><button class="eqb nb" onclick="ansQ('eq9','no',this)">&#10007; NO - Overlap present</button></div>
     <div class="eq-flag">Overlap between R(V6) and S(V5) may indicate biventricular or left ventricular hypertrophy. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq10">
     <div class="eq-hd"><span class="ecat">Q-Waves</span><div><div class="eq-q">Are the Q-waves <strong>less than 4 small boxes deep</strong> in all leads?</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq10','yes',this)">&#10003; YES &mdash; Q-waves &lt;4 boxes</button><button class="eqb nb" onclick="ansQ('eq10','no',this)">&#10007; NO &mdash; Deep Q-waves (&ge;4 boxes)</button></div>
-    <div class="eq-flag">Deep Q-waves (&gt;4 mm) may suggest hypertrophic cardiomyopathy (HOCM), myocardial infarction pattern, or infiltrative disease. Important finding in a child &mdash; discuss with cardiology.</div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq10','yes',this)">&#10003; YES - Q-waves &lt;4 boxes</button><button class="eqb nb" onclick="ansQ('eq10','no',this)">&#10007; NO - Deep Q-waves (&ge;4 boxes)</button></div>
+    <div class="eq-flag">Deep Q-waves (&gt;4 mm) may suggest hypertrophic cardiomyopathy (HOCM), myocardial infarction pattern, or infiltrative disease. Important finding in a child - discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq11">
     <div class="eq-hd"><span class="ecat">T-Waves V5/V6</span><div><div class="eq-q">Are the <strong>T-waves positive in V5 and V6</strong>?</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq11','yes',this)">&#10003; YES &mdash; Upright T-waves</button><button class="eqb nb" onclick="ansQ('eq11','no',this)">&#10007; NO &mdash; T-waves inverted</button></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq11','yes',this)">&#10003; YES - Upright T-waves</button><button class="eqb nb" onclick="ansQ('eq11','no',this)">&#10007; NO - T-waves inverted</button></div>
     <div class="eq-flag">T-wave inversion in V5/V6 is abnormal at any age. Consider LVH with strain, myocarditis, or ischaemia. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq12">
     <div class="eq-hd"><span class="ecat">T-Wave V1</span><div><div class="eq-q" id="q12q">In patients <strong>&lt;8 years</strong>, is the T-wave <strong>negative in V1</strong>?</div><div class="eq-note" id="q12note">A negative T-wave in V1 is normal in children under 8. After age 8 the T-wave in V1 should become upright.</div></div></div>
     <div class="eq-btns" id="q12btns">
-      <button class="eqb yb" onclick="ansQ('eq12','yes',this)">&#10003; YES &mdash; T negative in V1 (normal &lt;8 yrs)</button>
-      <button class="eqb nb" onclick="ansQ('eq12','no',this)">&#10007; NO &mdash; T positive in V1 (abnormal &lt;8 yrs)</button>
+      <button class="eqb yb" onclick="ansQ('eq12','yes',this)">&#10003; YES - T negative in V1 (normal &lt;8 yrs)</button>
+      <button class="eqb nb" onclick="ansQ('eq12','no',this)">&#10007; NO - T positive in V1 (abnormal &lt;8 yrs)</button>
     </div>
     <div class="eq-flag">Positive T-wave in V1 in a child under 8 years is abnormal. Consider RVH or posterior ischaemic pattern. Discuss with cardiology.</div>
   </div>
 
   <div class="eq" id="eq13">
     <div class="eq-hd"><span class="ecat">ST Segment</span><div><div class="eq-q">If ST elevation is present: is it raised by <strong>less than 2 small boxes</strong>?</div><div class="eq-note">If there is no ST elevation at all, answer YES.</div></div></div>
-    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq13','yes',this)">&#10003; YES &mdash; None, or &lt;2 boxes</button><button class="eqb nb" onclick="ansQ('eq13','no',this)">&#10007; NO &mdash; ST elevation &ge;2 boxes</button></div>
+    <div class="eq-btns"><button class="eqb yb" onclick="ansQ('eq13','yes',this)">&#10003; YES - None, or &lt;2 boxes</button><button class="eqb nb" onclick="ansQ('eq13','no',this)">&#10007; NO - ST elevation &ge;2 boxes</button></div>
     <div class="eq-flag">Significant ST elevation &ge;2 boxes may indicate myocarditis, pericarditis, Kawasaki disease, or ischaemia. Urgent senior / cardiology review required.</div>
   </div>
 
@@ -350,8 +350,8 @@ function calcQTc() {
   var defF = document.getElementById('defFormula').value;
 
   var formulas = [
-    { key:'bazett',     name:'Bazett',     ms: Math.round((qtS / Math.sqrt(RR)) * 1000),       note:'QT / sqrt(RR) &mdash; most widely used' },
-    { key:'fridericia', name:'Fridericia', ms: Math.round((qtS / Math.pow(RR, 1/3)) * 1000),   note:'QT / RR^(1/3) &mdash; better at high HR' },
+    { key:'bazett',     name:'Bazett',     ms: Math.round((qtS / Math.sqrt(RR)) * 1000),       note:'QT / sqrt(RR) - most widely used' },
+    { key:'fridericia', name:'Fridericia', ms: Math.round((qtS / Math.pow(RR, 1/3)) * 1000),   note:'QT / RR^(1/3) - better at high HR' },
     { key:'framingham', name:'Framingham', ms: Math.round((qtS + 0.154 * (1 - RR)) * 1000),    note:'QT + 0.154(1-RR)' },
     { key:'hodges',     name:'Hodges',     ms: Math.round((qtS + 0.00175 * (hr - 60)) * 1000), note:'QT + 1.75(HR-60)/1000' }
   ];
@@ -377,7 +377,7 @@ function calcQTc() {
 
   var msg = document.getElementById('qtcMsg');
   if (anyFlag) {
-    msg.innerHTML = '<div class="alert alert-danger" style="margin-top:12px;"><strong>&#9888; QTc &ge;460 ms &mdash; Prolonged</strong><p>One or more formulae indicate a prolonged QTc. Review the drug chart and electrolytes using the checklist below. Discuss with a senior and consider cardiology referral. Avoid prescribing further QT-prolonging agents.</p></div>';
+    msg.innerHTML = '<div class="alert alert-danger" style="margin-top:12px;"><strong>&#9888; QTc &ge;460 ms - Prolonged</strong><p>One or more formulae indicate a prolonged QTc. Review the drug chart and electrolytes using the checklist below. Discuss with a senior and consider cardiology referral. Avoid prescribing further QT-prolonging agents.</p></div>';
   } else {
     msg.innerHTML = '<div class="alert alert-ok" style="margin-top:12px;"><strong>&#10003; QTc &lt;460 ms across all formulae</strong><p>QT interval is within normal limits. If clinical concern remains (syncope, palpitations, family history of sudden death), discuss with senior regardless of this result.</p></div>';
   }
@@ -416,11 +416,11 @@ function renderQ12Buttons(ageYr) {
   yes.className = 'eqb yb';
   no.className = 'eqb nb';
   if (ageYr < 8) {
-    yes.innerHTML = '&#10003; YES &mdash; T negative in V1 (normal &lt;8 yrs)';
-    no.innerHTML = '&#10007; NO &mdash; T positive in V1 (abnormal &lt;8 yrs)';
+    yes.innerHTML = '&#10003; YES - T negative in V1 (normal &lt;8 yrs)';
+    no.innerHTML = '&#10007; NO - T positive in V1 (abnormal &lt;8 yrs)';
   } else {
-    yes.innerHTML = '&#10003; YES &mdash; T upright in V1 (normal ≥8 yrs)';
-    no.innerHTML = '&#10007; NO &mdash; T inverted in V1 (abnormal)';
+    yes.innerHTML = '&#10003; YES - T upright in V1 (normal ≥8 yrs)';
+    no.innerHTML = '&#10007; NO - T inverted in V1 (abnormal)';
   }
   yes.addEventListener('click', function () { ansQ('eq12', 'yes', this); });
   no.addEventListener('click', function () { ansQ('eq12', 'no', this); });
@@ -464,7 +464,7 @@ function onAgeChange() {
 
   var note = document.getElementById('ageNote');
   note.style.display = 'block';
-  note.textContent = 'Age ' + ageYr.toFixed(1) + ' yr — ' + hrTxt + '. Q4 axis and Q12 T-wave thresholds adjusted.';
+  note.textContent = 'Age ' + ageYr.toFixed(1) + ' yr - ' + hrTxt + '. Q4 axis and Q12 T-wave thresholds adjusted.';
   delete ecgAnswers['eq12'];
   updateResult();
 }
@@ -500,13 +500,13 @@ function updateResult() {
   if (nos.length === 0) {
     top.className = 'cr-top all-yes';
     icon.textContent = '✅';
-    title.textContent = 'All criteria met — ECG appears normal';
+    title.textContent = 'All criteria met - ECG appears normal';
     sub.textContent = 'All 13 items answered YES. No red flag features identified. Patient may be suitable for e-vetting discharge if clinically appropriate.';
     bd.innerHTML = '<p style="font-size:0.8rem;color:var(--muted);">Always correlate with the clinical presentation. If any uncertainty remains, discuss with a senior before discharge.</p>';
   } else {
     top.className = 'cr-top has-no';
     icon.textContent = '🔴';
-    title.textContent = nos.length + ' abnormal finding' + (nos.length > 1 ? 's' : '') + ' — Senior / Cardiology Review Required';
+    title.textContent = nos.length + ' abnormal finding' + (nos.length > 1 ? 's' : '') + ' - Senior / Cardiology Review Required';
     sub.textContent = 'One or more ECG parameters are outside normal limits. Do not discharge without senior review.';
     var html = '';
     for (var i = 0; i < nos.length; i++) {
@@ -520,3 +520,5 @@ function updateResult() {
 </script>
 </body>
 </html>
+
+

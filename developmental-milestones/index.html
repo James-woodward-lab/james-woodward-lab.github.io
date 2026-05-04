@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -90,7 +90,7 @@
   .sc.or{background:var(--orange-light);border-color:var(--orange);color:var(--text);}
   .sc.gn{background:var(--green-light);border-color:var(--green-mid);color:var(--text);}
 
-  /* TIP BOXES — high contrast text */
+  /* TIP BOXES - high contrast text */
   .tip{padding:10px 14px;border-left:4px solid;border-radius:0 8px 8px 0;font-size:0.82rem;line-height:1.5;}
   .tip.blue{background:var(--blue-light);border-color:var(--blue);color:var(--text);}
   .tip.orange{background:var(--orange-light);border-color:var(--orange);color:var(--text);}
@@ -229,7 +229,7 @@
             <button class="ubtn" id="btn-y" onclick="setUnit('y')">Yr</button>
             <button class="ubtn" id="btn-w" onclick="setUnit('w')">Wk</button>
           </div>
-          <p class="hint" style="font-size:0.75rem;margin-top:6px;color:var(--muted);">Using custom age — switch back above to use DOB</p>
+          <p class="hint" style="font-size:0.75rem;margin-top:6px;color:var(--muted);">Using custom age - switch back above to use DOB</p>
         </div>
         <div class="tog" onclick="toggleCorrected()">
           <input type="checkbox" id="corrCk">
@@ -284,7 +284,7 @@
 </div>
 
 <div class="footer">
-  Built for Southampton General Hospital. Not a substitute for clinical judgement. v2.0 — 2026.
+  Built for Southampton General Hospital. Not a substitute for clinical judgement. v2.0 - 2026.
 </div>
 
 <section class="references" style="padding:16px 22px 24px;background:var(--surface);border-top:1px solid var(--grey-mid);font-size:0.75rem;color:var(--muted);line-height:1.6;">
@@ -638,7 +638,7 @@ function toggleMilestone(id) {
     const seq = domainMilestonesSorted(ms.domain, true);
     const idx = seq.findIndex(m => m.id===id);
     if (checkedAll.has(id)) {
-      // Uncheck only this milestone — never cascade uncheck to older (later) ones
+      // Uncheck only this milestone - never cascade uncheck to older (later) ones
       checkedAll.delete(id);
       checkedDirect.delete(id);
       refreshItemUI(id);
@@ -805,7 +805,7 @@ function updateResults() {
   });
   if (regression) {
     if (!refMap['paeds']) refMap['paeds'] = {urgent:[],soon:[],routine:[]};
-    refMap['paeds'].urgent.push({text:'Skill regression reported',urgency:'urgent',note:'Requires urgent paediatric review — consider neurodegenerative, metabolic, epileptic, safeguarding'});
+    refMap['paeds'].urgent.push({text:'Skill regression reported',urgency:'urgent',note:'Requires urgent paediatric review - consider neurodegenerative, metabolic, epileptic, safeguarding'});
   }
 
   const domainFlags = {};
@@ -830,8 +830,8 @@ function updateResults() {
   const hasUrgent = regression || triggers.some(t=>t.urgency==='urgent');
   const statusClass = hasUrgent ? 'urgent-banner' : 'concerns';
   const statusIcon = hasUrgent ? '🚨' : '⚠️';
-  const statusTitle = hasUrgent ? 'Urgent Referral(s) Indicated' : 'Concerns — Referral Recommended';
-  const statusDesc = `${triggers.length} milestone(s) not achieved.${numFlagDomains>=2?' ⚠️ '+numFlagDomains+' domains affected — consider GDD.':''}`;
+  const statusTitle = hasUrgent ? 'Urgent Referral(s) Indicated' : 'Concerns - Referral Recommended';
+  const statusDesc = `${triggers.length} milestone(s) not achieved.${numFlagDomains>=2?' ⚠️ '+numFlagDomains+' domains affected - consider GDD.':''}`;
 
   let html = `<div class="status-banner ${statusClass}">
     <div class="status-icon">${statusIcon}</div>
@@ -870,12 +870,12 @@ function updateResults() {
     const allItems = [...uItems,...sItems,...rItems];
     if (!allItems.length) return;
     const topU = uItems.length?'urgent':sItems.length?'soon':'routine';
-    const urgLabel = topU==='urgent'?'🔴 URGENT — Same day / within 48h':topU==='soon'?'🟠 SOON — Within 2–4 weeks':'🟡 ROUTINE — Standard pathway';
+    const urgLabel = topU==='urgent'?'🔴 URGENT - Same day / within 48h':topU==='soon'?'🟠 SOON - Within 2–4 weeks':'🟡 ROUTINE - Standard pathway';
 
     html += `<div class="ref-card ${topU}">
       <div class="ref-hd">
         <span style="font-size:1.2rem">${cfg.icon}</span>
-        <div style="flex:1"><div class="ref-org">${cfg.label} — ${cfg.full}</div>
+        <div style="flex:1"><div class="ref-org">${cfg.label} - ${cfg.full}</div>
           <div class="ref-urgency">${urgLabel}</div></div>
       </div>
       <div class="ref-body">`;

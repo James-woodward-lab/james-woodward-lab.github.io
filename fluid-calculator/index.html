@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -31,7 +31,7 @@
   <button class="install-close" id="install-close">✕</button>
 </div>
 
-<!-- PAGE 1 — MAINTENANCE -->
+<!-- PAGE 1 - MAINTENANCE -->
 <div class="page active" id="page-maint">
   <div class="page-header">
     <h1>💧 Maintenance Requirements</h1>
@@ -61,22 +61,22 @@
     <div class="stat-grid" style="margin-bottom:12px;">
       <div class="stat hi">
         <div class="lbl">Maintenance</div>
-        <div class="val" id="maint-vol">—<span>mL/24h</span></div>
+        <div class="val" id="maint-vol">-<span>mL/24h</span></div>
         <div class="sub" id="maint-vol-sub"></div>
       </div>
       <div class="stat hi">
         <div class="lbl">Hourly Rate</div>
-        <div class="val" id="maint-rate">—<span>mL/h</span></div>
+        <div class="val" id="maint-rate">-<span>mL/h</span></div>
         <div class="sub">Holliday-Segar</div>
       </div>
       <div class="stat">
         <div class="lbl">Na⁺ (24h)</div>
-        <div class="val" id="maint-na">—<span>mmol</span></div>
+        <div class="val" id="maint-na">-<span>mmol</span></div>
         <div class="sub" id="maint-na-sub"></div>
       </div>
       <div class="stat">
         <div class="lbl">K⁺ (24h)</div>
-        <div class="val" id="maint-k">—<span>mmol</span></div>
+        <div class="val" id="maint-k">-<span>mmol</span></div>
         <div class="sub" id="maint-k-sub"></div>
       </div>
     </div>
@@ -88,11 +88,11 @@
   </div>
 </div>
 
-<!-- PAGE 2 — 24H BALANCE -->
+<!-- PAGE 2 - 24H BALANCE -->
 <div class="page" id="page-balance">
   <div class="page-header">
     <h1>⚖️ 24-Hour Intake &amp; Balance</h1>
-    <p>Enter each feed separately — new rows appear automatically</p>
+    <p>Enter each feed separately - new rows appear automatically</p>
   </div>
 
   <div class="card" id="sec-balance">
@@ -107,17 +107,17 @@
     <div class="stat-grid cols3" style="margin-bottom:10px;">
       <div class="stat hi">
         <div class="lbl">Total Intake</div>
-        <div class="val" id="bal-intake">—<span>mL</span></div>
+        <div class="val" id="bal-intake">-<span>mL</span></div>
         <div class="sub" id="bal-intake-sub"></div>
       </div>
       <div class="stat hi">
         <div class="lbl">Maintenance</div>
-        <div class="val" id="bal-maint">—<span>mL</span></div>
+        <div class="val" id="bal-maint">-<span>mL</span></div>
         <div class="sub">Holliday-Segar</div>
       </div>
       <div class="stat" id="bal-diff-stat">
         <div class="lbl">Balance</div>
-        <div class="val" id="bal-diff">—<span>mL</span></div>
+        <div class="val" id="bal-diff">-<span>mL</span></div>
         <div class="sub" id="bal-diff-sub"></div>
       </div>
     </div>
@@ -133,7 +133,7 @@
   </div>
 </div>
 
-<!-- PAGE 3 — FEED CALCULATOR -->
+<!-- PAGE 3 - FEED CALCULATOR -->
 <div class="page" id="page-feed">
   <div class="page-header">
     <h1>🍼 Baby Feeding Calculator</h1>
@@ -142,13 +142,13 @@
 
   <div class="card" id="sec-feed">
     <div class="hint" style="margin-bottom:14px;">
-      This calculates feed volumes (formula/EBM) for <b style="color:var(--text);">nutritional &amp; growth requirements</b> — distinct from the physiological maintenance fluid on the Maintenance tab.
+      This calculates feed volumes (formula/EBM) for <b style="color:var(--text);">nutritional &amp; growth requirements</b> - distinct from the physiological maintenance fluid on the Maintenance tab.
     </div>
 
     <div id="feed-weight-mirror" class="hidden">
       <div class="weight-mirror" id="feed-weight-badge">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Using weight: — kg
+        Using weight: - kg
       </div>
     </div>
 
@@ -159,7 +159,7 @@
     <div class="field">
       <label>Feeding frequency</label>
       <select id="feed-freq" onchange="calcFeed()">
-        <option value="">— select —</option>
+        <option value="">- select -</option>
         <option value="1">Every 1 hour</option>
         <option value="2">Every 2 hours</option>
         <option value="3">Every 3 hours</option>
@@ -185,17 +185,17 @@
     <div class="stat-grid" style="margin-bottom:10px;">
       <div class="stat hi">
         <div class="lbl">Total Volume (24h)</div>
-        <div class="val" id="feed-total">—<span>mL</span></div>
+        <div class="val" id="feed-total">-<span>mL</span></div>
         <div class="sub" id="feed-total-sub"></div>
       </div>
       <div class="stat hi">
         <div class="lbl" id="feed-per-feed-lbl">Per Feed</div>
-        <div class="val" id="feed-per-feed">—<span>mL</span></div>
+        <div class="val" id="feed-per-feed">-<span>mL</span></div>
         <div class="sub" id="feed-per-feed-sub"></div>
       </div>
       <div class="stat" id="feed-feeds-stat">
         <div class="lbl">Feeds / 24h</div>
-        <div class="val" id="feed-count">—</div>
+        <div class="val" id="feed-count">-</div>
         <div class="sub" id="feed-count-sub"></div>
       </div>
     </div>
@@ -268,7 +268,7 @@ function getSex() {
   const el = document.querySelector('input[name="sex"]:checked');
   return el ? el.value : '';
 }
-function fmt(n, d=0) { return isNaN(n) ? '—' : n.toFixed(d); }
+function fmt(n, d=0) { return isNaN(n) ? '-' : n.toFixed(d); }
 function r5(n) { return Math.round(n / 5) * 5; }
 
 function calcMaintenance() {
@@ -441,7 +441,7 @@ function calcBalance() {
       alertHtml = `<div class="alert alert-orange">⚠️ Significant shortfall of <b>${shortFmt} mL</b> below maintenance (<b>${pctFmt}%</b> of requirements). Consider increasing feed volumes or frequency.</div>`;
     } else if (pct < 95) {
       diffStat.className = 'stat warn';
-      alertHtml = `<div class="alert alert-yellow">⚠️ Shortfall of <b>${shortFmt} mL</b> below maintenance (<b>${pctFmt}%</b> of requirements). Consider increasing feed volumes or frequency. If unwell (respiratory or CNS infection), at risk of ADH secretion, overload, or starting IV fluids — consider whether <b>2/3rd maintenance</b> is appropriate.</div>`;
+      alertHtml = `<div class="alert alert-yellow">⚠️ Shortfall of <b>${shortFmt} mL</b> below maintenance (<b>${pctFmt}%</b> of requirements). Consider increasing feed volumes or frequency. If unwell (respiratory or CNS infection), at risk of ADH secretion, overload, or starting IV fluids - consider whether <b>2/3rd maintenance</b> is appropriate.</div>`;
     } else {
       diffStat.className = 'stat';
       alertHtml = `<div class="alert alert-ok">✓ Intake within acceptable range (${pctFmt}% of maintenance).</div>`;

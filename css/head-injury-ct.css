@@ -1,5 +1,5 @@
-/* ==========================================================================
-   Paediatric Head Injury CT Stratification — tokens from app-theme.css
+﻿/* ==========================================================================
+   Paediatric Head Injury CT Stratification - tokens from app-theme.css
    ========================================================================== */
 
 .head-injury-app .age-grid {
@@ -109,3 +109,4 @@
   display: grid;
   gap: 5px;
 }
+

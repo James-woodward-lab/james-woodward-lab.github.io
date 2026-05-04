@@ -1,12 +1,12 @@
-/* ==========================================================================
-   Stop the Clock — ED multi-timer dashboard
+﻿/* ==========================================================================
+   Stop the Clock - ED multi-timer dashboard
    All colour / spacing / radius / motion reference tokens from app-theme.css.
    Scoped under .ed-timers-app to avoid leaking into other tools.
    ========================================================================== */
 
 
 /* --------------------------------------------------------------------------
-   Controls card — Clear / Sound / Vibrate toolbar
+   Controls card - Clear / Sound / Vibrate toolbar
    -------------------------------------------------------------------------- */
 .ed-timers-app .edt-controls-row {
   display: flex;
@@ -448,7 +448,7 @@
 
 
 /* --------------------------------------------------------------------------
-   Print — keep cards legible on a laminated snapshot
+   Print - keep cards legible on a laminated snapshot
    -------------------------------------------------------------------------- */
 @media print {
   .ed-timers-app .theme-toggle,
@@ -479,3 +479,4 @@
   .ed-timers-app .edt-ring-fg { stroke: #000 !important; }
   .ed-timers-app .container { padding: 10mm; max-width: 100%; }
 }
+

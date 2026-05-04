@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f1117">
   <meta name="color-scheme" content="dark light">
-  <title>Paediatric Vitals — James Woodward Lab</title>
+  <title>Paediatric Vitals - James Woodward Lab</title>
   <link rel="stylesheet" href="../css/app-theme.css">
   <link rel="stylesheet" href="../css/style-variants.css">
   <link rel="stylesheet" href="../css/paediatric-vitals.css">
@@ -17,7 +17,7 @@
 <div class="container">
   <header class="app-header-center">
     <h1>📈 Paediatric Vitals</h1>
-    <p>Age-aware observation interpretation &mdash; APLS normal ranges, auto-flagging, one-line note</p>
+    <p>Age-aware observation interpretation - APLS normal ranges, auto-flagging, one-line note</p>
   </header>
 
   <section class="card no-print">
@@ -49,7 +49,7 @@
   <section class="card no-print">
     <div class="card-title">Paste from monitor &middot; <span class="pv-muted-small">optional time-saver</span></div>
     <textarea id="paste-input" rows="2" class="pv-paste"
-              placeholder='Paste anything — e.g. "HR 142  RR 32  SpO2 98%  BP 95/58  T 38.1  CRT <2s"'></textarea>
+              placeholder='Paste anything - e.g. "HR 142  RR 32  SpO2 98%  BP 95/58  T 38.1  CRT <2s"'></textarea>
     <div class="pv-paste-row">
       <button type="button" class="btn btn-reset" id="btn-clear-paste">Clear</button>
       <button type="button" class="btn btn-primary" id="btn-parse">Parse &amp; fill</button>
@@ -64,7 +64,7 @@
         <label for="v-rr">Respiratory rate <span class="pv-unit">/min</span></label>
         <div class="pv-input-row">
           <input type="number" id="v-rr" min="0" max="120" step="1" inputmode="numeric">
-          <span class="pv-flag" data-flag-for="rr" aria-live="polite">—</span>
+          <span class="pv-flag" data-flag-for="rr" aria-live="polite">-</span>
         </div>
         <p class="pv-range" data-range-for="rr"></p>
       </div>
@@ -83,7 +83,7 @@
         <label for="v-hr">Heart rate <span class="pv-unit">/min</span></label>
         <div class="pv-input-row">
           <input type="number" id="v-hr" min="0" max="300" step="1" inputmode="numeric">
-          <span class="pv-flag" data-flag-for="hr" aria-live="polite">—</span>
+          <span class="pv-flag" data-flag-for="hr" aria-live="polite">-</span>
         </div>
         <p class="pv-range" data-range-for="hr"></p>
       </div>
@@ -94,7 +94,7 @@
           <input type="number" id="v-sbp" min="0" max="250" step="1" inputmode="numeric" placeholder="SBP">
           <span class="pv-bp-sep">/</span>
           <input type="number" id="v-dbp" min="0" max="200" step="1" inputmode="numeric" placeholder="DBP">
-          <span class="pv-flag" data-flag-for="bp" aria-live="polite">—</span>
+          <span class="pv-flag" data-flag-for="bp" aria-live="polite">-</span>
         </div>
         <p class="pv-range" data-range-for="bp"></p>
       </div>
@@ -107,7 +107,7 @@
             <button type="button" class="pv-chip pv-chip-sm" data-o2="air">Air</button>
             <button type="button" class="pv-chip pv-chip-sm" data-o2="o2">On O₂</button>
           </div>
-          <span class="pv-flag" data-flag-for="spo2" aria-live="polite">—</span>
+          <span class="pv-flag" data-flag-for="spo2" aria-live="polite">-</span>
         </div>
         <p class="pv-range" data-range-for="spo2"></p>
       </div>
@@ -116,7 +116,7 @@
         <label for="v-temp">Temperature <span class="pv-unit">°C</span></label>
         <div class="pv-input-row">
           <input type="number" id="v-temp" min="25" max="44" step="0.1" inputmode="decimal">
-          <span class="pv-flag" data-flag-for="temp" aria-live="polite">—</span>
+          <span class="pv-flag" data-flag-for="temp" aria-live="polite">-</span>
         </div>
         <p class="pv-range" data-range-for="temp"></p>
       </div>
@@ -125,7 +125,7 @@
         <label for="v-crt">CRT <span class="pv-unit">seconds</span></label>
         <div class="pv-input-row">
           <input type="number" id="v-crt" min="0" max="10" step="0.5" inputmode="decimal">
-          <span class="pv-flag" data-flag-for="crt" aria-live="polite">—</span>
+          <span class="pv-flag" data-flag-for="crt" aria-live="polite">-</span>
         </div>
         <p class="pv-range" data-range-for="crt"></p>
       </div>
@@ -138,7 +138,7 @@
           <button type="button" class="pv-chip" data-avpu="P">P</button>
           <button type="button" class="pv-chip" data-avpu="U">U</button>
         </div>
-        <span class="pv-flag pv-flag-below" data-flag-for="avpu" aria-live="polite">—</span>
+        <span class="pv-flag pv-flag-below" data-flag-for="avpu" aria-live="polite">-</span>
       </div>
     </div>
 
@@ -162,7 +162,7 @@
       <div class="pv-summary-block">
         <h3>One-line note</h3>
         <div class="pv-note-box">
-          <code id="note-text">—</code>
+          <code id="note-text">-</code>
         </div>
         <div class="pv-note-actions">
           <button type="button" class="btn btn-primary" id="btn-copy-note">Copy note</button>
@@ -178,7 +178,7 @@
           <a href="/wetflag-calculator/" class="btn btn-primary">
             🚨 Open WETFLAG &rarr;
           </a>
-          <p class="hint">Red flag triggered &mdash; weight-based emergency doses are one click away.</p>
+          <p class="hint">Red flag triggered - weight-based emergency doses are one click away.</p>
         </div>
       </div>
     </div>
@@ -214,7 +214,7 @@
         </ul>
         <p class="hint">
           Based on APLS 6th edition age-banded normals and NICE CG160 / CG98
-          red-flag thresholds. Trust PEWS charts differ slightly &mdash; always
+          red-flag thresholds. Trust PEWS charts differ slightly - always
           follow local guidance. This tool is decision support, not a
           substitute for clinical judgement.
         </p>
@@ -419,11 +419,11 @@
       const cLabel = (cy ? cy + 'y ' : '') + cm + 'm';
       extra = ` · corrected ${cLabel}`;
       $('corrected-age-hint').textContent =
-        `Corrected age ${cLabel} — ranges adjusted. Correction applies up to 2 years.`;
+        `Corrected age ${cLabel} - ranges adjusted. Correction applies up to 2 years.`;
     } else if (state.exPrem && state.gaWeeks && rawM >= 24) {
       extra = '';
       $('corrected-age-hint').textContent =
-        'Beyond 2 years — no further correction applied.';
+        'Beyond 2 years - no further correction applied.';
     } else {
       $('corrected-age-hint').textContent = '';
     }
@@ -483,7 +483,7 @@
       if (!el) return;
       const f = flags[key];
       el.className = 'pv-flag' + (el.classList.contains('pv-flag-below') ? ' pv-flag-below' : '');
-      if (!f) { el.textContent = '—'; el.classList.add('pv-flag-none'); return; }
+      if (!f) { el.textContent = '-'; el.classList.add('pv-flag-none'); return; }
       el.classList.add('pv-flag-' + f.level);
       el.textContent = f.label;
     });
@@ -544,7 +544,7 @@
       overall.classList.remove('empty');
       overall.className = 'pv-overall level-' + level;
       if (level >= 3) {
-        overall.innerHTML = '<strong>🚨 Red-flag vitals.</strong> Escalate now — senior review, reassess airway/breathing/circulation.';
+        overall.innerHTML = '<strong>🚨 Red-flag vitals.</strong> Escalate now - senior review, reassess airway/breathing/circulation.';
       } else if (level === 2) {
         overall.innerHTML = '<strong>⚠️ Concerning vitals.</strong> Reassess in context, plan early review.';
       } else {
@@ -583,7 +583,7 @@
     }
 
     // One-line note
-    $('note-text').textContent = buildNote(false) || '—';
+    $('note-text').textContent = buildNote(false) || '-';
   }
 
   function countEntered() {
@@ -666,7 +666,7 @@
    * Paste-from-monitor parser
    * ================================================================== */
 
-  // Whole-word matchers — permissive about separators and case.
+  // Whole-word matchers - permissive about separators and case.
   const PARSERS = [
     { key: 'hr',   re: /\b(?:HR|heart\s?rate|pulse)\b[^0-9]{0,6}(\d{2,3})\b/i },
     { key: 'rr',   re: /\b(?:RR|resp\s?rate|resps?)\b[^0-9]{0,6}(\d{1,2})\b/i },
@@ -904,3 +904,5 @@
 </script>
 </body>
 </html>
+
+

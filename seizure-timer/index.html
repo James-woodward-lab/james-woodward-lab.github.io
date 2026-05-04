@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -16,7 +16,7 @@
 <div class="container">
   <header class="app-header-center">
     <h1>⏱️ Paediatric Seizure Timer</h1>
-    <p>Status epilepticus escalation prompts — clinical decision support</p>
+    <p>Status epilepticus escalation prompts - clinical decision support</p>
   </header>
 
   <div class="warning-banner seizure-warn">
@@ -55,7 +55,7 @@
     <div class="card timer-card" id="timerCard">
       <div class="timer-display" id="timerDisplay">0:00</div>
       <div class="timer-mins" id="timerMins">0 min</div>
-      <div class="timer-paused-note" id="timerPausedNote" style="display:none;">Seizure terminated — time stopped</div>
+      <div class="timer-paused-note" id="timerPausedNote" style="display:none;">Seizure terminated - time stopped</div>
       <button type="button" class="btn-seizure-terminated" id="btnSeizureTerminated" onclick="pauseSeizureTerminated()">Seizure terminated</button>
     </div>
     <div class="card prompt-card" id="promptCard">
@@ -64,7 +64,7 @@
     </div>
     <div class="card dose-buttons-card">
       <div class="card-title">Mark dose administered</div>
-      <p class="dose-hint">Tap when each intervention has been given — this will update the prompts accordingly.</p>
+      <p class="dose-hint">Tap when each intervention has been given - this will update the prompts accordingly.</p>
       <div class="dose-btn-row">
         <button type="button" class="dose-btn" id="dose1Btn" onclick="markDose(1)" disabled>
           <span class="dose-btn-icon">💉</span>
@@ -106,22 +106,22 @@
         <div class="dose-grid" id="benzoDoses">
           <div class="dose-item">
             <div class="dose-drug">Buccal midazolam</div>
-            <div class="dose-value" id="doseBuccalMidaz">—</div>
+            <div class="dose-value" id="doseBuccalMidaz">-</div>
             <div class="dose-note">0.5 mg/kg, max 10 mg</div>
           </div>
           <div class="dose-item">
             <div class="dose-drug">Buccal midazolam (age-band)</div>
-            <div class="dose-value" id="doseBuccolam">—</div>
+            <div class="dose-value" id="doseBuccolam">-</div>
             <div class="dose-note">Age-band. 3–6 mo: hospital only</div>
           </div>
           <div class="dose-item">
             <div class="dose-drug">IV Lorazepam</div>
-            <div class="dose-value" id="doseLorazepam">—</div>
+            <div class="dose-value" id="doseLorazepam">-</div>
             <div class="dose-note">0.1 mg/kg, max 4 mg</div>
           </div>
           <div class="dose-item">
             <div class="dose-drug">PR Diazepam</div>
-            <div class="dose-value" id="dosePRDiazepam">—</div>
+            <div class="dose-value" id="dosePRDiazepam">-</div>
             <div class="dose-note">0.5 mg/kg, max 10 mg</div>
           </div>
         </div>
@@ -131,12 +131,12 @@
         <div class="dose-grid" id="secondLineDoses">
           <div class="dose-item">
             <div class="dose-drug">Levetiracetam IV</div>
-            <div class="dose-value" id="doseLevetiracetam">—</div>
+            <div class="dose-value" id="doseLevetiracetam">-</div>
             <div class="dose-note">40 mg/kg, max 3 g, over 5 min</div>
           </div>
           <div class="dose-item">
             <div class="dose-drug">Phenytoin IV</div>
-            <div class="dose-value" id="dosePhenytoin">—</div>
+            <div class="dose-value" id="dosePhenytoin">-</div>
             <div class="dose-note">20 mg/kg, over 20 min, ECG monitoring</div>
           </div>
         </div>
@@ -165,12 +165,12 @@
     const hasWeight = w && w >= 2;
     const hasAge = !isNaN(ageMo) && ageMo >= 0;
     if (!hasWeight && !hasAge) {
-      document.getElementById('doseBuccalMidaz').textContent = '—';
-      document.getElementById('doseBuccolam').textContent = '—';
-      document.getElementById('doseLorazepam').textContent = '—';
-      document.getElementById('dosePRDiazepam').textContent = '—';
-      document.getElementById('doseLevetiracetam').textContent = '—';
-      document.getElementById('dosePhenytoin').textContent = '—';
+      document.getElementById('doseBuccalMidaz').textContent = '-';
+      document.getElementById('doseBuccolam').textContent = '-';
+      document.getElementById('doseLorazepam').textContent = '-';
+      document.getElementById('dosePRDiazepam').textContent = '-';
+      document.getElementById('doseLevetiracetam').textContent = '-';
+      document.getElementById('dosePhenytoin').textContent = '-';
       return;
     }
     if (hasWeight) {
@@ -185,11 +185,11 @@
       document.getElementById('doseLevetiracetam').textContent = levetiracetam >= 1000 ? (levetiracetam / 1000).toFixed(1) + ' g' : levetiracetam + ' mg';
       document.getElementById('dosePhenytoin').textContent = phenytoin >= 1000 ? (phenytoin / 1000).toFixed(1) + ' g' : phenytoin + ' mg';
     } else {
-      document.getElementById('doseBuccalMidaz').textContent = '—';
-      document.getElementById('doseLorazepam').textContent = '—';
-      document.getElementById('dosePRDiazepam').textContent = '—';
-      document.getElementById('doseLevetiracetam').textContent = '—';
-      document.getElementById('dosePhenytoin').textContent = '—';
+      document.getElementById('doseBuccalMidaz').textContent = '-';
+      document.getElementById('doseLorazepam').textContent = '-';
+      document.getElementById('dosePRDiazepam').textContent = '-';
+      document.getElementById('doseLevetiracetam').textContent = '-';
+      document.getElementById('dosePhenytoin').textContent = '-';
     }
     if (hasAge) {
       let buccolam;
@@ -201,7 +201,7 @@
       else buccolam = 10;
       document.getElementById('doseBuccolam').textContent = buccolam !== null ? buccolam + ' mg' : '<3 mo';
     } else {
-      document.getElementById('doseBuccolam').textContent = '—';
+      document.getElementById('doseBuccolam').textContent = '-';
     }
   };
 
@@ -389,3 +389,4 @@
 </script>
 </body>
 </html>
+
