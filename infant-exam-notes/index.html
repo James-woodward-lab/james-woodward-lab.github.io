@@ -54,53 +54,63 @@
     }
     .section-groups-grid--single { grid-template-columns: 1fr !important; }
 
-    /* Cardiovascular: heart sounds (left) + radial pulses (right) on one row when 2-column */
+    /* Cardiovascular: NAD full-width row 1; heart sounds + radial on row 2 when 2-column */
     @container section-card (min-width: 34rem) {
+      .section-groups-grid--cardiovascular .cvs-nad-slot {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        align-self: start;
+      }
       .section-groups-grid--cardiovascular .cvs-heart-slot {
         grid-column: 1;
-        grid-row: 1;
+        grid-row: 2;
         align-self: start;
       }
       .section-groups-grid--cardiovascular .cvs-radial-slot {
         grid-column: 2;
-        grid-row: 1;
+        grid-row: 2;
         align-self: start;
       }
       .section-groups-grid--cardiovascular .cvs-murmur-slot {
         grid-column: 1 / -1;
-        grid-row: 2;
+        grid-row: 3;
       }
       .section-groups-grid--cardiovascular .cvs-femoral-slot {
         grid-column: 1 / -1;
-        grid-row: 3;
+        grid-row: 4;
       }
       .section-groups-grid--cardiovascular .cvs-hep-slot {
         grid-column: 1 / -1;
-        grid-row: 4;
+        grid-row: 5;
       }
     }
     @media (min-width: 640px) {
+      .section-groups-grid--cardiovascular .cvs-nad-slot {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        align-self: start;
+      }
       .section-groups-grid--cardiovascular .cvs-heart-slot {
         grid-column: 1;
-        grid-row: 1;
+        grid-row: 2;
         align-self: start;
       }
       .section-groups-grid--cardiovascular .cvs-radial-slot {
         grid-column: 2;
-        grid-row: 1;
+        grid-row: 2;
         align-self: start;
       }
       .section-groups-grid--cardiovascular .cvs-murmur-slot {
         grid-column: 1 / -1;
-        grid-row: 2;
+        grid-row: 3;
       }
       .section-groups-grid--cardiovascular .cvs-femoral-slot {
         grid-column: 1 / -1;
-        grid-row: 3;
+        grid-row: 4;
       }
       .section-groups-grid--cardiovascular .cvs-hep-slot {
         grid-column: 1 / -1;
-        grid-row: 4;
+        grid-row: 5;
       }
     }
 
@@ -849,21 +859,12 @@
     ];
     var HEENT_NECK_MENINGISM_YN_ROWS = [
       { key: 'neckMovement', label: 'Normal neck movements', yes: 'normal neck movements', no: 'Neck movements limited', normalYes: true },
-      { key: 'kernigsSign', label: "Kernig's sign negative", yes: "Kernig's sign negative", no: "Kernig's sign positive", normalYes: true },
+      { key: 'appearsMeningitic', label: 'Does not appear meningitic', yes: 'does not appear meningitic', no: 'Appearance concerning for meningitis', normalYes: true },
       { key: 'photophobia', label: 'No photophobia', yes: 'no photophobia', no: 'photophobic', normalYes: true },
-      { key: 'appearsMeningitic', label: 'Does not appear meningitic', yes: 'does not appear meningitic', no: 'Appearance concerning for meningitis', normalYes: true }
+      { key: 'kernigsSign', label: "Kernig's sign negative", yes: "Kernig's sign negative", no: "Kernig's sign positive", normalYes: true }
     ];
 
     var CARDIOVASCULAR_FINDINGS_YN_ROWS = [
-      {
-        key: 'femoralPulses',
-        label: 'Femorals palpable and equal',
-        yes: 'Femoral pulses palpable and equal bilaterally',
-        no: 'Femoral pulses not palpable/equal',
-        normalYes: true,
-        yesTag: 'Normal finding',
-        noTag: 'urgent abnormal finding'
-      },
       {
         key: 'hepatomegaly',
         label: 'Hepatomegaly',
@@ -881,6 +882,15 @@
         normalYes: false,
         yesTag: 'urgent abnormal finding',
         noTag: 'Normal finding'
+      },
+      {
+        key: 'femoralPulses',
+        label: 'Femorals palpable and equal',
+        yes: 'Femoral pulses palpable and equal bilaterally',
+        no: 'Femoral pulses not palpable/equal',
+        normalYes: true,
+        yesTag: 'Normal finding',
+        noTag: 'urgent abnormal finding'
       },
       {
         key: 'cyanosis',
@@ -976,8 +986,8 @@
           { type: 'radio', name: 'wob', label: 'Work of breathing', options: ['No WOB', 'Mild', 'Moderate', { value: 'Severe', tag: 'urgent abnormal finding' }] },
           { type: 'respiratoryAccessoryYn', name: 'accessory', label: '', rows: RESPIRATORY_ACCESSORY_YN_ROWS },
           { type: 'radio', name: 'upperAirwayMode', label: 'Upper airway sounds', options: [{ value: 'No airway noises', tag: 'Normal finding' }, { value: 'Upper airway sounds', tag: 'abnormal finding' }] },
-          { type: 'radio', name: 'coughing', label: 'Coughing', options: [{ value: 'Dry cough', tag: 'Normal finding' }, { value: 'Wet cough', tag: 'abnormal finding' }, { value: 'Barking cough', tag: 'abnormal finding' }] },
           { type: 'radio', name: 'chestAppearance', label: 'Chest appearance', options: ['Good chest rise', { value: 'Poor chest rise', tag: 'urgent abnormal finding' }, 'Asymmetrical chest rise'] },
+          { type: 'radio', name: 'coughing', label: 'Coughing', options: [{ value: 'Dry cough', tag: 'Normal finding' }, { value: 'Wet cough', tag: 'abnormal finding' }, { value: 'Barking cough', tag: 'abnormal finding' }] },
           { type: 'radio', name: 'auscultationMode', label: 'Auscultation', options: ['Chest clear', 'Added sounds'] }
         ],
         freeHint: 'Describe cough or added sounds'
@@ -1016,7 +1026,7 @@
         label: 'Skin',
         icon: '💪',
         groups: [
-          { type: 'radio', name: 'colour', label: 'Colour', options: ['Pink', 'Pale', 'Jaundiced', 'Mottled', 'Cyanosed'] },
+          { type: 'radio', name: 'colour', label: 'Colour', options: [{ value: 'No pallor', tag: 'Normal finding' }, { value: 'Pale', tag: 'abnormal finding' }, { value: 'Jaundiced', tag: 'abnormal finding' }, { value: 'Mottled', tag: 'urgent abnormal finding' }, { value: 'Cyanosed', tag: 'urgent abnormal finding' }] },
           { type: 'radio', name: 'rash', label: 'Rash', options: ['No rash', 'Rash (blanching)', 'Rash (non-blanching)'] },
           { type: 'radio', name: 'bruising', label: 'Bruising', options: ['No bruising', 'Bruising present'] },
           { type: 'radio', name: 'nappy', label: 'Nappy area', options: ['Nappy area intact', 'Nappy rash present'] },
@@ -1524,7 +1534,7 @@
       'Well': 'appears well',
       'Mildly unwell': 'appears mildly unwell',
       'Toxic/Septic': 'appears toxic/septic',
-      'Interacting with carer': 'interacting well with carer',
+      'Interacting with carer': 'interacting appropriately with carer',
       'Comfortable': 'comfortable at rest',
       'Mild pain': 'in mild pain at rest',
       'Moderate pain': 'in moderate pain at rest',
@@ -2194,6 +2204,12 @@
         if (input.name === 'skin__rash' || input.name === 'skin__bruising') updateSkinRashBruisingFields();
         if (input.name === 'heent__oral_cavity_vis' || input.name === 'heent__tonsils_vis') updateHeentOralCavityPanel();
         if (input.name === 'general__state' || input.name === 'general__appearance' || input.name === 'general__comfort' || input.name === 'general__interaction') syncGeneralNadPill();
+        if (input.name === 'perfusionHydration__crtCentral' || input.name === 'perfusionHydration__crtPeripheral' || input.name === 'perfusionHydration__perfusion' || input.name === 'perfusionHydration__mucosa') syncPerfusionNadPill();
+        if (input.name === 'cardiovascular__heartMurmur' || input.name === 'cardiovascular__radialPulse') syncCardiovascularNadPill();
+        if (input.name === 'respiratory__wob' || input.name === 'respiratory__upperAirwayMode' || input.name === 'respiratory__chestAppearance' || input.name === 'respiratory__auscultationMode') syncRespiratoryNadPill();
+        if (input.name === 'abdomen__consistency' || input.name === 'abdomen__distension' || input.name === 'abdomen__tenderness' || input.name === 'abdomen__guarding' || input.name === 'abdomen__bowelSounds') syncAbdomenNadPill();
+        if (input.name === 'heent__tm_nad' || input.name === 'heent__photo' || input.name === 'heent__pearl' || input.name === 'heent__conj' || input.name === 'heent__lips' || input.name === 'heent__oral_cavity_vis' || input.name === 'heent__tonsils_vis' || input.name === 'heent__neck_ln') syncHeentNadPill();
+        if (input.name === 'skin__colour' || input.name === 'skin__rash' || input.name === 'skin__bruising' || input.name === 'skin__nappy' || input.name === 'skin__perfusion') syncSkinNadPill();
         updateOutput();
         return;
       }
@@ -2221,6 +2237,8 @@
       else if (n === 'heent__conj' && (v === 'Conjunctival injection' || v === 'Conjunctival discharge')) label.classList.add('abnormal');
       else if (n === 'respiratory__wob' && (v === 'Mild' || v === 'Moderate' || v === 'Severe')) label.classList.add('abnormal');
       else if (n === 'respiratory__wob' && v === 'No WOB') label.classList.add('pill-normal');
+      else if (n === 'skin__colour' && v === 'No pallor') label.classList.add('pill-normal');
+      else if (n === 'skin__colour') label.classList.add('abnormal');
       else {
         var ph = pillHighlightClassFromTaggedInput(input);
         if (ph === 'abnormal') label.classList.add('abnormal');
@@ -2246,6 +2264,12 @@
       if (n === 'heent__oral_cavity_vis' || n === 'heent__tonsils_vis') updateHeentOralCavityPanel();
       if (n === 'skin__rash' || n === 'skin__bruising') updateSkinRashBruisingFields();
       if (n === 'general__state' || n === 'general__appearance' || n === 'general__comfort' || n === 'general__interaction') syncGeneralNadPill();
+      if (n === 'perfusionHydration__crtCentral' || n === 'perfusionHydration__crtPeripheral' || n === 'perfusionHydration__perfusion' || n === 'perfusionHydration__mucosa') syncPerfusionNadPill();
+      if (n === 'cardiovascular__heartMurmur' || n === 'cardiovascular__radialPulse') syncCardiovascularNadPill();
+      if (n === 'respiratory__wob' || n === 'respiratory__upperAirwayMode' || n === 'respiratory__chestAppearance' || n === 'respiratory__auscultationMode') syncRespiratoryNadPill();
+      if (n === 'abdomen__consistency' || n === 'abdomen__distension' || n === 'abdomen__tenderness' || n === 'abdomen__guarding' || n === 'abdomen__bowelSounds') syncAbdomenNadPill();
+      if (n === 'heent__tm_nad' || n === 'heent__photo' || n === 'heent__pearl' || n === 'heent__conj' || n === 'heent__lips' || n === 'heent__oral_cavity_vis' || n === 'heent__tonsils_vis' || n === 'heent__neck_ln') syncHeentNadPill();
+      if (n === 'skin__colour' || n === 'skin__rash' || n === 'skin__bruising' || n === 'skin__nappy' || n === 'skin__perfusion') syncSkinNadPill();
       updateOutput();
     }
 
@@ -2307,6 +2331,548 @@
       if (generalMatchesNadPreset()) clearGeneralNadRowsViaPills();
       else applyGeneralNadViaPills();
       syncGeneralNadPill();
+    }
+
+    var PERFUSION_NAD_KEYS = ['crtCentral', 'crtPeripheral', 'perfusion', 'mucosa'];
+    var PERFUSION_NAD_VALUES = {
+      crtCentral: '<2s',
+      crtPeripheral: '<2s',
+      perfusion: 'Warm and well perfused',
+      mucosa: 'Moist mucous membranes'
+    };
+
+    function perfusionMatchesNadPreset() {
+      for (var pi = 0; pi < PERFUSION_NAD_KEYS.length; pi++) {
+        var pk = PERFUSION_NAD_KEYS[pi];
+        var pel = document.querySelector('input[name="perfusionHydration__' + pk + '"]:checked');
+        if (!pel || pel.value !== PERFUSION_NAD_VALUES[pk]) return false;
+      }
+      return true;
+    }
+
+    function getPerfusionPillLabelForValue(groupName, value) {
+      var pinp = document.querySelector('input[name="perfusionHydration__' + groupName + '"][value="' + value + '"]');
+      return pinp ? pinp.closest('.pill-opt') : null;
+    }
+
+    function applyPerfusionNadViaPills() {
+      var pev = generalNadStubEv();
+      for (var pj = 0; pj < PERFUSION_NAD_KEYS.length; pj++) {
+        var pk2 = PERFUSION_NAD_KEYS[pj];
+        var pwant = PERFUSION_NAD_VALUES[pk2];
+        var pcur = document.querySelector('input[name="perfusionHydration__' + pk2 + '"]:checked');
+        if (pcur && pcur.value === pwant) continue;
+        var plab = getPerfusionPillLabelForValue(pk2, pwant);
+        if (plab) handlePillClick(plab, pev);
+      }
+    }
+
+    function clearPerfusionNadRowsViaPills() {
+      var pev2 = generalNadStubEv();
+      for (var pk3 = 0; pk3 < PERFUSION_NAD_KEYS.length; pk3++) {
+        var pkName = PERFUSION_NAD_KEYS[pk3];
+        var pchk = document.querySelector('input[name="perfusionHydration__' + pkName + '"]:checked');
+        if (!pchk) continue;
+        var plab2 = pchk.closest('.pill-opt');
+        if (plab2) handlePillClick(plab2, pev2);
+      }
+    }
+
+    function syncPerfusionNadPill() {
+      var pbtn = document.getElementById('perfusionNadPill');
+      if (!pbtn) return;
+      pbtn.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (perfusionMatchesNadPreset()) {
+        pbtn.classList.add('selected', 'pill-normal');
+      }
+    }
+
+    function onPerfusionNadPillClick(ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      if (perfusionMatchesNadPreset()) clearPerfusionNadRowsViaPills();
+      else applyPerfusionNadViaPills();
+      syncPerfusionNadPill();
+    }
+
+    var CVS_FINDINGS_PREFIX = 'cardiovascular__findings';
+
+    function getCardiovascularCvsYnRow(rowKey) {
+      var wrap = document.querySelector('[data-yesno-prefix="' + CVS_FINDINGS_PREFIX + '"]');
+      if (!wrap) return null;
+      return wrap.querySelector('.yesno-toggle-row[data-row-key="' + rowKey + '"]');
+    }
+
+    function setCardiovascularCvsFindingNoSelected(rowKey, selected) {
+      var yesEl = document.getElementById(CVS_FINDINGS_PREFIX + '__' + rowKey + '__yes');
+      var noEl = document.getElementById(CVS_FINDINGS_PREFIX + '__' + rowKey + '__no');
+      var ynRow = getCardiovascularCvsYnRow(rowKey);
+      if (!yesEl || !noEl || !ynRow) return;
+      if (selected) {
+        yesEl.checked = false;
+        noEl.checked = true;
+      } else {
+        yesEl.checked = false;
+        noEl.checked = false;
+      }
+      syncYesNoToggleRowStyles(ynRow);
+    }
+
+    function cardiovascularMatchesNadPreset() {
+      var murmurEl = document.querySelector('input[name="cardiovascular__heartMurmur"]:checked');
+      if (!murmurEl || murmurEl.value !== 'HS I + II only') return false;
+      var radialEl = document.querySelector('input[name="cardiovascular__radialPulse"]:checked');
+      if (!radialEl || radialEl.value !== 'Radial pulses normal') return false;
+      var hmNo = document.getElementById(CVS_FINDINGS_PREFIX + '__hepatomegaly__no');
+      var hmYes = document.getElementById(CVS_FINDINGS_PREFIX + '__hepatomegaly__yes');
+      if (!hmNo || !hmNo.checked || (hmYes && hmYes.checked)) return false;
+      var poNo = document.getElementById(CVS_FINDINGS_PREFIX + '__peripheralOedema__no');
+      var poYes = document.getElementById(CVS_FINDINGS_PREFIX + '__peripheralOedema__yes');
+      if (!poNo || !poNo.checked || (poYes && poYes.checked)) return false;
+      return true;
+    }
+
+    function getCardiovascularPillLabel(nameAttrPrefixEnd, value) {
+      var inp = document.querySelector('input[name="' + nameAttrPrefixEnd + '"][value="' + value + '"]');
+      return inp ? inp.closest('.pill-opt') : null;
+    }
+
+    function applyCardiovascularNadViaPills() {
+      var cev = generalNadStubEv();
+      var murmurWant = 'HS I + II only';
+      var murmurCur = document.querySelector('input[name="cardiovascular__heartMurmur"]:checked');
+      if (!murmurCur || murmurCur.value !== murmurWant) {
+        var murmurLab = getCardiovascularPillLabel('cardiovascular__heartMurmur', murmurWant);
+        if (murmurLab) handlePillClick(murmurLab, cev);
+      }
+      var radWant = 'Radial pulses normal';
+      var radCur = document.querySelector('input[name="cardiovascular__radialPulse"]:checked');
+      if (!radCur || radCur.value !== radWant) {
+        var radLab = getCardiovascularPillLabel('cardiovascular__radialPulse', radWant);
+        if (radLab) handlePillClick(radLab, cev);
+      }
+      var hmNo = document.getElementById(CVS_FINDINGS_PREFIX + '__hepatomegaly__no');
+      if (!hmNo || !hmNo.checked) setCardiovascularCvsFindingNoSelected('hepatomegaly', true);
+      var poNo = document.getElementById(CVS_FINDINGS_PREFIX + '__peripheralOedema__no');
+      if (!poNo || !poNo.checked) setCardiovascularCvsFindingNoSelected('peripheralOedema', true);
+      updateOutput();
+    }
+
+    function clearCardiovascularNadSelections() {
+      var cev2 = generalNadStubEv();
+      var murmurChk = document.querySelector('input[name="cardiovascular__heartMurmur"]:checked');
+      if (murmurChk) {
+        var murmurLab2 = murmurChk.closest('.pill-opt');
+        if (murmurLab2) handlePillClick(murmurLab2, cev2);
+      }
+      var radChk = document.querySelector('input[name="cardiovascular__radialPulse"]:checked');
+      if (radChk) {
+        var radLab2 = radChk.closest('.pill-opt');
+        if (radLab2) handlePillClick(radLab2, cev2);
+      }
+      setCardiovascularCvsFindingNoSelected('hepatomegaly', false);
+      setCardiovascularCvsFindingNoSelected('peripheralOedema', false);
+      updateOutput();
+    }
+
+    function syncCardiovascularNadPill() {
+      var cbtn = document.getElementById('cardiovascularNadPill');
+      if (!cbtn) return;
+      cbtn.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (cardiovascularMatchesNadPreset()) {
+        cbtn.classList.add('selected', 'pill-normal');
+      }
+    }
+
+    function onCardiovascularNadPillClick(ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      if (cardiovascularMatchesNadPreset()) clearCardiovascularNadSelections();
+      else applyCardiovascularNadViaPills();
+      syncCardiovascularNadPill();
+    }
+
+    var RESPIRATORY_NAD_ROWS = [
+      { radioName: 'respiratory__wob', value: 'No WOB' },
+      { radioName: 'respiratory__upperAirwayMode', value: 'No airway noises' },
+      { radioName: 'respiratory__chestAppearance', value: 'Good chest rise' },
+      { radioName: 'respiratory__auscultationMode', value: 'Chest clear' }
+    ];
+
+    function getRespiratoryPillLabel(radioName, value) {
+      var rins = document.querySelector('input[name="' + radioName + '"][value="' + value + '"]');
+      return rins ? rins.closest('.pill-opt') : null;
+    }
+
+    function respiratoryMatchesNadPreset() {
+      for (var ri = 0; ri < RESPIRATORY_NAD_ROWS.length; ri++) {
+        var rdef = RESPIRATORY_NAD_ROWS[ri];
+        var rel = document.querySelector('input[name="' + rdef.radioName + '"]:checked');
+        if (!rel || rel.value !== rdef.value) return false;
+      }
+      return true;
+    }
+
+    function applyRespiratoryNadViaPills() {
+      var rev = generalNadStubEv();
+      for (var rj = 0; rj < RESPIRATORY_NAD_ROWS.length; rj++) {
+        var rspec = RESPIRATORY_NAD_ROWS[rj];
+        var rcur = document.querySelector('input[name="' + rspec.radioName + '"]:checked');
+        if (rcur && rcur.value === rspec.value) continue;
+        var rlab = getRespiratoryPillLabel(rspec.radioName, rspec.value);
+        if (rlab) handlePillClick(rlab, rev);
+      }
+      updateOutput();
+    }
+
+    function clearRespiratoryNadSelections() {
+      var rev2 = generalNadStubEv();
+      for (var rk = 0; rk < RESPIRATORY_NAD_ROWS.length; rk++) {
+        var rspec2 = RESPIRATORY_NAD_ROWS[rk];
+        var rchk = document.querySelector('input[name="' + rspec2.radioName + '"]:checked');
+        if (!rchk) continue;
+        var rlab2 = rchk.closest('.pill-opt');
+        if (rlab2) handlePillClick(rlab2, rev2);
+      }
+      updateOutput();
+    }
+
+    function syncRespiratoryNadPill() {
+      var rbtn = document.getElementById('respiratoryNadPill');
+      if (!rbtn) return;
+      rbtn.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (respiratoryMatchesNadPreset()) {
+        rbtn.classList.add('selected', 'pill-normal');
+      }
+    }
+
+    function onRespiratoryNadPillClick(ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      if (respiratoryMatchesNadPreset()) clearRespiratoryNadSelections();
+      else applyRespiratoryNadViaPills();
+      syncRespiratoryNadPill();
+    }
+
+    var ABDOMEN_PERITONITIC_PREFIX = 'abdomen__peritonitic';
+
+    function getAbdomenPeritoniticYnRow(rowKey) {
+      var wrap = document.querySelector('[data-yesno-prefix="' + ABDOMEN_PERITONITIC_PREFIX + '"]');
+      if (!wrap) return null;
+      return wrap.querySelector('.yesno-toggle-row[data-row-key="' + rowKey + '"]');
+    }
+
+    function setAbdomenPeritoniticRowNoSelected(rowKey, selected) {
+      var yesEl = document.getElementById(ABDOMEN_PERITONITIC_PREFIX + '__' + rowKey + '__yes');
+      var noEl = document.getElementById(ABDOMEN_PERITONITIC_PREFIX + '__' + rowKey + '__no');
+      var ynRow = getAbdomenPeritoniticYnRow(rowKey);
+      if (!yesEl || !noEl || !ynRow) return;
+      if (selected) {
+        yesEl.checked = false;
+        noEl.checked = true;
+      } else {
+        yesEl.checked = false;
+        noEl.checked = false;
+      }
+      syncYesNoToggleRowStyles(ynRow);
+    }
+
+    var ABDOMEN_NAD_ROWS = [
+      { radioName: 'abdomen__consistency', value: 'Soft' },
+      { radioName: 'abdomen__distension', value: 'Non-distended' },
+      { radioName: 'abdomen__tenderness', value: 'Non-tender' },
+      { radioName: 'abdomen__guarding', value: 'No guarding' },
+      { radioName: 'abdomen__bowelSounds', value: 'Bowel sounds present' }
+    ];
+    var ABDOMEN_NAD_CHECK_INDICES = [0, 1];
+
+    function getAbdomenPillLabelForValue(radioName, value) {
+      var ain = document.querySelector('input[name="' + radioName + '"][value="' + value + '"]');
+      return ain ? ain.closest('.pill-opt') : null;
+    }
+
+    function syncAbdomenChecksLabelStyle(checkboxEl) {
+      var lab = checkboxEl ? checkboxEl.closest('.check-opt') : null;
+      if (!lab || !checkboxEl) return;
+      lab.classList.remove('selected', 'abnormal', 'pill-normal');
+      if (!checkboxEl.checked) return;
+      lab.classList.add('selected');
+      var phc = pillHighlightClassFromTaggedInput(checkboxEl);
+      if (phc === 'abnormal') lab.classList.add('abnormal');
+      else if (phc === 'pill-normal') lab.classList.add('pill-normal');
+      else if (classifyFinding(checkboxEl.value) === 'abnormal') lab.classList.add('abnormal');
+      else if (classifyFinding(checkboxEl.value) === 'normal') lab.classList.add('pill-normal');
+    }
+
+    function abdomenMatchesNadPreset() {
+      for (var abi = 0; abi < ABDOMEN_NAD_ROWS.length; abi++) {
+        var abdef = ABDOMEN_NAD_ROWS[abi];
+        var acel = document.querySelector('input[name="' + abdef.radioName + '"]:checked');
+        if (!acel || acel.value !== abdef.value) return false;
+      }
+      var ptYes = document.getElementById(ABDOMEN_PERITONITIC_PREFIX + '__peritonitic__yes');
+      var ptNo = document.getElementById(ABDOMEN_PERITONITIC_PREFIX + '__peritonitic__no');
+      if (!ptNo || !ptNo.checked || (ptYes && ptYes.checked)) return false;
+      for (var acj = 0; acj < ABDOMEN_NAD_CHECK_INDICES.length; acj++) {
+        var acbx = document.getElementById('abdomen__checks__' + ABDOMEN_NAD_CHECK_INDICES[acj]);
+        if (!acbx || !acbx.checked) return false;
+      }
+      return true;
+    }
+
+    function applyAbdomenNadViaControls() {
+      var abev = generalNadStubEv();
+      for (var abk = 0; abk < ABDOMEN_NAD_ROWS.length; abk++) {
+        var abspec = ABDOMEN_NAD_ROWS[abk];
+        var abcur = document.querySelector('input[name="' + abspec.radioName + '"]:checked');
+        if (abcur && abcur.value === abspec.value) continue;
+        var ablab = getAbdomenPillLabelForValue(abspec.radioName, abspec.value);
+        if (ablab) handlePillClick(ablab, abev);
+      }
+      var ptNoCur = document.getElementById(ABDOMEN_PERITONITIC_PREFIX + '__peritonitic__no');
+      if (!ptNoCur || !ptNoCur.checked) setAbdomenPeritoniticRowNoSelected('peritonitic', true);
+      for (var ack = 0; ack < ABDOMEN_NAD_CHECK_INDICES.length; ack++) {
+        var ckIdx = ABDOMEN_NAD_CHECK_INDICES[ack];
+        var ckEl = document.getElementById('abdomen__checks__' + ckIdx);
+        if (ckEl && !ckEl.checked) {
+          ckEl.checked = true;
+          syncAbdomenChecksLabelStyle(ckEl);
+        }
+      }
+      updateAbdomenTendernessField();
+      updateOutput();
+    }
+
+    function clearAbdomenNadSelections() {
+      var abev2 = generalNadStubEv();
+      for (var abm = 0; abm < ABDOMEN_NAD_ROWS.length; abm++) {
+        var abspec2 = ABDOMEN_NAD_ROWS[abm];
+        var abchk = document.querySelector('input[name="' + abspec2.radioName + '"]:checked');
+        if (!abchk) continue;
+        var ablab2 = abchk.closest('.pill-opt');
+        if (ablab2) handlePillClick(ablab2, abev2);
+      }
+      setAbdomenPeritoniticRowNoSelected('peritonitic', false);
+      for (var acl = 0; acl < ABDOMEN_NAD_CHECK_INDICES.length; acl++) {
+        var ckIdx2 = ABDOMEN_NAD_CHECK_INDICES[acl];
+        var ckEl2 = document.getElementById('abdomen__checks__' + ckIdx2);
+        if (ckEl2 && ckEl2.checked) {
+          ckEl2.checked = false;
+          syncAbdomenChecksLabelStyle(ckEl2);
+        }
+      }
+      updateAbdomenTendernessField();
+      updateOutput();
+    }
+
+    function syncAbdomenNadPill() {
+      var abbtn = document.getElementById('abdomenNadPill');
+      if (!abbtn) return;
+      abbtn.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (abdomenMatchesNadPreset()) {
+        abbtn.classList.add('selected', 'pill-normal');
+      }
+    }
+
+    function onAbdomenNadPillClick(ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      if (abdomenMatchesNadPreset()) clearAbdomenNadSelections();
+      else applyAbdomenNadViaControls();
+      syncAbdomenNadPill();
+    }
+
+    var HEENT_ORAL_YN_PREFIX = 'heent__oral_yn';
+    var HEENT_NECK_MENINGISM_PREFIX = 'heent__neck_meningism_yn';
+
+    function getHeentPillLabel(name, value) {
+      var hin = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
+      return hin ? hin.closest('.pill-opt') : null;
+    }
+
+    function getHeentOralYnRow(rowKey) {
+      var wrap = document.querySelector('[data-yesno-prefix="' + HEENT_ORAL_YN_PREFIX + '"]');
+      if (!wrap) return null;
+      return wrap.querySelector('.yesno-toggle-row[data-row-key="' + rowKey + '"]');
+    }
+
+    function getHeentNeckMeningismYnRow(rowKey) {
+      var wrap = document.querySelector('[data-yesno-prefix="' + HEENT_NECK_MENINGISM_PREFIX + '"]');
+      if (!wrap) return null;
+      return wrap.querySelector('.yesno-toggle-row[data-row-key="' + rowKey + '"]');
+    }
+
+    function setHeentOralYnRowNoSelected(rowKey, selected) {
+      var yesEl = document.getElementById(HEENT_ORAL_YN_PREFIX + '__' + rowKey + '__yes');
+      var noEl = document.getElementById(HEENT_ORAL_YN_PREFIX + '__' + rowKey + '__no');
+      var ynRow = getHeentOralYnRow(rowKey);
+      if (!yesEl || !noEl || !ynRow) return;
+      if (selected) {
+        yesEl.checked = false;
+        noEl.checked = true;
+      } else {
+        yesEl.checked = false;
+        noEl.checked = false;
+      }
+      syncYesNoToggleRowStyles(ynRow);
+    }
+
+    function setHeentNeckMeningismRowYesSelected(rowKey, selected) {
+      var yesEl = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__' + rowKey + '__yes');
+      var noEl = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__' + rowKey + '__no');
+      var ynRow = getHeentNeckMeningismYnRow(rowKey);
+      if (!yesEl || !noEl || !ynRow) return;
+      if (selected) {
+        yesEl.checked = true;
+        noEl.checked = false;
+      } else {
+        yesEl.checked = false;
+        noEl.checked = false;
+      }
+      syncYesNoToggleRowStyles(ynRow);
+    }
+
+    var HEENT_NAD_ROWS = [
+      { radioName: 'heent__tm_nad', value: 'Tympanic membranes NAD bilaterally' },
+      { radioName: 'heent__photo', value: 'No photophobia' },
+      { radioName: 'heent__pearl', value: 'PEARL' },
+      { radioName: 'heent__conj', value: 'Normal conjunctiva' },
+      { radioName: 'heent__lips', value: 'Lips normal' },
+      { radioName: 'heent__oral_cavity_vis', value: 'Pharynx visualised' },
+      { radioName: 'heent__tonsils_vis', value: 'Tonsils NAD' },
+      { radioName: 'heent__neck_ln', value: 'No lymphadenopathy' }
+    ];
+
+    function heentMatchesNadPreset() {
+      for (var hi = 0; hi < HEENT_NAD_ROWS.length; hi++) {
+        var hdef = HEENT_NAD_ROWS[hi];
+        var hel = document.querySelector('input[name="' + hdef.radioName + '"]:checked');
+        if (!hel || hel.value !== hdef.value) return false;
+      }
+      var phYes = document.getElementById(HEENT_ORAL_YN_PREFIX + '__pharyngealEry__yes');
+      var phNo = document.getElementById(HEENT_ORAL_YN_PREFIX + '__pharyngealEry__no');
+      if (!phNo || !phNo.checked || (phYes && phYes.checked)) return false;
+      var nmYes = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__neckMovement__yes');
+      var nmNo = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__neckMovement__no');
+      if (!nmYes || !nmYes.checked || (nmNo && nmNo.checked)) return false;
+      var amYes = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__appearsMeningitic__yes');
+      var amNo = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__appearsMeningitic__no');
+      if (!amYes || !amYes.checked || (amNo && amNo.checked)) return false;
+      return true;
+    }
+
+    function applyHeentNadViaControls() {
+      var hev = generalNadStubEv();
+      for (var hj = 0; hj < HEENT_NAD_ROWS.length; hj++) {
+        var hspec = HEENT_NAD_ROWS[hj];
+        var hcur = document.querySelector('input[name="' + hspec.radioName + '"]:checked');
+        if (hcur && hcur.value === hspec.value) continue;
+        var hlab = getHeentPillLabel(hspec.radioName, hspec.value);
+        if (hlab) handlePillClick(hlab, hev);
+      }
+      var phNoCur = document.getElementById(HEENT_ORAL_YN_PREFIX + '__pharyngealEry__no');
+      if (!phNoCur || !phNoCur.checked) setHeentOralYnRowNoSelected('pharyngealEry', true);
+      var nmYesCur = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__neckMovement__yes');
+      if (!nmYesCur || !nmYesCur.checked) setHeentNeckMeningismRowYesSelected('neckMovement', true);
+      var amYesCur = document.getElementById(HEENT_NECK_MENINGISM_PREFIX + '__appearsMeningitic__yes');
+      if (!amYesCur || !amYesCur.checked) setHeentNeckMeningismRowYesSelected('appearsMeningitic', true);
+      updateHeentTmFindingsPanel();
+      updateHeentOralCavityPanel();
+      updateOutput();
+    }
+
+    function clearHeentNadSelections() {
+      var hev2 = generalNadStubEv();
+      for (var hk = 0; hk < HEENT_NAD_ROWS.length; hk++) {
+        var hspec2 = HEENT_NAD_ROWS[hk];
+        var hchk = document.querySelector('input[name="' + hspec2.radioName + '"]:checked');
+        if (!hchk || hchk.value !== hspec2.value) continue;
+        var hlab2 = hchk.closest('.pill-opt');
+        if (hlab2) handlePillClick(hlab2, hev2);
+      }
+      setHeentOralYnRowNoSelected('pharyngealEry', false);
+      setHeentNeckMeningismRowYesSelected('neckMovement', false);
+      setHeentNeckMeningismRowYesSelected('appearsMeningitic', false);
+      updateHeentOralCavityPanel();
+      updateOutput();
+    }
+
+    function syncHeentNadPill() {
+      var hbtn = document.getElementById('heentNadPill');
+      if (!hbtn) return;
+      hbtn.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (heentMatchesNadPreset()) {
+        hbtn.classList.add('selected', 'pill-normal');
+      }
+    }
+
+    function onHeentNadPillClick(ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      if (heentMatchesNadPreset()) clearHeentNadSelections();
+      else applyHeentNadViaControls();
+      syncHeentNadPill();
+    }
+
+    var SKIN_NO_PALLOR_OUTPUT = 'No pallor of lips, conjunctiva, palms, or nail beds, and skin normal colour for this child';
+
+    function getSkinPillLabel(name, value) {
+      var sin = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
+      return sin ? sin.closest('.pill-opt') : null;
+    }
+
+    var SKIN_NAD_ROWS = [
+      { radioName: 'skin__colour', value: 'No pallor' },
+      { radioName: 'skin__rash', value: 'No rash' },
+      { radioName: 'skin__bruising', value: 'No bruising' },
+      { radioName: 'skin__nappy', value: 'Nappy area intact' },
+      { radioName: 'skin__perfusion', value: 'Warm peripheries' }
+    ];
+
+    function skinMatchesNadPreset() {
+      for (var si = 0; si < SKIN_NAD_ROWS.length; si++) {
+        var sdef = SKIN_NAD_ROWS[si];
+        var sel = document.querySelector('input[name="' + sdef.radioName + '"]:checked');
+        if (!sel || sel.value !== sdef.value) return false;
+      }
+      return true;
+    }
+
+    function applySkinNadViaControls() {
+      var sev = generalNadStubEv();
+      for (var sj = 0; sj < SKIN_NAD_ROWS.length; sj++) {
+        var sspec = SKIN_NAD_ROWS[sj];
+        var scur = document.querySelector('input[name="' + sspec.radioName + '"]:checked');
+        if (scur && scur.value === sspec.value) continue;
+        var slab = getSkinPillLabel(sspec.radioName, sspec.value);
+        if (slab) handlePillClick(slab, sev);
+      }
+      updateSkinRashBruisingFields();
+      updateOutput();
+    }
+
+    function clearSkinNadSelections() {
+      var sev2 = generalNadStubEv();
+      for (var sk = 0; sk < SKIN_NAD_ROWS.length; sk++) {
+        var sspec2 = SKIN_NAD_ROWS[sk];
+        var schk = document.querySelector('input[name="' + sspec2.radioName + '"]:checked');
+        if (!schk || schk.value !== sspec2.value) continue;
+        var slab2 = schk.closest('.pill-opt');
+        if (slab2) handlePillClick(slab2, sev2);
+      }
+      updateSkinRashBruisingFields();
+      updateOutput();
+    }
+
+    function syncSkinNadPill() {
+      var sbtn = document.getElementById('skinNadPill');
+      if (!sbtn) return;
+      sbtn.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (skinMatchesNadPreset()) {
+        sbtn.classList.add('selected', 'pill-normal');
+      }
+    }
+
+    function onSkinNadPillClick(ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      if (skinMatchesNadPreset()) clearSkinNadSelections();
+      else applySkinNadViaControls();
+      syncSkinNadPill();
     }
 
     function clearRecessionSubtypes() {
@@ -2526,6 +3092,8 @@
             }
           }
         }
+
+        if (input.name && input.name.indexOf('abdomen__checks__') === 0) syncAbdomenNadPill();
 
         if (input.checked) {
           label.classList.add('selected');
@@ -2770,6 +3338,21 @@
       heentHeading.appendChild(document.createTextNode('HEENT'));
       card.appendChild(heentHeading);
 
+      var heentNadWrap = document.createElement('div');
+      heentNadWrap.className = 'group-row span-full';
+      var heentNadRow = document.createElement('div');
+      heentNadRow.className = 'pill-row';
+      var heentNadBtn = document.createElement('button');
+      heentNadBtn.type = 'button';
+      heentNadBtn.id = 'heentNadPill';
+      heentNadBtn.className = 'pill-opt general-nad-pill';
+      heentNadBtn.textContent = 'NAD';
+      heentNadBtn.title = 'HEENT NAD (tap again to clear)';
+      heentNadBtn.addEventListener('click', onHeentNadPillClick);
+      heentNadRow.appendChild(heentNadBtn);
+      heentNadWrap.appendChild(heentNadRow);
+      card.appendChild(heentNadWrap);
+
       var tmB = document.createElement('div');
       tmB.className = 'heent-subblock';
       var tmT = document.createElement('div');
@@ -2849,7 +3432,7 @@
       mouthT.textContent = 'Mouth/oropharynx';
       mouthB.appendChild(mouthT);
       mouthB.appendChild(heentPillRow('heent__lips', ['Lips normal', 'Lips dry']));
-      var oralVisRow = heentPillRow('heent__oral_cavity_vis', ['Pharynx visualised', 'Oral cavity not visualised']);
+      var oralVisRow = heentPillRow('heent__oral_cavity_vis', [{ value: 'Pharynx visualised', tag: 'Normal finding' }, 'Oral cavity not visualised']);
       oralVisRow.style.marginTop = '8px';
       mouthB.appendChild(oralVisRow);
       var oralDetail = document.createElement('div');
@@ -3198,6 +3781,22 @@
       groupsWrap.className = 'section-groups-grid';
       if (section.key === 'neurology') groupsWrap.classList.add('section-groups-grid--single');
       if (section.key === 'cardiovascular') groupsWrap.classList.add('section-groups-grid--cardiovascular');
+      if (section.key === 'cardiovascular') {
+        var cvsNadWrap = document.createElement('div');
+        cvsNadWrap.className = 'group-row span-full cvs-nad-slot';
+        var cvsNadRow = document.createElement('div');
+        cvsNadRow.className = 'pill-row';
+        var cvsNadBtn = document.createElement('button');
+        cvsNadBtn.type = 'button';
+        cvsNadBtn.id = 'cardiovascularNadPill';
+        cvsNadBtn.className = 'pill-opt general-nad-pill';
+        cvsNadBtn.textContent = 'NAD';
+        cvsNadBtn.title = 'Cardiovascular NAD (tap again to clear)';
+        cvsNadBtn.addEventListener('click', onCardiovascularNadPillClick);
+        cvsNadRow.appendChild(cvsNadBtn);
+        cvsNadWrap.appendChild(cvsNadRow);
+        groupsWrap.appendChild(cvsNadWrap);
+      }
       if (section.key === 'general') {
         var generalNadWrap = document.createElement('div');
         generalNadWrap.className = 'group-row span-full';
@@ -3213,6 +3812,70 @@
         generalNadRow.appendChild(generalNadBtn);
         generalNadWrap.appendChild(generalNadRow);
         groupsWrap.appendChild(generalNadWrap);
+      }
+      if (section.key === 'perfusionHydration') {
+        var perfusionNadWrap = document.createElement('div');
+        perfusionNadWrap.className = 'group-row span-full';
+        var perfusionNadRow = document.createElement('div');
+        perfusionNadRow.className = 'pill-row';
+        var perfusionNadBtn = document.createElement('button');
+        perfusionNadBtn.type = 'button';
+        perfusionNadBtn.id = 'perfusionNadPill';
+        perfusionNadBtn.className = 'pill-opt general-nad-pill';
+        perfusionNadBtn.textContent = 'NAD';
+        perfusionNadBtn.title = 'Perfusion NAD (tap again to clear)';
+        perfusionNadBtn.addEventListener('click', onPerfusionNadPillClick);
+        perfusionNadRow.appendChild(perfusionNadBtn);
+        perfusionNadWrap.appendChild(perfusionNadRow);
+        groupsWrap.appendChild(perfusionNadWrap);
+      }
+      if (section.key === 'respiratory') {
+        var respNadWrap = document.createElement('div');
+        respNadWrap.className = 'group-row span-full';
+        var respNadRow = document.createElement('div');
+        respNadRow.className = 'pill-row';
+        var respNadBtn = document.createElement('button');
+        respNadBtn.type = 'button';
+        respNadBtn.id = 'respiratoryNadPill';
+        respNadBtn.className = 'pill-opt general-nad-pill';
+        respNadBtn.textContent = 'NAD';
+        respNadBtn.title = 'Respiratory NAD (tap again to clear)';
+        respNadBtn.addEventListener('click', onRespiratoryNadPillClick);
+        respNadRow.appendChild(respNadBtn);
+        respNadWrap.appendChild(respNadRow);
+        groupsWrap.appendChild(respNadWrap);
+      }
+      if (section.key === 'abdomen') {
+        var abdomenNadWrap = document.createElement('div');
+        abdomenNadWrap.className = 'group-row span-full';
+        var abdomenNadRow = document.createElement('div');
+        abdomenNadRow.className = 'pill-row';
+        var abdomenNadBtn = document.createElement('button');
+        abdomenNadBtn.type = 'button';
+        abdomenNadBtn.id = 'abdomenNadPill';
+        abdomenNadBtn.className = 'pill-opt general-nad-pill';
+        abdomenNadBtn.textContent = 'NAD';
+        abdomenNadBtn.title = 'Abdomen NAD (tap again to clear)';
+        abdomenNadBtn.addEventListener('click', onAbdomenNadPillClick);
+        abdomenNadRow.appendChild(abdomenNadBtn);
+        abdomenNadWrap.appendChild(abdomenNadRow);
+        groupsWrap.appendChild(abdomenNadWrap);
+      }
+      if (section.key === 'skin') {
+        var skinNadWrap = document.createElement('div');
+        skinNadWrap.className = 'group-row span-full';
+        var skinNadRow = document.createElement('div');
+        skinNadRow.className = 'pill-row';
+        var skinNadBtn = document.createElement('button');
+        skinNadBtn.type = 'button';
+        skinNadBtn.id = 'skinNadPill';
+        skinNadBtn.className = 'pill-opt general-nad-pill';
+        skinNadBtn.textContent = 'NAD';
+        skinNadBtn.title = 'Skin NAD (tap again to clear)';
+        skinNadBtn.addEventListener('click', onSkinNadPillClick);
+        skinNadRow.appendChild(skinNadBtn);
+        skinNadWrap.appendChild(skinNadRow);
+        groupsWrap.appendChild(skinNadWrap);
       }
 
       for (var g = 0; g < section.groups.length; g++) {
@@ -4582,6 +5245,10 @@
         updateRecessionSubtypePanel();
       }
       if (prefix.indexOf('msk__shoulder__') === 0) updateMskShoulderPanels();
+      if (prefix === CVS_FINDINGS_PREFIX && (key === 'hepatomegaly' || key === 'peripheralOedema')) syncCardiovascularNadPill();
+      if (prefix === ABDOMEN_PERITONITIC_PREFIX && key === 'peritonitic') syncAbdomenNadPill();
+      if (prefix === HEENT_ORAL_YN_PREFIX && key === 'pharyngealEry') syncHeentNadPill();
+      if (prefix === HEENT_NECK_MENINGISM_PREFIX && (key === 'neckMovement' || key === 'appearsMeningitic')) syncHeentNadPill();
       updateOutput();
     }
 
@@ -4714,6 +5381,17 @@
             phrases.push(makeTaggedFinding(pb, resolveFindingTagLabel(pb)));
           } else if (bruPick && bruPick.value === 'No bruising') {
             phrases.push(makeTaggedFinding('No bruising', resolveFindingTagLabel('No bruising')));
+          }
+          continue;
+        }
+        if (section.key === 'skin' && group.name === 'colour') {
+          var skinColPick = document.querySelector('input[name="skin__colour"]:checked');
+          if (skinColPick) {
+            var scVal = trimSentence(skinColPick.value);
+            var toneFragment = scVal === 'No pallor' ? SKIN_NO_PALLOR_OUTPUT : scVal.charAt(0).toLowerCase() + scVal.slice(1);
+            var skinColourPhrase = 'Skin: ' + toneFragment;
+            var scTag = skinColPick.getAttribute('data-finding-tag') || '';
+            phrases.push(makeTaggedFinding(skinColourPhrase, scTag || resolveFindingTagLabel(skinColourPhrase)));
           }
           continue;
         }
@@ -4935,6 +5613,18 @@
       for (var i = 0; i < pills.length; i++) pills[i].classList.remove('selected', 'abnormal', 'pill-normal');
       var generalNadPill = document.getElementById('generalNadPill');
       if (generalNadPill) generalNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
+      var perfusionNadPill = document.getElementById('perfusionNadPill');
+      if (perfusionNadPill) perfusionNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
+      var cardiovascularNadPill = document.getElementById('cardiovascularNadPill');
+      if (cardiovascularNadPill) cardiovascularNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
+      var respiratoryNadPill = document.getElementById('respiratoryNadPill');
+      if (respiratoryNadPill) respiratoryNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
+      var abdomenNadPill = document.getElementById('abdomenNadPill');
+      if (abdomenNadPill) abdomenNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
+      var heentNadPill = document.getElementById('heentNadPill');
+      if (heentNadPill) heentNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
+      var skinNadPill = document.getElementById('skinNadPill');
+      if (skinNadPill) skinNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
       var textareas = document.querySelectorAll('#exam-sections textarea');
       for (var t = 0; t < textareas.length; t++) textareas[t].value = '';
       for (var z = 0; z < LUNG_ZONES.length; z++) {
