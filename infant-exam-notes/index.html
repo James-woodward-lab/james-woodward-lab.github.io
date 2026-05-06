@@ -182,6 +182,13 @@
     .pill-opt.selected { border-color: var(--accent); background: color-mix(in srgb,var(--accent) 12%,transparent); color: var(--accent); font-weight: 600; }
     .pill-opt.selected.abnormal { border-color: var(--danger); background: var(--danger-surface); color: var(--danger); }
     .pill-opt.selected.pill-normal { border-color: var(--success); background: color-mix(in srgb,var(--success) 12%,transparent); color: var(--success); }
+    button.pill-opt {
+      font: inherit;
+      line-height: inherit;
+      margin: 0;
+      appearance: none;
+      -webkit-appearance: none;
+    }
 
     /* ===== CHECK BUTTONS (checkbox) ===== */
     .check-grid {
@@ -847,7 +854,7 @@
       { key: 'appearsMeningitic', label: 'Does not appear meningitic', yes: 'does not appear meningitic', no: 'Appearance concerning for meningitis', normalYes: true }
     ];
 
-    var CARDIOVASCULAR_FEMORAL_YN_ROWS = [
+    var CARDIOVASCULAR_FINDINGS_YN_ROWS = [
       {
         key: 'femoralPulses',
         label: 'Femorals palpable and equal',
@@ -856,10 +863,7 @@
         normalYes: true,
         yesTag: 'Normal finding',
         noTag: 'urgent abnormal finding'
-      }
-    ];
-
-    var CARDIOVASCULAR_HEPATOMEGALY_YN_ROWS = [
+      },
       {
         key: 'hepatomegaly',
         label: 'Hepatomegaly',
@@ -867,6 +871,24 @@
         no: 'No hepatomegaly',
         normalYes: false,
         yesTag: 'abnormal finding',
+        noTag: 'Normal finding'
+      },
+      {
+        key: 'peripheralOedema',
+        label: 'Peripheral oedema',
+        yes: 'peripheral oedema present',
+        no: 'No peripheral oedema',
+        normalYes: false,
+        yesTag: 'urgent abnormal finding',
+        noTag: 'Normal finding'
+      },
+      {
+        key: 'cyanosis',
+        label: 'Cyanosis',
+        yes: 'Cyanotic',
+        no: 'No cyanosis',
+        normalYes: false,
+        yesTag: 'urgent abnormal finding',
         noTag: 'Normal finding'
       }
     ];
@@ -915,8 +937,7 @@
       abdomen__peritonitic: ABDOMEN_PERITONITIC_YN_ROWS,
       heent__oral_yn: HEENT_ORAL_YN_ROWS,
       heent__neck_meningism_yn: HEENT_NECK_MENINGISM_YN_ROWS,
-      cardiovascular__femoral: CARDIOVASCULAR_FEMORAL_YN_ROWS,
-      cardiovascular__hepatomegaly: CARDIOVASCULAR_HEPATOMEGALY_YN_ROWS,
+      cardiovascular__findings: CARDIOVASCULAR_FINDINGS_YN_ROWS,
       respiratory__accessory: RESPIRATORY_ACCESSORY_YN_ROWS,
       neurology__cn: NEURO_CN_YN_ROWS,
       neurology__upperLimb: NEURO_UL_YN_ROWS,
@@ -933,8 +954,7 @@
           { type: 'radio', name: 'state', label: 'Alertness', options: ['Alert', { value: 'Lethargic', tag: 'abnormal finding' }, 'Drowsy', 'Irritable'] },
           { type: 'radio', name: 'appearance', label: 'Appearance', options: [{ value: 'Well', tag: 'Normal finding' }, { value: 'Mildly unwell', tag: 'Normal finding' }, { value: 'Toxic/Septic', tag: 'urgent abnormal finding' }] },
           { type: 'radio', name: 'comfort', label: 'Comfort', options: [{ value: 'Comfortable', tag: 'Normal finding' }, { value: 'Mild pain', tag: 'abnormal finding' }, { value: 'Moderate pain', tag: 'urgent abnormal finding' }, { value: 'Severe pain', tag: 'urgent abnormal finding' }, 'In distress'] },
-          { type: 'radio', name: 'interaction', label: 'Interaction', options: ['Interacting with carer', { value: 'Withdrawn', tag: 'abnormal finding' }, 'Inconsolable'] },
-          { type: 'radio', name: 'dysmorphism', label: 'Dysmorphic features', options: ['No dysmorphic features', 'Dysmorphic features'] }
+          { type: 'radio', name: 'interaction', label: 'Interaction', options: ['Interacting with carer', { value: 'Withdrawn', tag: 'abnormal finding' }, 'Inconsolable'] }
         ]
       },
       {
@@ -943,8 +963,7 @@
         icon: '🫀',
         groups: [
           { type: 'radio', name: 'heartMurmur', label: 'Heart sounds / murmur', options: ['HS I + II only', 'Murmur'] },
-          { type: 'yesNoToggle', name: 'femoral', label: 'Findings', rows: CARDIOVASCULAR_FEMORAL_YN_ROWS },
-          { type: 'yesNoToggle', name: 'hepatomegaly', label: '', rows: CARDIOVASCULAR_HEPATOMEGALY_YN_ROWS },
+          { type: 'yesNoToggle', name: 'findings', label: 'Findings', rows: CARDIOVASCULAR_FINDINGS_YN_ROWS },
           { type: 'radio', name: 'radialPulse', label: 'Radial pulse quality', options: ['Radial pulses normal', 'Radial pulses weak', 'Radial pulses thready', 'Radial pulses bounding'] }
         ],
         freeHint: 'Murmur grade/location/radiation/character'
@@ -954,9 +973,9 @@
         label: 'Respiratory',
         icon: '🫁',
         groups: [
-          { type: 'radio', name: 'wob', label: 'Work of breathing', options: ['No WOB', 'Mild', 'Moderate', 'Severe'] },
+          { type: 'radio', name: 'wob', label: 'Work of breathing', options: ['No WOB', 'Mild', 'Moderate', { value: 'Severe', tag: 'urgent abnormal finding' }] },
           { type: 'respiratoryAccessoryYn', name: 'accessory', label: '', rows: RESPIRATORY_ACCESSORY_YN_ROWS },
-          { type: 'checkbox', name: 'upperAirwaySounds', label: 'Upper airway sounds', options: ['No upper airway sounds', 'Soft stridor', 'Harsh stridor', 'Stertorous', 'Upper airway secretions audible'] },
+          { type: 'radio', name: 'upperAirwayMode', label: 'Upper airway sounds', options: [{ value: 'No airway noises', tag: 'Normal finding' }, { value: 'Upper airway sounds', tag: 'abnormal finding' }] },
           { type: 'radio', name: 'coughing', label: 'Coughing', options: [{ value: 'Dry cough', tag: 'Normal finding' }, { value: 'Wet cough', tag: 'abnormal finding' }, { value: 'Barking cough', tag: 'abnormal finding' }] },
           { type: 'radio', name: 'chestAppearance', label: 'Chest appearance', options: ['Good chest rise', { value: 'Poor chest rise', tag: 'urgent abnormal finding' }, 'Asymmetrical chest rise'] },
           { type: 'radio', name: 'auscultationMode', label: 'Auscultation', options: ['Chest clear', 'Added sounds'] }
@@ -983,8 +1002,8 @@
         label: 'Perfusion/Hydration',
         icon: '💧',
         groups: [
-          { type: 'radio', name: 'crtCentral', label: 'Capillary refill - Centrally', options: ['<2s', '2-3s', '>3s'] },
-          { type: 'radio', name: 'crtPeripheral', label: 'Capillary refill - Peripherally', options: ['<2s', '2-3s', '>3s'] },
+          { type: 'radio', name: 'crtCentral', label: 'Capillary refill - Centrally', options: [{ value: '<2s', tag: 'Normal finding' }, '2-3s', '>3s'] },
+          { type: 'radio', name: 'crtPeripheral', label: 'Capillary refill - Peripherally', options: [{ value: '<2s', tag: 'Normal finding' }, '2-3s', '>3s'] },
           { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm and well perfused', 'Cool peripherally', 'Shut down'] },
           { type: 'radio', name: 'mucosa', label: 'Mucous membranes', options: ['Moist mucous membranes', 'Dry mucous membranes'] },
           { type: 'radio', name: 'tears', label: 'Tears', options: [{ value: 'Good tears', tag: 'Normal finding' }, { value: 'No tears', tag: 'abnormal finding' }] },
@@ -1840,8 +1859,7 @@
     applyTagsToYnRows(ABDOMEN_PERITONITIC_YN_ROWS);
     applyTagsToYnRows(HEENT_ORAL_YN_ROWS);
     applyTagsToYnRows(HEENT_NECK_MENINGISM_YN_ROWS);
-    applyTagsToYnRows(CARDIOVASCULAR_FEMORAL_YN_ROWS);
-    applyTagsToYnRows(CARDIOVASCULAR_HEPATOMEGALY_YN_ROWS);
+    applyTagsToYnRows(CARDIOVASCULAR_FINDINGS_YN_ROWS);
     applyTagsToYnRows(RESPIRATORY_ACCESSORY_YN_ROWS);
     applyTagsToYnRows(NEURO_CN_YN_ROWS);
     applyTagsToYnRows(NEURO_UL_YN_ROWS);
@@ -1855,6 +1873,28 @@
       if (t === normalizeFindingText(TAG_ABNORMAL)) return 'abnormal';
       if (t === normalizeFindingText(TAG_NORMAL)) return 'normal';
       return '';
+    }
+
+    /** CSS class suffix for pill/check styling from data-finding-tag or data-tag; '' if no recognised tag. */
+    function pillHighlightClassFromTaggedInput(input) {
+      if (!input || !input.getAttribute) return '';
+      var raw = (input.getAttribute('data-finding-tag') || input.getAttribute('data-tag') || '').trim();
+      if (!raw) return '';
+      var nt = normalizeFindingTag(raw);
+      if (nt === 'urgent' || nt === 'abnormal') return 'abnormal';
+      if (nt === 'normal') return 'pill-normal';
+      return '';
+    }
+
+    /** Yes/no toggle buttons only expose data-finding-tag on the nested inputs. */
+    function ynPillClassFromInput(inp, fallbackIsNormalSide) {
+      if (!inp) return fallbackIsNormalSide ? 'pill-normal' : 'abnormal';
+      var raw = (inp.getAttribute('data-finding-tag') || '').trim();
+      if (!raw) return fallbackIsNormalSide ? 'pill-normal' : 'abnormal';
+      var nt = normalizeFindingTag(raw);
+      if (nt === 'urgent' || nt === 'abnormal') return 'abnormal';
+      if (nt === 'normal') return 'pill-normal';
+      return fallbackIsNormalSide ? 'pill-normal' : 'abnormal';
     }
 
     function classFromTaggedFinding(entryText, entryTag) {
@@ -2111,18 +2151,18 @@
       svgShell.innerHTML =
         '<svg viewBox=\"0 0 220 220\" width=\"100%\" role=\"img\" aria-label=\"Interactive lung zones\">' +
         '<line x1=\"110\" y1=\"20\" x2=\"110\" y2=\"200\" stroke=\"var(--border)\" stroke-width=\"2\" />' +
-        '<rect class=\"lung-zone\" data-zone=\"left_upper\" tabindex=\"0\" role=\"button\" aria-label=\"Left upper zone\" x=\"24\" y=\"34\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
-        '<rect class=\"lung-zone\" data-zone=\"left_middle\" tabindex=\"0\" role=\"button\" aria-label=\"Left middle zone\" x=\"24\" y=\"86\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
-        '<rect class=\"lung-zone\" data-zone=\"left_base\" tabindex=\"0\" role=\"button\" aria-label=\"Left base\" x=\"24\" y=\"138\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
-        '<rect class=\"lung-zone\" data-zone=\"right_upper\" tabindex=\"0\" role=\"button\" aria-label=\"Right upper zone\" x=\"122\" y=\"34\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
-        '<rect class=\"lung-zone\" data-zone=\"right_middle\" tabindex=\"0\" role=\"button\" aria-label=\"Right middle zone\" x=\"122\" y=\"86\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
-        '<rect class=\"lung-zone\" data-zone=\"right_base\" tabindex=\"0\" role=\"button\" aria-label=\"Right base\" x=\"122\" y=\"138\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
-        '<text class=\"lung-zone-label\" x=\"40\" y=\"62\">L upper</text>' +
-        '<text class=\"lung-zone-label\" x=\"39\" y=\"114\">L mid</text>' +
-        '<text class=\"lung-zone-label\" x=\"43\" y=\"166\">L base</text>' +
-        '<text class=\"lung-zone-label\" x=\"135\" y=\"62\">R upper</text>' +
-        '<text class=\"lung-zone-label\" x=\"139\" y=\"114\">R mid</text>' +
-        '<text class=\"lung-zone-label\" x=\"139\" y=\"166\">R base</text>' +
+        '<rect class=\"lung-zone\" data-zone=\"right_upper\" tabindex=\"0\" role=\"button\" aria-label=\"Right upper zone\" x=\"24\" y=\"34\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"right_middle\" tabindex=\"0\" role=\"button\" aria-label=\"Right middle zone\" x=\"24\" y=\"86\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"right_base\" tabindex=\"0\" role=\"button\" aria-label=\"Right base\" x=\"24\" y=\"138\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"left_upper\" tabindex=\"0\" role=\"button\" aria-label=\"Left upper zone\" x=\"122\" y=\"34\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"left_middle\" tabindex=\"0\" role=\"button\" aria-label=\"Left middle zone\" x=\"122\" y=\"86\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<rect class=\"lung-zone\" data-zone=\"left_base\" tabindex=\"0\" role=\"button\" aria-label=\"Left base\" x=\"122\" y=\"138\" width=\"74\" height=\"46\" rx=\"10\"></rect>' +
+        '<text class=\"lung-zone-label\" x=\"40\" y=\"62\">R upper</text>' +
+        '<text class=\"lung-zone-label\" x=\"39\" y=\"114\">R mid</text>' +
+        '<text class=\"lung-zone-label\" x=\"43\" y=\"166\">R base</text>' +
+        '<text class=\"lung-zone-label\" x=\"135\" y=\"62\">L upper</text>' +
+        '<text class=\"lung-zone-label\" x=\"139\" y=\"114\">L mid</text>' +
+        '<text class=\"lung-zone-label\" x=\"139\" y=\"166\">L base</text>' +
         '</svg>';
       layout.appendChild(svgShell);
 
@@ -2153,6 +2193,7 @@
         if (input.name === 'abdomen__tenderness') updateAbdomenTendernessField();
         if (input.name === 'skin__rash' || input.name === 'skin__bruising') updateSkinRashBruisingFields();
         if (input.name === 'heent__oral_cavity_vis' || input.name === 'heent__tonsils_vis') updateHeentOralCavityPanel();
+        if (input.name === 'general__state' || input.name === 'general__appearance' || input.name === 'general__comfort' || input.name === 'general__interaction') syncGeneralNadPill();
         updateOutput();
         return;
       }
@@ -2180,10 +2221,16 @@
       else if (n === 'heent__conj' && (v === 'Conjunctival injection' || v === 'Conjunctival discharge')) label.classList.add('abnormal');
       else if (n === 'respiratory__wob' && (v === 'Mild' || v === 'Moderate' || v === 'Severe')) label.classList.add('abnormal');
       else if (n === 'respiratory__wob' && v === 'No WOB') label.classList.add('pill-normal');
-      else if (classifyFinding(v) === 'abnormal') label.classList.add('abnormal');
-      else if (classifyFinding(v) === 'normal') label.classList.add('pill-normal');
+      else {
+        var ph = pillHighlightClassFromTaggedInput(input);
+        if (ph === 'abnormal') label.classList.add('abnormal');
+        else if (ph === 'pill-normal') label.classList.add('pill-normal');
+        else if (classifyFinding(v) === 'abnormal') label.classList.add('abnormal');
+        else if (classifyFinding(v) === 'normal') label.classList.add('pill-normal');
+      }
       if (n === 'abdomen__tenderness') updateAbdomenTendernessField();
       if (n === 'respiratory__wob') updateRespiratoryWobDependentPanels();
+      if (n === 'respiratory__upperAirwayMode') updateUpperAirwayFindingsPanel();
       if (n === 'respiratory__auscultationMode') {
         updateAuscultationAddedPanel();
         if (v === 'Chest clear') clearAuscultationAddedFields();
@@ -2198,7 +2245,68 @@
       }
       if (n === 'heent__oral_cavity_vis' || n === 'heent__tonsils_vis') updateHeentOralCavityPanel();
       if (n === 'skin__rash' || n === 'skin__bruising') updateSkinRashBruisingFields();
+      if (n === 'general__state' || n === 'general__appearance' || n === 'general__comfort' || n === 'general__interaction') syncGeneralNadPill();
       updateOutput();
+    }
+
+    var GENERAL_NAD_KEYS = ['state', 'appearance', 'comfort', 'interaction'];
+    var GENERAL_NAD_VALUES = { state: 'Alert', appearance: 'Well', comfort: 'Comfortable', interaction: 'Interacting with carer' };
+
+    function generalMatchesNadPreset() {
+      for (var i = 0; i < GENERAL_NAD_KEYS.length; i++) {
+        var k = GENERAL_NAD_KEYS[i];
+        var el = document.querySelector('input[name="general__' + k + '"]:checked');
+        if (!el || el.value !== GENERAL_NAD_VALUES[k]) return false;
+      }
+      return true;
+    }
+
+    function generalNadStubEv() {
+      return { preventDefault: function() {} };
+    }
+
+    function getGeneralPillLabelForValue(groupName, value) {
+      var inp = document.querySelector('input[name="general__' + groupName + '"][value="' + value + '"]');
+      return inp ? inp.closest('.pill-opt') : null;
+    }
+
+    function applyGeneralNadViaPills() {
+      var ev = generalNadStubEv();
+      for (var i = 0; i < GENERAL_NAD_KEYS.length; i++) {
+        var k = GENERAL_NAD_KEYS[i];
+        var want = GENERAL_NAD_VALUES[k];
+        var cur = document.querySelector('input[name="general__' + k + '"]:checked');
+        if (cur && cur.value === want) continue;
+        var lab = getGeneralPillLabelForValue(k, want);
+        if (lab) handlePillClick(lab, ev);
+      }
+    }
+
+    function clearGeneralNadRowsViaPills() {
+      var ev = generalNadStubEv();
+      for (var i = 0; i < GENERAL_NAD_KEYS.length; i++) {
+        var k = GENERAL_NAD_KEYS[i];
+        var checked = document.querySelector('input[name="general__' + k + '"]:checked');
+        if (!checked) continue;
+        var lab = checked.closest('.pill-opt');
+        if (lab) handlePillClick(lab, ev);
+      }
+    }
+
+    function syncGeneralNadPill() {
+      var btn = document.getElementById('generalNadPill');
+      if (!btn) return;
+      btn.classList.remove('selected', 'pill-normal', 'abnormal');
+      if (generalMatchesNadPreset()) {
+        btn.classList.add('selected', 'pill-normal');
+      }
+    }
+
+    function onGeneralNadPillClick(ev) {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+      if (generalMatchesNadPreset()) clearGeneralNadRowsViaPills();
+      else applyGeneralNadViaPills();
+      syncGeneralNadPill();
     }
 
     function clearRecessionSubtypes() {
@@ -2265,6 +2373,26 @@
       var added = document.querySelector('input[name="respiratory__auscultationMode"][value="Added sounds"]');
       var show = !!(added && added.checked);
       wrap.classList.toggle('show', show);
+    }
+
+    function clearUpperAirwayFindings() {
+      var wrap = document.getElementById('respiratoryUpperAirwayFindingsWrap');
+      if (!wrap) return;
+      var cbs = wrap.querySelectorAll('input[type="checkbox"]');
+      for (var i = 0; i < cbs.length; i++) {
+        cbs[i].checked = false;
+        var lab = cbs[i].closest('.check-opt');
+        if (lab) lab.classList.remove('selected', 'abnormal', 'pill-normal');
+      }
+    }
+
+    function updateUpperAirwayFindingsPanel() {
+      var wrap = document.getElementById('respiratoryUpperAirwayFindingsWrap');
+      if (!wrap) return;
+      var noisy = document.querySelector('input[name="respiratory__upperAirwayMode"][value="Upper airway sounds"]');
+      var show = !!(noisy && noisy.checked);
+      wrap.classList.toggle('show', show);
+      if (!show) clearUpperAirwayFindings();
     }
 
     function clearCvMurmurDetailFields() {
@@ -2381,25 +2509,6 @@
     function handleCheckClick(label) {
       var input = label.querySelector('input');
       setTimeout(function() {
-        if (input.name.indexOf('respiratory__upperAirwaySounds__') === 0) {
-          var upperWrap = label.closest('.group-row');
-          var upperInputs = upperWrap ? upperWrap.querySelectorAll('input[type="checkbox"]') : [];
-          if (input.checked && input.value === 'No upper airway sounds') {
-            for (var ui = 0; ui < upperInputs.length; ui++) {
-              if (upperInputs[ui] === input) continue;
-              upperInputs[ui].checked = false;
-              var ulab = upperInputs[ui].closest('.check-opt');
-              if (ulab) ulab.classList.remove('selected', 'abnormal', 'pill-normal');
-            }
-          } else if (input.checked && input.value !== 'No upper airway sounds') {
-            for (var uj = 0; uj < upperInputs.length; uj++) {
-              if (upperInputs[uj].value !== 'No upper airway sounds') continue;
-              upperInputs[uj].checked = false;
-              var nlab = upperInputs[uj].closest('.check-opt');
-              if (nlab) nlab.classList.remove('selected', 'abnormal', 'pill-normal');
-            }
-          }
-        }
 
         if (input.name && input.name.indexOf('msk__') === 0 && input.type === 'checkbox') {
           var mskNameParts = input.name.split('__');
@@ -2428,16 +2537,16 @@
             label.classList.remove('pill-normal');
           } else if (label.closest('#recessionSubtypeWrap')) label.classList.add('abnormal');
           else if (label.closest('.auscultation-added-check-grid')) label.classList.add('abnormal');
-          else if (input.name.indexOf('respiratory__upperAirwaySounds__') === 0 && input.value === 'Soft stridor') label.classList.add('abnormal');
+          else if (input.name.indexOf('respiratory__upperAirwayFindings__') === 0 && input.value === 'Soft stridor') label.classList.add('abnormal');
           else if (input.name.indexOf('msk__') === 0 && (input.name.indexOf('__nad') !== -1 || input.name.indexOf('msk__quickscreen__') === 0)) label.classList.add('pill-normal');
-          else if (input.name.indexOf('neurology__primitiveReflexes__') === 0) {
-            var neuroReflexTag = normalizeFindingTag(input.getAttribute('data-finding-tag') || '');
-            if (neuroReflexTag === 'normal') label.classList.add('pill-normal');
-            else if (neuroReflexTag === 'abnormal' || neuroReflexTag === 'urgent') label.classList.add('abnormal');
+          else {
+            var phc = pillHighlightClassFromTaggedInput(input);
+            if (phc === 'abnormal') label.classList.add('abnormal');
+            else if (phc === 'pill-normal') label.classList.add('pill-normal');
+            else if (classifyFinding(input.value) === 'abnormal') label.classList.add('abnormal');
+            else if (classifyFinding(input.value) === 'normal') label.classList.add('pill-normal');
+            else label.classList.remove('abnormal', 'pill-normal');
           }
-          else if (classifyFinding(input.value) === 'abnormal') label.classList.add('abnormal');
-          else if (classifyFinding(input.value) === 'normal') label.classList.add('pill-normal');
-          else label.classList.remove('abnormal', 'pill-normal');
           if (label.closest('#recessionSubtypeWrap')) syncRecessionPresentFromSubtypes();
         } else {
           label.classList.remove('selected', 'abnormal', 'pill-normal');
@@ -2632,7 +2741,7 @@
       var tWrap = document.getElementById('heentTonsilsDetailWrap');
       var oral = document.querySelector('input[name="heent__oral_cavity_vis"]:checked');
       if (!detail) return;
-      var showDetail = oral && oral.value === 'Oral cavity / tonsils / pharynx visualised';
+      var showDetail = oral && oral.value === 'Pharynx visualised';
       detail.classList.toggle('show', showDetail);
       if (!showDetail) {
         clearHeentOralCavityDetailFields();
@@ -2718,12 +2827,9 @@
       var pearlRow = heentPillRow('heent__pearl', ['PEARL']);
       pearlRow.style.marginTop = '8px';
       eyeB.appendChild(pearlRow);
-      var conjLab = document.createElement('div');
-      conjLab.className = 'group-label';
-      conjLab.style.marginTop = '10px';
-      conjLab.textContent = 'Conjunctiva';
-      eyeB.appendChild(conjLab);
-      eyeB.appendChild(heentPillRow('heent__conj', ['Normal conjunctiva', 'Conjunctival injection', 'Conjunctival discharge']));
+      var conjRow = heentPillRow('heent__conj', ['Normal conjunctiva', 'Conjunctival injection', 'Conjunctival discharge']);
+      conjRow.style.marginTop = '8px';
+      eyeB.appendChild(conjRow);
       card.appendChild(eyeB);
 
       var noseB = document.createElement('div');
@@ -2740,15 +2846,12 @@
       mouthB.id = 'heentMouthBlock';
       var mouthT = document.createElement('div');
       mouthT.className = 'heent-subtitle';
-      mouthT.textContent = 'Mouth / oropharynx';
+      mouthT.textContent = 'Mouth/oropharynx';
       mouthB.appendChild(mouthT);
-      mouthB.appendChild(heentPillRow('heent__lips', ['Lips normal', 'Lips dry', 'Lips cracked']));
-      var oralCavT = document.createElement('div');
-      oralCavT.className = 'heent-subtitle';
-      oralCavT.style.marginTop = '10px';
-      oralCavT.textContent = 'Oral cavity / tonsils';
-      mouthB.appendChild(oralCavT);
-      mouthB.appendChild(heentPillRow('heent__oral_cavity_vis', ['Oral cavity / tonsils / pharynx visualised', 'Oral cavity not visualised']));
+      mouthB.appendChild(heentPillRow('heent__lips', ['Lips normal', 'Lips dry']));
+      var oralVisRow = heentPillRow('heent__oral_cavity_vis', ['Pharynx visualised', 'Oral cavity not visualised']);
+      oralVisRow.style.marginTop = '8px';
+      mouthB.appendChild(oralVisRow);
       var oralDetail = document.createElement('div');
       oralDetail.id = 'heentOralCavityDetailWrap';
       oralDetail.className = 'conditional-inline-field';
@@ -2846,7 +2949,7 @@
         parts.push('Unable to visualise oral cavity');
         return parts;
       }
-      if (!oral || oral.value !== 'Oral cavity / tonsils / pharynx visualised') return parts;
+      if (!oral || oral.value !== 'Pharynx visualised') return parts;
 
       var tons = mBlock.querySelector('input[name="heent__tonsils_vis"]:checked');
       if (tons && tons.value === 'Tonsils NAD') {
@@ -3095,6 +3198,22 @@
       groupsWrap.className = 'section-groups-grid';
       if (section.key === 'neurology') groupsWrap.classList.add('section-groups-grid--single');
       if (section.key === 'cardiovascular') groupsWrap.classList.add('section-groups-grid--cardiovascular');
+      if (section.key === 'general') {
+        var generalNadWrap = document.createElement('div');
+        generalNadWrap.className = 'group-row span-full';
+        var generalNadRow = document.createElement('div');
+        generalNadRow.className = 'pill-row';
+        var generalNadBtn = document.createElement('button');
+        generalNadBtn.type = 'button';
+        generalNadBtn.id = 'generalNadPill';
+        generalNadBtn.className = 'pill-opt general-nad-pill';
+        generalNadBtn.textContent = 'NAD';
+        generalNadBtn.title = 'General NAD (tap again to clear)';
+        generalNadBtn.addEventListener('click', onGeneralNadPillClick);
+        generalNadRow.appendChild(generalNadBtn);
+        generalNadWrap.appendChild(generalNadRow);
+        groupsWrap.appendChild(generalNadWrap);
+      }
 
       for (var g = 0; g < section.groups.length; g++) {
         var group = section.groups[g];
@@ -3111,7 +3230,55 @@
           row.appendChild(lbl);
         }
 
-        if (group.type === 'radio') {
+        if (section.key === 'respiratory' && group.type === 'radio' && group.name === 'upperAirwayMode') {
+          var upperPillRow = document.createElement('div');
+          upperPillRow.className = 'pill-row';
+          for (var uo = 0; uo < group.options.length; uo++) {
+            var upperOpt = group.options[uo];
+            var upperVal = typeof upperOpt === 'string' ? upperOpt : upperOpt.value;
+            var upperTag = typeof upperOpt === 'string' ? resolveFindingTagLabel(upperVal) : (upperOpt.tag || resolveFindingTagLabel(upperVal));
+            var upperLbl = document.createElement('label');
+            upperLbl.className = 'pill-opt';
+            upperLbl.onclick = (function(lbl) { return function(e) { handlePillClick(lbl, e); }; })(upperLbl);
+            var upperInp = document.createElement('input');
+            upperInp.type = 'radio';
+            upperInp.name = 'respiratory__upperAirwayMode';
+            upperInp.id = makeId('respiratory', 'upperAirwayMode', uo);
+            upperInp.value = upperVal;
+            upperInp.setAttribute('data-finding-tag', upperTag);
+            upperLbl.appendChild(upperInp);
+            upperLbl.appendChild(document.createTextNode(upperVal));
+            upperPillRow.appendChild(upperLbl);
+          }
+          row.appendChild(upperPillRow);
+
+          var upperDetailWrap = document.createElement('div');
+          upperDetailWrap.id = 'respiratoryUpperAirwayFindingsWrap';
+          upperDetailWrap.className = 'group-row span-full conditional-inline-field';
+          var upperDetailLabel = document.createElement('div');
+          upperDetailLabel.className = 'group-label';
+          upperDetailLabel.textContent = 'Upper airway sound findings';
+          upperDetailWrap.appendChild(upperDetailLabel);
+          var upperDetailGrid = document.createElement('div');
+          upperDetailGrid.className = 'check-grid';
+          var upperDetailOpts = ['Soft stridor', 'Harsh stridor', 'Stertorous', 'Upper airway secretions audible'];
+          for (var ud = 0; ud < upperDetailOpts.length; ud++) {
+            var upperCheckLbl = document.createElement('label');
+            upperCheckLbl.className = 'check-opt';
+            upperCheckLbl.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(upperCheckLbl);
+            var upperCb = document.createElement('input');
+            upperCb.type = 'checkbox';
+            upperCb.id = 'respiratory__upperAirwayFindings__' + ud;
+            upperCb.name = 'respiratory__upperAirwayFindings__' + ud;
+            upperCb.value = upperDetailOpts[ud];
+            upperCb.setAttribute('data-finding-tag', resolveFindingTagLabel(upperDetailOpts[ud]));
+            upperCheckLbl.appendChild(upperCb);
+            upperCheckLbl.appendChild(document.createTextNode(upperDetailOpts[ud]));
+            upperDetailGrid.appendChild(upperCheckLbl);
+          }
+          upperDetailWrap.appendChild(upperDetailGrid);
+          row.appendChild(upperDetailWrap);
+        } else if (group.type === 'radio') {
           var pillRow = document.createElement('div');
           pillRow.className = 'pill-row';
           for (var o = 0; o < group.options.length; o++) {
@@ -4375,11 +4542,11 @@
       if (noLbl) noLbl.classList.remove('selected', 'pill-normal', 'abnormal');
       if (yesInp && yesInp.checked && yesLbl) {
         yesLbl.classList.add('selected');
-        yesLbl.classList.add(def.normalYes ? 'pill-normal' : 'abnormal');
+        yesLbl.classList.add(ynPillClassFromInput(yesInp, def.normalYes));
       }
       if (noInp && noInp.checked && noLbl) {
         noLbl.classList.add('selected');
-        noLbl.classList.add(def.normalYes ? 'abnormal' : 'pill-normal');
+        noLbl.classList.add(ynPillClassFromInput(noInp, !def.normalYes));
       }
     }
 
@@ -4423,6 +4590,19 @@
       for (var g = 0; g < section.groups.length; g++) {
         var group = section.groups[g];
         if (section.key === 'respiratory' && group.name === 'auscultationMode') continue;
+        if (section.key === 'respiratory' && group.name === 'upperAirwayMode') {
+          var airwayMode = document.querySelector('input[name="respiratory__upperAirwayMode"]:checked');
+          if (airwayMode && airwayMode.value === 'No airway noises') {
+            phrases.push(makeTaggedFinding('No added upper airway sounds', airwayMode.getAttribute('data-finding-tag') || resolveFindingTagLabel('No added upper airway sounds')));
+          } else if (airwayMode && airwayMode.value === 'Upper airway sounds') {
+            var uaChecked = document.querySelectorAll('input[id^="respiratory__upperAirwayFindings__"]:checked');
+            for (var uac = 0; uac < uaChecked.length; uac++) {
+              var uaTag = uaChecked[uac].getAttribute('data-finding-tag') || '';
+              phrases.push(makeTaggedFinding(uaChecked[uac].value, uaTag));
+            }
+          }
+          continue;
+        }
         if (section.key === 'abdomen' && group.type === 'yesNoToggle') {
           var abPrfx = 'abdomen__peritonitic';
           for (var py = 0; py < group.rows.length; py++) {
@@ -4753,6 +4933,8 @@
       for (var i = 0; i < inputs.length; i++) inputs[i].checked = false;
       var pills = document.querySelectorAll('.pill-opt.selected, .check-opt.selected, .yesno-toggle-btn.selected');
       for (var i = 0; i < pills.length; i++) pills[i].classList.remove('selected', 'abnormal', 'pill-normal');
+      var generalNadPill = document.getElementById('generalNadPill');
+      if (generalNadPill) generalNadPill.classList.remove('selected', 'abnormal', 'pill-normal');
       var textareas = document.querySelectorAll('#exam-sections textarea');
       for (var t = 0; t < textareas.length; t++) textareas[t].value = '';
       for (var z = 0; z < LUNG_ZONES.length; z++) {
@@ -4771,6 +4953,7 @@
       updateHeentOralCavityPanel();
       clearAuscultationAddedFields();
       updateAuscultationAddedPanel();
+      updateUpperAirwayFindingsPanel();
       updateSkinRashBruisingFields();
       updateOutput();
     }
@@ -4782,6 +4965,7 @@
     updateCvMurmurDetailsPanel();
     updateHeentTmFindingsPanel();
     updateAuscultationAddedPanel();
+    updateUpperAirwayFindingsPanel();
     var lungZoneEls = document.querySelectorAll('.lung-zone');
     for (var i = 0; i < lungZoneEls.length; i++) {
       lungZoneEls[i].addEventListener('click', function() { setActiveLungZone(this.getAttribute('data-zone')); });
