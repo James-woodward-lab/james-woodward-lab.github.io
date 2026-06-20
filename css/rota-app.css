@@ -1,0 +1,278 @@
+/* ==========================================================================
+   Rota App - styles
+   ==========================================================================
+   App-specific styles only; leans on shared tokens in app-theme.css.
+   ========================================================================== */
+
+.rota-app .container {
+  padding-top: var(--sp-3);
+}
+
+/* Status line under the header (e.g. "Loaded 184 days · last fetched 09:48"). */
+.rota-status {
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--sp-2);
+  min-height: 1.4em;
+}
+
+.rota-status.is-error { color: var(--danger); }
+.rota-status.is-ok    { color: var(--accent2); }
+
+/* Error banner action row */
+.rota-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.rota-error-hint {
+  margin: var(--sp-2) 0 0;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-snug);
+}
+
+.rota-error-hint code {
+  background: var(--surface3);
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 0.95em;
+}
+
+/* ----- Stats row above the shifts table ----- */
+.rota-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+
+.rota-stats:empty { margin-bottom: 0; }
+
+.rota-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.rota-stat b {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ----- Shifts table ----- */
+.rota-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.rota-table th,
+.rota-table td {
+  text-align: left;
+  padding: var(--sp-1) 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.rota-table th {
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.rota-table tbody tr:hover {
+  background: var(--surface2);
+}
+
+.rota-table .rota-empty td {
+  text-align: center;
+  color: var(--muted);
+  padding: var(--sp-3) var(--sp-2);
+  font-style: italic;
+}
+
+.rota-table td.rota-cell-date    { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rota-table td.rota-cell-day     { color: var(--muted); }
+.rota-table td.rota-cell-time    { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-soft); }
+.rota-table td.rota-cell-notes   { color: var(--muted); font-size: var(--fs-xs); }
+
+.rota-table .rota-shift-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  border: 1px solid var(--border-strong);
+  background: var(--surface3);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.rota-table .rota-shift-pill[data-cat="working"]      { background: var(--accent-surface); border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent2); }
+.rota-table .rota-shift-pill[data-cat="annual-leave"] { background: var(--info-surface);   border-color: var(--info-border);   color: var(--info); }
+.rota-table .rota-shift-pill[data-cat="study-leave"]  { background: var(--warn-surface);   border-color: var(--warn-border);   color: var(--warn); }
+.rota-table .rota-shift-pill[data-cat="toil"]         { background: var(--warn-surface);   border-color: var(--warn-border);   color: var(--warn); }
+.rota-table .rota-shift-pill[data-cat="sick-off"]     { background: var(--danger-surface); border-color: var(--danger-border); color: var(--danger); }
+
+/* All-staff view groups by date with a heading row */
+.rota-table tr.rota-group-row td {
+  background: var(--surface2);
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ----- Export card ----- */
+.rota-fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.rota-fieldset legend {
+  padding: 0 var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-soft);
+}
+
+.rota-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: var(--sp-1);
+}
+
+.rota-daterange {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: flex-end;
+}
+
+.rota-daterange .field {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+}
+
+.rota-daterange button {
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+.rota-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: center;
+  margin-top: var(--sp-3);
+}
+
+.rota-export-summary {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+/* ----- Source / debug card ----- */
+.rota-source-actions {
+  margin-top: var(--sp-2);
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.rota-warnings:empty { display: none; }
+
+.rota-warnings {
+  margin-top: var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rota-warnings .alert {
+  margin-top: 0;
+}
+
+.rota-raw-details {
+  margin-top: var(--sp-2);
+}
+
+.rota-raw-details > summary {
+  cursor: pointer;
+  padding: var(--sp-0) 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.rota-raw {
+  max-height: 360px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-1) var(--sp-2);
+  color: var(--text-soft);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ----- Loading skeleton for the table while we fetch ----- */
+.rota-skeleton-row td {
+  padding: 14px 10px;
+}
+
+.rota-skeleton-bar {
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(90deg,
+    var(--surface2) 0%,
+    var(--surface3) 50%,
+    var(--surface2) 100%);
+  background-size: 200% 100%;
+  animation: rota-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes rota-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rota-skeleton-bar { animation: none; }
+}
+
+/* ----- Small screens ----- */
+@media (max-width: 640px) {
+  .rota-table th,
+  .rota-table td {
+    padding: 8px 6px;
+    font-size: var(--fs-xs);
+  }
+
+  .rota-table .rota-cell-notes {
+    max-width: 14ch;
+  }
+}

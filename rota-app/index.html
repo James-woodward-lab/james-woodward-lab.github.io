@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <title>Rota App - James Woodward Lab</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/rota-app.css">
+  <script src="../js/theme-toggle.js"></script>
+</head>
+<body class="rota-app">
+<a href="#main" class="skip-link">Skip to main content</a>
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+  <span aria-hidden="true">☀️</span>
+</button>
+<a href="../" class="back-home-link" aria-label="Back to home">‹ Home</a>
+
+<main class="container" id="main">
+  <header class="app-header-center">
+    <h1><span aria-hidden="true">🗓️</span> Rota App</h1>
+    <p>Pick a person, see just their shifts, export to Google Calendar.</p>
+  </header>
+
+  <div id="status-line" class="rota-status" role="status" aria-live="polite">Loading rota…</div>
+  <div id="error-banner" class="alert alert-danger" hidden>
+    <strong id="error-title">Couldn't load the rota</strong>
+    <p id="error-message"></p>
+    <div class="rota-error-actions">
+      <button type="button" id="retry-btn" class="btn-primary">Try again</button>
+      <a id="open-sheet-link" href="#" target="_blank" rel="noopener" class="btn-ghost">Open sheet</a>
+    </div>
+  </div>
+
+  <section class="card" aria-labelledby="picker-heading">
+    <div class="card-title" id="picker-heading">Choose person</div>
+    <div class="field">
+      <label for="person-select">Staff member</label>
+      <select id="person-select" disabled>
+        <option value="">Loading…</option>
+      </select>
+    </div>
+    <p class="hint" id="person-hint">Pick a name to see just that person's shifts.</p>
+  </section>
+
+  <section class="card" aria-labelledby="shifts-heading">
+    <div class="card-title" id="shifts-heading">Shifts</div>
+    <div id="shift-stats" class="rota-stats" aria-label="Shift counts"></div>
+    <div class="table-scroll">
+      <table class="rota-table" id="shifts-table">
+        <thead>
+          <tr>
+            <th scope="col" id="th-first">Date</th>
+            <th scope="col">Day</th>
+            <th scope="col">Shift</th>
+            <th scope="col">Time</th>
+            <th scope="col">Notes</th>
+          </tr>
+        </thead>
+        <tbody id="shifts-tbody">
+          <tr class="rota-empty"><td colspan="5">Pick a person to see their shifts.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="export-heading">
+    <div class="card-title" id="export-heading">Export to calendar</div>
+    <p class="hint">Tick which shift types to include, then download the <code>.ics</code> file and import it into Google Calendar (Settings → Import &amp; export).</p>
+
+    <fieldset class="rota-fieldset">
+      <legend>Include in export</legend>
+      <div class="rota-checkbox-grid">
+        <label class="checkbox-row">
+          <input type="checkbox" data-category="working" checked>
+          <span>Working shifts (D, M, T, N, S)</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" data-category="annual-leave" checked>
+          <span>Annual leave (A/L)</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" data-category="study-leave" checked>
+          <span>Study leave (SL)</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" data-category="toil">
+          <span>TOIL</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" data-category="sick-off">
+          <span>Sick / Off / Strike / Carer's</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" data-category="other">
+          <span>Other (Office, Supervision, locum notes, etc.)</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="rota-fieldset">
+      <legend>Date range</legend>
+      <div class="rota-daterange">
+        <div class="field">
+          <label for="range-from">From</label>
+          <input type="date" id="range-from">
+        </div>
+        <div class="field">
+          <label for="range-to">To</label>
+          <input type="date" id="range-to">
+        </div>
+        <button type="button" id="range-reset" class="btn-ghost">Whole rota</button>
+      </div>
+    </fieldset>
+
+    <div class="rota-export-actions">
+      <button type="button" id="download-ics" class="btn-primary" disabled>
+        <span aria-hidden="true">📥</span> Download .ics
+      </button>
+      <span id="export-summary" class="rota-export-summary"></span>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="source-heading">
+    <details>
+      <summary id="source-heading"><strong>Source &amp; debug</strong></summary>
+      <p class="hint" style="margin-top: var(--sp-2);">
+        Pulled live from
+        <a id="sheet-link" href="#" target="_blank" rel="noopener">this Google Sheet</a>.
+        If the sheet stops being publicly viewable, the app will fail to load.
+      </p>
+      <div class="rota-source-actions">
+        <button type="button" id="refresh-btn" class="btn-ghost">Refresh from sheet</button>
+      </div>
+      <div id="warnings" class="rota-warnings"></div>
+      <details class="rota-raw-details">
+        <summary>Raw parsed rows for selected person</summary>
+        <pre id="raw-debug" class="rota-raw"></pre>
+      </details>
+    </details>
+  </section>
+
+  <footer class="app-footer">
+    Personal rota helper. Always verify shifts against the master rota.
+  </footer>
+</main>
+
+<script src="../js/rota-app.js"></script>
+</body>
+</html>

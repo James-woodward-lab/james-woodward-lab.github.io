@@ -14,7 +14,7 @@
  * caches are cleaned on activate.
  */
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v7';
 const SHELL_CACHE = `jwl-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `jwl-runtime-${CACHE_VERSION}`;
 
@@ -25,11 +25,14 @@ const APP_SHELL = [
   '/css/app-theme.css',
   '/css/style-variants.css',
   '/css/ed-discharge-pack.css',
+  '/css/rota-app.css',
   '/js/style-system.js',
   '/js/theme-toggle.js',
   '/js/quick-links.js',
   '/js/app-shell.js',
+  '/js/rota-app.js',
   '/ed-discharge-pack/index.html',
+  '/rota-app/index.html',
   '/icons/icon.svg',
   '/icons/icon-maskable.svg'
 ];
