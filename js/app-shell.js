@@ -32,6 +32,7 @@
     { title: 'Examination Notes',               href: '/infant-exam-notes/',               emoji: '🧾', tags: 'exam examination notes infant baby', group: 'Top' },
     { title: 'Fluid Calculator',                href: '/fluid-calculator/',                emoji: '💧', tags: 'fluid maintenance iv hydration', group: 'Top' },
     { title: 'QTc Calculator',                  href: '/qtc-calculator/',                  emoji: '🫀', tags: 'qtc ecg cardiac rhythm bazett fridericia', group: 'Top' },
+    { title: 'BMI and BP calculator',           href: '/BMI%20and%20BP/index.html',        emoji: '⚖️', tags: 'bmi bp blood pressure centile rcpch growth height weight', group: 'Top' },
     { title: 'Simple Analgesia Dosing',         href: '/bnfc-dose-calculator/',            emoji: '💊', tags: 'paracetamol ibuprofen analgesia dose bnfc', group: 'Top' },
     { title: 'ED Discharge Pack',               href: '/ed-discharge-pack/',               emoji: '📝', tags: 'discharge pack safety netting gp letter clinical summary note template bronchiolitis gastroenteritis fever head injury asthma uti wound croup febrile convulsion constipation hand foot mouth chickenpox scarlet fever allergic reaction abdominal pain healthier together parent resources', group: 'Top' },
 
@@ -60,7 +61,7 @@
     { title: 'SORT',                                 href: 'https://www.sort.nhs.uk/home.aspx',                                                                     emoji: '📚', tags: 'sort southampton retrieval', external: true },
     { title: 'PIER',                                 href: 'https://www.piernetwork.org/',                                                                          emoji: '🧠', tags: 'pier guidelines paediatric', external: true },
     { title: 'Staffnet',                             href: 'https://staffnet.uhs.nhs.uk',                                                                           emoji: '🏢', tags: 'uhs intranet', external: true },
-    { title: 'Southampton Hospital at Home',         href: 'https://forms.office.com/pages/responsepage.aspx?id=wRwyQbnsfEaw1YVGRNlOO96jJGeS21RFoF5oTRt3gkpUODdMM1JGV0tKU0pTTjI0R1VSUlhaWk5UTy4u&route=shorturl', emoji: '🏠', tags: 'h@h hospital at home southampton', external: true },
+    { title: 'Southampton Hospital at Home',         href: 'https://forms.cloud.microsoft/e/4b0THPXkj6', emoji: '🏠', tags: 'h@h hospital at home southampton', external: true },
   ];
 
   const ACTIONS = [

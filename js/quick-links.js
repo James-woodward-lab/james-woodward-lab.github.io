@@ -15,7 +15,7 @@
     { label: 'SORT',                url: 'https://www.sort.nhs.uk/home.aspx',                                                                                                                                                                                                                                             emoji: '📚', tags: ['resources', 'local', 'sort'] },
     { label: 'PIER',                url: 'https://www.piernetwork.org/',                                                                                                                                                                                                                                                  emoji: '🧠', tags: ['guidelines', 'paediatrics', 'pier'] },
     { label: 'Staffnet',            url: 'https://staffnet.uhs.nhs.uk',                                                                                                                                                                                                                                                   emoji: '🏢', tags: ['uhs', 'intranet', 'staff'] },
-    { label: 'Southampton Hospital at Home (H@H)', url: 'https://forms.office.com/pages/responsepage.aspx?id=wRwyQbnsfEaw1YVGRNlOO96jJGeS21RFoF5oTRt3gkpUODdMM1JGV0tKU0pTTjI0R1VSUlhaWk5UTy4u&route=shorturl', emoji: '🏠', tags: ['h@h', 'hospital at home', 'southampton'] }
+    { label: 'Southampton Hospital at Home (H@H)', url: 'https://forms.cloud.microsoft/e/4b0THPXkj6', emoji: '🏠', tags: ['h@h', 'hospital at home', 'southampton'] }
   ];
 
   function normalise(value) {
@@ -31,9 +31,13 @@
     var anchor = document.createElement('a');
     anchor.className = 'app-btn';
     anchor.href = link.url;
-    anchor.target = '_blank';
-    anchor.rel = 'noopener noreferrer';
-    anchor.setAttribute('aria-label', link.label + ' (opens in new tab)');
+    if (link.external !== false) {
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      anchor.setAttribute('aria-label', link.label + ' (opens in new tab)');
+    } else {
+      anchor.setAttribute('aria-label', link.label);
+    }
 
     var emoji = document.createElement('span');
     emoji.className = 'quick-link-emoji';

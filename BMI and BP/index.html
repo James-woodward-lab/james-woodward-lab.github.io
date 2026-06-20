@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BMI & BP Centile Calculator</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">RCPCH online growth mode + Jackson 2007 BP testing mode</p>
+        <h1>BMI & Blood Pressure Centile Calculator</h1>
+        <p class="lead">For children aged 2–18 years. Growth calculations use the RCPCH Digital Growth API when available. % median BMI is read directly from the RCPCH BMI API response when available. BP centiles are estimated from embedded Jackson 2007-derived testing tables for ages 4–18.</p>
+      </div>
+      <div class="status-card" id="apiStatus">API not tested yet</div>
+    </header>
+
+    <section class="safety-banner">
+      <strong>Clinical safety note:</strong> decision-support/testing tool only.
+    </section>
+
+    <div class="layout">
+      <section class="panel input-panel">
+        <h2>Patient and measurements</h2>
+        <form id="calcForm">
+          <fieldset>
+            <legend>Patient details</legend>
+            <label>Date of birth <input type="date" id="dob" required /></label>
+            <label>Sex
+              <select id="sex" required>
+                <option value="">Select</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Measurement details</legend>
+            <label>Date measured <input type="date" id="obsDate" required /></label>
+            <div class="pair">
+              <label>Height (cm) <input type="number" id="height" min="50" max="220" step="0.1" required /></label>
+              <label>Weight (kg) <input type="number" id="weight" min="2" max="250" step="0.1" required /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="bp-fieldset">
+            <legend>Blood pressure</legend>
+            <div class="pair bp-pair">
+              <label>Systolic BP (mmHg) <input type="number" id="sbp" min="40" max="250" step="1" required /></label>
+              <label>Diastolic BP (mmHg) <input type="number" id="dbp" min="20" max="150" step="1" required /></label>
+            </div>
+          </fieldset>
+
+          <details class="advanced">
+            <summary>API settings</summary>
+            <label>RCPCH API key <input type="password" id="apiKey" /></label>
+            <label>API endpoint <input type="text" id="apiEndpoint" /></label>
+            <p>This static version calls the RCPCH API directly from the browser. Some NHS browsers/networks may block this because of CORS or firewall policy.</p>
+            <button type="button" class="secondary" id="saveSettingsBtn">Save settings to this browser</button>
+            <button type="button" class="secondary" id="testApiBtn">Test API connection</button>
+          </details>
+
+          <div class="actions">
+            <button type="submit">Calculate</button>
+            <button type="button" class="secondary" id="resetBtn">Reset</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel results-panel">
+        <div class="results-header">
+          <h2>Results</h2>
+          <button type="button" class="secondary" id="copyBtn" disabled>Copy results</button>
+        </div>
+        <div id="messages" class="messages"></div>
+        <div class="result-grid">
+          <article class="result-card"><span>Age</span><strong id="ageOut">—</strong></article>
+          <article class="result-card"><span>BMI</span><strong id="bmiOut">—</strong></article>
+          <article class="result-card"><span>BMI centile</span><strong id="bmiCentileOut">—</strong></article>
+          <article class="result-card"><span>Estimated median BMI</span><strong id="medianBmiOut">—</strong></article>
+          <article class="result-card"><span>% median BMI</span><strong id="pmBMIOut">—</strong></article>
+          <article class="result-card"><span>Height centile</span><strong id="heightCentileOut">—</strong></article>
+          <article class="result-card"><span>SBP centile</span><strong id="sbpCentileOut">—</strong></article>
+          <article class="result-card"><span>DBP centile</span><strong id="dbpCentileOut">—</strong></article>
+          <article class="result-card emphasis"><span>BP category</span><strong id="bpCategoryOut">—</strong></article>
+        </div>
+        <textarea id="copyText" readonly placeholder="Copyable summary will appear here"></textarea>
+      </section>
+    </div>
+
+    <footer>
+      <p>RCPCH API base: <code>https://api.rcpch.ac.uk/growth/v1</code>. The RCPCH docs show calls to <code>/uk-who/calculation</code> using a <code>Subscription-Key</code> header. This version uses the percentage median BMI value returned directly by the RCPCH BMI calculation response, so it normally makes only two POST API calls per calculation: one height and one BMI.</p>
+    </footer>
+  </main>
+  <script src="assets/config.js"></script>
+  <script src="assets/bp-jackson2007-test-data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
