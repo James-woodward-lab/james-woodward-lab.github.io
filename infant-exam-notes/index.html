@@ -398,13 +398,24 @@
     .output-actions .copy-btn:hover { background: var(--accent2); }
     .output-actions .copy-btn.copied { background: var(--success); border-color: var(--success); }
     .output-body {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
       margin-top: 8px; font-size: 0.875rem; line-height: 1.55;
       color: var(--text); white-space: pre-wrap;
       min-height: 60px; max-height: 40vh; overflow-y: auto;
       padding: 10px 12px; background: var(--surface);
       border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: inherit;
+      resize: vertical;
     }
-    .output-body.empty { color: var(--muted); font-style: italic; text-align: center; padding: 14px; min-height: 60px; }
+    .output-body:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .output-body.empty { color: var(--muted); font-style: italic; text-align: center; }
+    .output-body.empty::placeholder { color: var(--muted); font-style: italic; }
     .output-collapsed .output-body { display: none; }
     .output-options-wrap {
       margin-top: 8px;
@@ -803,7 +814,7 @@
           <button type="button" onclick="event.stopPropagation(); clearAll()">Clear all</button>
         </div>
       </div>
-      <div class="output-body empty" id="output">Select findings above to generate the note.</div>
+      <textarea class="output-body empty" id="output" rows="4" placeholder="Select findings above to generate the note." aria-label="Examination note"></textarea>
       <div class="output-options-wrap">
         <details class="output-options-details" id="outputOptionsDetails">
           <summary>
@@ -5468,6 +5479,18 @@
       return { line: withSectionPrefix(section.key, lineBody, getSeverityFromFindings(ordered)), severity: getSeverityFromFindings(ordered) };
     }
 
+    function updateOutputTitle() {
+      var outputEl = document.getElementById('output');
+      var titleEl = document.getElementById('outputToggleTitle');
+      var text = outputEl.value.trim();
+      if (!text) {
+        titleEl.textContent = 'Examination Note';
+        return;
+      }
+      var wordCount = (text.match(/\b[\w'-]+\b/g) || []).length;
+      titleEl.textContent = 'Examination Note (' + wordCount + ' word' + (wordCount === 1 ? '' : 's') + ')';
+    }
+
     function updateOutput() {
       var lines = [];
       var abnormalCollector = [];
@@ -5532,31 +5555,19 @@
       if (typeof updateMskQuickChipStates === 'function') updateMskQuickChipStates();
 
       var outputEl = document.getElementById('output');
-      var titleEl = document.getElementById('outputToggleTitle');
-      var systemLineCount = 0;
-      for (var lc = 0; lc < lines.length; lc++) {
-        var lineText = lines[lc];
-        if (!lineText || lineText.indexOf('--- ') === 0) continue;
-        if (lineText.indexOf('⚠️ ') === 0 || lineText.indexOf('** ') === 0) {
-          // summary lines look the same as severity-marked system lines; we stop counting
-          // once we hit the summary divider (handled via the blank line above).
-        }
-        systemLineCount++;
-      }
       if (lines.length) {
         var joinedOutput = lines.join('\n');
         if (expandAbbreviations) joinedOutput = applyAbbreviationExpansions(joinedOutput);
         if (prependTimestamp) {
           joinedOutput = 'Examined ' + formatExamTimestamp() + '.\n' + joinedOutput;
         }
-        outputEl.textContent = joinedOutput;
+        outputEl.value = joinedOutput;
         outputEl.classList.remove('empty');
-        var wordCount = (joinedOutput.match(/\b[\w'-]+\b/g) || []).length;
-        titleEl.textContent = 'Examination Note (' + wordCount + ' word' + (wordCount === 1 ? '' : 's') + ')';
+        updateOutputTitle();
       } else {
-        outputEl.textContent = 'Select findings above to generate the note.';
+        outputEl.value = '';
         outputEl.classList.add('empty');
-        titleEl.textContent = 'Examination Note';
+        updateOutputTitle();
       }
     }
 
@@ -5567,8 +5578,9 @@
     }
 
     function copyOutput() {
-      var out = document.getElementById('output').textContent;
-      if (!out || document.getElementById('output').classList.contains('empty')) return;
+      var outputEl = document.getElementById('output');
+      var out = outputEl.value.trim();
+      if (!out) return;
       var btn = document.getElementById('copyBtn');
 
       function copiedState() {
@@ -5708,6 +5720,13 @@
     bindOutputOption('expandAbbrevToggle', function(v) { expandAbbreviations = v; });
     bindOutputOption('timestampToggle', function(v) { prependTimestamp = v; });
     refreshOptionToggleStyles();
+    var outputTextarea = document.getElementById('output');
+    if (outputTextarea) {
+      outputTextarea.addEventListener('input', function() {
+        this.classList.toggle('empty', !this.value.trim());
+        updateOutputTitle();
+      });
+    }
     updateOutput();
   </script>
 </body>
