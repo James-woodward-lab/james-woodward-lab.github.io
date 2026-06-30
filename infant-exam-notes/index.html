@@ -3625,6 +3625,15 @@
           if (leftDullOn) leftOnly.push(dullPhrase(leftDullNote));
           if (rightDullOn) rightOnly.push(dullPhrase(rightDullNote));
         }
+        if (!leftDullOn && leftDullNote) leftOnly.push(leftDullNote.toLowerCase());
+        if (!rightDullOn && rightDullNote) rightOnly.push(rightDullNote.toLowerCase());
+        if (!tmBits.length && leftOnly.length === 1 && rightOnly.length === 1
+            && normalizeFindingText(leftOnly[0]) === normalizeFindingText(rightOnly[0])
+            && !leftDullOn && !rightDullOn) {
+          tmBits.push('Tympanic membranes ' + leftOnly[0] + ' bilaterally');
+          leftOnly.length = 0;
+          rightOnly.length = 0;
+        }
         if (leftOnly.length) tmBits.push('Left TM ' + leftOnly.join(' and '));
         if (rightOnly.length) tmBits.push('Right TM ' + rightOnly.join(' and '));
         for (var tb = 0; tb < tmBits.length; tb++) heentMainParts.push(tmBits[tb]);
