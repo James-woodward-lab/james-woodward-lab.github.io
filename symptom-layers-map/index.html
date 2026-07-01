@@ -953,17 +953,15 @@ var SLM = (function(){
     items.forEach(function(f){ (byCat[f.cat]||byCat.symptom).push(f); });
     var clauses=[];
 
-    // symptoms / function
+    // symptoms / function - separate genuinely worsening symptoms from newly-appearing ones.
     if(byCat.symptom.length){
-      var phrases=byCat.symptom.map(function(f){ return f.phrase; });
-      var verb;
-      if(isOpening) verb='began';
-      else verb='developed';
-      // worsening trend adjustment
-      var anyWorse=byCat.symptom.some(function(f){ return f.e.trend==='worsening'; });
-      var txt=joinList(phrases)+' '+verb;
-      if(anyWorse && !isOpening) txt=joinList(phrases)+' worsened';
-      clauses.push(txt);
+      var newVerb = isOpening ? 'began' : 'developed';
+      var worseItems=[], newItems=[];
+      byCat.symptom.forEach(function(f){
+        if(!isOpening && f.e.trend==='worsening') worseItems.push(f.phrase); else newItems.push(f.phrase);
+      });
+      if(newItems.length) clauses.push(joinList(newItems)+' '+newVerb);
+      if(worseItems.length) clauses.push(joinList(worseItems)+' worsened');
     }
     // intake/output (self-contained clauses)
     if(byCat.intake.length){
