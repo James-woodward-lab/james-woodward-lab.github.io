@@ -24,6 +24,9 @@ bedside on a phone or trust PC.
   ECG reference.
 - **💊 [Simple Analgesia Dosing](bnfc-dose-calculator/)** - paracetamol
   & ibuprofen dosing.
+- **💉 [Dosing Calculator](dosing-calculator/)** - universal weight-based
+  drug dose calculator with unit-aware volume conversion, max-dose capping
+  and live output. A calculation aid only, not a drug database.
 
 ### Works in progress
 A-E Assessment, Chest X-ray Systematic Review, Developmental Milestones,

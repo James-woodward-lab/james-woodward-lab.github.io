@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dosing">
+<meta name="theme-color" content="#0f1117">
+<meta name="color-scheme" content="dark light">
+<title>Dosing Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../css/app-theme.css">
+<script src="../js/theme-toggle.js"></script>
+<style>
+/* ==========================================================================
+   Dosing Calculator - app-specific styles (gated behind body.dose-app)
+   ========================================================================== */
+body.dose-app {
+  padding-bottom: calc(var(--sp-4) + var(--safe-b));
+}
+
+.dose-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-inline:
+    calc(clamp(var(--sp-2), 3vw, var(--sp-4)) + var(--safe-l))
+    calc(clamp(var(--sp-2), 3vw, var(--sp-4)) + var(--safe-r));
+}
+
+/* Sticky compact header */
+.dose-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: var(--sp-1) 0;
+  margin-bottom: var(--sp-2);
+}
+
+.dose-header-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px var(--sp-2);
+  padding-inline:
+    calc(clamp(var(--sp-2), 3vw, var(--sp-4)) + var(--safe-l) + 54px)
+    calc(clamp(var(--sp-2), 3vw, var(--sp-4)) + var(--safe-r) + 54px);
+  text-align: center;
+}
+
+.dose-header h1 {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  color: var(--accent);
+  line-height: var(--lh-tight);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dose-header .disclaimer {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: var(--lh-snug);
+}
+
+/* 3-column desktop grid */
+.dose-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.25fr 1fr;
+  gap: var(--sp-2);
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .dose-grid { grid-template-columns: 1fr; }
+}
+
+/* Compact card override for this tool */
+.dose-app .card {
+  padding: var(--sp-2) var(--sp-2);
+  margin-bottom: 0;
+}
+
+.dose-app .card + .card { margin-top: var(--sp-2); }
+
+.col { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+
+/* Output column sticks on desktop so inputs + result stay together */
+@media (min-width: 981px) {
+  .col-output {
+    position: sticky;
+    top: 58px;
+    max-height: calc(100vh - 66px);
+    overflow: auto;
+  }
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-1);
+}
+
+.card-head .card-title { margin-bottom: 0; }
+
+.field-compact { margin-bottom: var(--sp-1); }
+.field-compact:last-child { margin-bottom: 0; }
+.field-compact label {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-bottom: 3px;
+  font-weight: var(--fw-medium);
+}
+.dose-app .field-compact input,
+.dose-app .field-compact select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  color: var(--text);
+  font-size: var(--fs-base);
+  font-family: inherit;
+  min-height: 40px;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+.dose-app .field-compact input:focus,
+.dose-app .field-compact select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.dose-app .field-compact input.invalid {
+  border-color: var(--danger);
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-1);
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--sp-1);
+}
+
+.hint-sm {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: var(--lh-snug);
+}
+
+/* Chip / toggle button groups */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-soft);
+  border-radius: var(--radius-full);
+  padding: 6px 11px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  min-height: 34px;
+  line-height: 1;
+  touch-action: manipulation;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              background var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+.chip:hover { border-color: var(--border-strong); }
+.chip:active { transform: scale(0.97); }
+.chip[aria-pressed="true"],
+.chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-on);
+}
+
+/* Weight quick chips */
+.wchip {
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-soft);
+  border-radius: var(--radius-sm);
+  padding: 6px 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  min-height: 34px;
+  touch-action: manipulation;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              background var(--duration-fast) var(--ease-standard);
+}
+.wchip:hover { border-color: var(--accent); color: var(--text); }
+.wchip-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+/* Segmented toggle (Measured / Estimated) */
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.seg button {
+  background: var(--surface2);
+  color: var(--muted);
+  border: none;
+  padding: 8px 6px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  min-height: 40px;
+  touch-action: manipulation;
+  transition: background var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
+}
+.seg button + button { border-left: 1.5px solid var(--border); }
+.seg button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+.seg button.est[aria-pressed="true"] {
+  background: var(--warn);
+  color: #1a1400;
+}
+
+/* Unit selector buttons - colour coded to reduce unit confusion */
+.unit-group-label {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+  margin: var(--sp-1) 0 5px;
+}
+.unit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.ubtn {
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 8px 4px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  min-height: 42px;
+  line-height: 1.1;
+  touch-action: manipulation;
+  position: relative;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              background var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+.ubtn:hover { border-color: var(--border-strong); }
+.ubtn:active { transform: scale(0.97); }
+
+/* Colour accents by unit family (left border tag) */
+.ubtn::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  background: var(--u-color, var(--border-strong));
+}
+.ubtn.u-mg    { --u-color: var(--accent); }
+.ubtn.u-mcg   { --u-color: var(--warn); }
+.ubtn.u-ng    { --u-color: var(--danger); }
+.ubtn.u-units { --u-color: #a78bfa; }
+.ubtn.u-mmol  { --u-color: var(--success); }
+.ubtn.u-ml    { --u-color: var(--info); }
+
+.ubtn[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--u-color) 22%, var(--surface2));
+  border-color: var(--u-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--u-color) 35%, transparent);
+}
+
+/* Collapsible section */
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 8px 11px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  min-height: 40px;
+  touch-action: manipulation;
+}
+.collapse-toggle:hover { border-color: var(--border-strong); }
+.collapse-toggle .chev { transition: transform var(--duration-fast) var(--ease-standard); color: var(--muted); }
+.collapse-toggle[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.collapse-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-med) var(--ease-standard);
+}
+.collapse-body.open { grid-template-rows: 1fr; }
+.collapse-body > .inner { overflow: hidden; }
+.collapse-body > .inner > .pad { padding-top: var(--sp-1); }
+
+/* Output cards */
+.out-placeholder {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-4) var(--sp-2);
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+}
+.out-placeholder .big { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+
+.res-hero {
+  border: 1.5px solid var(--accent);
+  background: var(--accent-surface);
+  border-radius: var(--radius-md);
+  padding: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+.res-hero .lbl {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+}
+.res-hero .val {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: var(--lh-tight);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+  word-break: break-word;
+}
+.res-hero .val small { font-size: var(--fs-md); color: var(--muted); font-weight: var(--fw-semibold); }
+.res-hero .sub { font-size: var(--fs-xs); color: var(--muted); margin-top: 3px; }
+
+.res-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-1);
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-sm);
+}
+.res-row:last-child { border-bottom: none; }
+.res-row .k { color: var(--muted); }
+.res-row .v {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.res-row .v small { color: var(--muted); font-weight: var(--fw-regular); }
+
+.badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: var(--sp-1); }
+
+.formula-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+  line-height: var(--lh-normal);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-top: var(--sp-1);
+}
+
+.copy-block {
+  margin-top: var(--sp-1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.copy-line {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.copy-line .txt {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: var(--fs-xs);
+  color: var(--text);
+  line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
+}
+.copy-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--accent2);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  min-width: 62px;
+  touch-action: manipulation;
+  transition: background var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard);
+}
+.copy-btn:hover { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+.copy-btn.copied { background: var(--success); color: #05230f; border-color: var(--success); }
+
+.alert-stack { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-1); }
+.dose-app .alert { margin-top: 0; padding: 8px 11px; }
+
+.reset-row { margin-top: var(--sp-1); }
+.dose-app .btn-reset { margin-top: 0; }
+
+.mini-note {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  background: var(--accent-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 9px;
+  line-height: var(--lh-snug);
+}
+
+.footer-note {
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-loose);
+  padding: var(--sp-3) 0 var(--sp-1);
+}
+</style>
+</head>
+<body class="dose-app">
+<a href="#main" class="skip-link">Skip to main content</a>
+<a href="../" class="back-home-link" aria-label="Back to home">‹ Home</a>
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">☀️</button>
+
+<header class="dose-header">
+  <div class="dose-header-inner">
+    <h1><span aria-hidden="true">💉</span> Dosing Calculator</h1>
+    <span class="disclaimer">Calculation aid only — verify with local guideline / BNFc before prescribing.</span>
+  </div>
+</header>
+
+<main class="dose-container" id="main">
+  <div class="dose-grid">
+
+    <!-- ============================= LEFT: PATIENT ============================= -->
+    <div class="col col-patient">
+      <section class="card" aria-labelledby="patient-h">
+        <div class="card-head">
+          <div class="card-title" id="patient-h">Patient</div>
+        </div>
+
+        <div class="field-compact">
+          <label for="weight">Weight (kg) <span aria-hidden="true" style="color:var(--danger)">*</span></label>
+          <input type="number" id="weight" inputmode="decimal" min="0" step="0.1"
+                 autocomplete="off" placeholder="e.g. 14.2" aria-required="true">
+          <div class="hint-sm">All dose calculations use kilograms.</div>
+        </div>
+
+        <div class="field-compact">
+          <label>Quick weight (kg)</label>
+          <div class="wchip-grid" id="weight-chips"></div>
+        </div>
+
+        <div class="field-compact">
+          <label>Weight source</label>
+          <div class="seg" role="group" aria-label="Weight source">
+            <button type="button" id="src-measured" data-src="measured" aria-pressed="true">Measured</button>
+            <button type="button" class="est" id="src-estimated" data-src="estimated" aria-pressed="false">Estimated</button>
+          </div>
+        </div>
+
+        <div class="field-compact">
+          <label for="age">Age (context only, optional)</label>
+          <input type="text" id="age" autocomplete="off" placeholder="e.g. 3 years">
+        </div>
+
+        <details class="field-compact">
+          <summary style="cursor:pointer;font-size:var(--fs-sm);color:var(--muted);">Pounds → kg converter (secondary)</summary>
+          <div style="margin-top:8px;">
+            <div class="two-col">
+              <input type="number" id="lb-in" inputmode="decimal" min="0" step="0.1" placeholder="lb">
+              <input type="text" id="lb-out" readonly placeholder="= kg" aria-label="Converted kilograms" style="background:var(--surface3);">
+            </div>
+            <button type="button" class="chip" id="lb-use" style="margin-top:8px;">Use as weight</button>
+            <div class="hint-sm">Kilograms is the primary, safest workflow. 1 lb = 0.4536 kg.</div>
+          </div>
+        </details>
+
+        <div class="reset-row">
+          <button type="button" class="btn btn-reset" id="reset-btn">Reset all</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================= CENTRE: DOSE BUILDER ============================= -->
+    <div class="col col-builder">
+      <section class="card" aria-labelledby="builder-h">
+        <div class="card-head">
+          <div class="card-title" id="builder-h">Dose builder</div>
+        </div>
+
+        <div class="field-compact">
+          <label for="drug">Drug name (optional)</label>
+          <input type="text" id="drug" autocomplete="off" placeholder="e.g. Paracetamol">
+        </div>
+
+        <div class="field-compact">
+          <label for="dose-value">Dose per kg</label>
+          <input type="number" id="dose-value" inputmode="decimal" min="0" step="any"
+                 autocomplete="off" placeholder="e.g. 15">
+        </div>
+
+        <div class="field-compact">
+          <label>Dose unit</label>
+          <div class="unit-group-label">Bolus / oral / standard</div>
+          <div class="unit-grid" id="unit-std" role="group" aria-label="Standard dose units"></div>
+          <div class="unit-group-label">Infusion rates</div>
+          <div class="unit-grid" id="unit-rate" role="group" aria-label="Infusion rate units"></div>
+        </div>
+
+        <div class="field-compact">
+          <label>Route (optional)</label>
+          <div class="chips" id="route-chips" role="group" aria-label="Route"></div>
+        </div>
+
+        <div class="field-compact">
+          <label>Frequency (optional)</label>
+          <div class="chips" id="freq-chips" role="group" aria-label="Frequency"></div>
+        </div>
+      </section>
+
+      <!-- Maximum dose -->
+      <section class="card">
+        <button type="button" class="collapse-toggle" id="max-toggle" aria-expanded="false" aria-controls="max-body">
+          <span>Maximum single dose (optional)</span><span class="chev" aria-hidden="true">›</span>
+        </button>
+        <div class="collapse-body" id="max-body">
+          <div class="inner"><div class="pad">
+            <div class="two-col">
+              <div class="field-compact">
+                <label for="max-value">Max dose</label>
+                <input type="number" id="max-value" inputmode="decimal" min="0" step="any" placeholder="e.g. 1000">
+              </div>
+              <div class="field-compact">
+                <label for="max-unit">Max unit</label>
+                <select id="max-unit">
+                  <option value="mg">mg</option>
+                  <option value="micrograms">micrograms</option>
+                  <option value="nanograms">nanograms</option>
+                  <option value="units">units</option>
+                  <option value="mmol">mmol</option>
+                  <option value="mL">mL</option>
+                </select>
+              </div>
+            </div>
+            <div class="hint-sm">If the calculated dose exceeds this, a capped dose is shown alongside the raw dose.</div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- Concentration -->
+      <section class="card">
+        <button type="button" class="collapse-toggle" id="conc-toggle" aria-expanded="false" aria-controls="conc-body">
+          <span>Concentration → volume (optional)</span><span class="chev" aria-hidden="true">›</span>
+        </button>
+        <div class="collapse-body" id="conc-body">
+          <div class="inner"><div class="pad">
+            <div class="hint-sm" style="margin-top:0;margin-bottom:8px;">Enter the strength exactly as supplied.</div>
+            <div class="two-col">
+              <div class="field-compact">
+                <label for="conc-num">Amount</label>
+                <input type="number" id="conc-num" inputmode="decimal" min="0" step="any" placeholder="e.g. 125">
+              </div>
+              <div class="field-compact">
+                <label for="conc-num-unit">Unit</label>
+                <select id="conc-num-unit">
+                  <option value="mg">mg</option>
+                  <option value="micrograms">micrograms</option>
+                  <option value="nanograms">nanograms</option>
+                  <option value="units">units</option>
+                  <option value="mmol">mmol</option>
+                </select>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="field-compact">
+                <label for="conc-den">Per volume</label>
+                <input type="number" id="conc-den" inputmode="decimal" min="0" step="any" placeholder="e.g. 5">
+              </div>
+              <div class="field-compact">
+                <label for="conc-den-unit">Volume unit</label>
+                <select id="conc-den-unit">
+                  <option value="mL">mL</option>
+                </select>
+              </div>
+            </div>
+            <div class="hint-sm">Examples: 125 mg / 5 mL · 1000 units / 1 mL · 1 mg / 10 mL</div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- Rounding -->
+      <section class="card">
+        <button type="button" class="collapse-toggle" id="round-toggle" aria-expanded="false" aria-controls="round-body">
+          <span>Volume rounding (optional)</span><span class="chev" aria-hidden="true">›</span>
+        </button>
+        <div class="collapse-body" id="round-body">
+          <div class="inner"><div class="pad">
+            <div class="chips" id="round-chips" role="group" aria-label="Rounding mode"></div>
+            <div class="hint-sm">Applies to the volume to give. Rounded value is for practical administration only — the exact result is always shown.</div>
+          </div></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================= RIGHT: OUTPUT ============================= -->
+    <div class="col col-output">
+      <section class="card" aria-labelledby="output-h" aria-live="polite">
+        <div class="card-head">
+          <div class="card-title" id="output-h">Output</div>
+        </div>
+        <div id="output-content">
+          <div class="out-placeholder">
+            <span class="big" aria-hidden="true">🧮</span>
+            Enter weight and dose details to calculate.
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    General weight-based dose calculator · not a drug database · no data stored · works offline.<br>
+    Always check against local guidance and the BNFc before prescribing.
+  </div>
+</main>
+
+<script>
+/* =======================================================================
+   Dosing Calculator logic
+   ======================================================================= */
+
+/* ==== PURE LOGIC START ==== */
+/* These functions are DOM-free and unit-tested in a Node harness. */
+
+const UNIT_DEFS = {
+  'mg/kg':             { measure: 'mg',         rate: null,   fam: 'u-mg'    },
+  'micrograms/kg':     { measure: 'micrograms', rate: null,   fam: 'u-mcg'   },
+  'nanograms/kg':      { measure: 'nanograms',  rate: null,   fam: 'u-ng'    },
+  'units/kg':          { measure: 'units',      rate: null,   fam: 'u-units' },
+  'mmol/kg':           { measure: 'mmol',       rate: null,   fam: 'u-mmol'  },
+  'mL/kg':             { measure: 'mL',         rate: null,   fam: 'u-ml'    },
+  'mg/kg/hour':        { measure: 'mg',         rate: 'hour', fam: 'u-mg'    },
+  'micrograms/kg/min': { measure: 'micrograms', rate: 'min',  fam: 'u-mcg'   },
+  'units/kg/hour':     { measure: 'units',      rate: 'hour', fam: 'u-units' }
+};
+
+/* Mass family: conversion factors to milligrams. Only these units are
+   inter-convertible; unrelated families (units, mmol, mL) are never mixed. */
+const MASS_TO_MG = { mg: 1, micrograms: 1e-3, nanograms: 1e-6 };
+
+function measureFamily(u) {
+  return (u in MASS_TO_MG) ? 'mass' : u;
+}
+
+function parseNum(v) {
+  if (v === null || v === undefined) return NaN;
+  const s = String(v).trim();
+  if (s === '') return NaN;
+  const n = Number(s);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+/* Convert a measured amount between mass units. Returns null if the units
+   belong to different (non-convertible) families. */
+function convertMeasure(value, fromUnit, toUnit) {
+  if (fromUnit === toUnit) return value;
+  if ((fromUnit in MASS_TO_MG) && (toUnit in MASS_TO_MG)) {
+    return (value * MASS_TO_MG[fromUnit]) / MASS_TO_MG[toUnit];
+  }
+  return null;
+}
+
+/* Core dose: total = weight (kg) x dose-per-kg. */
+function calcDose(weight, doseValue, doseUnit) {
+  const def = UNIT_DEFS[doseUnit];
+  if (!def) return null;
+  if (!(weight > 0) || !Number.isFinite(doseValue)) return null;
+  return { value: weight * doseValue, measure: def.measure, rate: def.rate };
+}
+
+/* Maximum single-dose cap. Compares raw dose to the max (converting within
+   the mass family if needed). Not applied to infusion rates. */
+function applyMaxCap(rawValue, rawMeasure, isRate, maxValue, maxUnit) {
+  if (!Number.isFinite(maxValue) || maxValue <= 0) return { applicable: false };
+  if (isRate) return { applicable: true, comparable: false, isRate: true };
+  const rawInMax = convertMeasure(rawValue, rawMeasure, maxUnit);
+  if (rawInMax === null) return { applicable: true, comparable: false };
+  const capped = rawInMax > maxValue;
+  return {
+    applicable: true,
+    comparable: true,
+    capped,
+    rawInMax,
+    maxValue,
+    maxUnit,
+    finalValue: capped ? convertMeasure(maxValue, maxUnit, rawMeasure) : rawValue
+  };
+}
+
+/* Concentration -> volume. strength = numerator/denominator (per mL).
+   Dose is converted into the numerator unit when in the same mass family. */
+function calcVolume(doseValue, doseMeasure, numValue, numUnit, denValue) {
+  if (!Number.isFinite(numValue) || numValue <= 0) return { ok: false, reason: 'incomplete' };
+  if (!Number.isFinite(denValue) || denValue <= 0) return { ok: false, reason: 'incomplete' };
+  const doseInNum = convertMeasure(doseValue, doseMeasure, numUnit);
+  if (doseInNum === null) return { ok: false, reason: 'mismatch' };
+  const strength = numValue / denValue;
+  return {
+    ok: true,
+    strength,
+    volume: doseInNum / strength,
+    doseInNum,
+    converted: doseMeasure !== numUnit
+  };
+}
+
+function roundVolume(v, mode) {
+  if (!Number.isFinite(v)) return null;
+  switch (mode) {
+    case '0.01': return Math.round(v / 0.01) * 0.01;
+    case '0.1':  return Math.round(v / 0.1) * 0.1;
+    case '0.5':  return Math.round(v / 0.5) * 0.5;
+    case '1':    return Math.round(v);
+    case 'oral': return Math.round(v / 0.1) * 0.1;   /* oral syringe, 0.1 mL */
+    case 'iv':   return Math.round(v / 0.01) * 0.01; /* fine IV, 0.01 mL */
+    default:     return null;
+  }
+}
+
+function sigFig(x, n) {
+  if (!Number.isFinite(x) || x === 0) return x;
+  const digits = Math.ceil(Math.log10(Math.abs(x)));
+  const power = n - digits;
+  const mag = Math.pow(10, power);
+  return Math.round(x * mag) / mag;
+}
+
+/* Trim floating point noise and format for display (up to 4 dp). */
+function fmtNum(x) {
+  if (!Number.isFinite(x)) return '–';
+  const r = Math.round(x * 1e6) / 1e6;
+  let s = (Math.round(r * 1e4) / 1e4).toString();
+  return s;
+}
+/* ==== PURE LOGIC END ==== */
+
+/* ----------------------------------------------------------------------- */
+/* State                                                                    */
+/* ----------------------------------------------------------------------- */
+const state = {
+  weight: null,
+  weightSource: 'measured',
+  age: '',
+  drugName: '',
+  doseValue: null,
+  doseUnit: '',
+  route: '',
+  frequency: '',
+  maxDoseValue: null,
+  maxDoseUnit: 'mg',
+  concentrationNumerator: null,
+  concentrationNumeratorUnit: 'mg',
+  concentrationDenominator: null,
+  concentrationDenominatorUnit: 'mL',
+  roundingMode: 'none'
+};
+
+const STD_UNITS  = ['mg/kg', 'micrograms/kg', 'nanograms/kg', 'units/kg', 'mmol/kg', 'mL/kg'];
+const RATE_UNITS = ['mg/kg/hour', 'micrograms/kg/min', 'units/kg/hour'];
+const ROUTES     = ['PO', 'IV', 'IM', 'Buccal', 'IN', 'Neb', 'PR', 'Other'];
+const FREQS      = ['Once', 'OD', 'BD', 'TDS', 'QDS', 'Stat', 'PRN', 'Continuous'];
+const WEIGHTS    = [5, 7.5, 10, 12, 15, 20, 25, 30];
+const ROUND_MODES = [
+  { v: 'none', l: 'None' },
+  { v: '0.01', l: '0.01 mL' },
+  { v: '0.1',  l: '0.1 mL' },
+  { v: '0.5',  l: '0.5 mL' },
+  { v: '1',    l: '1 mL' },
+  { v: 'oral', l: 'Oral (0.1 mL)' },
+  { v: 'iv',   l: 'IV (0.01 mL)' }
+];
+const ROUND_LABEL = {
+  '0.01': 'nearest 0.01 mL', '0.1': 'nearest 0.1 mL', '0.5': 'nearest 0.5 mL',
+  '1': 'nearest 1 mL', 'oral': 'nearest 0.1 mL (oral syringe)', 'iv': 'nearest 0.01 mL (fine IV)'
+};
+
+const $ = (id) => document.getElementById(id);
+
+/* ----------------------------------------------------------------------- */
+/* Build dynamic controls                                                   */
+/* ----------------------------------------------------------------------- */
+function buildControls() {
+  // Weight chips
+  $('weight-chips').innerHTML = WEIGHTS.map(w =>
+    `<button type="button" class="wchip" data-w="${w}">${w}</button>`).join('');
+
+  // Unit buttons
+  const unitBtn = (u) => {
+    const def = UNIT_DEFS[u];
+    return `<button type="button" class="ubtn ${def.fam}" data-unit="${u}" aria-pressed="false">${u}</button>`;
+  };
+  $('unit-std').innerHTML  = STD_UNITS.map(unitBtn).join('');
+  $('unit-rate').innerHTML = RATE_UNITS.map(unitBtn).join('');
+
+  // Route / frequency chips
+  $('route-chips').innerHTML = ROUTES.map(r =>
+    `<button type="button" class="chip" data-route="${r}" aria-pressed="false">${r}</button>`).join('');
+  $('freq-chips').innerHTML = FREQS.map(f =>
+    `<button type="button" class="chip" data-freq="${f}" aria-pressed="false">${f}</button>`).join('');
+
+  // Rounding chips
+  $('round-chips').innerHTML = ROUND_MODES.map(m =>
+    `<button type="button" class="chip" data-round="${m.v}" aria-pressed="${m.v === 'none'}">${m.l}</button>`).join('');
+}
+
+/* ----------------------------------------------------------------------- */
+/* Wiring                                                                   */
+/* ----------------------------------------------------------------------- */
+let debounceTimer = null;
+function scheduleRender() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(render, 150);
+}
+
+function setPressed(container, attr, value) {
+  container.querySelectorAll('[' + attr + ']').forEach(b => {
+    b.setAttribute('aria-pressed', b.getAttribute(attr) === value ? 'true' : 'false');
+  });
+}
+
+function wire() {
+  // Weight (debounced)
+  $('weight').addEventListener('input', (e) => {
+    state.weight = parseNum(e.target.value);
+    scheduleRender();
+  });
+
+  // Quick weight chips (immediate)
+  $('weight-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-w]'); if (!b) return;
+    $('weight').value = b.dataset.w;
+    state.weight = parseNum(b.dataset.w);
+    render();
+  });
+
+  // Weight source segmented (immediate)
+  document.querySelectorAll('[data-src]').forEach(b => {
+    b.addEventListener('click', () => {
+      state.weightSource = b.dataset.src;
+      $('src-measured').setAttribute('aria-pressed', state.weightSource === 'measured');
+      $('src-estimated').setAttribute('aria-pressed', state.weightSource === 'estimated');
+      render();
+    });
+  });
+
+  // Age / drug (debounced)
+  $('age').addEventListener('input', (e) => { state.age = e.target.value.trim(); scheduleRender(); });
+  $('drug').addEventListener('input', (e) => { state.drugName = e.target.value.trim(); scheduleRender(); });
+
+  // lb converter
+  $('lb-in').addEventListener('input', (e) => {
+    const lb = parseNum(e.target.value);
+    $('lb-out').value = (Number.isFinite(lb) && lb > 0) ? fmtNum(lb * 0.45359237) + ' kg' : '';
+  });
+  $('lb-use').addEventListener('click', () => {
+    const lb = parseNum($('lb-in').value);
+    if (Number.isFinite(lb) && lb > 0) {
+      const kg = Math.round(lb * 0.45359237 * 100) / 100;
+      $('weight').value = kg;
+      state.weight = kg;
+      render();
+    }
+  });
+
+  // Dose value (debounced)
+  $('dose-value').addEventListener('input', (e) => {
+    state.doseValue = parseNum(e.target.value);
+    scheduleRender();
+  });
+
+  // Unit buttons (immediate, single-select across both groups)
+  document.querySelectorAll('.ubtn').forEach(b => {
+    b.addEventListener('click', () => {
+      const u = b.dataset.unit;
+      state.doseUnit = (state.doseUnit === u) ? '' : u; // toggle off if same
+      document.querySelectorAll('.ubtn').forEach(x =>
+        x.setAttribute('aria-pressed', x.dataset.unit === state.doseUnit ? 'true' : 'false'));
+      render();
+    });
+  });
+
+  // Route chips (immediate, toggle single)
+  $('route-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-route]'); if (!b) return;
+    state.route = (state.route === b.dataset.route) ? '' : b.dataset.route;
+    setPressed($('route-chips'), 'data-route', state.route);
+    render();
+  });
+
+  // Frequency chips
+  $('freq-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-freq]'); if (!b) return;
+    state.frequency = (state.frequency === b.dataset.freq) ? '' : b.dataset.freq;
+    setPressed($('freq-chips'), 'data-freq', state.frequency);
+    render();
+  });
+
+  // Max dose
+  $('max-value').addEventListener('input', (e) => { state.maxDoseValue = parseNum(e.target.value); scheduleRender(); });
+  $('max-unit').addEventListener('change', (e) => { state.maxDoseUnit = e.target.value; render(); });
+
+  // Concentration
+  $('conc-num').addEventListener('input', (e) => { state.concentrationNumerator = parseNum(e.target.value); scheduleRender(); });
+  $('conc-num-unit').addEventListener('change', (e) => { state.concentrationNumeratorUnit = e.target.value; render(); });
+  $('conc-den').addEventListener('input', (e) => { state.concentrationDenominator = parseNum(e.target.value); scheduleRender(); });
+  $('conc-den-unit').addEventListener('change', (e) => { state.concentrationDenominatorUnit = e.target.value; render(); });
+
+  // Rounding chips
+  $('round-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-round]'); if (!b) return;
+    state.roundingMode = b.dataset.round;
+    setPressed($('round-chips'), 'data-round', state.roundingMode);
+    render();
+  });
+
+  // Collapsibles
+  [['max-toggle', 'max-body'], ['conc-toggle', 'conc-body'], ['round-toggle', 'round-body']].forEach(([t, b]) => {
+    $(t).addEventListener('click', () => {
+      const open = $(t).getAttribute('aria-expanded') === 'true';
+      $(t).setAttribute('aria-expanded', String(!open));
+      $(b).classList.toggle('open', !open);
+    });
+  });
+
+  // Reset
+  $('reset-btn').addEventListener('click', resetAll);
+}
+
+function resetAll() {
+  Object.assign(state, {
+    weight: null, weightSource: 'measured', age: '', drugName: '',
+    doseValue: null, doseUnit: '', route: '', frequency: '',
+    maxDoseValue: null, maxDoseUnit: 'mg',
+    concentrationNumerator: null, concentrationNumeratorUnit: 'mg',
+    concentrationDenominator: null, concentrationDenominatorUnit: 'mL',
+    roundingMode: 'none'
+  });
+  ['weight', 'age', 'drug', 'dose-value', 'max-value', 'conc-num', 'conc-den', 'lb-in', 'lb-out'].forEach(id => $(id).value = '');
+  $('max-unit').value = 'mg';
+  $('conc-num-unit').value = 'mg';
+  $('conc-den-unit').value = 'mL';
+  document.querySelectorAll('.ubtn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  setPressed($('route-chips'), 'data-route', '');
+  setPressed($('freq-chips'), 'data-freq', '');
+  setPressed($('round-chips'), 'data-round', 'none');
+  $('src-measured').setAttribute('aria-pressed', 'true');
+  $('src-estimated').setAttribute('aria-pressed', 'false');
+  render();
+}
+
+/* ----------------------------------------------------------------------- */
+/* Render                                                                   */
+/* ----------------------------------------------------------------------- */
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function timeSuffix(rate) { return rate === 'hour' ? '/hour' : rate === 'min' ? '/min' : ''; }
+
+function render() {
+  // reflect weight validity styling
+  const wInput = $('weight');
+  const wValid = Number.isFinite(state.weight) && state.weight > 0;
+  wInput.classList.toggle('invalid', wInput.value !== '' && !wValid);
+
+  const out = $('output-content');
+  const warnings = [];
+
+  // Placeholder gate: need valid weight + dose value + unit
+  const haveDose = Number.isFinite(state.doseValue) && state.doseUnit;
+  if (!wValid || !haveDose) {
+    // Still surface a couple of soft warnings for partial input
+    let hint = 'Enter weight and dose details to calculate.';
+    if (wInput.value !== '' && !wValid) hint = 'Enter a valid weight greater than 0 kg.';
+    else if (wValid && Number.isFinite(state.doseValue) && state.doseValue <= 0) hint = 'Enter a dose value greater than 0.';
+    else if (wValid && Number.isFinite(state.doseValue) && !state.doseUnit) hint = 'Select a dose unit.';
+    out.innerHTML = `<div class="out-placeholder"><span class="big" aria-hidden="true">🧮</span>${esc(hint)}</div>`;
+    return;
+  }
+
+  const def = UNIT_DEFS[state.doseUnit];
+  const isRate = !!def.rate;
+
+  // Weight plausibility
+  if (state.weight < 0.3) warnings.push({ t: 'warn', m: `Weight ${fmtNum(state.weight)} kg is very low — please double-check.` });
+  else if (state.weight > 150) warnings.push({ t: 'warn', m: `Weight ${fmtNum(state.weight)} kg is very high — please double-check.` });
+
+  // Dose value sanity
+  if (state.doseValue <= 0) {
+    out.innerHTML = renderWarnings([{ t: 'danger', m: 'Dose value must be greater than 0.' }]);
+    return;
+  }
+  // Heuristic unit-mistake flag for mass units
+  if (measureFamily(def.measure) === 'mass' && def.measure === 'mg' && state.doseValue >= 1000) {
+    warnings.push({ t: 'warn', m: `${fmtNum(state.doseValue)} mg/kg is unusually high — check for a possible unit error (mg vs micrograms).` });
+  }
+
+  // Core dose
+  const dose = calcDose(state.weight, state.doseValue, state.doseUnit);
+  const rawValue = dose.value;
+  const measure = dose.measure;
+
+  // Max cap
+  const cap = applyMaxCap(rawValue, measure, isRate, state.maxDoseValue, state.maxDoseUnit);
+  let finalValue = rawValue;
+  let capApplied = false;
+  if (cap.applicable) {
+    if (cap.isRate) {
+      warnings.push({ t: 'info', m: 'Maximum single dose is not applied to infusion rates.' });
+    } else if (!cap.comparable) {
+      warnings.push({ t: 'warn', m: `Maximum dose unit (${state.maxDoseUnit}) is not compatible with the dose unit (${measure}) — cap not applied.` });
+    } else if (cap.capped) {
+      finalValue = cap.finalValue;
+      capApplied = true;
+    }
+  }
+
+  // Concentration -> volume (uses final/capped dose)
+  let vol = null;
+  let concEntered = Number.isFinite(state.concentrationNumerator) || Number.isFinite(state.concentrationDenominator);
+  if (concEntered) {
+    vol = calcVolume(finalValue, measure, state.concentrationNumerator, state.concentrationNumeratorUnit, state.concentrationDenominator);
+    if (!vol.ok && vol.reason === 'incomplete') {
+      warnings.push({ t: 'warn', m: 'Concentration is incomplete — enter both amount and volume (volume must be > 0). No volume calculated.' });
+    } else if (!vol.ok && vol.reason === 'mismatch') {
+      warnings.push({ t: 'warn', m: `Dose unit (${measure}) and concentration unit (${state.concentrationNumeratorUnit}) are different families and cannot be converted. No volume calculated.` });
+    }
+  }
+
+  // Rounded volume
+  let roundedVol = null;
+  if (vol && vol.ok && state.roundingMode !== 'none') {
+    roundedVol = roundVolume(vol.volume, state.roundingMode);
+  }
+
+  // Small volume warning
+  if (vol && vol.ok && vol.volume > 0 && vol.volume < 0.1) {
+    warnings.push({ t: 'warn', m: `Volume is very small (${fmtNum(vol.volume)} mL) — check the dose and concentration carefully.` });
+  }
+
+  // Estimated weight notice
+  if (state.weightSource === 'estimated') {
+    warnings.push({ t: 'warn', m: 'Weight is estimated, not measured — verify before administration.' });
+  }
+
+  out.innerHTML = renderResult({ dose, rawValue, finalValue, measure, isRate, rate: def.rate, cap, capApplied, vol, roundedVol, warnings });
+  attachCopyHandlers();
+}
+
+function renderWarnings(warnings) {
+  if (!warnings.length) return '';
+  return `<div class="alert-stack">` + warnings.map(w =>
+    `<div class="alert alert-${w.t === 'danger' ? 'danger' : w.t === 'info' ? 'info' : 'warn'}">${esc(w.m)}</div>`
+  ).join('') + `</div>`;
+}
+
+function renderResult(r) {
+  const suffix = timeSuffix(r.rate);
+  const dispDose = r.capApplied ? r.finalValue : r.rawValue;
+  const rounded = sigFig(dispDose, 3);
+  const showRounded = fmtNum(rounded) !== fmtNum(dispDose);
+
+  // Badges
+  const badges = [];
+  badges.push(`<span class="badge ${state.weightSource === 'estimated' ? 'badge-amber' : 'badge-green'}">Weight: ${state.weightSource === 'estimated' ? 'Estimated' : 'Measured'}</span>`);
+  if (r.cap.applicable && r.cap.comparable) {
+    badges.push(`<span class="badge ${r.capApplied ? 'badge-amber' : 'badge-green'}">Max cap: ${r.capApplied ? 'Applied' : 'Not applied'}</span>`);
+  }
+
+  let html = '';
+  html += `<div class="badges">${badges.join('')}</div>`;
+  html += renderWarnings(r.warnings);
+
+  // Hero: exact dose (or capped final)
+  html += `<div class="res-hero">
+    <div class="lbl">${r.capApplied ? 'Final dose (capped)' : 'Exact dose'}</div>
+    <div class="val">${fmtNum(dispDose)} <small>${esc(r.measure)}${esc(suffix)}</small></div>
+    ${r.capApplied ? `<div class="sub">Raw dose ${fmtNum(r.rawValue)} ${esc(r.measure)} exceeded the ${fmtNum(r.cap.maxValue)} ${esc(r.cap.maxUnit)} maximum.</div>` : ''}
+  </div>`;
+
+  // Detail rows
+  html += `<div>`;
+  html += row('Exact result', `${fmtNum(r.rawValue)} <small>${esc(r.measure)}${esc(suffix)}</small>`);
+  if (r.capApplied) html += row('Final (capped)', `${fmtNum(r.finalValue)} <small>${esc(r.measure)}${esc(suffix)}</small>`);
+  if (showRounded) html += row('Rounded (3 s.f.)', `${fmtNum(rounded)} <small>${esc(r.measure)}${esc(suffix)}</small>`);
+
+  // Volume
+  if (r.vol && r.vol.ok) {
+    const concStr = `${fmtNum(state.concentrationNumerator)} ${state.concentrationNumeratorUnit}/${fmtNum(state.concentrationDenominator)} ${state.concentrationDenominatorUnit}`;
+    if (r.isRate) {
+      // volume rate; if per min also show per hour
+      const rateSuffix = suffix;
+      html += row('Volume to give', `${fmtNum(r.vol.volume)} <small>mL${rateSuffix}</small>`);
+      if (r.rate === 'min') {
+        html += row('Volume (per hour)', `${fmtNum(r.vol.volume * 60)} <small>mL/hour</small>`);
+      }
+    } else {
+      html += row('Volume to give', `${fmtNum(r.vol.volume)} <small>mL</small>`);
+      if (r.roundedVol !== null) {
+        html += row(`Rounded volume`, `${fmtNum(r.roundedVol)} <small>mL</small> <small>(${ROUND_LABEL[state.roundingMode]})</small>`);
+      }
+    }
+    html += row('Concentration', `<small>${esc(concStr)} · strength ${fmtNum(r.vol.strength)} ${state.concentrationNumeratorUnit}/mL</small>`);
+  }
+  html += `</div>`;
+
+  // Formula
+  html += `<div class="unit-group-label" style="margin-bottom:4px;">Formula used</div>`;
+  html += `<div class="formula-box">${buildFormula(r)}</div>`;
+
+  // Copy lines
+  const rxLine = buildRxLine(r);
+  const calcLine = buildCalcLine(r);
+  html += `<div class="copy-block">
+    <div class="copy-line"><div class="txt" id="rx-line">${esc(rxLine)}</div><button type="button" class="copy-btn" data-copy="rx-line">Copy</button></div>
+    <div class="copy-line"><div class="txt" id="calc-line">${esc(calcLine)}</div><button type="button" class="copy-btn" data-copy="calc-line">Copy</button></div>
+  </div>`;
+
+  html += `<div class="mini-note" style="margin-top:12px;">Calculation aid only. Always check against local guidance and the BNFc before prescribing.</div>`;
+
+  return html;
+}
+
+function row(k, v) {
+  return `<div class="res-row"><span class="k">${esc(k)}</span><span class="v">${v}</span></div>`;
+}
+
+function buildFormula(r) {
+  const suffix = timeSuffix(r.rate);
+  let lines = [];
+  lines.push(`${fmtNum(state.doseValue)} ${state.doseUnit} × ${fmtNum(state.weight)} kg = ${fmtNum(r.rawValue)} ${r.measure}${suffix}`);
+  if (r.capApplied) {
+    lines.push(`cap: ${fmtNum(r.rawValue)} ${r.measure} > ${fmtNum(r.cap.maxValue)} ${r.cap.maxUnit} → final ${fmtNum(r.finalValue)} ${r.measure}`);
+  }
+  if (r.vol && r.vol.ok) {
+    if (r.vol.converted) {
+      lines.push(`convert: ${fmtNum(r.capApplied ? r.finalValue : r.rawValue)} ${r.measure} = ${fmtNum(r.vol.doseInNum)} ${state.concentrationNumeratorUnit}`);
+    }
+    const denom = `${fmtNum(state.concentrationNumerator)}/${fmtNum(state.concentrationDenominator)}`;
+    lines.push(`volume: ${fmtNum(r.vol.doseInNum)} ${state.concentrationNumeratorUnit} ÷ ${fmtNum(r.vol.strength)} ${state.concentrationNumeratorUnit}/mL = ${fmtNum(r.vol.volume)} mL${suffix}`);
+    if (r.isRate && r.rate === 'min') {
+      lines.push(`rate: ${fmtNum(r.vol.volume)} mL/min × 60 = ${fmtNum(r.vol.volume * 60)} mL/hour`);
+    }
+  }
+  return esc(lines.join('\n'));
+}
+
+function buildRxLine(r) {
+  const suffix = timeSuffix(r.rate);
+  const parts = [];
+  if (state.drugName) parts.push(state.drugName);
+  parts.push(`${fmtNum(r.capApplied ? r.finalValue : r.rawValue)} ${r.measure}${suffix}`);
+  if (state.route) parts.push(state.route);
+  if (state.frequency) parts.push(state.frequency);
+  let line = parts.join(' ');
+  if (r.vol && r.vol.ok) {
+    const showVol = (!r.isRate && r.roundedVol !== null) ? r.roundedVol : r.vol.volume;
+    const concStr = `${fmtNum(state.concentrationNumerator)} ${state.concentrationNumeratorUnit}/${fmtNum(state.concentrationDenominator)} ${state.concentrationDenominatorUnit}`;
+    line += ` = ${fmtNum(showVol)} mL${suffix} of ${concStr}`;
+  }
+  if (state.weightSource === 'estimated') line += ' (estimated weight)';
+  return line;
+}
+
+function buildCalcLine(r) {
+  const suffix = timeSuffix(r.rate);
+  let line = `${fmtNum(state.doseValue)} ${state.doseUnit} × ${fmtNum(state.weight)} kg = ${fmtNum(r.rawValue)} ${r.measure}${suffix}`;
+  if (r.capApplied) line += ` (capped to ${fmtNum(r.finalValue)} ${r.measure})`;
+  if (r.vol && r.vol.ok) line += `; ${fmtNum(r.vol.volume)} mL of ${fmtNum(state.concentrationNumerator)} ${state.concentrationNumeratorUnit}/${fmtNum(state.concentrationDenominator)} ${state.concentrationDenominatorUnit}`;
+  return line;
+}
+
+function attachCopyHandlers() {
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const target = $(btn.dataset.copy);
+      if (!target) return;
+      const text = target.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (_) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+      const orig = btn.textContent;
+      btn.textContent = 'Copied'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1400);
+    });
+  });
+}
+
+/* ----------------------------------------------------------------------- */
+buildControls();
+wire();
+render();
+</script>
+</body>
+</html>
