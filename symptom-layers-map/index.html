@@ -928,9 +928,13 @@ var SLM = (function(){
     var chip=chipCfg(e.lane, e.chipKey);
     var phrase = chip?chip.phrase:e.label.toLowerCase();
     var clause = (chip&&chip.clause)?chip.clause:phrase;
-    // severity adjective for symptoms
-    if(e.severity==='severe'){ phrase='severe '+phrase; }
-    else if(e.severity==='moderate'){ phrase='moderate '+phrase; }
+    // severity adjective for symptoms; insert after any leading article ("a rash" -> "a moderate rash")
+    var adj = (e.severity==='severe'||e.severity==='moderate') ? e.severity : '';
+    if(adj){
+      // "moderate"/"severe" are consonant-initial, so any leading article becomes "a".
+      var insert=function(t){ return t.replace(/^(an? )?/, function(mtch, art){ return (art?'a ':'')+adj+' '; }); };
+      phrase=insert(phrase); clause=insert(clause);
+    }
     return {cat:chip?chip.cat:'symptom', phrase:phrase, clause:clause, e:e, chip:chip};
   }
 
