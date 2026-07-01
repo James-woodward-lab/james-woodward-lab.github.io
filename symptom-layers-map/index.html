@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="color-scheme" content="dark light">
+<title>Symptom Layers Map</title>
+<link rel="stylesheet" href="../css/app-theme.css">
+<script src="../js/theme-toggle.js"></script>
+<style>
+/* ==========================================================================
+   Symptom Layers Map - bedside paediatric history timeline builder
+   ========================================================================== */
+
+/* Lane accent tokens (muted, one family per lane) */
+:root{
+  --lane-symptoms:#f0776c;
+  --lane-function:#e0a13a;
+  --lane-intake:#4d96d9;
+  --lane-meds:#3bb9a3;
+  --lane-contacts:#9b8bd0;
+  --lane-obs:#8c98ad;
+  --lane-injury:#c98a5e;
+}
+html.theme-light{
+  --lane-symptoms:#d94b3f;
+  --lane-function:#b9781a;
+  --lane-intake:#2f74bd;
+  --lane-meds:#1f9c88;
+  --lane-contacts:#6f5cb8;
+  --lane-obs:#5f6b80;
+  --lane-injury:#a9673a;
+}
+
+/* Layout shell ------------------------------------------------------------ */
+.slm-topbar{
+  position:sticky;top:0;z-index:var(--z-sticky);
+  background:var(--bg);border-bottom:1px solid var(--border);
+  padding:8px calc(12px + var(--safe-r)) 8px calc(12px + var(--safe-l));
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+}
+.slm-topbar h1{font-size:1rem;font-weight:700;color:var(--accent);margin:0;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.slm-topbar .tb-fields{display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:0;align-items:center;}
+.tb-field{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.tb-field label{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:600;line-height:1;}
+.tb-field input{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:6px 9px;color:var(--text);font-size:0.82rem;min-height:34px;width:100%;}
+.tb-field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--focus-ring);}
+.tb-field.age{width:74px;flex:0 0 auto;}
+.tb-field.complaint{flex:2 1 180px;}
+.tb-field.lastnormal{flex:1.4 1 150px;}
+.age-wrap{display:flex;gap:0;}
+.age-wrap input{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none;}
+.age-unit{background:var(--surface2);border:1.5px solid var(--border);border-radius:0 8px 8px 0;color:var(--muted);font-size:0.72rem;font-weight:600;padding:0 7px;cursor:pointer;min-height:34px;}
+.age-unit:hover{color:var(--accent);border-color:var(--accent);}
+
+.mode-toggle{display:inline-flex;gap:0;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);flex:0 0 auto;}
+.mode-toggle button{padding:7px 11px;background:transparent;border:none;color:var(--muted);font-size:0.74rem;font-weight:700;cursor:pointer;border-right:1px solid var(--border);white-space:nowrap;}
+.mode-toggle button:last-child{border-right:none;}
+.mode-toggle button.active{background:var(--accent);color:var(--accent-on);}
+
+.tb-actions{display:flex;gap:6px;flex:0 0 auto;}
+.tb-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--muted);font-size:0.74rem;font-weight:600;cursor:pointer;min-height:34px;display:flex;align-items:center;gap:4px;white-space:nowrap;}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent);}
+.tb-btn.danger:hover{border-color:var(--danger);color:var(--danger);}
+
+/* Three-column workspace -------------------------------------------------- */
+.slm-workspace{
+  display:grid;
+  grid-template-columns:minmax(220px,22%) minmax(0,1fr) minmax(300px,30%);
+  gap:10px;
+  padding:10px calc(12px + var(--safe-r)) 20px calc(12px + var(--safe-l));
+  align-items:start;
+}
+.slm-col{min-width:0;display:flex;flex-direction:column;gap:10px;}
+.slm-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);}
+.slm-panel-hd{padding:9px 12px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.slm-panel-bd{padding:10px 12px;}
+
+/* Left: palette ----------------------------------------------------------- */
+.lane-group{margin-bottom:10px;}
+.lane-group:last-child{margin-bottom:0;}
+.lane-group-hd{display:flex;align-items:center;gap:7px;margin-bottom:6px;cursor:pointer;user-select:none;}
+.lane-dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto;}
+.lane-group-hd .lane-name{font-size:0.78rem;font-weight:700;color:var(--text);flex:1;}
+.lane-group-hd .lane-caret{color:var(--muted);font-size:0.7rem;transition:transform .15s;}
+.lane-group.collapsed .lane-caret{transform:rotate(-90deg);}
+.lane-group.collapsed .chip-row{display:none;}
+.chip-row{display:flex;flex-wrap:wrap;gap:5px;}
+.palette-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:16px;font-size:0.75rem;color:var(--text-soft);cursor:pointer;transition:border-color .15s,color .15s,background .15s;line-height:1.2;}
+.palette-chip:hover{border-color:var(--chip-accent,var(--accent));color:var(--text);background:color-mix(in srgb,var(--chip-accent,var(--accent)) 12%,transparent);}
+.palette-chip .cd{width:7px;height:7px;border-radius:50%;background:var(--chip-accent,var(--accent));flex:0 0 auto;}
+
+.filter-row{display:flex;flex-wrap:wrap;gap:5px;}
+.filter-toggle{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:16px;font-size:0.72rem;color:var(--muted);cursor:pointer;user-select:none;}
+.filter-toggle.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);}
+.filter-toggle .fdot{width:8px;height:8px;border-radius:2px;}
+
+/* Centre: timeline -------------------------------------------------------- */
+.timeline-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px;}
+.timeline-grid{display:grid;gap:6px;min-width:max-content;}
+.tl-corner{position:sticky;left:0;z-index:3;background:var(--surface);}
+.tl-colhd{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 8px;text-align:center;min-width:120px;}
+.tl-colhd .cd-day{font-size:0.78rem;font-weight:700;color:var(--text);}
+.tl-colhd .cd-sub{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-top:1px;}
+.tl-colhd.today{border-color:var(--accent);}
+.tl-lanelabel{position:sticky;left:0;z-index:2;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--lane-c,var(--border));border-radius:8px;padding:8px 9px;display:flex;flex-direction:column;justify-content:center;min-width:120px;}
+.tl-lanelabel .ll-name{font-size:0.76rem;font-weight:700;color:var(--text);line-height:1.2;}
+.tl-lanelabel .ll-count{font-size:0.62rem;color:var(--muted);margin-top:1px;}
+.tl-cell{background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:5px;min-height:52px;min-width:120px;display:flex;flex-direction:column;gap:4px;}
+.tl-cell.today{border-color:color-mix(in srgb,var(--accent) 40%,var(--border));}
+
+.event-pill{border:1.5px solid var(--pill-c,var(--border));background:color-mix(in srgb,var(--pill-c,var(--accent)) 14%,var(--surface));border-radius:7px;padding:4px 7px;cursor:pointer;text-align:left;width:100%;transition:transform .1s,box-shadow .1s;}
+.event-pill:hover{transform:translateY(-1px);box-shadow:var(--shadow-xs);}
+.event-pill .ep-label{font-size:0.74rem;font-weight:600;color:var(--text);line-height:1.25;display:block;}
+.event-pill .ep-meta{font-size:0.6rem;color:var(--muted);margin-top:1px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+.event-pill.redflag{border-style:solid;border-color:var(--danger);box-shadow:0 0 0 1px var(--danger) inset;}
+.event-pill.resolved .ep-label{text-decoration:line-through;opacity:0.7;}
+.ep-tag{display:inline-block;padding:0 4px;border-radius:4px;font-size:0.58rem;font-weight:700;line-height:1.5;}
+.ep-tag.period{background:var(--surface3);color:var(--text-soft);}
+.ep-tag.sev{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn);}
+.ep-tag.trend-worsening{background:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger);}
+.ep-tag.trend-improving{background:color-mix(in srgb,var(--success) 18%,transparent);color:var(--success);}
+.ep-tag.trend-fluctuating,.ep-tag.trend-resolved{background:var(--surface3);color:var(--text-soft);}
+.ep-tag.flag{background:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger);}
+
+.tl-empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:0.86rem;line-height:1.5;}
+.tl-empty strong{color:var(--text-soft);display:block;margin-bottom:4px;font-size:0.95rem;}
+
+/* Right: output + insights ------------------------------------------------ */
+.out-tabs{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:10px;}
+.out-tab{flex:1;padding:7px 6px;background:transparent;border:none;color:var(--muted);font-size:0.72rem;font-weight:700;cursor:pointer;border-right:1px solid var(--border);}
+.out-tab:last-child{border-right:none;}
+.out-tab.active{background:var(--accent);color:var(--accent-on);}
+.out-text{font-size:0.88rem;line-height:1.62;color:var(--text);min-height:60px;white-space:pre-wrap;}
+.out-empty{color:var(--muted);font-size:0.85rem;text-align:center;padding:18px 6px;line-height:1.5;}
+.flag-word{color:var(--danger);font-weight:600;}
+.copy-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;background:var(--accent);color:var(--accent-on);border:none;border-radius:9px;font-size:0.85rem;font-weight:700;cursor:pointer;margin-top:10px;min-height:42px;}
+.copy-btn:hover{background:var(--accent2);}
+.copy-btn.copied{background:var(--success);}
+
+.insight-list{display:flex;flex-direction:column;gap:6px;}
+.insight{display:flex;gap:8px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 9px;}
+.insight.warn{border-color:var(--warn-border);background:var(--warn-surface);}
+.insight.flag{border-color:var(--danger-border);background:var(--danger-surface);}
+.insight .ic{font-size:0.9rem;line-height:1.4;flex:0 0 auto;}
+.insight .itxt{font-size:0.76rem;line-height:1.4;}
+.insight .itxt b{color:var(--text);display:block;font-size:0.64rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:1px;}
+.insight .itxt span{color:var(--text-soft);}
+.insight-empty{color:var(--muted);font-size:0.8rem;text-align:center;padding:12px 6px;}
+
+.prompt-list{display:flex;flex-direction:column;gap:6px;}
+.prompt-item{display:flex;gap:7px;align-items:flex-start;background:var(--info-surface);border:1px solid var(--info-border);border-radius:8px;padding:7px 9px;font-size:0.76rem;line-height:1.4;color:var(--text-soft);}
+.prompt-item .pc{flex:0 0 auto;}
+.prompt-item button{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.95rem;line-height:1;padding:0 2px;flex:0 0 auto;}
+.prompt-item button:hover{color:var(--danger);}
+
+/* Event editor modal / bottom-sheet -------------------------------------- */
+.editor-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:var(--z-overlay);display:none;}
+.editor-backdrop.open{display:block;}
+.editor-panel{position:fixed;z-index:calc(var(--z-overlay) + 1);background:var(--surface);border:1px solid var(--border);
+  top:50%;left:50%;transform:translate(-50%,-50%);width:min(460px,94vw);max-height:90vh;overflow-y:auto;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);display:none;}
+.editor-panel.open{display:block;}
+.editor-hd{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:8px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;}
+.editor-hd .eh-dot{width:12px;height:12px;border-radius:4px;flex:0 0 auto;}
+.editor-hd h2{font-size:1rem;font-weight:700;color:var(--text);margin:0;flex:1;text-transform:none;letter-spacing:0;}
+.editor-hd .eh-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:2px 6px;}
+.editor-hd .eh-close:hover{color:var(--text);}
+.editor-bd{padding:12px 14px 6px;}
+.ed-field{margin-bottom:11px;}
+.ed-field>label{display:block;font-size:0.72rem;color:var(--muted);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;}
+.ed-field input[type=text],.ed-field input[type=number],.ed-field select,.ed-field textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-size:0.88rem;min-height:40px;font-family:inherit;}
+.ed-field textarea{min-height:56px;resize:vertical;}
+.ed-field input:focus,.ed-field select:focus,.ed-field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--focus-ring);}
+.ed-two{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.seg{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);flex-wrap:wrap;}
+.seg button{flex:1;min-width:44px;padding:8px 6px;background:var(--surface2);border:none;border-right:1px solid var(--border);color:var(--muted);font-size:0.76rem;font-weight:600;cursor:pointer;}
+.seg button:last-child{border-right:none;}
+.seg button.active{background:var(--accent);color:var(--accent-on);}
+.seg.sev button.active{background:var(--warn);color:#241a02;}
+.seg.flag-seg button.active{background:var(--danger);color:#fff;}
+.ed-check{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.82rem;color:var(--text-soft);user-select:none;}
+.ed-check.on{border-color:var(--accent);color:var(--text);}
+.ed-check input{width:18px;height:18px;accent-color:var(--accent);}
+.ed-prompt{background:var(--info-surface);border:1px solid var(--info-border);border-radius:8px;padding:8px 10px;font-size:0.76rem;color:var(--text-soft);line-height:1.45;margin-bottom:11px;}
+.ed-prompt b{color:var(--accent2);}
+.editor-ft{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 14px;display:flex;flex-wrap:wrap;gap:7px;border-radius:0 0 var(--radius-lg) var(--radius-lg);}
+.editor-ft .ef-save{flex:1 1 100%;background:var(--accent);color:var(--accent-on);border:none;border-radius:9px;padding:11px;font-size:0.9rem;font-weight:700;cursor:pointer;min-height:44px;}
+.editor-ft .ef-save:hover{background:var(--accent2);}
+.editor-ft .ef-min{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:0.76rem;font-weight:600;color:var(--muted);cursor:pointer;min-height:38px;}
+.editor-ft .ef-min:hover{border-color:var(--accent);color:var(--accent);}
+.editor-ft .ef-min.danger:hover{border-color:var(--danger);color:var(--danger);}
+
+/* Toast ------------------------------------------------------------------- */
+.slm-toast{position:fixed;bottom:calc(18px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:9px 16px;font-size:0.82rem;font-weight:600;box-shadow:var(--shadow-md);z-index:var(--z-toast);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+.slm-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Mobile ------------------------------------------------------------------ */
+@media(max-width:900px){
+  .slm-workspace{grid-template-columns:1fr;}
+  .slm-col.centre{order:2;}
+  .slm-col.left{order:1;}
+  .slm-col.right{order:3;}
+  .editor-panel{top:auto;bottom:0;left:0;transform:none;width:100%;max-height:88vh;border-radius:var(--radius-lg) var(--radius-lg) 0 0;}
+  .editor-panel.open{animation:sheet-up .22s var(--ease-standard);}
+  @keyframes sheet-up{from{transform:translateY(100%);}to{transform:translateY(0);}}
+}
+@media(max-width:560px){
+  .slm-topbar h1 span.htxt{display:none;}
+  .tb-field.lastnormal{flex:1 1 100%;}
+}
+</style>
+</head>
+<body>
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">&#9728;&#65039;</button>
+
+<!-- ===================== TOP BAR ===================== -->
+<header class="slm-topbar">
+  <h1><span aria-hidden="true">&#128506;&#65039;</span> <span class="htxt">Symptom Layers Map</span></h1>
+  <div class="tb-fields">
+    <div class="tb-field age">
+      <label for="patAge">Age</label>
+      <div class="age-wrap">
+        <input type="number" id="patAge" min="0" step="0.5" placeholder="8" oninput="SLM.refresh()">
+        <button type="button" class="age-unit" id="ageUnitBtn" onclick="SLM.toggleAgeUnit()">mo</button>
+      </div>
+    </div>
+    <div class="tb-field complaint">
+      <label for="patComplaint">Presenting complaint</label>
+      <input type="text" id="patComplaint" placeholder="e.g. increased work of breathing" oninput="SLM.refresh()">
+    </div>
+    <div class="tb-field lastnormal">
+      <label for="patLastNormal">Last completely well</label>
+      <input type="text" id="patLastNormal" placeholder="e.g. 2 days ago" oninput="SLM.refresh()">
+    </div>
+  </div>
+  <div class="mode-toggle" id="modeToggle">
+    <button type="button" data-mode="rapid" onclick="SLM.setMode('rapid')">Rapid</button>
+    <button type="button" data-mode="standard" class="active" onclick="SLM.setMode('standard')">Standard</button>
+    <button type="button" data-mode="trauma" onclick="SLM.setMode('trauma')">Trauma</button>
+  </div>
+  <div class="tb-actions">
+    <button type="button" class="tb-btn" onclick="SLM.loadScenarioPrompt()" title="Load a sample scenario">&#128203; Sample</button>
+    <button type="button" class="tb-btn danger" onclick="SLM.clearAll()" title="Clear timeline">&#10005; Clear</button>
+  </div>
+</header>
+
+<!-- ===================== WORKSPACE ===================== -->
+<div class="slm-workspace">
+
+  <!-- LEFT: palette + filters -->
+  <div class="slm-col left">
+    <div class="slm-panel">
+      <div class="slm-panel-hd">Event palette</div>
+      <div class="slm-panel-bd" id="palette"></div>
+    </div>
+    <div class="slm-panel">
+      <div class="slm-panel-hd">Lane filters</div>
+      <div class="slm-panel-bd">
+        <div class="filter-row" id="laneFilters"></div>
+        <label class="filter-toggle" id="redFlagFilter" style="margin-top:8px;" onclick="SLM.toggleRedFlagFilter()">
+          <span class="fdot" style="background:var(--danger);"></span> Red flags only
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTRE: timeline -->
+  <div class="slm-col centre">
+    <div class="slm-panel">
+      <div class="slm-panel-hd">
+        <span>Timeline</span>
+        <span id="tlHint" style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted);font-size:0.68rem;"></span>
+      </div>
+      <div class="slm-panel-bd">
+        <div class="timeline-scroll">
+          <div class="timeline-grid" id="timelineGrid"></div>
+        </div>
+        <div class="tl-empty" id="tlEmpty">
+          <strong>Build the story, not just the symptom list.</strong>
+          Tap an event chip on the left to place it on the timeline. Add only abnormal or relevant events.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: output + insights -->
+  <div class="slm-col right">
+    <div class="slm-panel">
+      <div class="slm-panel-hd">Live output</div>
+      <div class="slm-panel-bd">
+        <div class="out-tabs">
+          <button type="button" class="out-tab active" data-tab="chronology" onclick="SLM.setTab('chronology')">Chronology</button>
+          <button type="button" class="out-tab" data-tab="handover" onclick="SLM.setTab('handover')">Handover</button>
+          <button type="button" class="out-tab" data-tab="trigger" onclick="SLM.setTab('trigger')">Trigger</button>
+        </div>
+        <div class="out-text" id="outText"><div class="out-empty">Your chronology paragraph will appear here as you add events.</div></div>
+        <button type="button" class="copy-btn" id="copyBtn" onclick="SLM.copyOutput()" style="display:none;">&#128203; Copy to clipboard</button>
+      </div>
+    </div>
+    <div class="slm-panel">
+      <div class="slm-panel-hd">Consider documenting</div>
+      <div class="slm-panel-bd">
+        <div class="prompt-list" id="promptList"><div class="insight-empty">Contextual prompts appear here.</div></div>
+      </div>
+    </div>
+    <div class="slm-panel">
+      <div class="slm-panel-hd">Key insights</div>
+      <div class="slm-panel-bd">
+        <div class="insight-list" id="insightList"><div class="insight-empty">Trajectory insights appear here once events are added.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== EVENT EDITOR ===================== -->
+<div class="editor-backdrop" id="editorBackdrop" onclick="SLM.closeEditor()"></div>
+<div class="editor-panel" id="editorPanel" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="editor-hd">
+    <span class="eh-dot" id="edDot"></span>
+    <h2 id="edTitle">Event</h2>
+    <button type="button" class="eh-close" onclick="SLM.closeEditor()" aria-label="Close">&times;</button>
+  </div>
+  <div class="editor-bd" id="editorBody"></div>
+  <div class="editor-ft">
+    <button type="button" class="ef-save" onclick="SLM.saveEditor()">Save to timeline</button>
+    <button type="button" class="ef-min" id="edResolveBtn" onclick="SLM.toggleResolvedEditor()">Mark resolved</button>
+    <button type="button" class="ef-min" onclick="SLM.duplicateEditor()">Duplicate</button>
+    <button type="button" class="ef-min danger" id="edDeleteBtn" onclick="SLM.deleteEditor()">Delete</button>
+  </div>
+</div>
+
+<div class="slm-toast" id="toast"></div>
+
+<footer class="app-footer" style="padding:8px 16px 24px;">
+  For clinical documentation support only. A chronology aid, not a diagnostic engine. Always verify against local guidelines.
+</footer>
+
+<script>
+"use strict";
+/* ==========================================================================
+   Symptom Layers Map
+   A bedside paediatric history tool that turns a fragmented parent story
+   into a multi-lane clinical timeline, then generates note-ready prose.
+   ========================================================================== */
+var SLM = (function(){
+
+  /* ---- Time model -------------------------------------------------------- */
+  // dayOffset: -3,-2,-1(yesterday),0(today), or 'baseline'
+  var DAYS = [
+    {off:'baseline', short:'Baseline', sub:'last well'},
+    {off:-3, short:'3 days ago', sub:''},
+    {off:-2, short:'2 days ago', sub:''},
+    {off:-1, short:'Yesterday', sub:''},
+    {off:0,  short:'Today', sub:''}
+  ];
+  var PERIODS = [
+    {key:'unspecified', label:'Unspecified', rank:0, tag:''},
+    {key:'morning',     label:'Morning',     rank:1, tag:'am'},
+    {key:'afternoon',   label:'Afternoon',   rank:2, tag:'pm'},
+    {key:'evening',     label:'Evening',     rank:3, tag:'eve'},
+    {key:'overnight',   label:'Overnight',   rank:4, tag:'night'}
+  ];
+  function periodRank(k){ for(var i=0;i<PERIODS.length;i++) if(PERIODS[i].key===k) return PERIODS[i].rank; return 0; }
+  function periodTag(k){ for(var i=0;i<PERIODS.length;i++) if(PERIODS[i].key===k) return PERIODS[i].tag; return ''; }
+  function periodLabel(k){ for(var i=0;i<PERIODS.length;i++) if(PERIODS[i].key===k) return PERIODS[i].label; return ''; }
+
+  function sortKey(ev){
+    if(ev.dayOffset==='baseline') return -1000;
+    return ev.dayOffset*10 + periodRank(ev.period);
+  }
+
+  // Natural language time phrase for prose.
+  function timePhrase(dayOffset, period, capital){
+    var p;
+    if(dayOffset==='baseline'){ p='initially'; }
+    else if(dayOffset===0){
+      if(period==='morning') p='this morning';
+      else if(period==='afternoon') p='this afternoon';
+      else if(period==='evening') p='this evening';
+      else if(period==='overnight') p='overnight';
+      else p='today';
+    } else if(dayOffset===-1){
+      if(period==='morning') p='yesterday morning';
+      else if(period==='afternoon') p='yesterday afternoon';
+      else if(period==='evening') p='yesterday evening';
+      else if(period==='overnight') p='overnight';
+      else p='yesterday';
+    } else {
+      var base = (dayOffset===-2)?'two days ago':(dayOffset===-3?'three days ago':(Math.abs(dayOffset)+' days ago'));
+      if(period && period!=='unspecified' && period!=='overnight') p=base+' in the '+period;
+      else if(period==='overnight') p=base+' overnight';
+      else p=base;
+    }
+    if(capital) p=p.charAt(0).toUpperCase()+p.slice(1);
+    return p;
+  }
+
+  /* ---- Lane + chip configuration ---------------------------------------- */
+  var LANES = [
+    {key:'symptoms',  name:'Symptoms',              color:'var(--lane-symptoms)', modes:['rapid','standard','trauma']},
+    {key:'function',  name:'Function / behaviour',  color:'var(--lane-function)', modes:['rapid','standard','trauma']},
+    {key:'intake',    name:'Intake / output',       color:'var(--lane-intake)',   modes:['rapid','standard','trauma']},
+    {key:'meds',      name:'Meds / interventions',  color:'var(--lane-meds)',     modes:['rapid','standard','trauma']},
+    {key:'contacts',  name:'Contacts / reviews',    color:'var(--lane-contacts)', modes:['standard','trauma']},
+    {key:'obs',       name:'Observations',          color:'var(--lane-obs)',      modes:['standard']},
+    {key:'injury',    name:'Injury / mechanism',    color:'var(--lane-injury)',   modes:['trauma']}
+  ];
+  function laneCfg(key){ for(var i=0;i<LANES.length;i++) if(LANES[i].key===key) return LANES[i]; return null; }
+
+  // Field templates reused across chips.
+  var F_CHARACTER = {key:'character', label:'Character', type:'select', options:['','non-bilious','bilious','bloody','unknown']};
+  var F_RELFEEDS  = {key:'relFeeds', label:'Relation to feeds', type:'select', options:['','after feeds','unrelated','unknown']};
+  var F_EPISODES  = {key:'episodes', label:'Episodes (number)', type:'number', placeholder:'e.g. 4'};
+  var F_RESP      = {key:'response', label:'Response to treatment', type:'select', options:['','improved briefly','sustained improvement','no effect','unknown']};
+
+  // eventType: 'point' or 'duration'. phrase = prose fragment. cat guides verb.
+  // cat: 'symptom' | 'intake' | 'med' | 'contact' | 'obs' | 'injury'
+  var CHIPS = {
+    symptoms: [
+      {key:'coryza', label:'Coryza', phrase:'coryzal symptoms', cat:'symptom', type:'duration'},
+      {key:'fever', label:'Fever', phrase:'fever', cat:'symptom', type:'duration',
+        fields:[{key:'maxTemp',label:'Max reported temp (\u00b0C)',type:'number',placeholder:'e.g. 39.4'},
+                {key:'antipyretic',label:'Antipyretic given',type:'select',options:['','yes','no']}, F_RESP,
+                {key:'rigors',label:'Associated rigors',type:'select',options:['','yes','no']}],
+        prompts:['If fever persists after antipyretic, document the response.','If a rash is present, note whether it is blanching or non-blanching.']},
+      {key:'cough', label:'Cough', phrase:'cough', cat:'symptom', type:'duration'},
+      {key:'breathing', label:'Breathing difficulty', phrase:'increased work of breathing', cat:'symptom', type:'duration',
+        fields:[{key:'wob',label:'Work of breathing',type:'select',options:['','mild','moderate','severe']},
+                {key:'inhalerResp',label:'Inhaler response',type:'select',options:['','improved','partial','no effect','not given']}],
+        prompts:['Document inhaler/bronchodilator response and timing of increased work of breathing.']},
+      {key:'vomiting', label:'Vomiting', phrase:'vomiting', cat:'symptom', type:'duration',
+        fields:[F_EPISODES, F_CHARACTER, F_RELFEEDS, {key:'lastEpisode',label:'Last episode',type:'text',placeholder:'e.g. today 10:00'}],
+        prompts:['Note whether vomiting is bilious or bloody.','Check hydration: wet nappies / urine output.']},
+      {key:'diarrhoea', label:'Diarrhoea', phrase:'diarrhoea', cat:'symptom', type:'duration',
+        fields:[{key:'frequency',label:'Frequency / day',type:'text',placeholder:'e.g. 6 loose stools'},
+                {key:'blood',label:'Blood in stool',type:'select',options:['','yes','no','unknown']}]},
+      {key:'pain', label:'Pain', phrase:'pain', cat:'symptom', type:'duration',
+        fields:[{key:'site',label:'Site',type:'text',placeholder:'e.g. central then RIF'},
+                {key:'migration',label:'Migration',type:'text',placeholder:'optional'}],
+        prompts:['With abdominal pain + vomiting, consider bilious vomiting, localisation and testicular pain.']},
+      {key:'rash', label:'Rash', phrase:'a rash', cat:'symptom', type:'duration',
+        fields:[{key:'blanching',label:'Blanching',type:'select',options:['','blanching','non-blanching','unknown']},
+                {key:'distribution',label:'Distribution',type:'text',placeholder:'optional'}],
+        prompts:['Document whether the rash is blanching or non-blanching.']},
+      {key:'seizure', label:'Seizure', phrase:'a seizure', cat:'symptom', type:'point',
+        fields:[{key:'duration',label:'Duration',type:'text',placeholder:'e.g. 3 minutes'},
+                {key:'recovery',label:'Recovery',type:'select',options:['','returned to baseline','prolonged recovery','not back to baseline']},
+                {key:'recurrence',label:'Recurrence',type:'select',options:['','single','multiple']}],
+        prompts:['Document seizure duration, recovery and whether it recurred.']},
+      {key:'sorethroat', label:'Sore throat', phrase:'sore throat', cat:'symptom', type:'duration'},
+      {key:'earpain', label:'Ear pain', phrase:'ear pain', cat:'symptom', type:'duration'}
+    ],
+    function: [
+      {key:'lethargy', label:'Lethargy', phrase:'lethargy', cat:'symptom', type:'duration'},
+      {key:'lessactive', label:'Less active', phrase:'reduced activity', cat:'symptom', type:'duration'},
+      {key:'irritable', label:'Irritability', phrase:'irritability', cat:'symptom', type:'duration'},
+      {key:'drowsy', label:'Drowsy', phrase:'drowsiness', cat:'symptom', type:'duration',
+        prompts:['With drowsiness after a head injury, document the vomiting sequence and any LOC.']},
+      {key:'notweightbear', label:'Not weight-bearing', phrase:'reluctance to weight-bear', cat:'symptom', type:'duration',
+        prompts:['With a limp / not weight-bearing, check fever and any trauma history.']},
+      {key:'poorsleep', label:'Poor sleep', phrase:'disturbed sleep', cat:'symptom', type:'duration'}
+    ],
+    intake: [
+      {key:'reducedfeeds', label:'Reduced feeds', phrase:'oral intake reduced', cat:'intake', type:'duration',
+        fields:[{key:'amount',label:'Amount of normal',type:'select',options:['','roughly normal','about half','minimal','none']}],
+        prompts:['With reduced intake, document urine output / wet nappies and time of last urine.']},
+      {key:'refusedfluids', label:'Refused fluids', phrase:'fluids refused', cat:'intake', type:'duration',
+        prompts:['With reduced intake, document urine output / wet nappies and time of last urine.']},
+      {key:'vomitfeeds', label:'Vomiting after feeds', phrase:'vomiting after feeds', cat:'intake', type:'duration'},
+      {key:'wetnappies', label:'Wet nappies reduced', phrase:'fewer wet nappies', cat:'intake', type:'duration',
+        fields:[{key:'lastUrine',label:'Last urine / wet nappy',type:'text',placeholder:'e.g. this morning'}]},
+      {key:'nourine', label:'No urine output', phrase:'no urine output', cat:'intake', type:'duration', redFlagDefault:true,
+        fields:[{key:'lastUrine',label:'Last urine passed',type:'text',placeholder:'e.g. yesterday evening'}]},
+      {key:'looseoutput', label:'Diarrhoea (output)', phrase:'loose stool output', cat:'intake', type:'duration'},
+      {key:'normalintake', label:'Intake maintained', phrase:'oral intake maintained', cat:'intake', type:'duration'}
+    ],
+    meds: [
+      {key:'paracetamol', label:'Paracetamol', phrase:'paracetamol', cat:'med', type:'point', fields:[F_RESP]},
+      {key:'ibuprofen', label:'Ibuprofen', phrase:'ibuprofen', cat:'med', type:'point', fields:[F_RESP]},
+      {key:'inhaler', label:'Inhaler / salbutamol', phrase:'salbutamol', cat:'med', type:'point', fields:[F_RESP]},
+      {key:'antibiotics', label:'Antibiotics', phrase:'antibiotics', cat:'med', type:'point', fields:[{key:'agent',label:'Agent',type:'text',placeholder:'optional'}, F_RESP]},
+      {key:'ors', label:'ORS', phrase:'oral rehydration solution', cat:'med', type:'point', fields:[F_RESP]},
+      {key:'antiemetic', label:'Antiemetic', phrase:'an antiemetic (e.g. ondansetron)', cat:'med', type:'point', fields:[F_RESP]}
+    ],
+    contacts: [
+      {key:'gp', label:'GP', phrase:'seen by their GP', cat:'contact', type:'point', fields:[{key:'outcome',label:'Outcome',type:'text',placeholder:'e.g. advised to attend ED'}]},
+      {key:'nhs111', label:'NHS 111', phrase:'contacted NHS 111', cat:'contact', type:'point', fields:[{key:'outcome',label:'Outcome',type:'text',placeholder:'optional'}]},
+      {key:'pharmacist', label:'Pharmacist', phrase:'seen by a pharmacist', cat:'contact', type:'point', fields:[{key:'outcome',label:'Outcome',type:'text',placeholder:'optional'}]},
+      {key:'prioredattend', label:'Prior ED', phrase:'a previous ED attendance', cat:'contact', type:'point', fields:[{key:'outcome',label:'Outcome',type:'text',placeholder:'optional'}]},
+      {key:'ambulance', label:'Ambulance', phrase:'an ambulance was called', cat:'contact', type:'point'},
+      {key:'healthvisitor', label:'Health visitor', phrase:'seen by a health visitor', cat:'contact', type:'point'}
+    ],
+    obs: [
+      {key:'temperature', label:'Temperature', phrase:'a recorded temperature', cat:'obs', type:'point', fields:[{key:'value',label:'Value (\u00b0C)',type:'number',placeholder:'e.g. 39.2'}]},
+      {key:'wobobs', label:'Work of breathing', phrase:'increased work of breathing', cat:'obs', type:'point', fields:[{key:'value',label:'Grade',type:'select',options:['','mild','moderate','severe']}]},
+      {key:'nappycount', label:'Wet nappy count', phrase:'wet nappy count', cat:'obs', type:'point', fields:[{key:'value',label:'Count in 24h',type:'text',placeholder:'e.g. 2'}]}
+    ],
+    injury: [
+      {key:'mechanism', label:'Mechanism', phrase:'the injury occurred', cat:'injury', type:'point',
+        fields:[{key:'mech',label:'Mechanism',type:'text',placeholder:'e.g. fall from ~1m onto laminate'},
+                {key:'immediate',label:'Immediate response',type:'select',options:['','cried immediately','delayed cry','no cry']}],
+        prompts:['For head injury, document LOC, seizure, amnesia and the vomiting sequence.']},
+      {key:'loc', label:'LOC', phrase:'loss of consciousness', cat:'injury', type:'point', redFlagDefault:true,
+        fields:[{key:'locDur',label:'Duration',type:'text',placeholder:'e.g. ~30 seconds'}]},
+      {key:'headstrike', label:'Head strike', phrase:'a head strike', cat:'injury', type:'point'},
+      {key:'postvomit', label:'Vomit (post-injury)', phrase:'vomiting after the injury', cat:'injury', type:'point',
+        fields:[F_EPISODES], prompts:['Clarify whether vomiting began before or after the injury.']},
+      {key:'limbunused', label:'Limb not used', phrase:'reluctance to use the limb', cat:'injury', type:'duration'},
+      {key:'swelling', label:'Swelling', phrase:'swelling', cat:'injury', type:'duration'},
+      {key:'traumaanalgesia', label:'Analgesia given', phrase:'analgesia', cat:'injury', type:'point', fields:[F_RESP]},
+      {key:'returnbaseline', label:'Returned to baseline', phrase:'returned to baseline', cat:'injury', type:'point'}
+    ]
+  };
+  function chipCfg(lane, key){
+    var arr = CHIPS[lane]||[]; for(var i=0;i<arr.length;i++) if(arr[i].key===key) return arr[i]; return null;
+  }
+  // Rapid mode common chips (subset).
+  var RAPID_KEYS = {
+    symptoms:['fever','cough','vomiting','diarrhoea','breathing'],
+    function:['lethargy','lessactive'],
+    intake:['reducedfeeds','wetnappies'],
+    meds:['paracetamol','inhaler'],
+    contacts:[], obs:[], injury:[]
+  };
+
+  /* ---- State ------------------------------------------------------------- */
+  var state = {
+    mode:'standard',
+    ageUnit:'mo',
+    events:[],
+    tab:'chronology',
+    laneCollapsed:{},
+    laneHidden:{},
+    redFlagOnly:false,
+    draft:null,        // editor working object
+    editingId:null,
+    dismissedPrompts:{}
+  };
+  var idSeq = 1;
+
+  /* ---- Helpers ----------------------------------------------------------- */
+  function esc(s){ var d=document.createElement('div'); d.textContent=(s==null?'':s); return d.innerHTML; }
+  function el(id){ return document.getElementById(id); }
+  function toast(msg){
+    var t=el('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove('show'); },1600);
+  }
+  function joinList(arr){
+    arr = arr.filter(Boolean);
+    if(arr.length===0) return '';
+    if(arr.length===1) return arr[0];
+    if(arr.length===2) return arr[0]+' and '+arr[1];
+    return arr.slice(0,-1).join(', ')+', and '+arr[arr.length-1];
+  }
+  function cap(s){ return s? s.charAt(0).toUpperCase()+s.slice(1):s; }
+
+  /* ---- Mode / age / patient --------------------------------------------- */
+  function setMode(mode){
+    state.mode=mode;
+    var btns=el('modeToggle').querySelectorAll('button');
+    for(var i=0;i<btns.length;i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-mode')===mode);
+    renderPalette(); renderLaneFilters(); renderTimeline(); renderOutputs();
+  }
+  function toggleAgeUnit(){
+    state.ageUnit = state.ageUnit==='mo'?'yr':'mo';
+    el('ageUnitBtn').textContent = state.ageUnit;
+    refresh();
+  }
+  function ageString(){
+    var v=parseFloat(el('patAge').value);
+    if(isNaN(v)) return '';
+    if(state.ageUnit==='yr') return v+(v===1?' year old':' year old');
+    if(v>=24) return Math.floor(v/12)+' year old';
+    return v+(v===1?' month old':' month old');
+  }
+
+  /* ---- Palette ----------------------------------------------------------- */
+  function activeChips(laneKey){
+    var arr = CHIPS[laneKey]||[];
+    if(state.mode==='rapid'){
+      var keys = RAPID_KEYS[laneKey]||[];
+      return arr.filter(function(c){ return keys.indexOf(c.key)!==-1; });
+    }
+    return arr;
+  }
+  function visibleLanes(){
+    return LANES.filter(function(l){ return l.modes.indexOf(state.mode)!==-1; });
+  }
+  function renderPalette(){
+    var host=el('palette'); host.innerHTML='';
+    visibleLanes().forEach(function(lane){
+      var chips=activeChips(lane.key);
+      if(chips.length===0) return;
+      var group=document.createElement('div');
+      group.className='lane-group'+(state.laneCollapsed[lane.key]?' collapsed':'');
+      var hd=document.createElement('div');
+      hd.className='lane-group-hd';
+      hd.onclick=function(){ state.laneCollapsed[lane.key]=!state.laneCollapsed[lane.key]; renderPalette(); };
+      hd.innerHTML='<span class="lane-dot" style="background:'+lane.color+'"></span>'+
+        '<span class="lane-name">'+esc(lane.name)+'</span>'+
+        '<span class="lane-caret">&#9662;</span>';
+      group.appendChild(hd);
+      var row=document.createElement('div'); row.className='chip-row';
+      chips.forEach(function(c){
+        var b=document.createElement('button');
+        b.type='button'; b.className='palette-chip';
+        b.style.setProperty('--chip-accent', lane.color);
+        b.innerHTML='<span class="cd"></span>'+esc(c.label);
+        b.onclick=function(){ openEditor(lane.key, c.key, null); };
+        row.appendChild(b);
+      });
+      group.appendChild(row);
+      host.appendChild(group);
+    });
+  }
+
+  function renderLaneFilters(){
+    var host=el('laneFilters'); host.innerHTML='';
+    visibleLanes().forEach(function(lane){
+      var t=document.createElement('label');
+      var hidden=!!state.laneHidden[lane.key];
+      t.className='filter-toggle'+(hidden?'':' on');
+      t.innerHTML='<span class="fdot" style="background:'+lane.color+'"></span>'+esc(lane.name.split(' ')[0]);
+      t.onclick=function(){ state.laneHidden[lane.key]=!state.laneHidden[lane.key]; renderLaneFilters(); renderTimeline(); };
+      host.appendChild(t);
+    });
+  }
+  function toggleRedFlagFilter(){
+    state.redFlagOnly=!state.redFlagOnly;
+    el('redFlagFilter').classList.toggle('on', state.redFlagOnly);
+    renderTimeline();
+  }
+
+  /* ---- Editor ------------------------------------------------------------ */
+  function blankDraft(laneKey, chipKey){
+    var chip=chipCfg(laneKey, chipKey);
+    var d={
+      id:null, lane:laneKey, chipKey:chipKey, label:chip.label,
+      dayOffset:0, period:'unspecified', endDayOffset:0, endPeriod:'unspecified',
+      eventType:chip.type||'point', precision:'approx',
+      severity:'', trend:'', isRedFlag:!!chip.redFlagDefault, includeInOutput:true, resolved:false,
+      details:{}, note:''
+    };
+    return d;
+  }
+  function openEditor(laneKey, chipKey, existingId){
+    if(existingId!=null){
+      var found=null; for(var i=0;i<state.events.length;i++) if(state.events[i].id===existingId){ found=state.events[i]; break; }
+      if(!found) return;
+      state.draft=JSON.parse(JSON.stringify(found));
+      state.editingId=existingId;
+    } else {
+      state.draft=blankDraft(laneKey, chipKey);
+      // Rapid mode: default to today; standard keeps today too but user picks.
+      state.editingId=null;
+    }
+    buildEditorBody();
+    el('editorBackdrop').classList.add('open');
+    el('editorPanel').classList.add('open');
+    el('edDeleteBtn').style.display = state.editingId!=null ? '' : 'none';
+    el('edResolveBtn').textContent = state.draft.resolved ? 'Unmark resolved' : 'Mark resolved';
+  }
+  function closeEditor(){
+    el('editorBackdrop').classList.remove('open');
+    el('editorPanel').classList.remove('open');
+    state.draft=null; state.editingId=null;
+  }
+
+  function segHTML(field, current, cls){
+    var opts=field.opts; var html='<div class="seg '+(cls||'')+'" data-seg="'+field.key+'">';
+    for(var i=0;i<opts.length;i++){
+      html+='<button type="button" data-val="'+esc(opts[i].v)+'"'+(opts[i].v===current?' class="active"':'')+'>'+esc(opts[i].l)+'</button>';
+    }
+    return html+'</div>';
+  }
+
+  function buildEditorBody(){
+    var d=state.draft, chip=chipCfg(d.lane, d.chipKey), lane=laneCfg(d.lane);
+    el('edTitle').textContent=chip.label;
+    el('edDot').style.background=lane.color;
+    var b=el('editorBody'); b.innerHTML='';
+    var html='';
+
+    // Onset day + period
+    html+='<div class="ed-two">';
+    html+='<div class="ed-field"><label>Onset day</label><select id="fDay">';
+    DAYS.forEach(function(dy){
+      var val=(dy.off==='baseline')?'baseline':String(dy.off);
+      html+='<option value="'+val+'"'+((''+d.dayOffset)===val?' selected':'')+'>'+esc(dy.short)+'</option>';
+    });
+    html+='</select></div>';
+    html+='<div class="ed-field"><label>Time of day</label><select id="fPeriod">';
+    PERIODS.forEach(function(p){ html+='<option value="'+p.key+'"'+(p.key===d.period?' selected':'')+'>'+esc(p.label)+'</option>'; });
+    html+='</select></div>';
+    html+='</div>';
+
+    // Event type toggle
+    html+='<div class="ed-field"><label>Event type</label>'+segHTML({key:'eventType',opts:[{v:'point',l:'Point event'},{v:'duration',l:'Ongoing / duration'}]}, d.eventType)+'</div>';
+    // Duration end (shown if duration)
+    html+='<div id="durWrap" style="display:'+(d.eventType==='duration'?'block':'none')+';"><div class="ed-two">';
+    html+='<div class="ed-field"><label>Until day</label><select id="fEndDay">';
+    DAYS.forEach(function(dy){
+      var val=(dy.off==='baseline')?'baseline':String(dy.off);
+      html+='<option value="'+val+'"'+((''+d.endDayOffset)===val?' selected':'')+'>'+esc(dy.short)+'</option>';
+    });
+    html+='</select></div>';
+    html+='<div class="ed-field"><label>Until time</label><select id="fEndPeriod">';
+    PERIODS.forEach(function(p){ html+='<option value="'+p.key+'"'+(p.key===d.endPeriod?' selected':'')+'>'+esc(p.label)+'</option>'; });
+    html+='</select></div></div><p class="hint" style="margin:-4px 0 11px;">Leave as onset for &ldquo;still ongoing&rdquo;.</p></div>';
+
+    // Confidence
+    html+='<div class="ed-field"><label>Time confidence</label>'+segHTML({key:'precision',opts:[{v:'exact',l:'Exact'},{v:'approx',l:'Approx'},{v:'unclear',l:'Unclear'}]}, d.precision)+'</div>';
+
+    // Severity + trend (not for meds/contacts/obs where less relevant, but keep trend everywhere)
+    if(chip.cat==='symptom' || chip.cat==='intake' || chip.cat==='injury'){
+      html+='<div class="ed-field"><label>Severity</label>'+segHTML({key:'severity',opts:[{v:'',l:'n/a'},{v:'mild',l:'Mild'},{v:'moderate',l:'Moderate'},{v:'severe',l:'Severe'}]}, d.severity, 'sev')+'</div>';
+    }
+    html+='<div class="ed-field"><label>Trend</label>'+segHTML({key:'trend',opts:[{v:'',l:'n/a'},{v:'improving',l:'Improving'},{v:'worsening',l:'Worsening'},{v:'fluctuating',l:'Fluctuating'},{v:'resolved',l:'Resolved'}]}, d.trend)+'</div>';
+
+    // Chip-specific fields
+    if(chip.fields){
+      chip.fields.forEach(function(f){
+        var cur=d.details[f.key]!=null?d.details[f.key]:'';
+        html+='<div class="ed-field"><label>'+esc(f.label)+'</label>';
+        if(f.type==='select'){
+          html+='<select data-detail="'+f.key+'">';
+          f.options.forEach(function(o){ html+='<option value="'+esc(o)+'"'+(o===cur?' selected':'')+'>'+esc(o===''?'--':o)+'</option>'; });
+          html+='</select>';
+        } else if(f.type==='number'){
+          html+='<input type="number" data-detail="'+f.key+'" value="'+esc(cur)+'" placeholder="'+esc(f.placeholder||'')+'">';
+        } else {
+          html+='<input type="text" data-detail="'+f.key+'" value="'+esc(cur)+'" placeholder="'+esc(f.placeholder||'')+'">';
+        }
+        html+='</div>';
+      });
+    }
+
+    // Response to treatment (for symptom when treated) is covered by chip fields; add generic responseToTreatment note for injury analgesia etc handled above.
+
+    // Free note
+    html+='<div class="ed-field"><label>Free note (optional)</label><textarea data-detail="note" placeholder="e.g. green vomit, pain migrated to RIF">'+esc(d.note||'')+'</textarea></div>';
+
+    // Red flag + include
+    html+='<div class="ed-two">';
+    html+='<label class="ed-check'+(d.isRedFlag?' on':'')+'" id="rfCheck"><input type="checkbox" id="fRedFlag"'+(d.isRedFlag?' checked':'')+'> Red flag</label>';
+    html+='<label class="ed-check'+(d.includeInOutput?' on':'')+'" id="incCheck"><input type="checkbox" id="fInclude"'+(d.includeInOutput?' checked':'')+'> Include in note</label>';
+    html+='</div>';
+
+    b.innerHTML=html;
+
+    // Contextual prompt(s) at top of body
+    if(chip.prompts && chip.prompts.length){
+      var pw=document.createElement('div'); pw.className='ed-prompt';
+      pw.innerHTML='<b>Consider documenting:</b> '+chip.prompts.map(esc).join(' ');
+      b.insertBefore(pw, b.firstChild);
+    }
+
+    wireEditor();
+  }
+
+  function wireEditor(){
+    var b=el('editorBody');
+    // segmented controls
+    var segs=b.querySelectorAll('.seg');
+    for(var i=0;i<segs.length;i++){
+      (function(seg){
+        var key=seg.getAttribute('data-seg');
+        seg.querySelectorAll('button').forEach(function(btn){
+          btn.onclick=function(){
+            seg.querySelectorAll('button').forEach(function(x){x.classList.remove('active');});
+            btn.classList.add('active');
+            var v=btn.getAttribute('data-val');
+            state.draft[key]=v;
+            if(key==='eventType'){ el('durWrap').style.display=(v==='duration')?'block':'none'; }
+          };
+        });
+      })(segs[i]);
+    }
+    // red flag / include checks
+    el('fRedFlag').onchange=function(){ state.draft.isRedFlag=this.checked; el('rfCheck').classList.toggle('on',this.checked); };
+    el('fInclude').onchange=function(){ state.draft.includeInOutput=this.checked; el('incCheck').classList.toggle('on',this.checked); };
+  }
+
+  function collectEditor(){
+    var d=state.draft;
+    var dv=el('fDay').value; d.dayOffset = dv==='baseline'?'baseline':parseInt(dv,10);
+    d.period=el('fPeriod').value;
+    if(el('fEndDay')){ var ev=el('fEndDay').value; d.endDayOffset = ev==='baseline'?'baseline':parseInt(ev,10); d.endPeriod=el('fEndPeriod').value; }
+    // details
+    d.details={};
+    var dets=el('editorBody').querySelectorAll('[data-detail]');
+    for(var i=0;i<dets.length;i++){
+      var k=dets[i].getAttribute('data-detail'); var v=dets[i].value.trim();
+      if(k==='note'){ d.note=v; }
+      else if(v!=='') d.details[k]=v;
+    }
+    return d;
+  }
+
+  function saveEditor(){
+    var d=collectEditor();
+    if(state.editingId!=null){
+      for(var i=0;i<state.events.length;i++) if(state.events[i].id===state.editingId){ state.events[i]=d; break; }
+      toast('Event updated');
+    } else {
+      d.id=idSeq++;
+      state.events.push(d);
+      toast('Added to timeline');
+    }
+    closeEditor();
+    refresh();
+  }
+  function deleteEditor(){
+    if(state.editingId==null) return;
+    state.events=state.events.filter(function(e){ return e.id!==state.editingId; });
+    closeEditor(); refresh(); toast('Event deleted');
+  }
+  function duplicateEditor(){
+    var d=collectEditor();
+    var copy=JSON.parse(JSON.stringify(d)); copy.id=idSeq++;
+    state.events.push(copy);
+    // keep editing the copy
+    state.editingId=copy.id; state.draft=JSON.parse(JSON.stringify(copy));
+    refresh(); toast('Duplicated');
+  }
+  function toggleResolvedEditor(){
+    state.draft.resolved=!state.draft.resolved;
+    if(state.draft.resolved && !state.draft.trend) state.draft.trend='resolved';
+    el('edResolveBtn').textContent = state.draft.resolved ? 'Unmark resolved' : 'Mark resolved';
+  }
+
+  /* ---- Timeline rendering ------------------------------------------------ */
+  function filteredEvents(){
+    return state.events.filter(function(e){
+      if(state.laneHidden[e.lane]) return false;
+      if(state.redFlagOnly && !e.isRedFlag) return false;
+      return true;
+    });
+  }
+  function usedDayOffsets(){
+    var set={}; state.events.forEach(function(e){ set[e.dayOffset]=true; });
+    // Always include yesterday + today.
+    set[-1]=true; set[0]=true;
+    var list=[];
+    if(set['baseline']) list.push('baseline');
+    [-3,-2,-1,0].forEach(function(o){ if(set[o]) list.push(o); });
+    return list;
+  }
+  function dayDesc(off){ for(var i=0;i<DAYS.length;i++) if((''+DAYS[i].off)===(''+off)) return DAYS[i]; return null; }
+
+  function renderTimeline(){
+    var evs=filteredEvents();
+    var grid=el('timelineGrid');
+    var empty=el('tlEmpty');
+    var hint=el('tlHint');
+
+    var lanesWithEvents={}; state.events.forEach(function(e){ lanesWithEvents[e.lane]=true; });
+    var lanesToShow=visibleLanes().filter(function(l){
+      if(state.laneHidden[l.key]) return false;
+      return lanesWithEvents[l.key]; // hide empty lanes
+    });
+
+    if(state.events.length===0){
+      grid.innerHTML=''; grid.style.display='none'; empty.style.display='block'; hint.textContent=''; return;
+    }
+    empty.style.display='none'; grid.style.display='grid';
+
+    var days=usedDayOffsets();
+    hint.textContent = state.events.length+' event'+(state.events.length===1?'':'s')+' \u00b7 '+lanesToShow.length+' lane'+(lanesToShow.length===1?'':'s');
+
+    // grid template columns: label + one per day
+    grid.style.gridTemplateColumns='minmax(120px,150px) repeat('+days.length+', minmax(120px,1fr))';
+    grid.innerHTML='';
+
+    // header row
+    var corner=document.createElement('div'); corner.className='tl-corner'; grid.appendChild(corner);
+    days.forEach(function(off){
+      var dd=dayDesc(off);
+      var h=document.createElement('div'); h.className='tl-colhd'+(off===0?' today':'');
+      h.innerHTML='<div class="cd-day">'+esc(dd.short)+'</div>'+(dd.sub?'<div class="cd-sub">'+esc(dd.sub)+'</div>':'');
+      grid.appendChild(h);
+    });
+
+    // lane rows
+    if(lanesToShow.length===0){
+      var msg=document.createElement('div');
+      msg.style.gridColumn='1 / -1'; msg.className='tl-empty';
+      msg.innerHTML='No events match the current filters.';
+      grid.appendChild(msg);
+    }
+    lanesToShow.forEach(function(lane){
+      var count=evs.filter(function(e){ return e.lane===lane.key; }).length;
+      var lbl=document.createElement('div'); lbl.className='tl-lanelabel';
+      lbl.style.setProperty('--lane-c', lane.color);
+      lbl.innerHTML='<span class="ll-name">'+esc(lane.name)+'</span><span class="ll-count">'+count+' event'+(count===1?'':'s')+'</span>';
+      grid.appendChild(lbl);
+
+      days.forEach(function(off){
+        var cell=document.createElement('div'); cell.className='tl-cell'+(off===0?' today':'');
+        var cellEvents=evs.filter(function(e){ return e.lane===lane.key && (''+e.dayOffset)===(''+off); });
+        cellEvents.sort(function(a,b){ return periodRank(a.period)-periodRank(b.period); });
+        cellEvents.forEach(function(e){ cell.appendChild(eventPill(e, lane)); });
+        grid.appendChild(cell);
+      });
+    });
+  }
+
+  function eventPill(e, lane){
+    var pill=document.createElement('button');
+    pill.type='button';
+    pill.className='event-pill'+(e.isRedFlag?' redflag':'')+(e.resolved?' resolved':'');
+    pill.style.setProperty('--pill-c', lane.color);
+    var meta='';
+    var pt=periodTag(e.period); if(pt) meta+='<span class="ep-tag period">'+esc(pt)+'</span>';
+    if(e.eventType==='duration') meta+='<span class="ep-tag period">ongoing</span>';
+    if(e.severity) meta+='<span class="ep-tag sev">'+esc(e.severity)+'</span>';
+    if(e.trend) meta+='<span class="ep-tag trend-'+e.trend+'">'+esc(e.trend)+'</span>';
+    if(e.isRedFlag) meta+='<span class="ep-tag flag">&#9873; flag</span>';
+    if(!e.includeInOutput) meta+='<span class="ep-tag period">hidden</span>';
+    pill.innerHTML='<span class="ep-label">'+esc(e.label)+'</span>'+(meta?'<span class="ep-meta">'+meta+'</span>':'');
+    pill.onclick=function(){ openEditor(e.lane, e.chipKey, e.id); };
+    return pill;
+  }
+
+  /* ---- Prose fragment builders ------------------------------------------ */
+  function fragmentFor(e){
+    var chip=chipCfg(e.lane, e.chipKey);
+    var phrase = chip?chip.phrase:e.label.toLowerCase();
+    // severity adjective for symptoms
+    if(e.severity==='severe') phrase='severe '+phrase;
+    else if(e.severity==='moderate') phrase='moderate '+phrase;
+    return {cat:chip?chip.cat:'symptom', phrase:phrase, e:e, chip:chip};
+  }
+
+  function medResponsePhrase(e){
+    var r=e.details.response;
+    if(!r) return '';
+    if(r==='improved briefly') return ' with brief improvement';
+    if(r==='sustained improvement') return ' with good effect';
+    if(r==='no effect') return ' without effect';
+    return '';
+  }
+
+  // Build a clause for a bucket's events grouped by category.
+  function bucketClause(items, isOpening){
+    var byCat={symptom:[],intake:[],med:[],contact:[],obs:[],injury:[]};
+    items.forEach(function(f){ (byCat[f.cat]||byCat.symptom).push(f); });
+    var clauses=[];
+
+    // symptoms / function
+    if(byCat.symptom.length){
+      var phrases=byCat.symptom.map(function(f){ return f.phrase; });
+      var verb;
+      if(isOpening) verb='began';
+      else verb='developed';
+      // worsening trend adjustment
+      var anyWorse=byCat.symptom.some(function(f){ return f.e.trend==='worsening'; });
+      var txt=joinList(phrases)+' '+verb;
+      if(anyWorse && !isOpening) txt=joinList(phrases)+' worsened';
+      clauses.push(txt);
+    }
+    // intake/output (self-contained phrases)
+    if(byCat.intake.length){
+      var ip=byCat.intake.map(function(f){ return f.phrase; });
+      clauses.push(joinList(ip));
+    }
+    // obs
+    if(byCat.obs.length){
+      var op=byCat.obs.map(function(f){
+        var v=f.e.details.value;
+        return f.phrase + (v?(' of '+v):'');
+      });
+      clauses.push(joinList(op)+' '+(byCat.obs.length>1?'were recorded':'was recorded'));
+    }
+    // meds
+    if(byCat.med.length){
+      var mp=byCat.med.map(function(f){ return f.phrase+medResponsePhrase(f.e); });
+      var mverb=byCat.med.length>1?'were given':'was given';
+      clauses.push(joinList(byCat.med.map(function(f){ return f.phrase; }))+' '+mverb + medRespSuffix(byCat.med));
+    }
+    // contacts
+    if(byCat.contact.length){
+      var cp=byCat.contact.map(function(f){
+        var out=f.e.details.outcome;
+        return f.phrase + (out?(' ('+out+')'):'');
+      });
+      clauses.push('the child was '+joinList(cp).replace(/^the child was /,'') );
+    }
+    // injury
+    if(byCat.injury.length){
+      var jp=byCat.injury.map(function(f){ return f.phrase; });
+      clauses.push(joinList(jp));
+    }
+    return clauses.join('; ');
+  }
+  function medRespSuffix(medItems){
+    // append combined response note if a single med has response
+    if(medItems.length===1){ return medResponsePhrase(medItems[0].e); }
+    return '';
+  }
+
+  /* ---- Output generation ------------------------------------------------- */
+  function outputEvents(){
+    return state.events.filter(function(e){ return e.includeInOutput; })
+      .slice().sort(function(a,b){ return sortKey(a)-sortKey(b); });
+  }
+
+  function groupByBucket(evs){
+    // Returns ordered array of {dayOffset, period, items:[fragment]}
+    var buckets=[]; var map={};
+    evs.forEach(function(e){
+      var key=e.dayOffset+'|'+e.period;
+      if(!map[key]){ map[key]={dayOffset:e.dayOffset, period:e.period, items:[], key:key, sk:sortKey(e)}; map[key]._added=true; buckets.push(map[key]); }
+      map[key].items.push(fragmentFor(e));
+    });
+    buckets.sort(function(a,b){ return a.sk-b.sk; });
+    return buckets;
+  }
+
+  function generateChronology(){
+    var evs=outputEvents();
+    if(evs.length===0) return '';
+    var buckets=groupByBucket(evs);
+    var age=ageString();
+    var lastNormal=el('patLastNormal').value.trim();
+    var sentences=[];
+
+    // Opening
+    var subj = age ? ('This '+age) : 'The child';
+    var firstBucket=buckets[0];
+    var opening;
+    var firstIsBaseline = firstBucket.dayOffset==='baseline';
+    if(firstIsBaseline){
+      // baseline events themselves
+      opening = subj+' was previously well';
+      var bl=bucketClause(firstBucket.items, false);
+      if(bl) opening += ', with '+bl;
+      opening+='.';
+      sentences.push(opening);
+      buckets=buckets.slice(1);
+      if(buckets.length){
+        var nb=buckets[0];
+        var when=timePhrase(nb.dayOffset, nb.period, false);
+        sentences.push(cap(when)+', '+bucketClause(nb.items, true)+'.');
+        buckets=buckets.slice(1);
+      }
+    } else {
+      var when0=timePhrase(firstBucket.dayOffset, firstBucket.period, false);
+      var wellClause = lastNormal ? (subj+' was previously well until '+ (/(ago|yesterday|today|overnight|morning|afternoon|evening|day)/i.test(lastNormal)? lastNormal : lastNormal))
+                                  : (subj+' was previously well until '+when0);
+      // Prefer explicit lastNormal text if given, else the first event time.
+      if(lastNormal){
+        sentences.push(subj+' was previously well until '+lastNormal+', when '+bucketClause(firstBucket.items,true)+'.');
+      } else {
+        sentences.push(subj+' was previously well until '+when0+', when '+bucketClause(firstBucket.items,true)+'.');
+      }
+      buckets=buckets.slice(1);
+    }
+
+    // Remaining buckets
+    buckets.forEach(function(bk){
+      var when=timePhrase(bk.dayOffset, bk.period, true);
+      var clause=bucketClause(bk.items, false);
+      if(clause) sentences.push(when+', '+clause+'.');
+    });
+
+    // Closing turning point / attendance trigger
+    var complaint=el('patComplaint').value.trim();
+    var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
+    var todayEscalation=todayEvs.filter(function(e){ return e.isRedFlag || e.trend==='worsening'; });
+    if(todayEscalation.length){
+      var esc2=todayEscalation.map(function(e){ return fragmentFor(e).phrase; });
+      var trg='This prompted presentation to ED';
+      // add "despite treatment" if today meds with no effect
+      var noEffMeds=todayEvs.filter(function(e){ return chipCfg(e.lane,e.chipKey) && chipCfg(e.lane,e.chipKey).cat==='med' && e.details.response==='no effect'; });
+      var lastSentence=sentences[sentences.length-1];
+      // integrate into last sentence for natural flow
+      sentences[sentences.length-1]=lastSentence.replace(/\.$/, '') + (noEffMeds.length?(' despite '+joinList(noEffMeds.map(function(e){return fragmentFor(e).phrase;}))):'') + ', prompting presentation to ED.';
+    } else if(complaint){
+      sentences.push('The reason for presentation today was '+complaint+'.');
+    }
+    return sentences.join(' ');
+  }
+
+  function illnessSpan(){
+    var evs=outputEvents().filter(function(e){ return e.dayOffset!=='baseline'; });
+    if(!evs.length) return null;
+    var first=evs[0].dayOffset;
+    return (0-first)+1; // yesterday->2, 2 days ago ->3
+  }
+
+  function generateHandover(){
+    var evs=outputEvents();
+    if(evs.length===0) return '';
+    var span=illnessSpan();
+    var age=ageString();
+    // key symptoms (symptom cat) unique phrases
+    var symPhrases=[]; var seen={};
+    evs.forEach(function(e){
+      var c=chipCfg(e.lane,e.chipKey);
+      if(c && c.cat==='symptom'){ var p=c.phrase; if(!seen[p]){ seen[p]=1; symPhrases.push(p); } }
+    });
+    var intakePhrases=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='intake'){ if(intakePhrases.indexOf(c.phrase)===-1) intakePhrases.push(c.phrase); } });
+    var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
+    var todayFeatures=todayEvs.filter(function(e){ return e.isRedFlag||e.trend==='worsening'; }).map(function(e){ return fragmentFor(e).phrase; });
+    var meds=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='med'){ if(meds.indexOf(c.phrase)===-1) meds.push(c.phrase); } });
+
+    var parts=[];
+    var lead=(span?span+'-day':'')+' history';
+    var featureList=symPhrases.concat(intakePhrases).slice(0,4);
+    var s=(age?age+' with ':'')+lead;
+    if(featureList.length) s+=' of '+joinList(featureList);
+    if(todayFeatures.length) s+=', with '+joinList(todayFeatures)+' today';
+    if(meds.length) s+=' despite '+joinList(meds)+' at home';
+    s+='.';
+    parts.push(cap(s));
+    return parts.join(' ');
+  }
+
+  function generateTrigger(){
+    var evs=outputEvents();
+    if(evs.length===0) return '';
+    var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
+    var escal=todayEvs.filter(function(e){ return e.isRedFlag||e.trend==='worsening'; });
+    var complaint=el('patComplaint').value.trim();
+    if(escal.length){
+      var phrases=escal.map(function(e){ return fragmentFor(e).phrase; });
+      // contrast with earlier stable features (e.g. fever alone)
+      var earlier=evs.filter(function(e){ return e.dayOffset!==0 && e.dayOffset!=='baseline'; })
+        .map(function(e){ var c=chipCfg(e.lane,e.chipKey); return c?c.phrase:e.label.toLowerCase(); });
+      var uniqEarlier=[]; earlier.forEach(function(p){ if(uniqEarlier.indexOf(p)===-1) uniqEarlier.push(p); });
+      var s='Escalation today was driven by '+joinList(phrases);
+      if(uniqEarlier.length) s+=', rather than '+joinList(uniqEarlier.slice(0,2))+' alone';
+      s+='.';
+      return s;
+    }
+    // fallback: latest significant event
+    var last=evs[evs.length-1];
+    var lp=fragmentFor(last).phrase;
+    if(complaint) return 'Presented today with '+complaint+ (lp?(', most recently '+lp):'') +'.';
+    return 'Most recent change: '+lp+'.';
+  }
+
+  /* ---- Insights ---------------------------------------------------------- */
+  function computeInsights(){
+    var evs=outputEvents();
+    var out=[];
+    if(evs.length===0) return out;
+    var nonBaseline=evs.filter(function(e){ return e.dayOffset!=='baseline'; });
+
+    // Last known normal
+    var lastNormal=el('patLastNormal').value.trim();
+    if(lastNormal) out.push({ic:'\u2705',t:'Last known normal',v:lastNormal});
+
+    // First abnormal event
+    if(nonBaseline.length){
+      var f=nonBaseline[0];
+      out.push({ic:'\ud83d\udd52',t:'First abnormal event',v:cap(fragmentFor(f).phrase)+' \u2014 '+timePhrase(f.dayOffset,f.period,false)});
+    }
+
+    // Duration of illness
+    var span=illnessSpan();
+    if(span) out.push({ic:'\u23f3',t:'Duration of illness',v:span+' day'+(span===1?'':'s')+' of symptoms'});
+
+    // Worsening point
+    var worse=null;
+    for(var i=0;i<evs.length;i++){ if(evs[i].trend==='worsening'||evs[i].isRedFlag){ worse=evs[i]; break; } }
+    if(worse) out.push({ic:'\ud83d\udcc8',t:'Turning point',v:cap(fragmentFor(worse).phrase)+' '+(worse.trend==='worsening'?'worsening':'flagged')+' '+timePhrase(worse.dayOffset,worse.period,false), cls:'warn'});
+
+    // Response to treatment
+    var resp=evs.filter(function(e){ return e.details && e.details.response && e.details.response!=='unknown'; });
+    if(resp.length){
+      var r=resp[resp.length-1];
+      out.push({ic:'\ud83d\udc8a',t:'Response to treatment',v:cap(fragmentFor(r).phrase)+': '+r.details.response});
+    }
+
+    // Hydration risk
+    var reducedIntake=evs.some(function(e){ return ['reducedfeeds','refusedfluids','vomitfeeds'].indexOf(e.chipKey)!==-1; });
+    var reducedOutput=evs.some(function(e){ return ['wetnappies','nourine'].indexOf(e.chipKey)!==-1; });
+    if(reducedIntake && reducedOutput){
+      out.push({ic:'\ud83d\udca7',t:'Hydration risk',v:'Reduced intake with reduced urine output \u2014 assess hydration.', cls:'flag'});
+    } else if(reducedIntake){
+      out.push({ic:'\ud83d\udca7',t:'Hydration risk',v:'Reduced intake documented \u2014 check urine output / wet nappies.', cls:'warn'});
+    }
+
+    // Delay to presentation (injury / contact based)
+    var injuryEv=evs.filter(function(e){ return e.lane==='injury' && e.chipKey==='mechanism'; })[0];
+    if(injuryEv){
+      out.push({ic:'\u23f1\ufe0f',t:'Delay to presentation',v:'Injury '+timePhrase(injuryEv.dayOffset,injuryEv.period,false)+'; presenting today.'});
+    }
+
+    // Prior contact / re-attendance
+    var contacts=evs.filter(function(e){ return e.lane==='contacts'; });
+    if(contacts.length){
+      out.push({ic:'\u260e\ufe0f',t:'Prior contact',v:contacts.map(function(e){ return fragmentFor(e).phrase; }).join('; ')});
+    }
+    return out;
+  }
+
+  function renderInsights(){
+    var host=el('insightList');
+    var ins=computeInsights();
+    if(ins.length===0){ host.innerHTML='<div class="insight-empty">Trajectory insights appear here once events are added.</div>'; return; }
+    host.innerHTML='';
+    ins.forEach(function(i){
+      var d=document.createElement('div'); d.className='insight'+(i.cls?(' '+i.cls):'');
+      d.innerHTML='<span class="ic">'+i.ic+'</span><span class="itxt"><b>'+esc(i.t)+'</b><span>'+esc(i.v)+'</span></span>';
+      host.appendChild(d);
+    });
+  }
+
+  /* ---- Contextual cross-event prompts ------------------------------------ */
+  function computePrompts(){
+    var evs=state.events;
+    var prompts=[];
+    function has(keys){ return evs.some(function(e){ return keys.indexOf(e.chipKey)!==-1; }); }
+    function hasLane(l){ return evs.some(function(e){ return e.lane===l; }); }
+
+    if(has(['reducedfeeds','refusedfluids']) && !has(['wetnappies','nourine','nappycount'])){
+      prompts.push({id:'urine', t:'Reduced intake added \u2014 document urine output / wet nappies and time of last urine.'});
+    }
+    if(has(['vomiting']) ){
+      var vom=evs.filter(function(e){return e.chipKey==='vomiting';})[0];
+      if(vom && !vom.details.character) prompts.push({id:'vomchar', t:'Vomiting added \u2014 record whether it is bilious or bloody.'});
+      if(!has(['wetnappies','nourine','reducedfeeds','refusedfluids'])) prompts.push({id:'vomhydration', t:'Vomiting added \u2014 consider documenting hydration (intake and urine output).'});
+    }
+    if(has(['rash'])){
+      var rash=evs.filter(function(e){return e.chipKey==='rash';})[0];
+      if(rash && !rash.details.blanching) prompts.push({id:'blanch', t:'Rash added \u2014 document whether it is blanching or non-blanching.'});
+    }
+    if(has(['seizure'])){
+      var sz=evs.filter(function(e){return e.chipKey==='seizure';})[0];
+      if(sz && (!sz.details.duration || !sz.details.recovery)) prompts.push({id:'seizure', t:'Seizure added \u2014 document duration, recovery and any recurrence.'});
+    }
+    if(has(['breathing'])){
+      var br=evs.filter(function(e){return e.chipKey==='breathing';})[0];
+      if(br && !br.details.inhalerResp) prompts.push({id:'inhaler', t:'Breathing difficulty added \u2014 document inhaler response and work of breathing timing.'});
+    }
+    // fever persists after antipyretic
+    var feverTreated=evs.some(function(e){ return e.chipKey==='fever' && e.details.antipyretic==='yes' && !e.details.response; });
+    if(feverTreated) prompts.push({id:'feverresp', t:'Fever with antipyretic \u2014 document the response (improved briefly / no effect).'});
+    // head injury + vomiting sequence
+    if(state.mode==='trauma' && (has(['postvomit'])||has(['vomiting'])) && hasLane('injury')){
+      prompts.push({id:'vomseq', t:'Head injury with vomiting \u2014 clarify whether vomiting began before or after the injury.'});
+    }
+    // limp + fever/trauma
+    if(has(['notweightbear'])){
+      prompts.push({id:'limp', t:'Not weight-bearing \u2014 check for fever and any trauma history.'});
+    }
+    // filter dismissed
+    return prompts.filter(function(p){ return !state.dismissedPrompts[p.id]; });
+  }
+  function renderPrompts(){
+    var host=el('promptList');
+    var prompts=computePrompts();
+    if(prompts.length===0){ host.innerHTML='<div class="insight-empty">No outstanding prompts. Add events to see contextual suggestions.</div>'; return; }
+    host.innerHTML='';
+    prompts.forEach(function(p){
+      var d=document.createElement('div'); d.className='prompt-item';
+      d.innerHTML='<span class="pc">&#128161;</span><span>'+esc(p.t)+'</span>';
+      var x=document.createElement('button'); x.type='button'; x.setAttribute('aria-label','Dismiss'); x.innerHTML='&times;';
+      x.onclick=function(){ state.dismissedPrompts[p.id]=true; renderPrompts(); };
+      d.appendChild(x);
+      host.appendChild(d);
+    });
+  }
+
+  /* ---- Output panel render ---------------------------------------------- */
+  function setTab(tab){
+    state.tab=tab;
+    var tabs=el('outText').closest('.slm-panel-bd').querySelectorAll('.out-tab');
+    for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab);
+    renderOutputs();
+  }
+  function currentOutputText(){
+    if(state.tab==='chronology') return generateChronology();
+    if(state.tab==='handover') return generateHandover();
+    return generateTrigger();
+  }
+  function renderOutputs(){
+    var host=el('outText');
+    var txt=currentOutputText();
+    var copyBtn=el('copyBtn');
+    if(!txt){
+      var msg = state.tab==='chronology'?'Your chronology paragraph will appear here as you add events.'
+        : state.tab==='handover'?'A one-line handover summary will appear here.'
+        : 'The attendance-trigger summary will appear here.';
+      host.innerHTML='<div class="out-empty">'+msg+'</div>';
+      copyBtn.style.display='none';
+      return;
+    }
+    // highlight flagged phrases lightly: none for now, plain text
+    host.textContent=txt;
+    copyBtn.style.display='flex';
+    copyBtn.textContent='\ud83d\udccb Copy to clipboard'; copyBtn.classList.remove('copied');
+  }
+  function copyOutput(){
+    var txt=currentOutputText(); if(!txt) return;
+    function done(){ var b=el('copyBtn'); b.textContent='Copied \u2713'; b.classList.add('copied'); setTimeout(function(){ b.textContent='\ud83d\udccb Copy to clipboard'; b.classList.remove('copied'); },1600); }
+    function legacy(){ var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); done(); }
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, legacy); else legacy();
+  }
+
+  /* ---- Global refresh ---------------------------------------------------- */
+  function refresh(){
+    renderTimeline(); renderOutputs(); renderInsights(); renderPrompts();
+  }
+
+  /* ---- Clear ------------------------------------------------------------- */
+  function clearAll(){
+    if(state.events.length && !confirm('Clear the timeline and all events? This cannot be undone.')) return;
+    state.events=[]; state.dismissedPrompts={};
+    el('patAge').value=''; el('patComplaint').value=''; el('patLastNormal').value='';
+    refresh();
+    toast('Timeline cleared');
+  }
+
+  /* ---- Sample scenarios (validation) ------------------------------------- */
+  var SCENARIOS = {
+    bronchiolitis:{
+      age:'8', unit:'mo', complaint:'increased work of breathing', lastNormal:'2 days ago', mode:'standard',
+      events:[
+        {lane:'symptoms',chipKey:'coryza',dayOffset:-1,period:'morning',eventType:'duration'},
+        {lane:'symptoms',chipKey:'cough',dayOffset:-1,period:'evening',eventType:'duration'},
+        {lane:'symptoms',chipKey:'fever',dayOffset:-1,period:'evening',eventType:'duration',details:{maxTemp:'38.6',antipyretic:'yes',response:'improved briefly'}},
+        {lane:'intake',chipKey:'reducedfeeds',dayOffset:-1,period:'overnight',eventType:'duration',details:{amount:'about half'}},
+        {lane:'intake',chipKey:'wetnappies',dayOffset:0,period:'morning',eventType:'duration',details:{lastUrine:'this morning'}},
+        {lane:'symptoms',chipKey:'breathing',dayOffset:0,period:'afternoon',eventType:'duration',trend:'worsening',isRedFlag:true,details:{wob:'moderate',inhalerResp:'no effect'}},
+        {lane:'meds',chipKey:'inhaler',dayOffset:0,period:'afternoon',details:{response:'no effect'}}
+      ]
+    },
+    gastro:{
+      age:'2', unit:'yr', complaint:'poor oral intake and lethargy', lastNormal:'yesterday morning', mode:'standard',
+      events:[
+        {lane:'symptoms',chipKey:'vomiting',dayOffset:-1,period:'morning',eventType:'duration',details:{episodes:'6',character:'non-bilious',relFeeds:'after feeds'}},
+        {lane:'symptoms',chipKey:'diarrhoea',dayOffset:-1,period:'evening',eventType:'duration',details:{frequency:'5 loose stools'}},
+        {lane:'intake',chipKey:'reducedfeeds',dayOffset:-1,period:'evening',eventType:'duration',details:{amount:'minimal'}},
+        {lane:'intake',chipKey:'wetnappies',dayOffset:0,period:'morning',eventType:'duration'},
+        {lane:'meds',chipKey:'antiemetic',dayOffset:0,period:'morning',details:{response:'improved briefly'}},
+        {lane:'function',chipKey:'lethargy',dayOffset:0,period:'afternoon',eventType:'duration',trend:'worsening',isRedFlag:true}
+      ]
+    },
+    headinjury:{
+      age:'10', unit:'yr', complaint:'head injury with vomiting', lastNormal:'today', mode:'trauma',
+      events:[
+        {lane:'injury',chipKey:'mechanism',dayOffset:0,period:'morning',details:{mech:'fall from ~1.5m off a wall',immediate:'cried immediately'}},
+        {lane:'injury',chipKey:'loc',dayOffset:0,period:'morning',isRedFlag:true,details:{locDur:'no LOC'}},
+        {lane:'injury',chipKey:'postvomit',dayOffset:0,period:'afternoon',details:{episodes:'2'}},
+        {lane:'function',chipKey:'drowsy',dayOffset:0,period:'afternoon',eventType:'duration',trend:'worsening',isRedFlag:true},
+        {lane:'injury',chipKey:'traumaanalgesia',dayOffset:0,period:'afternoon',details:{response:'improved briefly'}}
+      ]
+    }
+  };
+  function loadScenarioPrompt(){
+    var choice=prompt('Load sample scenario:\n1 = 8-month bronchiolitis\n2 = 2-year gastroenteritis\n3 = 10-year head injury\n\nEnter 1, 2 or 3:');
+    if(choice==null) return;
+    choice=choice.trim();
+    var key = choice==='1'?'bronchiolitis':choice==='2'?'gastro':choice==='3'?'headinjury':null;
+    if(!key){ toast('Unknown option'); return; }
+    loadScenario(key);
+  }
+  function loadScenario(key){
+    var sc=SCENARIOS[key]; if(!sc) return;
+    state.events=[]; idSeq=1; state.dismissedPrompts={};
+    state.ageUnit=sc.unit; el('ageUnitBtn').textContent=sc.unit;
+    el('patAge').value=sc.age; el('patComplaint').value=sc.complaint; el('patLastNormal').value=sc.lastNormal;
+    setMode(sc.mode);
+    sc.events.forEach(function(spec){
+      var chip=chipCfg(spec.lane, spec.chipKey);
+      var d=blankDraft(spec.lane, spec.chipKey);
+      d.id=idSeq++;
+      d.dayOffset=spec.dayOffset; d.period=spec.period;
+      d.eventType=spec.eventType||chip.type||'point';
+      d.endDayOffset=spec.dayOffset; d.endPeriod=spec.period;
+      if(spec.severity) d.severity=spec.severity;
+      if(spec.trend) d.trend=spec.trend;
+      if(spec.isRedFlag) d.isRedFlag=true;
+      if(spec.details) d.details=spec.details;
+      state.events.push(d);
+    });
+    refresh();
+    toast('Loaded sample scenario');
+  }
+
+  /* ---- Init -------------------------------------------------------------- */
+  function init(){
+    renderPalette(); renderLaneFilters(); refresh();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  /* ---- Public API -------------------------------------------------------- */
+  return {
+    setMode:setMode, toggleAgeUnit:toggleAgeUnit, refresh:refresh,
+    openEditor:openEditor, closeEditor:closeEditor, saveEditor:saveEditor,
+    deleteEditor:deleteEditor, duplicateEditor:duplicateEditor, toggleResolvedEditor:toggleResolvedEditor,
+    setTab:setTab, copyOutput:copyOutput, clearAll:clearAll,
+    toggleRedFlagFilter:toggleRedFlagFilter,
+    loadScenarioPrompt:loadScenarioPrompt, loadScenario:loadScenario
+  };
+})();
+</script>
+</body>
+</html>
