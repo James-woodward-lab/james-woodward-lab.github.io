@@ -462,18 +462,18 @@ var SLM = (function(){
       {key:'poorsleep', label:'Poor sleep', phrase:'disturbed sleep', cat:'symptom', type:'duration'}
     ],
     intake: [
-      {key:'reducedfeeds', label:'Reduced feeds', phrase:'oral intake reduced', cat:'intake', type:'duration',
+      {key:'reducedfeeds', label:'Reduced feeds', phrase:'reduced oral intake', clause:'oral intake reduced', cat:'intake', type:'duration',
         fields:[{key:'amount',label:'Amount of normal',type:'select',options:['','roughly normal','about half','minimal','none']}],
         prompts:['With reduced intake, document urine output / wet nappies and time of last urine.']},
-      {key:'refusedfluids', label:'Refused fluids', phrase:'fluids refused', cat:'intake', type:'duration',
+      {key:'refusedfluids', label:'Refused fluids', phrase:'refused fluids', clause:'fluids were refused', cat:'intake', type:'duration',
         prompts:['With reduced intake, document urine output / wet nappies and time of last urine.']},
-      {key:'vomitfeeds', label:'Vomiting after feeds', phrase:'vomiting after feeds', cat:'intake', type:'duration'},
-      {key:'wetnappies', label:'Wet nappies reduced', phrase:'fewer wet nappies', cat:'intake', type:'duration',
+      {key:'vomitfeeds', label:'Vomiting after feeds', phrase:'vomiting after feeds', clause:'there was vomiting after feeds', cat:'intake', type:'duration'},
+      {key:'wetnappies', label:'Wet nappies reduced', phrase:'fewer wet nappies', clause:'wet nappies became less frequent', cat:'intake', type:'duration',
         fields:[{key:'lastUrine',label:'Last urine / wet nappy',type:'text',placeholder:'e.g. this morning'}]},
-      {key:'nourine', label:'No urine output', phrase:'no urine output', cat:'intake', type:'duration', redFlagDefault:true,
+      {key:'nourine', label:'No urine output', phrase:'no urine output', clause:'there was no urine output', cat:'intake', type:'duration', redFlagDefault:true,
         fields:[{key:'lastUrine',label:'Last urine passed',type:'text',placeholder:'e.g. yesterday evening'}]},
-      {key:'looseoutput', label:'Diarrhoea (output)', phrase:'loose stool output', cat:'intake', type:'duration'},
-      {key:'normalintake', label:'Intake maintained', phrase:'oral intake maintained', cat:'intake', type:'duration'}
+      {key:'looseoutput', label:'Diarrhoea (output)', phrase:'loose stool output', clause:'there was loose stool output', cat:'intake', type:'duration'},
+      {key:'normalintake', label:'Intake maintained', phrase:'maintained oral intake', clause:'oral intake was maintained', cat:'intake', type:'duration'}
     ],
     meds: [
       {key:'paracetamol', label:'Paracetamol', phrase:'paracetamol', cat:'med', type:'point', fields:[F_RESP]},
@@ -481,7 +481,7 @@ var SLM = (function(){
       {key:'inhaler', label:'Inhaler / salbutamol', phrase:'salbutamol', cat:'med', type:'point', fields:[F_RESP]},
       {key:'antibiotics', label:'Antibiotics', phrase:'antibiotics', cat:'med', type:'point', fields:[{key:'agent',label:'Agent',type:'text',placeholder:'optional'}, F_RESP]},
       {key:'ors', label:'ORS', phrase:'oral rehydration solution', cat:'med', type:'point', fields:[F_RESP]},
-      {key:'antiemetic', label:'Antiemetic', phrase:'an antiemetic (e.g. ondansetron)', cat:'med', type:'point', fields:[F_RESP]}
+      {key:'antiemetic', label:'Antiemetic', phrase:'an antiemetic', cat:'med', type:'point', fields:[F_RESP]}
     ],
     contacts: [
       {key:'gp', label:'GP', phrase:'seen by their GP', cat:'contact', type:'point', fields:[{key:'outcome',label:'Outcome',type:'text',placeholder:'e.g. advised to attend ED'}]},
@@ -497,19 +497,19 @@ var SLM = (function(){
       {key:'nappycount', label:'Wet nappy count', phrase:'wet nappy count', cat:'obs', type:'point', fields:[{key:'value',label:'Count in 24h',type:'text',placeholder:'e.g. 2'}]}
     ],
     injury: [
-      {key:'mechanism', label:'Mechanism', phrase:'the injury occurred', cat:'injury', type:'point',
+      {key:'mechanism', label:'Mechanism', phrase:'the injury', clause:'the injury occurred', cat:'injury', type:'point',
         fields:[{key:'mech',label:'Mechanism',type:'text',placeholder:'e.g. fall from ~1m onto laminate'},
                 {key:'immediate',label:'Immediate response',type:'select',options:['','cried immediately','delayed cry','no cry']}],
         prompts:['For head injury, document LOC, seizure, amnesia and the vomiting sequence.']},
-      {key:'loc', label:'LOC', phrase:'loss of consciousness', cat:'injury', type:'point', redFlagDefault:true,
+      {key:'loc', label:'LOC', phrase:'loss of consciousness', clause:'there was loss of consciousness', cat:'injury', type:'point', redFlagDefault:true,
         fields:[{key:'locDur',label:'Duration',type:'text',placeholder:'e.g. ~30 seconds'}]},
-      {key:'headstrike', label:'Head strike', phrase:'a head strike', cat:'injury', type:'point'},
-      {key:'postvomit', label:'Vomit (post-injury)', phrase:'vomiting after the injury', cat:'injury', type:'point',
+      {key:'headstrike', label:'Head strike', phrase:'a head strike', clause:'there was a head strike', cat:'injury', type:'point'},
+      {key:'postvomit', label:'Vomit (post-injury)', phrase:'post-injury vomiting', clause:'vomiting occurred after the injury', cat:'injury', type:'point',
         fields:[F_EPISODES], prompts:['Clarify whether vomiting began before or after the injury.']},
-      {key:'limbunused', label:'Limb not used', phrase:'reluctance to use the limb', cat:'injury', type:'duration'},
-      {key:'swelling', label:'Swelling', phrase:'swelling', cat:'injury', type:'duration'},
-      {key:'traumaanalgesia', label:'Analgesia given', phrase:'analgesia', cat:'injury', type:'point', fields:[F_RESP]},
-      {key:'returnbaseline', label:'Returned to baseline', phrase:'returned to baseline', cat:'injury', type:'point'}
+      {key:'limbunused', label:'Limb not used', phrase:'reluctance to use the limb', clause:'the limb was not being used', cat:'injury', type:'duration'},
+      {key:'swelling', label:'Swelling', phrase:'swelling', clause:'swelling developed', cat:'injury', type:'duration'},
+      {key:'traumaanalgesia', label:'Analgesia given', phrase:'analgesia', cat:'med', type:'point', fields:[F_RESP]},
+      {key:'returnbaseline', label:'Returned to baseline', phrase:'return to baseline', clause:'the child returned to baseline', cat:'injury', type:'point'}
     ]
   };
   function chipCfg(lane, key){
@@ -927,10 +927,11 @@ var SLM = (function(){
   function fragmentFor(e){
     var chip=chipCfg(e.lane, e.chipKey);
     var phrase = chip?chip.phrase:e.label.toLowerCase();
+    var clause = (chip&&chip.clause)?chip.clause:phrase;
     // severity adjective for symptoms
-    if(e.severity==='severe') phrase='severe '+phrase;
-    else if(e.severity==='moderate') phrase='moderate '+phrase;
-    return {cat:chip?chip.cat:'symptom', phrase:phrase, e:e, chip:chip};
+    if(e.severity==='severe'){ phrase='severe '+phrase; }
+    else if(e.severity==='moderate'){ phrase='moderate '+phrase; }
+    return {cat:chip?chip.cat:'symptom', phrase:phrase, clause:clause, e:e, chip:chip};
   }
 
   function medResponsePhrase(e){
@@ -960,9 +961,9 @@ var SLM = (function(){
       if(anyWorse && !isOpening) txt=joinList(phrases)+' worsened';
       clauses.push(txt);
     }
-    // intake/output (self-contained phrases)
+    // intake/output (self-contained clauses)
     if(byCat.intake.length){
-      var ip=byCat.intake.map(function(f){ return f.phrase; });
+      var ip=byCat.intake.map(function(f){ return f.clause; });
       clauses.push(joinList(ip));
     }
     // obs
@@ -975,7 +976,6 @@ var SLM = (function(){
     }
     // meds
     if(byCat.med.length){
-      var mp=byCat.med.map(function(f){ return f.phrase+medResponsePhrase(f.e); });
       var mverb=byCat.med.length>1?'were given':'was given';
       clauses.push(joinList(byCat.med.map(function(f){ return f.phrase; }))+' '+mverb + medRespSuffix(byCat.med));
     }
@@ -989,7 +989,10 @@ var SLM = (function(){
     }
     // injury
     if(byCat.injury.length){
-      var jp=byCat.injury.map(function(f){ return f.phrase; });
+      var jp=byCat.injury.map(function(f){
+        if(f.e.chipKey==='mechanism' && f.e.details.mech) return 'the injury occurred ('+f.e.details.mech+')';
+        return f.clause;
+      });
       clauses.push(joinList(jp));
     }
     return clauses.join('; ');
@@ -1070,13 +1073,10 @@ var SLM = (function(){
     var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
     var todayEscalation=todayEvs.filter(function(e){ return e.isRedFlag || e.trend==='worsening'; });
     if(todayEscalation.length){
-      var esc2=todayEscalation.map(function(e){ return fragmentFor(e).phrase; });
-      var trg='This prompted presentation to ED';
-      // add "despite treatment" if today meds with no effect
-      var noEffMeds=todayEvs.filter(function(e){ return chipCfg(e.lane,e.chipKey) && chipCfg(e.lane,e.chipKey).cat==='med' && e.details.response==='no effect'; });
+      // The med response is already narrated within the today bucket clause,
+      // so simply flag the escalation as the reason for presentation.
       var lastSentence=sentences[sentences.length-1];
-      // integrate into last sentence for natural flow
-      sentences[sentences.length-1]=lastSentence.replace(/\.$/, '') + (noEffMeds.length?(' despite '+joinList(noEffMeds.map(function(e){return fragmentFor(e).phrase;}))):'') + ', prompting presentation to ED.';
+      sentences[sentences.length-1]=lastSentence.replace(/\.$/, '') + ', prompting presentation to ED.';
     } else if(complaint){
       sentences.push('The reason for presentation today was '+complaint+'.');
     }
@@ -1102,20 +1102,27 @@ var SLM = (function(){
       if(c && c.cat==='symptom'){ var p=c.phrase; if(!seen[p]){ seen[p]=1; symPhrases.push(p); } }
     });
     var intakePhrases=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='intake'){ if(intakePhrases.indexOf(c.phrase)===-1) intakePhrases.push(c.phrase); } });
+    var injuryPhrases=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='injury'){ if(injuryPhrases.indexOf(c.phrase)===-1) injuryPhrases.push(c.phrase); } });
     var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
     var todayFeatures=todayEvs.filter(function(e){ return e.isRedFlag||e.trend==='worsening'; }).map(function(e){ return fragmentFor(e).phrase; });
-    var meds=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='med'){ if(meds.indexOf(c.phrase)===-1) meds.push(c.phrase); } });
+    // Only meds that did not fully work belong in a "despite" clause.
+    var meds=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='med' && e.details.response!=='sustained improvement'){ if(meds.indexOf(c.phrase)===-1) meds.push(c.phrase); } });
 
-    var parts=[];
-    var lead=(span?span+'-day':'')+' history';
-    var featureList=symPhrases.concat(intakePhrases).slice(0,4);
-    var s=(age?age+' with ':'')+lead;
-    if(featureList.length) s+=' of '+joinList(featureList);
-    if(todayFeatures.length) s+=', with '+joinList(todayFeatures)+' today';
-    if(meds.length) s+=' despite '+joinList(meds)+' at home';
+    // Avoid repeating today's escalation features in the general feature list.
+    var feats=symPhrases.concat(intakePhrases).concat(injuryPhrases).filter(function(p){ return todayFeatures.indexOf(p)===-1; }).slice(0,4);
+    var s;
+    if(span && span>=2){
+      s=(age?age+' with ':'')+span+'-day history';
+      if(feats.length) s+=' of '+joinList(feats);
+      if(todayFeatures.length) s+=', with '+joinList(todayFeatures)+' today';
+    } else {
+      s=(age?age+' ':'')+'presenting today';
+      var todayOrFeats = todayFeatures.length?todayFeatures:feats;
+      if(todayOrFeats.length) s+=' with '+joinList(todayOrFeats);
+    }
+    if(meds.length) s+=' despite '+joinList(meds);
     s+='.';
-    parts.push(cap(s));
-    return parts.join(' ');
+    return cap(s);
   }
 
   function generateTrigger(){
@@ -1319,7 +1326,7 @@ var SLM = (function(){
   /* ---- Sample scenarios (validation) ------------------------------------- */
   var SCENARIOS = {
     bronchiolitis:{
-      age:'8', unit:'mo', complaint:'increased work of breathing', lastNormal:'2 days ago', mode:'standard',
+      age:'8', unit:'mo', complaint:'increased work of breathing', lastNormal:'yesterday morning', mode:'standard',
       events:[
         {lane:'symptoms',chipKey:'coryza',dayOffset:-1,period:'morning',eventType:'duration'},
         {lane:'symptoms',chipKey:'cough',dayOffset:-1,period:'evening',eventType:'duration'},
@@ -1345,8 +1352,7 @@ var SLM = (function(){
       age:'10', unit:'yr', complaint:'head injury with vomiting', lastNormal:'today', mode:'trauma',
       events:[
         {lane:'injury',chipKey:'mechanism',dayOffset:0,period:'morning',details:{mech:'fall from ~1.5m off a wall',immediate:'cried immediately'}},
-        {lane:'injury',chipKey:'loc',dayOffset:0,period:'morning',isRedFlag:true,details:{locDur:'no LOC'}},
-        {lane:'injury',chipKey:'postvomit',dayOffset:0,period:'afternoon',details:{episodes:'2'}},
+        {lane:'injury',chipKey:'postvomit',dayOffset:0,period:'afternoon',isRedFlag:true,details:{episodes:'2'}},
         {lane:'function',chipKey:'drowsy',dayOffset:0,period:'afternoon',eventType:'duration',trend:'worsening',isRedFlag:true},
         {lane:'injury',chipKey:'traumaanalgesia',dayOffset:0,period:'afternoon',details:{response:'improved briefly'}}
       ]
