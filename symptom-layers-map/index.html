@@ -189,7 +189,8 @@ html.theme-light{
 .editor-ft .ef-save:hover{background:var(--accent2);}
 .editor-ft .ef-min{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:0.76rem;font-weight:600;color:var(--muted);cursor:pointer;min-height:38px;}
 .editor-ft .ef-min:hover{border-color:var(--accent);color:var(--accent);}
-.editor-ft .ef-min.danger:hover{border-color:var(--danger);color:var(--danger);}
+.ed-field input[type=date]{color-scheme:light dark;}
+.ed-field .date-hint{font-size:0.68rem;color:var(--accent2);margin-top:3px;line-height:1.3;}
 
 /* Toast ------------------------------------------------------------------- */
 .slm-toast{position:fixed;bottom:calc(18px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:9px 16px;font-size:0.82rem;font-weight:600;box-shadow:var(--shadow-md);z-index:var(--z-toast);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
@@ -345,15 +346,75 @@ html.theme-light{
    ========================================================================== */
 var SLM = (function(){
 
-  /* ---- Time model -------------------------------------------------------- */
-  // dayOffset: -3,-2,-1(yesterday),0(today), or 'baseline'
-  var DAYS = [
-    {off:'baseline', short:'Baseline', sub:'last well'},
-    {off:-3, short:'3 days ago', sub:''},
-    {off:-2, short:'2 days ago', sub:''},
-    {off:-1, short:'Yesterday', sub:''},
-    {off:0,  short:'Today', sub:''}
-  ];
+  /* ---- Date / time model ------------------------------------------------- */
+  // Events store ISO dates (YYYY-MM-DD). dayOffset is derived at save/render time
+  // relative to today so prose still reads "yesterday", "two days ago", etc.
+  function todayDate(){
+    var n=new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  }
+  function isoFromDate(d){
+    var y=d.getFullYear(), m=d.getMonth()+1, day=d.getDate();
+    return y+'-'+('0'+m).slice(-2)+'-'+('0'+day).slice(-2);
+  }
+  function todayISO(){ return isoFromDate(todayDate()); }
+  function parseISO(iso){
+    if(!iso) return null;
+    var p=String(iso).split('-').map(Number);
+    if(p.length<3||!p[0]) return null;
+    return new Date(p[0], p[1]-1, p[2]);
+  }
+  function dateToOffset(iso){
+    var d=parseISO(iso); if(!d) return 0;
+    return Math.round((d.getTime()-todayDate().getTime())/86400000);
+  }
+  function offsetToISO(off){
+    var d=todayDate(); d.setDate(d.getDate()+off);
+    return isoFromDate(d);
+  }
+  function resolveDayOffset(ev){
+    if(ev.isBaseline || ev.dayOffset==='baseline') return 'baseline';
+    if(ev.startDate) return dateToOffset(ev.startDate);
+    if(typeof ev.dayOffset==='number') return ev.dayOffset;
+    return 0;
+  }
+  function resolveEndDayOffset(ev){
+    if(ev.endDate) return dateToOffset(ev.endDate);
+    if(typeof ev.endDayOffset==='number') return ev.endDayOffset;
+    return resolveDayOffset(ev);
+  }
+  function syncEventTiming(ev){
+    if(ev.isBaseline){ ev.dayOffset='baseline'; ev.startDate=null; }
+    else if(ev.startDate){ ev.dayOffset=dateToOffset(ev.startDate); ev.isBaseline=false; }
+    else if(typeof ev.dayOffset==='number'){ ev.startDate=offsetToISO(ev.dayOffset); ev.isBaseline=false; }
+    if(ev.endDate) ev.endDayOffset=dateToOffset(ev.endDate);
+    else if(typeof ev.endDayOffset!=='number') ev.endDayOffset=resolveDayOffset(ev);
+  }
+  function ensureEventDates(ev){
+    if(!ev.isBaseline && !ev.startDate && typeof ev.dayOffset==='number') ev.startDate=offsetToISO(ev.dayOffset);
+    if(ev.eventType==='duration' && !ev.endDate && typeof ev.endDayOffset==='number') ev.endDate=offsetToISO(ev.endDayOffset);
+    syncEventTiming(ev);
+    return ev;
+  }
+  // Timeline column headers: Today, Yesterday, then "N days" (not "N days ago").
+  function timelineDayLabel(off){
+    if(off==='baseline') return {short:'Baseline', sub:'last well'};
+    if(off===0) return {short:'Today', sub:''};
+    if(off===-1) return {short:'Yesterday', sub:''};
+    if(off<-1) return {short:(Math.abs(off)+' days'), sub:''};
+    return {short:(off+' days ahead'), sub:''};
+  }
+  function relativeDateHint(iso){
+    if(!iso) return '';
+    var off=dateToOffset(iso);
+    if(off===0) return 'Today';
+    if(off===-1) return 'Yesterday';
+    if(off===-2) return '2 days ago';
+    if(off===-3) return '3 days ago';
+    if(off<-3) return Math.abs(off)+' days ago';
+    if(off>0) return off+' days ahead';
+    return '';
+  }
   var PERIODS = [
     {key:'unspecified', label:'Unspecified', rank:0, tag:''},
     {key:'morning',     label:'Morning',     rank:1, tag:'am'},
@@ -366,8 +427,9 @@ var SLM = (function(){
   function periodLabel(k){ for(var i=0;i<PERIODS.length;i++) if(PERIODS[i].key===k) return PERIODS[i].label; return ''; }
 
   function sortKey(ev){
-    if(ev.dayOffset==='baseline') return -1000;
-    return ev.dayOffset*10 + periodRank(ev.period);
+    var off=resolveDayOffset(ev);
+    if(off==='baseline') return -1000;
+    return off*10 + periodRank(ev.period);
   }
 
   // Natural language time phrase for prose.
@@ -637,6 +699,7 @@ var SLM = (function(){
     var chip=chipCfg(laneKey, chipKey);
     var d={
       id:null, lane:laneKey, chipKey:chipKey, label:chip.label,
+      startDate:todayISO(), endDate:null, isBaseline:false,
       dayOffset:0, period:'unspecified', endDayOffset:0, endPeriod:'unspecified',
       eventType:chip.type||'point', precision:'approx',
       severity:'', trend:'', isRedFlag:!!chip.redFlagDefault, includeInOutput:true, resolved:false,
@@ -649,6 +712,7 @@ var SLM = (function(){
       var found=null; for(var i=0;i<state.events.length;i++) if(state.events[i].id===existingId){ found=state.events[i]; break; }
       if(!found) return;
       state.draft=JSON.parse(JSON.stringify(found));
+      ensureEventDates(state.draft);
       state.editingId=existingId;
     } else {
       state.draft=blankDraft(laneKey, chipKey);
@@ -682,29 +746,23 @@ var SLM = (function(){
     var b=el('editorBody'); b.innerHTML='';
     var html='';
 
-    // Onset day + period
+    // Onset date + period
+    var startVal = d.isBaseline ? todayISO() : (d.startDate || offsetToISO(resolveDayOffset(d)));
+    var endVal = d.endDate || startVal;
+    html+='<div class="ed-field"><label class="ed-check'+(d.isBaseline?' on':'')+'" id="baselineCheck"><input type="checkbox" id="fBaseline"'+(d.isBaseline?' checked':'')+'> Baseline / last completely well</label></div>';
+    html+='<div id="dateFieldsWrap" style="display:'+(d.isBaseline?'none':'block')+';">';
     html+='<div class="ed-two">';
-    html+='<div class="ed-field"><label>Onset day</label><select id="fDay">';
-    DAYS.forEach(function(dy){
-      var val=(dy.off==='baseline')?'baseline':String(dy.off);
-      html+='<option value="'+val+'"'+((''+d.dayOffset)===val?' selected':'')+'>'+esc(dy.short)+'</option>';
-    });
-    html+='</select></div>';
+    html+='<div class="ed-field"><label>Onset date</label><input type="date" id="fStartDate" value="'+esc(startVal)+'"><div class="date-hint" id="startDateHint">'+esc(relativeDateHint(startVal))+'</div></div>';
     html+='<div class="ed-field"><label>Time of day</label><select id="fPeriod">';
     PERIODS.forEach(function(p){ html+='<option value="'+p.key+'"'+(p.key===d.period?' selected':'')+'>'+esc(p.label)+'</option>'; });
     html+='</select></div>';
-    html+='</div>';
+    html+='</div></div>';
 
     // Event type toggle
     html+='<div class="ed-field"><label>Event type</label>'+segHTML({key:'eventType',opts:[{v:'point',l:'Point event'},{v:'duration',l:'Ongoing / duration'}]}, d.eventType)+'</div>';
     // Duration end (shown if duration)
     html+='<div id="durWrap" style="display:'+(d.eventType==='duration'?'block':'none')+';"><div class="ed-two">';
-    html+='<div class="ed-field"><label>Until day</label><select id="fEndDay">';
-    DAYS.forEach(function(dy){
-      var val=(dy.off==='baseline')?'baseline':String(dy.off);
-      html+='<option value="'+val+'"'+((''+d.endDayOffset)===val?' selected':'')+'>'+esc(dy.short)+'</option>';
-    });
-    html+='</select></div>';
+    html+='<div class="ed-field"><label>Until date</label><input type="date" id="fEndDate" value="'+esc(endVal)+'"><div class="date-hint" id="endDateHint">'+esc(relativeDateHint(endVal))+'</div></div>';
     html+='<div class="ed-field"><label>Until time</label><select id="fEndPeriod">';
     PERIODS.forEach(function(p){ html+='<option value="'+p.key+'"'+(p.key===d.endPeriod?' selected':'')+'>'+esc(p.label)+'</option>'; });
     html+='</select></div></div><p class="hint" style="margin:-4px 0 11px;">Leave as onset for &ldquo;still ongoing&rdquo;.</p></div>';
@@ -780,13 +838,41 @@ var SLM = (function(){
     // red flag / include checks
     el('fRedFlag').onchange=function(){ state.draft.isRedFlag=this.checked; el('rfCheck').classList.toggle('on',this.checked); };
     el('fInclude').onchange=function(){ state.draft.includeInOutput=this.checked; el('incCheck').classList.toggle('on',this.checked); };
+    // baseline toggle
+    var fBaseline=el('fBaseline');
+    if(fBaseline){
+      fBaseline.onchange=function(){
+        state.draft.isBaseline=this.checked;
+        el('baselineCheck').classList.toggle('on',this.checked);
+        el('dateFieldsWrap').style.display=this.checked?'none':'block';
+      };
+    }
+    // live relative hints on date change
+    function bindDateHint(inputId, hintId){
+      var inp=el(inputId), hint=el(hintId);
+      if(!inp||!hint) return;
+      inp.onchange=function(){ hint.textContent=relativeDateHint(inp.value); };
+    }
+    bindDateHint('fStartDate','startDateHint');
+    bindDateHint('fEndDate','endDateHint');
   }
 
   function collectEditor(){
     var d=state.draft;
-    var dv=el('fDay').value; d.dayOffset = dv==='baseline'?'baseline':parseInt(dv,10);
+    d.isBaseline=!!(el('fBaseline') && el('fBaseline').checked);
+    if(d.isBaseline){
+      d.startDate=null; d.dayOffset='baseline';
+    } else {
+      d.startDate=el('fStartDate').value;
+      d.dayOffset=dateToOffset(d.startDate);
+    }
     d.period=el('fPeriod').value;
-    if(el('fEndDay')){ var ev=el('fEndDay').value; d.endDayOffset = ev==='baseline'?'baseline':parseInt(ev,10); d.endPeriod=el('fEndPeriod').value; }
+    if(el('fEndDate')){
+      d.endDate=el('fEndDate').value || d.startDate;
+      d.endDayOffset=d.endDate?dateToOffset(d.endDate):resolveDayOffset(d);
+      d.endPeriod=el('fEndPeriod').value;
+    }
+    syncEventTiming(d);
     // details
     d.details={};
     var dets=el('editorBody').querySelectorAll('[data-detail]');
@@ -839,15 +925,15 @@ var SLM = (function(){
     });
   }
   function usedDayOffsets(){
-    var set={}; state.events.forEach(function(e){ set[e.dayOffset]=true; });
-    // Always include yesterday + today.
+    var set={};
+    state.events.forEach(function(e){ set[resolveDayOffset(e)]=true; });
     set[-1]=true; set[0]=true;
     var list=[];
     if(set['baseline']) list.push('baseline');
-    [-3,-2,-1,0].forEach(function(o){ if(set[o]) list.push(o); });
+    Object.keys(set).filter(function(k){ return k!=='baseline'; }).map(Number).sort(function(a,b){ return a-b; })
+      .forEach(function(o){ list.push(o); });
     return list;
   }
-  function dayDesc(off){ for(var i=0;i<DAYS.length;i++) if((''+DAYS[i].off)===(''+off)) return DAYS[i]; return null; }
 
   function renderTimeline(){
     var evs=filteredEvents();
@@ -876,7 +962,7 @@ var SLM = (function(){
     // header row
     var corner=document.createElement('div'); corner.className='tl-corner'; grid.appendChild(corner);
     days.forEach(function(off){
-      var dd=dayDesc(off);
+      var dd=timelineDayLabel(off);
       var h=document.createElement('div'); h.className='tl-colhd'+(off===0?' today':'');
       h.innerHTML='<div class="cd-day">'+esc(dd.short)+'</div>'+(dd.sub?'<div class="cd-sub">'+esc(dd.sub)+'</div>':'');
       grid.appendChild(h);
@@ -898,7 +984,7 @@ var SLM = (function(){
 
       days.forEach(function(off){
         var cell=document.createElement('div'); cell.className='tl-cell'+(off===0?' today':'');
-        var cellEvents=evs.filter(function(e){ return e.lane===lane.key && (''+e.dayOffset)===(''+off); });
+        var cellEvents=evs.filter(function(e){ return e.lane===lane.key && (''+resolveDayOffset(e))===(''+off); });
         cellEvents.sort(function(a,b){ return periodRank(a.period)-periodRank(b.period); });
         cellEvents.forEach(function(e){ cell.appendChild(eventPill(e, lane)); });
         grid.appendChild(cell);
@@ -1015,8 +1101,9 @@ var SLM = (function(){
     // Returns ordered array of {dayOffset, period, items:[fragment]}
     var buckets=[]; var map={};
     evs.forEach(function(e){
-      var key=e.dayOffset+'|'+e.period;
-      if(!map[key]){ map[key]={dayOffset:e.dayOffset, period:e.period, items:[], key:key, sk:sortKey(e)}; map[key]._added=true; buckets.push(map[key]); }
+      var off=resolveDayOffset(e);
+      var key=off+'|'+e.period;
+      if(!map[key]){ map[key]={dayOffset:off, period:e.period, items:[], key:key, sk:sortKey(e)}; buckets.push(map[key]); }
       map[key].items.push(fragmentFor(e));
     });
     buckets.sort(function(a,b){ return a.sk-b.sk; });
@@ -1072,7 +1159,7 @@ var SLM = (function(){
 
     // Closing turning point / attendance trigger
     var complaint=el('patComplaint').value.trim();
-    var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
+    var todayEvs=evs.filter(function(e){ return resolveDayOffset(e)===0; });
     var todayEscalation=todayEvs.filter(function(e){ return e.isRedFlag || e.trend==='worsening'; });
     if(todayEscalation.length){
       // The med response is already narrated within the today bucket clause,
@@ -1086,9 +1173,9 @@ var SLM = (function(){
   }
 
   function illnessSpan(){
-    var evs=outputEvents().filter(function(e){ return e.dayOffset!=='baseline'; });
+    var evs=outputEvents().filter(function(e){ return resolveDayOffset(e)!=='baseline'; });
     if(!evs.length) return null;
-    var first=evs[0].dayOffset;
+    var first=resolveDayOffset(evs[0]);
     return (0-first)+1; // yesterday->2, 2 days ago ->3
   }
 
@@ -1105,7 +1192,7 @@ var SLM = (function(){
     });
     var intakePhrases=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='intake'){ if(intakePhrases.indexOf(c.phrase)===-1) intakePhrases.push(c.phrase); } });
     var injuryPhrases=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='injury'){ if(injuryPhrases.indexOf(c.phrase)===-1) injuryPhrases.push(c.phrase); } });
-    var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
+    var todayEvs=evs.filter(function(e){ return resolveDayOffset(e)===0; });
     var todayFeatures=todayEvs.filter(function(e){ return e.isRedFlag||e.trend==='worsening'; }).map(function(e){ return fragmentFor(e).phrase; });
     // Only meds that did not fully work belong in a "despite" clause.
     var meds=[]; evs.forEach(function(e){ var c=chipCfg(e.lane,e.chipKey); if(c&&c.cat==='med' && e.details.response!=='sustained improvement'){ if(meds.indexOf(c.phrase)===-1) meds.push(c.phrase); } });
@@ -1130,13 +1217,13 @@ var SLM = (function(){
   function generateTrigger(){
     var evs=outputEvents();
     if(evs.length===0) return '';
-    var todayEvs=evs.filter(function(e){ return e.dayOffset===0; });
+    var todayEvs=evs.filter(function(e){ return resolveDayOffset(e)===0; });
     var escal=todayEvs.filter(function(e){ return e.isRedFlag||e.trend==='worsening'; });
     var complaint=el('patComplaint').value.trim();
     if(escal.length){
       var phrases=escal.map(function(e){ return fragmentFor(e).phrase; });
       // contrast with earlier stable features (e.g. fever alone)
-      var earlier=evs.filter(function(e){ return e.dayOffset!==0 && e.dayOffset!=='baseline'; })
+      var earlier=evs.filter(function(e){ return resolveDayOffset(e)!==0 && resolveDayOffset(e)!=='baseline'; })
         .map(function(e){ var c=chipCfg(e.lane,e.chipKey); return c?c.phrase:e.label.toLowerCase(); });
       var uniqEarlier=[]; earlier.forEach(function(p){ if(uniqEarlier.indexOf(p)===-1) uniqEarlier.push(p); });
       var s='Escalation today was driven by '+joinList(phrases);
@@ -1156,7 +1243,7 @@ var SLM = (function(){
     var evs=outputEvents();
     var out=[];
     if(evs.length===0) return out;
-    var nonBaseline=evs.filter(function(e){ return e.dayOffset!=='baseline'; });
+    var nonBaseline=evs.filter(function(e){ return resolveDayOffset(e)!=='baseline'; });
 
     // Last known normal
     var lastNormal=el('patLastNormal').value.trim();
@@ -1165,7 +1252,7 @@ var SLM = (function(){
     // First abnormal event
     if(nonBaseline.length){
       var f=nonBaseline[0];
-      out.push({ic:'\ud83d\udd52',t:'First abnormal event',v:cap(fragmentFor(f).phrase)+' \u2014 '+timePhrase(f.dayOffset,f.period,false)});
+      out.push({ic:'\ud83d\udd52',t:'First abnormal event',v:cap(fragmentFor(f).phrase)+' \u2014 '+timePhrase(resolveDayOffset(f),f.period,false)});
     }
 
     // Duration of illness
@@ -1175,7 +1262,7 @@ var SLM = (function(){
     // Worsening point
     var worse=null;
     for(var i=0;i<evs.length;i++){ if(evs[i].trend==='worsening'||evs[i].isRedFlag){ worse=evs[i]; break; } }
-    if(worse) out.push({ic:'\ud83d\udcc8',t:'Turning point',v:cap(fragmentFor(worse).phrase)+' '+(worse.trend==='worsening'?'worsening':'flagged')+' '+timePhrase(worse.dayOffset,worse.period,false), cls:'warn'});
+    if(worse) out.push({ic:'\ud83d\udcc8',t:'Turning point',v:cap(fragmentFor(worse).phrase)+' '+(worse.trend==='worsening'?'worsening':'flagged')+' '+timePhrase(resolveDayOffset(worse),worse.period,false), cls:'warn'});
 
     // Response to treatment
     var resp=evs.filter(function(e){ return e.details && e.details.response && e.details.response!=='unknown'; });
@@ -1196,7 +1283,7 @@ var SLM = (function(){
     // Delay to presentation (injury / contact based)
     var injuryEv=evs.filter(function(e){ return e.lane==='injury' && e.chipKey==='mechanism'; })[0];
     if(injuryEv){
-      out.push({ic:'\u23f1\ufe0f',t:'Delay to presentation',v:'Injury '+timePhrase(injuryEv.dayOffset,injuryEv.period,false)+'; presenting today.'});
+      out.push({ic:'\u23f1\ufe0f',t:'Delay to presentation',v:'Injury '+timePhrase(resolveDayOffset(injuryEv),injuryEv.period,false)+'; presenting today.'});
     }
 
     // Prior contact / re-attendance
@@ -1378,9 +1465,14 @@ var SLM = (function(){
       var chip=chipCfg(spec.lane, spec.chipKey);
       var d=blankDraft(spec.lane, spec.chipKey);
       d.id=idSeq++;
-      d.dayOffset=spec.dayOffset; d.period=spec.period;
+      if(spec.dayOffset==='baseline'){ d.isBaseline=true; d.startDate=null; }
+      else {
+        d.dayOffset=spec.dayOffset; d.startDate=offsetToISO(spec.dayOffset);
+      }
+      d.period=spec.period;
       d.eventType=spec.eventType||chip.type||'point';
-      d.endDayOffset=spec.dayOffset; d.endPeriod=spec.period;
+      d.endDayOffset=spec.dayOffset; d.endDate=d.startDate; d.endPeriod=spec.period;
+      syncEventTiming(d);
       if(spec.severity) d.severity=spec.severity;
       if(spec.trend) d.trend=spec.trend;
       if(spec.isRedFlag) d.isRedFlag=true;
