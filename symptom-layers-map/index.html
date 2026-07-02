@@ -792,13 +792,14 @@ var SLM = (function(){
     var norm=label.toLowerCase();
     for(var i=0;i<state.customChips.length;i++){
       if(state.customChips[i].lane===lane && state.customChips[i].label.toLowerCase()===norm){
-        toast('Already in palette');
-        input.focus();
+        input.value='';
+        renderPalette();
+        openEditor(lane, state.customChips[i].key, null);
         return;
       }
     }
     var phrase=proseFromLabel(label);
-    state.customChips.push({
+    var newChip={
       key:'custom-'+(customSeq++),
       label:label,
       lane:lane,
@@ -807,12 +808,11 @@ var SLM = (function(){
       cat:laneToCat(lane),
       type:'duration',
       custom:true
-    });
+    };
+    state.customChips.push(newChip);
     input.value='';
     renderPalette();
-    toast('Added to palette');
-    var refocus=el('customEventInput');
-    if(refocus) refocus.focus();
+    openEditor(lane, newChip.key, null);
   }
 
   function renderLaneFilters(){
