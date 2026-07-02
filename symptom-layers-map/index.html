@@ -87,6 +87,18 @@ html.theme-light{
 .lane-group.collapsed .lane-caret{transform:rotate(-90deg);}
 .lane-group.collapsed .chip-row{display:none;}
 .chip-row{display:flex;flex-wrap:wrap;gap:5px;}
+.custom-add{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.custom-add label{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;}
+.custom-add-row{display:flex;gap:5px;align-items:stretch;}
+.custom-add-row input[type=text]{flex:1;min-width:0;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;color:var(--text);font-size:0.78rem;min-height:34px;font-family:inherit;}
+.custom-add-row input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--focus-ring);}
+.custom-add-row select{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:0 8px;color:var(--text);font-size:0.72rem;min-height:34px;max-width:7.5rem;}
+.custom-add-row select:focus{outline:none;border-color:var(--accent);}
+.custom-add-btn{background:var(--accent);color:var(--accent-on);border:none;border-radius:8px;padding:0 11px;font-size:0.74rem;font-weight:700;cursor:pointer;min-height:34px;white-space:nowrap;}
+.custom-add-btn:hover{background:var(--accent2);}
+.custom-chips{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.custom-chips-hd{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:600;margin-bottom:6px;}
+.palette-chip.custom-chip{border-style:dashed;}
 .palette-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:16px;font-size:0.75rem;color:var(--text-soft);cursor:pointer;transition:border-color .15s,color .15s,background .15s;line-height:1.2;}
 .palette-chip:hover{border-color:var(--chip-accent,var(--accent));color:var(--text);background:color-mix(in srgb,var(--chip-accent,var(--accent)) 12%,transparent);}
 .palette-chip .cd{width:7px;height:7px;border-radius:50%;background:var(--chip-accent,var(--accent));flex:0 0 auto;}
@@ -575,7 +587,25 @@ var SLM = (function(){
     ]
   };
   function chipCfg(lane, key){
-    var arr = CHIPS[lane]||[]; for(var i=0;i<arr.length;i++) if(arr[i].key===key) return arr[i]; return null;
+    var arr = CHIPS[lane]||[];
+    for(var i=0;i<arr.length;i++) if(arr[i].key===key) return arr[i];
+    for(var j=0;j<state.customChips.length;j++) if(state.customChips[j].key===key) return state.customChips[j];
+    return null;
+  }
+  function laneToCat(lane){
+    if(lane==='intake') return 'intake';
+    if(lane==='meds') return 'med';
+    if(lane==='contacts') return 'contact';
+    if(lane==='obs') return 'obs';
+    if(lane==='injury') return 'injury';
+    return 'symptom';
+  }
+  function proseFromLabel(label){
+    var t=String(label||'').trim().toLowerCase();
+    if(!t) return '';
+    if(/^(a|an|the)\s/.test(t)) return t;
+    if(/^(increased|reduced|fewer|no|poor|loss|refused|maintained|post-|pre-)/.test(t)) return t;
+    return t;
   }
   // Rapid mode common chips (subset).
   var RAPID_KEYS = {
@@ -597,9 +627,11 @@ var SLM = (function(){
     redFlagOnly:false,
     draft:null,        // editor working object
     editingId:null,
-    dismissedPrompts:{}
+    dismissedPrompts:{},
+    customChips:[]       // session-only custom palette entries
   };
   var idSeq = 1;
+  var customSeq = 1;
 
   /* ---- Helpers ----------------------------------------------------------- */
   function esc(s){ var d=document.createElement('div'); d.textContent=(s==null?'':s); return d.innerHTML; }
@@ -651,6 +683,43 @@ var SLM = (function(){
   }
   function renderPalette(){
     var host=el('palette'); host.innerHTML='';
+
+    // Custom event adder (session-only shortcuts)
+    var adder=document.createElement('div'); adder.className='custom-add';
+    adder.innerHTML='<label for="customEventInput">Add custom event</label>'+
+      '<div class="custom-add-row">'+
+      '<input type="text" id="customEventInput" placeholder="e.g. green vomit, ear pulling" autocomplete="off">'+
+      '<select id="customEventLane" aria-label="Lane for custom event"></select>'+
+      '<button type="button" class="custom-add-btn" id="customEventAddBtn">Add</button>'+
+      '</div>';
+    host.appendChild(adder);
+    var laneSel=el('customEventLane');
+    visibleLanes().forEach(function(lane){
+      var opt=document.createElement('option');
+      opt.value=lane.key; opt.textContent=lane.name.split(' / ')[0];
+      laneSel.appendChild(opt);
+    });
+    var customInput=el('customEventInput');
+    el('customEventAddBtn').onclick=addCustomChip;
+    customInput.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); addCustomChip(); } };
+
+    if(state.customChips.length){
+      var customWrap=document.createElement('div'); customWrap.className='custom-chips';
+      customWrap.innerHTML='<div class="custom-chips-hd">Your custom events</div>';
+      var customRow=document.createElement('div'); customRow.className='chip-row';
+      state.customChips.forEach(function(c){
+        var lane=laneCfg(c.lane);
+        var b=document.createElement('button');
+        b.type='button'; b.className='palette-chip custom-chip';
+        b.style.setProperty('--chip-accent', lane?lane.color:'var(--accent)');
+        b.innerHTML='<span class="cd"></span>'+esc(c.label);
+        b.onclick=function(){ openEditor(c.lane, c.key, null); };
+        customRow.appendChild(b);
+      });
+      customWrap.appendChild(customRow);
+      host.appendChild(customWrap);
+    }
+
     visibleLanes().forEach(function(lane){
       var chips=activeChips(lane.key);
       if(chips.length===0) return;
@@ -677,6 +746,39 @@ var SLM = (function(){
     });
   }
 
+  function addCustomChip(){
+    var input=el('customEventInput');
+    if(!input) return;
+    var label=String(input.value||'').trim();
+    if(!label){ toast('Enter an event name'); input.focus(); return; }
+    var lane=el('customEventLane') ? el('customEventLane').value : 'symptoms';
+    if(!laneCfg(lane)) lane='symptoms';
+    var norm=label.toLowerCase();
+    for(var i=0;i<state.customChips.length;i++){
+      if(state.customChips[i].lane===lane && state.customChips[i].label.toLowerCase()===norm){
+        toast('Already in palette');
+        input.focus();
+        return;
+      }
+    }
+    var phrase=proseFromLabel(label);
+    state.customChips.push({
+      key:'custom-'+(customSeq++),
+      label:label,
+      lane:lane,
+      phrase:phrase,
+      clause:phrase,
+      cat:laneToCat(lane),
+      type:'duration',
+      custom:true
+    });
+    input.value='';
+    renderPalette();
+    toast('Added to palette');
+    var refocus=el('customEventInput');
+    if(refocus) refocus.focus();
+  }
+
   function renderLaneFilters(){
     var host=el('laneFilters'); host.innerHTML='';
     visibleLanes().forEach(function(lane){
@@ -697,6 +799,7 @@ var SLM = (function(){
   /* ---- Editor ------------------------------------------------------------ */
   function blankDraft(laneKey, chipKey){
     var chip=chipCfg(laneKey, chipKey);
+    if(!chip) return null;
     var d={
       id:null, lane:laneKey, chipKey:chipKey, label:chip.label,
       startDate:todayISO(), endDate:null, isBaseline:false,
@@ -716,6 +819,7 @@ var SLM = (function(){
       state.editingId=existingId;
     } else {
       state.draft=blankDraft(laneKey, chipKey);
+      if(!state.draft){ toast('Could not open event'); return; }
       // Rapid mode: default to today; standard keeps today too but user picks.
       state.editingId=null;
     }
