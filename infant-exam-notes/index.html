@@ -868,6 +868,9 @@
       { key: 'drooling', label: 'Drooling', yes: 'Drooling', no: 'No drooling', normalYes: false },
       { key: 'trismus', label: 'Trismus', yes: 'Trismus present', no: 'No trismus', normalYes: false }
     ];
+    var HEENT_EARS_YN_ROWS = [
+      { key: 'mastoidSwelling', label: 'Mastoid swelling', yes: 'Mastoid swelling', no: 'No mastoid swelling', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' }
+    ];
     var HEENT_NECK_MENINGISM_YN_ROWS = [
       { key: 'neckMovement', label: 'Normal neck movements', yes: 'normal neck movements', no: 'Neck movements limited', normalYes: true },
       { key: 'appearsMeningitic', label: 'Does not appear meningitic', yes: 'does not appear meningitic', no: 'Appearance concerning for meningitis', normalYes: true },
@@ -957,6 +960,7 @@
     var YES_NO_TOGGLE_ROW_REGISTRY = {
       abdomen__peritonitic: ABDOMEN_PERITONITIC_YN_ROWS,
       heent__oral_yn: HEENT_ORAL_YN_ROWS,
+      heent__ears_yn: HEENT_EARS_YN_ROWS,
       heent__neck_meningism_yn: HEENT_NECK_MENINGISM_YN_ROWS,
       cardiovascular__findings: CARDIOVASCULAR_FINDINGS_YN_ROWS,
       respiratory__accessory: RESPIRATORY_ACCESSORY_YN_ROWS,
@@ -1750,6 +1754,7 @@
       'peripheral crt <2 seconds',
       'kernig s sign negative',
       'does not appear meningitic',
+      'no mastoid swelling',
       'barlow negative',
       'ortolani negative',
       'straight leg raise negative bilaterally',
@@ -1879,6 +1884,7 @@
 
     applyTagsToYnRows(ABDOMEN_PERITONITIC_YN_ROWS);
     applyTagsToYnRows(HEENT_ORAL_YN_ROWS);
+    applyTagsToYnRows(HEENT_EARS_YN_ROWS);
     applyTagsToYnRows(HEENT_NECK_MENINGISM_YN_ROWS);
     applyTagsToYnRows(CARDIOVASCULAR_FINDINGS_YN_ROWS);
     applyTagsToYnRows(RESPIRATORY_ACCESSORY_YN_ROWS);
@@ -3367,7 +3373,7 @@
       tmB.className = 'heent-subblock';
       var tmT = document.createElement('div');
       tmT.className = 'heent-subtitle';
-      tmT.textContent = 'Tympanic membranes';
+      tmT.textContent = 'Ears';
       tmB.appendChild(tmT);
       var nadRow = document.createElement('div');
       nadRow.className = 'pill-row';
@@ -3408,6 +3414,7 @@
       tmCols.appendChild(heentTmEarColumn('R', 'Right'));
       tmCols.appendChild(heentTmEarColumn('L', 'Left'));
       tmB.appendChild(tmCols);
+      appendYesNoToggleWrap(tmB, 'heent__ears_yn', HEENT_EARS_YN_ROWS, { id: 'heentEarsYnWrap' });
       card.appendChild(tmB);
 
       var eyeB = document.createElement('div');
@@ -3636,6 +3643,15 @@
         if (leftOnly.length) tmBits.push('Left TM ' + leftOnly.join(' and '));
         if (rightOnly.length) tmBits.push('Right TM ' + rightOnly.join(' and '));
         for (var tb = 0; tb < tmBits.length; tb++) heentMainParts.push(tmBits[tb]);
+      }
+
+      var earsPfx = 'heent__ears_yn';
+      for (var ei = 0; ei < HEENT_EARS_YN_ROWS.length; ei++) {
+        var earRow = HEENT_EARS_YN_ROWS[ei];
+        var earYesEl = document.getElementById(earsPfx + '__' + earRow.key + '__yes');
+        var earNoEl = document.getElementById(earsPfx + '__' + earRow.key + '__no');
+        if (earYesEl && earYesEl.checked) heentMainParts.push(makeTaggedFinding(earRow.yes, earRow.yesTag));
+        else if (earNoEl && earNoEl.checked) heentMainParts.push(makeTaggedFinding(earRow.no, earRow.noTag));
       }
 
       var eyeParts = [];
