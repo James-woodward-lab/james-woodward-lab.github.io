@@ -6006,7 +6006,7 @@
       };
       if (map[value]) return map[value];
       if (value === 'Normal') return title + ' normal';
-      if (/^Stage [IVX]+$/.test(value)) return title + ' ' + value.replace('Stage ', 'stage ');
+      if (/^Stage [IVX]+$/.test(value)) return title + ' ' + value.replace('Stage ', '');
       return value;
     }
 
