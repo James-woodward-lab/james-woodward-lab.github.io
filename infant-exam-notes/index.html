@@ -865,7 +865,7 @@
     var HEENT_ORAL_YN_ROWS = [
       { key: 'pharyngealEry', label: 'Pharyngeal erythema', yes: 'Pharynx erythematous', no: 'No pharyngeal erythema', normalYes: false },
       { key: 'uvulaMidline', label: 'Uvula midline', yes: 'Uvula midline', no: 'uvula deviated', normalYes: true },
-      { key: 'drooling', label: 'Drooling', yes: 'Drooling', no: 'No drooling', normalYes: false },
+      { key: 'drooling', label: 'Drooling', yes: 'Drooling', no: 'No drooling', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
       { key: 'trismus', label: 'Trismus', yes: 'Trismus present', no: 'No trismus', normalYes: false }
     ];
     var HEENT_NECK_MENINGISM_YN_ROWS = [
@@ -1750,6 +1750,7 @@
       'peripheral crt <2 seconds',
       'kernig s sign negative',
       'does not appear meningitic',
+      'no drooling',
       'barlow negative',
       'ortolani negative',
       'straight leg raise negative bilaterally',
@@ -2831,7 +2832,6 @@
       { radioName: 'skin__colour', value: 'No pallor' },
       { radioName: 'skin__rash', value: 'No rash' },
       { radioName: 'skin__bruising', value: 'No bruising' },
-      { radioName: 'skin__nappy', value: 'Nappy area intact' },
       { radioName: 'skin__perfusion', value: 'Warm peripheries' }
     ];
 
@@ -3576,8 +3576,8 @@
         var yr = HEENT_ORAL_YN_ROWS[yi];
         var yesEl = document.getElementById(ynPfx + '__' + yr.key + '__yes');
         var noEl = document.getElementById(ynPfx + '__' + yr.key + '__no');
-        if (yesEl && yesEl.checked) parts.push(yr.yes);
-        else if (noEl && noEl.checked) parts.push(yr.no);
+        if (yesEl && yesEl.checked) parts.push(makeTaggedFinding(yr.yes, yr.yesTag));
+        else if (noEl && noEl.checked) parts.push(makeTaggedFinding(yr.no, yr.noTag));
       }
       return parts;
     }
