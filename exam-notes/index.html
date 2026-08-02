@@ -1117,7 +1117,8 @@
           { type: 'radio', name: 'appearance', label: 'Appearance', options: [{ value: 'Well', tag: 'Normal finding' }, { value: 'Mildly unwell', tag: 'Normal finding' }, { value: 'Toxic/Septic', tag: 'urgent abnormal finding' }] },
           { type: 'radio', name: 'comfort', label: 'Comfort', options: [{ value: 'Comfortable', tag: 'Normal finding' }, { value: 'Mild pain', tag: 'abnormal finding' }, { value: 'Moderate pain', tag: 'urgent abnormal finding' }, { value: 'Severe pain', tag: 'urgent abnormal finding' }, 'In distress'] },
           { type: 'radio', name: 'interaction', label: 'Interaction', options: [
-            { value: 'Interacting with carer', ageBands: ['0-1', '1-4', '5-11'] },
+            { value: 'Interacting appropriately', tag: 'Normal finding', ageBands: ['0-1'], output: 'Interacting appropriately' },
+            { value: 'Interacting with carer', ageBands: ['1-4', '5-11'] },
             { value: 'Withdrawn', tag: 'abnormal finding', ageBands: ['0-1', '1-4', '5-11'] },
             { value: 'Inconsolable', ageBands: ['0-1', '1-4', '5-11'] },
             { value: 'Interacting appropriately', tag: 'Normal finding', ageBands: ['12+'], output: 'Interacting appropriately during visit, no confusion, coherent, and good communication' },
@@ -1133,7 +1134,13 @@
         groups: [
           { type: 'radio', name: 'heartMurmur', label: 'Heart sounds / murmur', options: ['HS I + II only', 'Murmur'] },
           { type: 'yesNoToggle', name: 'findings', label: 'Findings', rows: CARDIOVASCULAR_FINDINGS_YN_ROWS },
-          { type: 'radio', name: 'radialPulse', label: 'Radial pulse quality', options: ['Radial pulses normal', 'Radial pulses weak', 'Radial pulses thready', 'Radial pulses bounding'] }
+          { type: 'radio', name: 'radialPulse', label: 'Pulse quality', ageBands: ['0-1'], options: [
+            { value: 'Pulses normal', tag: 'Normal finding' },
+            { value: 'Pulses weak', tag: 'urgent abnormal finding' },
+            { value: 'pulses thready', tag: 'urgent abnormal finding' },
+            { value: 'Pulses bounding', tag: 'abnormal finding' }
+          ] },
+          { type: 'radio', name: 'radialPulse', label: 'Radial pulse quality', ageBands: ['1-4', '5-11', '12+'], options: ['Radial pulses normal', 'Radial pulses weak', 'Radial pulses thready', 'Radial pulses bounding'] }
         ],
         freeHint: 'Murmur grade/location/radiation/character'
       },
@@ -1835,6 +1842,8 @@
       'murmur',
       'radial pulses weak',
       'radial pulses thready',
+      'pulses weak',
+      'pulses thready',
       'severe work of breathing',
       'harsh stridor',
       'asymmetrical chest rise',
@@ -1920,6 +1929,8 @@
     var EXPLICIT_ABNORMAL_PATTERNS = [
       'raised jvp',
       'withdrawn and not interacting normally',
+      'signs of pain/tenderness on palpation',
+      'pulses bounding',
       'central crt 2 3 seconds',
       'peripheral crt 2 3 seconds',
       'radial pulses bounding',
@@ -1930,6 +1941,9 @@
     ];
     var EXPLICIT_NORMAL_PATTERNS = [
       'uncovered fully for examination',
+      'oral cavity nad, pharynx not visualised',
+      'oral cavity nad',
+      'pulses normal',
       'skin observed while fully clothed',
       'skin to arms and legs examined',
       'torso examined',
@@ -2434,7 +2448,7 @@
       label.classList.add('selected');
       var v = input.value;
       var n = input.name;
-      if (n === 'cardiovascular__radialPulse' && v !== 'Radial pulses normal') label.classList.add('abnormal');
+      if (n === 'cardiovascular__radialPulse' && v !== 'Radial pulses normal' && v !== 'Pulses normal') label.classList.add('abnormal');
       else if (n === 'abdomen__bowelSounds' && v === 'Bowel sounds present') label.classList.add('pill-normal');
       else if (n === 'abdomen__bowelSounds' && (v === 'Bowel sounds reduced' || v === 'Bowel sounds absent')) label.classList.add('abnormal');
       else if (n === 'respiratory__chestAppearance' && v === 'Good chest rise') label.classList.add('pill-normal');
@@ -2492,7 +2506,7 @@
         state: 'Alert',
         appearance: 'Well',
         comfort: 'Comfortable',
-        interaction: selectedAgeBand === '12+' ? 'Interacting appropriately' : 'Interacting with carer'
+        interaction: (selectedAgeBand === '0-1' || selectedAgeBand === '12+') ? 'Interacting appropriately' : 'Interacting with carer'
       };
     }
 
@@ -2643,7 +2657,8 @@
       var murmurEl = document.querySelector('input[name="cardiovascular__heartMurmur"]:checked');
       if (!murmurEl || murmurEl.value !== 'HS I + II only') return false;
       var radialEl = document.querySelector('input[name="cardiovascular__radialPulse"]:checked');
-      if (!radialEl || radialEl.value !== 'Radial pulses normal') return false;
+      var radialNadWant = selectedAgeBand === '0-1' ? 'Pulses normal' : 'Radial pulses normal';
+      if (!radialEl || radialEl.value !== radialNadWant) return false;
       var hmNo = document.getElementById(CVS_FINDINGS_PREFIX + '__hepatomegaly__no');
       var hmYes = document.getElementById(CVS_FINDINGS_PREFIX + '__hepatomegaly__yes');
       if (!hmNo || !hmNo.checked || (hmYes && hmYes.checked)) return false;
@@ -2669,7 +2684,7 @@
         var murmurLab = getCardiovascularPillLabel('cardiovascular__heartMurmur', murmurWant);
         if (murmurLab) handlePillClick(murmurLab, cev);
       }
-      var radWant = 'Radial pulses normal';
+      var radWant = selectedAgeBand === '0-1' ? 'Pulses normal' : 'Radial pulses normal';
       var radCur = document.querySelector('input[name="cardiovascular__radialPulse"]:checked');
       if (!radCur || radCur.value !== radWant) {
         var radLab = getCardiovascularPillLabel('cardiovascular__radialPulse', radWant);
@@ -3435,6 +3450,7 @@
       pr.className = 'pill-row';
       for (var i = 0; i < options.length; i++) {
         var opt = options[i];
+        if (!isVisibleForAge(opt, selectedAgeBand)) continue;
         var optVal = typeof opt === 'string' ? opt : opt.value;
         var optTag = typeof opt === 'string' ? resolveFindingTagLabel(optVal) : (opt.tag || resolveFindingTagLabel(optVal));
         var pl = document.createElement('label');
@@ -3445,6 +3461,7 @@
         inp.name = name;
         inp.value = optVal;
         inp.setAttribute('data-finding-tag', optTag);
+        if (opt && typeof opt === 'object' && opt.output) inp.setAttribute('data-output', opt.output);
         pl.appendChild(inp);
         pl.appendChild(document.createTextNode(optVal));
         pr.appendChild(pl);
@@ -3664,7 +3681,11 @@
       mouthT.textContent = 'Mouth/oropharynx';
       mouthB.appendChild(mouthT);
       mouthB.appendChild(heentPillRow('heent__lips', ['Lips normal', 'Lips dry']));
-      var oralVisRow = heentPillRow('heent__oral_cavity_vis', [{ value: 'Pharynx visualised', tag: 'Normal finding' }, 'Oral cavity not visualised']);
+      var oralVisRow = heentPillRow('heent__oral_cavity_vis', [
+        { value: 'Pharynx visualised', tag: 'Normal finding' },
+        { value: 'Oral cavity NAD', tag: 'Normal finding', ageBands: ['0-1'], output: 'Oral cavity NAD, pharynx not visualised' },
+        'Oral cavity not visualised'
+      ]);
       oralVisRow.style.marginTop = '8px';
       mouthB.appendChild(oralVisRow);
       var oralDetail = document.createElement('div');
@@ -3762,6 +3783,10 @@
       var oral = mBlock.querySelector('input[name="heent__oral_cavity_vis"]:checked');
       if (oral && oral.value === 'Oral cavity not visualised') {
         parts.push('Unable to visualise oral cavity');
+        return parts;
+      }
+      if (oral && oral.value === 'Oral cavity NAD') {
+        parts.push(oral.getAttribute('data-output') || 'Oral cavity NAD, pharynx not visualised');
         return parts;
       }
       if (!oral || oral.value !== 'Pharynx visualised') return parts;
@@ -5711,8 +5736,12 @@
           vals = [makeTaggedFinding(crtText, resolveFindingTagLabel(crtText))];
         }
         if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0].text === 'Tender') {
-          var tenderLoc = trimSentence(document.getElementById('abdomen__tender_location') ? document.getElementById('abdomen__tender_location').value : '');
-          if (tenderLoc) vals = [makeTaggedFinding('Tender ' + tenderLoc, resolveFindingTagLabel('Tender ' + tenderLoc))];
+          if (selectedAgeBand === '0-1') {
+            vals = [makeTaggedFinding('Signs of pain/tenderness on palpation', vals[0].tag || resolveFindingTagLabel('Signs of pain/tenderness on palpation'))];
+          } else {
+            var tenderLoc = trimSentence(document.getElementById('abdomen__tender_location') ? document.getElementById('abdomen__tender_location').value : '');
+            if (tenderLoc) vals = [makeTaggedFinding('Tender ' + tenderLoc, resolveFindingTagLabel('Tender ' + tenderLoc))];
+          }
         }
         if (section.key === 'abdomen' && group.name === 'tenderness' && vals.length > 0 && vals[0].text === 'Non-tender') {
           vals = [makeTaggedFinding('Non-tender', resolveFindingTagLabel('Non-tender'))];
