@@ -907,6 +907,133 @@
     }
     .age-banner-change:hover { border-color: var(--accent); }
     body.age-not-selected #outputPanel { display: none; }
+
+    /* ===== GENITAL EXAMINATION ===== */
+    .genital-panel-details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface2);
+      overflow: hidden;
+    }
+    .genital-panel-details > summary,
+    .genital-subdetails > summary {
+      cursor: pointer;
+      list-style: none;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .genital-panel-details > summary::-webkit-details-marker,
+    .genital-subdetails > summary::-webkit-details-marker { display: none; }
+    .genital-panel-details > summary::after,
+    .genital-subdetails > summary::after {
+      content: "\25B6";
+      color: var(--muted);
+      font-size: 0.65rem;
+      transition: transform 0.15s;
+    }
+    .genital-panel-details[open] > summary::after,
+    .genital-subdetails[open] > summary::after { transform: rotate(90deg); }
+    .genital-panel-body {
+      border-top: 1px solid var(--border);
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+    }
+    .genital-control-group { min-width: 0; }
+    .genital-control-group .group-label { margin-bottom: 4px; }
+    .genital-control-group .check-grid { grid-template-columns: 1fr; }
+    .genital-performed,
+    .genital-anatomy,
+    .genital-qualifiers,
+    .genital-deferred { display: none; }
+    .genital-performed.show,
+    .genital-anatomy.show,
+    .genital-qualifiers.show,
+    .genital-deferred.show { display: grid; gap: 10px; }
+    .genital-subdetails {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .genital-subdetails-body {
+      border-top: 1px solid var(--border);
+      padding: 8px;
+      display: grid;
+      gap: 10px;
+    }
+    .genital-warning,
+    .genital-urgent-prompt {
+      border: 1px solid color-mix(in srgb, var(--danger) 60%, var(--border));
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    .genital-urgent-prompt { display: none; font-weight: 600; }
+    .genital-urgent-prompt.show { display: block; }
+    .genital-inline-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .genital-inline-fields label {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+    .genital-inline-fields input,
+    .genital-inline-fields textarea,
+    .genital-deferred textarea {
+      width: 100%;
+      margin-top: 3px;
+      box-sizing: border-box;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface2);
+      color: var(--text);
+      padding: 7px 8px;
+      font: inherit;
+    }
+    .genital-inline-fields .span-full { grid-column: 1 / -1; }
+    .genital-bilateral-cols {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+    .genital-side-col {
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface2);
+      padding: 8px;
+      display: grid;
+      gap: 6px;
+    }
+    .genital-side-col-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .genital-side-col .yesno-toggle-wrap {
+      gap: 4px;
+    }
+    @media (max-width: 720px) {
+      .genital-bilateral-cols { grid-template-columns: 1fr; }
+      .genital-inline-fields { grid-template-columns: 1fr; }
+      .genital-inline-fields .span-full { grid-column: auto; }
+    }
+
   </style>
 </head>
 <body class="age-not-selected">
@@ -1169,7 +1296,8 @@
           { type: 'radio', name: 'guarding', label: 'Guarding', options: ['No guarding', 'Guarding present'] },
           { type: 'radio', name: 'bowelSounds', label: 'Bowel sounds', options: ['Bowel sounds present', 'Bowel sounds reduced', 'Bowel sounds absent'] },
           { type: 'yesNoToggle', name: 'peritonitic', label: 'Peritonitic', rows: ABDOMEN_PERITONITIC_YN_ROWS },
-          { type: 'checkbox', name: 'checks', label: 'Other findings', options: ['No organomegaly', 'No masses', { value: 'Umbilicus normal', ageBands: ['0-1'] }, 'No inguinal hernias'] }
+          { type: 'checkbox', name: 'checks', label: 'Other findings', options: ['No organomegaly', 'No masses', { value: 'Umbilicus normal', ageBands: ['0-1'] }, 'No inguinal hernias'] },
+          { type: 'genitalPanel', name: 'genitals', label: 'Genitals' }
         ],
         freeHint: 'Localise tenderness, describe hernia'
       },
@@ -4286,6 +4414,9 @@
         } else if (section.key === 'abdomen' && group.type === 'yesNoToggle') {
           row.classList.add('span-full');
           appendYesNoToggleWrap(row, 'abdomen__peritonitic', group.rows, { id: 'abdomenYesNoToggleWrap', spanFull: true });
+        } else if (section.key === 'abdomen' && group.type === 'genitalPanel') {
+          row.classList.add('span-full');
+          buildGenitalPanel(row);
         } else if (section.key === 'cardiovascular' && group.type === 'yesNoToggle') {
           row.classList.add('span-full');
           if (group.name === 'femoral') row.classList.add('cvs-femoral-slot');
@@ -5569,6 +5700,7 @@
       if (prefix === ABDOMEN_PERITONITIC_PREFIX && key === 'peritonitic') syncAbdomenNadPill();
       if (prefix === HEENT_ORAL_YN_PREFIX && key === 'pharyngealEry') syncHeentNadPill();
       if (prefix === HEENT_NECK_MENINGISM_PREFIX && (key === 'neckMovement' || key === 'appearsMeningitic')) syncHeentNadPill();
+      if (prefix.indexOf('genital__') === 0) updateGenitalPanels();
       updateOutput();
     }
 
@@ -5590,6 +5722,9 @@
             }
           }
           continue;
+        }
+        if (section.key === 'abdomen' && group.type === 'genitalPanel') {
+          continue; // handled via getGenitalOutputLine
         }
         if (section.key === 'abdomen' && group.type === 'yesNoToggle') {
           var abPrfx = 'abdomen__peritonitic';
@@ -5817,6 +5952,593 @@
       return { line: withSectionPrefix(section.key, lineBody, getSeverityFromFindings(ordered)), severity: getSeverityFromFindings(ordered) };
     }
 
+    /* ===== GENITAL EXAMINATION DATA ===== */
+    var GENITAL_TESTICULAR_APPEARANCE_YN_ROWS = [
+      { key: 'equalSize', label: 'Equal size', yes: 'Equal size', no: 'Not equal size', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'asymmetry', label: 'Asymmetry', yes: 'Asymmetry', no: 'No asymmetry', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
+      { key: 'atrophy', label: 'Atrophy', yes: 'Atrophy', no: 'No atrophy', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
+      { key: 'swelling', label: 'Swelling', yes: 'Swelling', no: 'No swelling', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
+      { key: 'firm', label: 'Firm', yes: 'Firm', no: 'Not firm', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
+      { key: 'massNodule', label: 'Mass/nodule', yes: 'Mass/nodule', no: 'No mass/nodule', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' }
+    ];
+    var GENITAL_ACUTE_SIGNS_YN_ROWS = [
+      { key: 'tenderness', label: 'Tenderness', yes: 'Tenderness', no: 'No tenderness', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
+      { key: 'highRiding', label: 'High-riding testis', yes: 'High-riding testis', no: 'Not high-riding', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
+      { key: 'horizontalLie', label: 'Horizontal lie', yes: 'Horizontal lie', no: 'No horizontal lie', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
+      { key: 'scrotalErythema', label: 'Scrotal erythema', yes: 'Scrotal erythema', no: 'No scrotal erythema', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
+      { key: 'oedema', label: 'Oedema', yes: 'Oedema', no: 'No oedema', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
+      { key: 'discolouration', label: 'Discolouration', yes: 'Discolouration', no: 'No discolouration', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' }
+    ];
+
+    var GENITAL_GROUPS = {
+      malePenis: [
+        { title: 'Appearance', mode: 'multi', options: ['Normal', 'Small penis/micropenis concern', 'Concealed/buried penis', 'Oedema', 'Bruising', 'Erythema', 'Lesion/ulcer', 'Rash'] },
+        { title: 'Meatus', mode: 'single', options: ['Orthotopic', 'Hypospadias', 'Epispadias', 'Meatal stenosis concern', 'Discharge'] },
+        { title: 'Foreskin', mode: 'single', options: ['Normal', 'Retractable for age', 'Non-retractile—physiological', 'Tight/scarred foreskin', 'Ballooning on voiding', 'Balanitis', 'Paraphimosis', 'Circumcised'] },
+        { title: 'Shaft/erection', mode: 'single', options: ['Straight', 'Curvature/chordee', 'Painful erection/priapism concern'] }
+      ],
+      maleScrotumControls: [
+        { title: 'Testicular position', mode: 'single', options: ['Both scrotal', 'Right high scrotal', 'Left high scrotal', 'Right impalpable', 'Left impalpable', 'Bilateral impalpable', 'Retractile testis'] },
+        { title: 'Scrotum/groin swellings', mode: 'single', options: ['None', 'Hydrocele', 'Inguinal hernia', 'Reducible groin swelling', 'Non-reducible/tender swelling'] }
+      ],
+      female: [
+        { title: 'General appearance', mode: 'multi', options: ['Normal', 'Erythema', 'Irritation/excoriation', 'Rash', 'Oedema', 'Bruising', 'Ulcer/lesion', 'Pigment change', 'Scar'] },
+        { title: 'Labia', mode: 'multi', options: ['Normal', 'Labial adhesions—partial', 'Labial adhesions—complete', 'Asymmetry', 'Swelling', 'Cyst/mass'] },
+        { title: 'Discharge/bleeding', mode: 'single', options: ['None', 'Physiological pubertal discharge', 'Offensive discharge', 'Mucoid discharge', 'Purulent discharge', 'Blood staining/vaginal bleeding'] },
+        { title: 'Itch/infection pattern', mode: 'single', options: ['No features', 'Vulvovaginitis appearance', 'Candidal-type appearance', 'Threadworm-associated excoriation suspected'] },
+        { title: 'Urethral region', mode: 'single', options: ['Normal', 'Urethral prolapse concern', 'Prolapsed ureterocele concern', 'Peri-urethral mass'] },
+        { title: 'Introitus', mode: 'single', options: ['Appears normal externally', 'Imperforate hymen concern', 'Vaginal mass/foreign body concern', 'Do not assess / not indicated'] },
+        { title: 'Perineum/anus', mode: 'multi', options: ['Normal', 'Fissure', 'Skin tag', 'Eczema', 'Lichen sclerosus-type pallor', 'Perianal erythema', 'Other lesion'] }
+      ],
+      puberty: [
+        { title: 'Pubertal status', mode: 'single', options: ['Pubertal status not assessed', 'Prepubertal'] },
+        { title: 'Tanner breast stage', mode: 'single', options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
+        { title: 'Tanner genital stage', mode: 'single', options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
+        { title: 'Pubic hair stage', mode: 'single', options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
+        { title: 'Axillary hair', mode: 'single', options: ['Absent', 'Present'] },
+        { title: 'Menarche', mode: 'single', options: ['Not commenced', 'Date/age recorded elsewhere', 'Menstrual history discussed'] },
+        { title: 'Pubertal concern', mode: 'multi', options: ['Precocious features', 'Delayed puberty concern', 'Virilisation', 'Gynaecomastia', 'Asymmetrical breast development'] }
+      ]
+    };
+
+    function genitalSlug(value) {
+      return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    }
+
+    function genitalFindingTag(value) {
+      var normal = [
+        'Normal', 'Orthotopic', 'Retractable for age', 'Non-retractile—physiological', 'Straight',
+        'Both scrotal', 'Equal size', 'No tenderness', 'None', 'Physiological pubertal discharge',
+        'No features', 'Appears normal externally', 'Do not assess / not indicated',
+        'Pubertal status not assessed', 'Prepubertal', 'Absent', 'Present', 'Not commenced',
+        'Date/age recorded elsewhere', 'Menstrual history discussed', 'External inspection only',
+        'Not indicated', 'Offered but declined', 'Not performed', 'Performed',
+        'Parent/carer consent obtained', 'Child assent obtained where appropriate',
+        'Declined', 'Not available', 'Supine', 'Frog-leg', 'Standing', 'Privacy maintained',
+        'Male', 'Female', 'Normal external genital examination', 'Non-tender', 'Present'
+      ];
+      var urgent = [
+        'Painful erection/priapism concern', 'Paraphimosis',
+        'High-riding testis', 'Horizontal lie', 'Non-reducible/tender swelling',
+        'Blood staining/vaginal bleeding', 'Vaginal mass/foreign body concern', 'Tenderness'
+      ];
+      if (normal.indexOf(value) !== -1 || /^Stage [IVX]+$/.test(value)) return 'Normal finding';
+      if (urgent.indexOf(value) !== -1) return 'urgent abnormal finding';
+      return 'abnormal finding';
+    }
+
+    function isGenitalNormalExclusive(value) {
+      return value === 'Normal' || value === 'None' || value === 'No tenderness' || value === 'No features';
+    }
+
+    function syncGenitalCheckLabel(input) {
+      var label = input ? input.closest('.check-opt') : null;
+      if (!label) return;
+      label.classList.remove('selected', 'abnormal', 'pill-normal');
+      if (!input.checked) return;
+      label.classList.add('selected');
+      var cls = pillHighlightClassFromTaggedInput(input);
+      if (cls) label.classList.add(cls);
+    }
+
+    function handleGenitalCheckClick(label) {
+      var input = label.querySelector('input');
+      setTimeout(function() {
+        if (!input) return;
+        var group = input.getAttribute('data-genital-group');
+        var siblings = document.querySelectorAll('input[data-genital-group="' + group + '"]');
+        if (input.checked && isGenitalNormalExclusive(input.value)) {
+          for (var i = 0; i < siblings.length; i++) {
+            if (siblings[i] !== input) {
+              siblings[i].checked = false;
+              syncGenitalCheckLabel(siblings[i]);
+            }
+          }
+        } else if (input.checked) {
+          for (var j = 0; j < siblings.length; j++) {
+            if (isGenitalNormalExclusive(siblings[j].value)) {
+              siblings[j].checked = false;
+              syncGenitalCheckLabel(siblings[j]);
+            }
+          }
+        }
+        syncGenitalCheckLabel(input);
+        updateGenitalPanels();
+        updateOutput();
+      }, 0);
+    }
+
+    function addGenitalControlGroup(parent, title, key, options, mode, sectionName) {
+      var group = document.createElement('div');
+      group.className = 'genital-control-group';
+      var label = document.createElement('div');
+      label.className = 'group-label';
+      label.textContent = title;
+      group.appendChild(label);
+      var controls = document.createElement('div');
+      controls.className = mode === 'multi' ? 'check-grid' : 'pill-row';
+      for (var i = 0; i < options.length; i++) {
+        var value = options[i];
+        var inputLabel = document.createElement('label');
+        inputLabel.className = mode === 'multi' ? 'check-opt' : 'pill-opt';
+        var input = document.createElement('input');
+        input.type = mode === 'multi' ? 'checkbox' : 'radio';
+        input.name = 'genital__' + key;
+        input.id = 'genital__' + key + '__' + i;
+        input.value = value;
+        input.setAttribute('data-genital-group', key);
+        input.setAttribute('data-genital-section', sectionName || 'core');
+        input.setAttribute('data-genital-title', title);
+        input.setAttribute('data-finding-tag', genitalFindingTag(value));
+        if (mode === 'multi') {
+          inputLabel.onclick = (function(lbl) { return function() { handleGenitalCheckClick(lbl); }; })(inputLabel);
+        } else {
+          inputLabel.onclick = (function(lbl) {
+            return function(ev) {
+              handlePillClick(lbl, ev);
+              setTimeout(function() {
+                updateGenitalPanels();
+                updateOutput();
+              }, 0);
+            };
+          })(inputLabel);
+        }
+        inputLabel.appendChild(input);
+        inputLabel.appendChild(document.createTextNode(value));
+        controls.appendChild(inputLabel);
+      }
+      group.appendChild(controls);
+      parent.appendChild(group);
+      return group;
+    }
+
+    function addGenitalGroups(parent, groups, sectionName, keyPrefix) {
+      for (var i = 0; i < groups.length; i++) {
+        var def = groups[i];
+        addGenitalControlGroup(parent, def.title, keyPrefix + '_' + genitalSlug(def.title), def.options, def.mode, sectionName);
+      }
+    }
+
+    function addGenitalBilateralYnBlock(parent, title, prefixBase, rowsDef) {
+      var group = document.createElement('div');
+      group.className = 'genital-control-group';
+      var label = document.createElement('div');
+      label.className = 'group-label';
+      label.textContent = title;
+      group.appendChild(label);
+      var cols = document.createElement('div');
+      cols.className = 'genital-bilateral-cols';
+      var sides = [
+        { side: 'R', word: 'Right' },
+        { side: 'L', word: 'Left' }
+      ];
+      for (var si = 0; si < sides.length; si++) {
+        var col = document.createElement('div');
+        col.className = 'genital-side-col';
+        var sideLab = document.createElement('div');
+        sideLab.className = 'genital-side-col-label';
+        sideLab.textContent = sides[si].word;
+        col.appendChild(sideLab);
+        var prefix = prefixBase + '__' + sides[si].side;
+        YES_NO_TOGGLE_ROW_REGISTRY[prefix] = rowsDef;
+        appendYesNoToggleWrap(col, prefix, rowsDef, { spanFull: true });
+        cols.appendChild(col);
+      }
+      group.appendChild(cols);
+      parent.appendChild(group);
+      return group;
+    }
+
+    function buildGenitalPanel(row) {
+      var details = document.createElement('details');
+      details.id = 'genitalExamDetails';
+      details.className = 'genital-panel-details';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Add genital findings';
+      details.appendChild(summary);
+
+      var body = document.createElement('div');
+      body.className = 'genital-panel-body';
+      addGenitalControlGroup(body, 'Examination status', 'status', ['Not indicated', 'Offered but declined', 'Not performed', 'Performed'], 'single', 'core');
+
+      var deferred = document.createElement('div');
+      deferred.id = 'genitalDeferredWrap';
+      deferred.className = 'genital-deferred';
+      var deferredLabel = document.createElement('label');
+      deferredLabel.className = 'group-label';
+      deferredLabel.setAttribute('for', 'genital__deferred_reason');
+      deferredLabel.textContent = 'Examination deferred—reason';
+      var deferredText = document.createElement('textarea');
+      deferredText.id = 'genital__deferred_reason';
+      deferredText.rows = 2;
+      deferredText.placeholder = 'Distress, refusal, clinical instability or lack of indication';
+      deferredText.addEventListener('input', updateOutput);
+      deferred.appendChild(deferredLabel);
+      deferred.appendChild(deferredText);
+      body.appendChild(deferred);
+
+      var performed = document.createElement('div');
+      performed.id = 'genitalPerformedWrap';
+      performed.className = 'genital-performed';
+      addGenitalControlGroup(performed, 'Consent/assent', 'consent', ['Parent/carer consent obtained', 'Child assent obtained where appropriate'], 'multi', 'core');
+      addGenitalControlGroup(performed, 'Chaperone', 'chaperone', ['Present', 'Declined', 'Not available'], 'single', 'core');
+      addGenitalControlGroup(performed, 'Position/exposure', 'position', ['Supine', 'Frog-leg', 'Standing', 'Privacy maintained'], 'multi', 'core');
+      addGenitalControlGroup(performed, 'Gender', 'gender', ['Male', 'Female'], 'single', 'core');
+      addGenitalControlGroup(performed, 'Overall', 'overall', ['Normal external genital examination', 'Abnormal—details below'], 'single', 'core');
+
+      var warning = document.createElement('div');
+      warning.className = 'genital-warning';
+      warning.textContent = 'If injury, bleeding, concerning ano-genital finding, disclosure, or safeguarding concern: stop and follow the local safeguarding/forensic pathway; do not rely on this template alone. A normal examination does not exclude abuse.';
+      performed.appendChild(warning);
+
+      var male = document.createElement('div');
+      male.id = 'genitalMaleWrap';
+      male.className = 'genital-anatomy';
+      var malePenis = document.createElement('details');
+      malePenis.className = 'genital-subdetails';
+      var malePenisSummary = document.createElement('summary');
+      malePenisSummary.textContent = 'Penis and foreskin';
+      malePenis.appendChild(malePenisSummary);
+      var malePenisBody = document.createElement('div');
+      malePenisBody.className = 'genital-subdetails-body';
+      addGenitalGroups(malePenisBody, GENITAL_GROUPS.malePenis, 'male', 'male');
+      malePenis.appendChild(malePenisBody);
+      male.appendChild(malePenis);
+
+      var maleScrotum = document.createElement('details');
+      maleScrotum.className = 'genital-subdetails';
+      var maleScrotumSummary = document.createElement('summary');
+      maleScrotumSummary.textContent = 'Scrotum, testes and groin';
+      maleScrotum.appendChild(maleScrotumSummary);
+      var maleScrotumBody = document.createElement('div');
+      maleScrotumBody.className = 'genital-subdetails-body';
+      addGenitalControlGroup(maleScrotumBody, 'Testicular position', 'male_testicular_position', GENITAL_GROUPS.maleScrotumControls[0].options, 'single', 'male');
+      addGenitalBilateralYnBlock(maleScrotumBody, 'Testicular appearance', 'genital__male_testicular_appearance', GENITAL_TESTICULAR_APPEARANCE_YN_ROWS);
+      addGenitalBilateralYnBlock(maleScrotumBody, 'Acute signs', 'genital__male_acute_signs', GENITAL_ACUTE_SIGNS_YN_ROWS);
+      addGenitalControlGroup(maleScrotumBody, 'Scrotum/groin swellings', 'male_scrotum_groin_swellings', GENITAL_GROUPS.maleScrotumControls[1].options, 'single', 'male');
+      var volumeLabel = document.createElement('label');
+      volumeLabel.className = 'group-label';
+      volumeLabel.textContent = 'Testicular volume (mL, optional)';
+      var volume = document.createElement('input');
+      volume.id = 'genital__testicular_volume';
+      volume.type = 'number';
+      volume.min = '0';
+      volume.step = '0.5';
+      volume.placeholder = 'mL';
+      volume.addEventListener('input', updateOutput);
+      volumeLabel.appendChild(volume);
+      maleScrotumBody.appendChild(volumeLabel);
+      maleScrotum.appendChild(maleScrotumBody);
+      male.appendChild(maleScrotum);
+      performed.appendChild(male);
+
+      var female = document.createElement('div');
+      female.id = 'genitalFemaleWrap';
+      female.className = 'genital-anatomy';
+      addGenitalControlGroup(female, 'Examination extent', 'female_extent', ['External inspection only'], 'multi', 'female');
+      var femaleDetails = document.createElement('details');
+      femaleDetails.className = 'genital-subdetails';
+      var femaleSummary = document.createElement('summary');
+      femaleSummary.textContent = 'Vulva and perineum';
+      femaleDetails.appendChild(femaleSummary);
+      var femaleBody = document.createElement('div');
+      femaleBody.className = 'genital-subdetails-body';
+      addGenitalGroups(femaleBody, GENITAL_GROUPS.female, 'female', 'female');
+      femaleDetails.appendChild(femaleBody);
+      female.appendChild(femaleDetails);
+      performed.appendChild(female);
+
+      var urgentPrompt = document.createElement('div');
+      urgentPrompt.id = 'genitalUrgentPrompt';
+      urgentPrompt.className = 'genital-urgent-prompt';
+      urgentPrompt.textContent = 'Urgent clinical review is required for acute unilateral testicular tenderness, a high-riding/horizontal testis, painful erection, paraphimosis, or a painful non-reducible groin/scrotal swelling.';
+      performed.appendChild(urgentPrompt);
+
+      var qualifiers = document.createElement('div');
+      qualifiers.id = 'genitalQualifiersWrap';
+      qualifiers.className = 'genital-qualifiers';
+      var qualifiersTitle = document.createElement('div');
+      qualifiersTitle.className = 'group-label';
+      qualifiersTitle.textContent = 'Optional abnormality qualifiers';
+      qualifiers.appendChild(qualifiersTitle);
+      addGenitalControlGroup(qualifiers, 'Laterality', 'laterality', ['Right', 'Left', 'Bilateral', 'Midline'], 'single', 'qualifier');
+      addGenitalControlGroup(qualifiers, 'Tenderness', 'qualifier_tenderness', ['Non-tender', 'Tender'], 'single', 'qualifier');
+      var fields = document.createElement('div');
+      fields.className = 'genital-inline-fields';
+      var fieldDefs = [
+        ['Site', 'site', 'text'], ['Size (mm/cm)', 'size', 'text'], ['Colour', 'colour', 'text'],
+        ['Duration', 'duration', 'text'], ['Discharge/bleeding', 'discharge', 'text'], ['Additional detail', 'detail', 'textarea']
+      ];
+      for (var fi = 0; fi < fieldDefs.length; fi++) {
+        var fieldLabel = document.createElement('label');
+        if (fieldDefs[fi][2] === 'textarea') fieldLabel.className = 'span-full';
+        fieldLabel.appendChild(document.createTextNode(fieldDefs[fi][0]));
+        var field = document.createElement(fieldDefs[fi][2] === 'textarea' ? 'textarea' : 'input');
+        field.id = 'genital__qualifier_' + fieldDefs[fi][1];
+        if (field.tagName === 'TEXTAREA') field.rows = 2;
+        else field.type = 'text';
+        field.addEventListener('input', updateOutput);
+        fieldLabel.appendChild(field);
+        fields.appendChild(fieldLabel);
+      }
+      qualifiers.appendChild(fields);
+      performed.appendChild(qualifiers);
+
+      var puberty = document.createElement('details');
+      puberty.id = 'genitalPubertyDetails';
+      puberty.className = 'genital-subdetails';
+      var pubertySummary = document.createElement('summary');
+      pubertySummary.textContent = 'Puberty and development (when age-appropriate)';
+      puberty.appendChild(pubertySummary);
+      var pubertyBody = document.createElement('div');
+      pubertyBody.className = 'genital-subdetails-body';
+      addGenitalGroups(pubertyBody, GENITAL_GROUPS.puberty, 'puberty', 'puberty');
+      puberty.appendChild(pubertyBody);
+      performed.appendChild(puberty);
+
+      body.appendChild(performed);
+      details.appendChild(body);
+      row.appendChild(details);
+    }
+
+    function clearGenitalContainer(container) {
+      if (!container) return;
+      var inputs = container.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].checked = false;
+        var label = inputs[i].closest('.pill-opt, .check-opt, .yesno-toggle-btn');
+        if (label) label.classList.remove('selected', 'abnormal', 'pill-normal');
+      }
+      var fields = container.querySelectorAll('input[type="text"], input[type="number"], textarea');
+      for (var j = 0; j < fields.length; j++) fields[j].value = '';
+      var ynRows = container.querySelectorAll('.yesno-toggle-row');
+      for (var yr = 0; yr < ynRows.length; yr++) syncYesNoToggleRowStyles(ynRows[yr]);
+    }
+
+    var genitalLastGender = '';
+    function updateGenitalPanels() {
+      var status = document.querySelector('input[name="genital__status"]:checked');
+      var statusValue = status ? status.value : '';
+      var performed = document.getElementById('genitalPerformedWrap');
+      var deferred = document.getElementById('genitalDeferredWrap');
+      if (!performed || !deferred) return;
+      performed.classList.toggle('show', statusValue === 'Performed');
+      deferred.classList.toggle('show', statusValue === 'Offered but declined' || statusValue === 'Not performed');
+
+      var genderInput = document.querySelector('input[name="genital__gender"]:checked');
+      var gender = genderInput ? genderInput.value : '';
+      var overallInput = document.querySelector('input[name="genital__overall"]:checked');
+      var abnormal = !!(overallInput && overallInput.value === 'Abnormal—details below');
+      var male = document.getElementById('genitalMaleWrap');
+      var female = document.getElementById('genitalFemaleWrap');
+      if (gender && genitalLastGender && gender !== genitalLastGender) {
+        clearGenitalContainer(genitalLastGender === 'Male' ? male : female);
+      }
+      if (gender) genitalLastGender = gender;
+      if (overallInput && overallInput.value === 'Normal external genital examination') {
+        clearGenitalContainer(male);
+        clearGenitalContainer(female);
+      }
+      if (male) male.classList.toggle('show', statusValue === 'Performed' && abnormal && gender === 'Male');
+      if (female) female.classList.toggle('show', statusValue === 'Performed' && abnormal && gender === 'Female');
+
+      var activeAbnormal = document.querySelectorAll('#genitalMaleWrap.show input[data-finding-tag="abnormal finding"]:checked, #genitalMaleWrap.show input[data-finding-tag="urgent abnormal finding"]:checked, #genitalFemaleWrap.show input[data-finding-tag="abnormal finding"]:checked, #genitalFemaleWrap.show input[data-finding-tag="urgent abnormal finding"]:checked');
+      var qualifiers = document.getElementById('genitalQualifiersWrap');
+      if (qualifiers) qualifiers.classList.toggle('show', activeAbnormal.length > 0);
+      var urgent = document.querySelector('#genitalMaleWrap.show input[data-finding-tag="urgent abnormal finding"]:checked, #genitalFemaleWrap.show input[data-finding-tag="urgent abnormal finding"]:checked');
+      var urgentPrompt = document.getElementById('genitalUrgentPrompt');
+      if (urgentPrompt) urgentPrompt.classList.toggle('show', !!urgent);
+    }
+
+    function genitalSelectedValue(name) {
+      var input = document.querySelector('input[name="genital__' + name + '"]:checked');
+      return input ? input.value : '';
+    }
+
+    function genitalSelectedValues(selector) {
+      var inputs = document.querySelectorAll(selector);
+      var values = [];
+      for (var i = 0; i < inputs.length; i++) values.push(inputs[i].value);
+      return values;
+    }
+
+    function genitalFindingOutput(input) {
+      var value = input.value;
+      var title = input.getAttribute('data-genital-title') || '';
+      var map = {
+        'Non-retractile—physiological': 'Foreskin non-retractile without scarring or inflammation',
+        'Both scrotal': 'Both testes palpable in the scrotum',
+        'Right high scrotal': 'Right testis palpable high in the scrotum',
+        'Left high scrotal': 'Left testis palpable high in the scrotum',
+        'Right impalpable': 'Right testis not palpable',
+        'Left impalpable': 'Left testis not palpable',
+        'Bilateral impalpable': 'Neither testis palpable',
+        'Equal size': 'Testes equal in size',
+        'None': title === 'Scrotum/groin swellings' ? 'No scrotal swelling' : 'No discharge or bleeding',
+        'Orthotopic': 'Meatus orthotopic',
+        'Straight': 'Penile shaft straight',
+        'External inspection only': 'External inspection only'
+      };
+      if (map[value]) return map[value];
+      if (value === 'Normal' && title === 'Foreskin') return 'Foreskin normal appearance';
+      if (value === 'Normal') return title + ' normal';
+      if (/^Stage [IVX]+$/.test(value)) return title + ' ' + value.replace('Stage ', '');
+      return value;
+    }
+
+    function collectGenitalBilateralYnPhrases(prefixBase, rowsDef, sideWordMap) {
+      var phrases = [];
+      var sides = ['R', 'L'];
+      var equalSizeSeen = false;
+      for (var si = 0; si < sides.length; si++) {
+        var side = sides[si];
+        var sideWord = sideWordMap[side];
+        var prefix = prefixBase + '__' + side;
+        for (var ri = 0; ri < rowsDef.length; ri++) {
+          var row = rowsDef[ri];
+          var yesEl = document.getElementById(prefix + '__' + row.key + '__yes');
+          var noEl = document.getElementById(prefix + '__' + row.key + '__no');
+          if (yesEl && yesEl.checked) {
+            if (row.key === 'equalSize') {
+              if (!equalSizeSeen) {
+                phrases.push({ text: 'Testes equal in size', tag: row.yesTag || 'Normal finding' });
+                equalSizeSeen = true;
+              }
+            } else if (row.key === 'tenderness') {
+              phrases.push({ text: sideWord + ' testicular tenderness', tag: row.yesTag || 'urgent abnormal finding' });
+            } else if (row.key === 'swelling') {
+              phrases.push({ text: sideWord + ' testicular swelling', tag: row.yesTag || 'abnormal finding' });
+            } else if (row.key === 'highRiding' || row.key === 'horizontalLie') {
+              phrases.push({ text: sideWord + ' ' + row.yes.toLowerCase(), tag: row.yesTag || 'urgent abnormal finding' });
+            } else {
+              phrases.push({ text: sideWord + ' ' + row.yes.toLowerCase(), tag: row.yesTag || 'abnormal finding' });
+            }
+          } else if (noEl && noEl.checked) {
+            if (row.key === 'equalSize') {
+              phrases.push({ text: sideWord + ' testis not equal in size', tag: row.noTag || 'abnormal finding' });
+            } else if (row.key === 'tenderness') {
+              phrases.push({ text: 'No ' + sideWord.toLowerCase() + ' testicular tenderness', tag: row.noTag || 'Normal finding' });
+            } else {
+              phrases.push({ text: row.no + ' (' + sideWord.toLowerCase() + ')', tag: row.noTag || 'Normal finding' });
+            }
+          }
+        }
+      }
+      return phrases;
+    }
+
+    function getGenitalOutputLine(abnormalCollector) {
+      var status = genitalSelectedValue('status');
+      if (!status) return '';
+      var reasonEl = document.getElementById('genital__deferred_reason');
+      var reason = reasonEl ? trimSentence(reasonEl.value) : '';
+      if (status === 'Not indicated') return 'Genital examination not indicated.';
+      if (status === 'Offered but declined') return 'Genital examination offered but declined' + (reason ? ' (' + reason + ')' : '') + '.';
+      if (status === 'Not performed') return 'Genital examination not performed' + (reason ? ' (' + reason + ')' : '') + '.';
+
+      var core = [];
+      var consent = genitalSelectedValues('input[name="genital__consent"]:checked');
+      for (var ci = 0; ci < consent.length; ci++) core.push(consent[ci].toLowerCase());
+      var chaperone = genitalSelectedValue('chaperone');
+      if (chaperone) core.push('chaperone ' + chaperone.toLowerCase());
+      var positions = genitalSelectedValues('input[name="genital__position"]:checked');
+      for (var pi = 0; pi < positions.length; pi++) core.push(positions[pi].toLowerCase());
+      var lead = 'External genital examination performed';
+      if (core.length) lead += ' with ' + core.join(', ');
+
+      var gender = genitalSelectedValue('gender');
+      var overall = genitalSelectedValue('overall');
+      var sentences = [lead + '.'];
+      if (overall === 'Normal external genital examination') {
+        if (gender === 'Male') {
+          sentences.push('Penis, testes and scrotum normal for age. Both testes palpable in the scrotum. No inguinal hernia or hydrocele evident. No rash, lesion, swelling, discharge or tenderness.');
+        } else if (gender === 'Female') {
+          sentences.push('Normal external female genitalia. No vulval erythema, rash, lesion, discharge, bleeding or swelling. Urethral and vaginal openings appear normal externally. No labial fusion.');
+        } else {
+          sentences.push('Normal external genital examination.');
+        }
+        return abnormalsOnly ? '' : sentences.join(' ');
+      }
+
+      var findingText = [];
+      var severity = overall === 'Abnormal—details below' ? 'abnormal' : 'normal';
+
+      if (gender === 'Male') {
+        var findings = document.querySelectorAll('#genitalMaleWrap.show input[data-genital-section="male"]:checked');
+        for (var fi = 0; fi < findings.length; fi++) {
+          var text = genitalFindingOutput(findings[fi]);
+          findingText.push(text);
+          var tagClass = normalizeFindingTag(findings[fi].getAttribute('data-finding-tag') || '');
+          if (tagClass === 'urgent' || tagClass === 'abnormal') {
+            severity = mergeSeverity(severity, tagClass);
+            if (abnormalCollector) abnormalCollector.push({ text: text, classType: tagClass, system: 'abdomen' });
+          }
+        }
+        var ynBlocks = [
+          { prefix: 'genital__male_testicular_appearance', rows: GENITAL_TESTICULAR_APPEARANCE_YN_ROWS },
+          { prefix: 'genital__male_acute_signs', rows: GENITAL_ACUTE_SIGNS_YN_ROWS }
+        ];
+        for (var yb = 0; yb < ynBlocks.length; yb++) {
+          var ynPhrases = collectGenitalBilateralYnPhrases(ynBlocks[yb].prefix, ynBlocks[yb].rows, { R: 'Right', L: 'Left' });
+          for (var yp = 0; yp < ynPhrases.length; yp++) {
+            findingText.push(ynPhrases[yp].text);
+            var ynCls = normalizeFindingTag(ynPhrases[yp].tag || '');
+            if (ynCls === 'urgent' || ynCls === 'abnormal') {
+              severity = mergeSeverity(severity, ynCls);
+              if (abnormalCollector) abnormalCollector.push({ text: ynPhrases[yp].text, classType: ynCls, system: 'abdomen' });
+            }
+          }
+        }
+        var volume = document.getElementById('genital__testicular_volume');
+        if (volume && trimSentence(volume.value)) findingText.push('Testicular volume ' + trimSentence(volume.value) + ' mL');
+      } else if (gender === 'Female') {
+        var fFindings = document.querySelectorAll('#genitalFemaleWrap.show input[data-genital-section="female"]:checked');
+        for (var ffi = 0; ffi < fFindings.length; ffi++) {
+          var fText = genitalFindingOutput(fFindings[ffi]);
+          findingText.push(fText);
+          var fTagClass = normalizeFindingTag(fFindings[ffi].getAttribute('data-finding-tag') || '');
+          if (fTagClass === 'urgent' || fTagClass === 'abnormal') {
+            severity = mergeSeverity(severity, fTagClass);
+            if (abnormalCollector) abnormalCollector.push({ text: fText, classType: fTagClass, system: 'abdomen' });
+          }
+        }
+      }
+
+      if (findingText.length) sentences.push(capitaliseFirst(findingText.join(', ')) + '.');
+      else if (overall === 'Abnormal—details below') sentences.push('Abnormal external genital findings—details not yet recorded.');
+
+      var qualifierText = [];
+      var laterality = genitalSelectedValue('laterality');
+      var qualifierTenderness = genitalSelectedValue('qualifier_tenderness');
+      if (laterality) qualifierText.push('laterality ' + laterality.toLowerCase());
+      if (qualifierTenderness) qualifierText.push(qualifierTenderness.toLowerCase());
+      var qualifierKeys = ['site', 'size', 'colour', 'duration', 'discharge', 'detail'];
+      var qualifierLabels = ['site', 'size', 'colour', 'duration', 'discharge/bleeding', 'detail'];
+      for (var qi = 0; qi < qualifierKeys.length; qi++) {
+        var qualifierEl = document.getElementById('genital__qualifier_' + qualifierKeys[qi]);
+        var qualifierValue = qualifierEl ? trimSentence(qualifierEl.value) : '';
+        if (qualifierValue) qualifierText.push(qualifierLabels[qi] + ' ' + qualifierValue);
+      }
+      if (qualifierText.length) sentences.push('Further description: ' + qualifierText.join(', ') + '.');
+
+      var pubertyInputs = document.querySelectorAll('#genitalPubertyDetails input[data-genital-section="puberty"]:checked');
+      var pubertyText = [];
+      for (var pui = 0; pui < pubertyInputs.length; pui++) {
+        var pubText = genitalFindingOutput(pubertyInputs[pui]);
+        pubertyText.push(pubText);
+        var pubClass = normalizeFindingTag(pubertyInputs[pui].getAttribute('data-finding-tag') || '');
+        if (pubClass === 'urgent' || pubClass === 'abnormal') {
+          severity = mergeSeverity(severity, pubClass);
+          if (abnormalCollector) abnormalCollector.push({ text: pubText, classType: pubClass, system: 'abdomen' });
+        }
+      }
+      if (pubertyText.length) sentences.push('Puberty/development: ' + pubertyText.join(', ') + '.');
+      if (abnormalsOnly && severity === 'normal') return '';
+      var marker = showSeverityMarkers ? (severity === 'urgent' ? '⚠️ ' : (severity === 'abnormal' ? '** ' : '')) : '';
+      var prefix = includeSystemPrefixes ? 'GENITALS: ' : '';
+      return marker + prefix + sentences.join(' ');
+    }
+
     function updateOutputTitle() {
       var outputEl = document.getElementById('output');
       var titleEl = document.getElementById('outputToggleTitle');
@@ -5890,6 +6612,10 @@
               lines.push(line);
             } else lines.push(line);
           }
+        }
+        if (skey === 'abdomen') {
+          var genitalLine = getGenitalOutputLine(abnormalCollector);
+          if (genitalLine) lines.push(genitalLine);
         }
       }
       if (showAbnormalSummary) {
@@ -6005,6 +6731,11 @@
       updateAuscultationAddedPanel();
       updateUpperAirwayFindingsPanel();
       updateSkinRashBruisingFields();
+      clearGenitalContainer(document.getElementById('genitalExamDetails'));
+      genitalLastGender = '';
+      var genitalDetails = document.getElementById('genitalExamDetails');
+      if (genitalDetails) genitalDetails.open = false;
+      updateGenitalPanels();
       updateOutput();
     }
 
@@ -6084,6 +6815,7 @@
       updateFontanelleOpenField();
       updateRecessionSubtypePanel();
       updateSkinRashBruisingFields();
+      updateGenitalPanels();
       var lungNoteInput = document.getElementById('lungZoneNoteInput');
       if (lungNoteInput) {
         lungNoteInput.addEventListener('input', function() {
