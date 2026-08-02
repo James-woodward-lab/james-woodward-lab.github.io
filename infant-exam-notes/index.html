@@ -1030,7 +1030,18 @@
         no: 'Femoral pulses not palpable/equal',
         normalYes: true,
         yesTag: 'Normal finding',
-        noTag: 'urgent abnormal finding'
+        noTag: 'urgent abnormal finding',
+        ageBands: ['0-1', '1-4', '5-11']
+      },
+      {
+        key: 'jvp',
+        label: 'JVP raised',
+        yes: 'Raised JVP',
+        no: 'JVP normal',
+        normalYes: false,
+        yesTag: 'abnormal finding',
+        noTag: 'Normal finding',
+        ageBands: ['12+']
       },
       {
         key: 'cyanosis',
@@ -1105,7 +1116,14 @@
           { type: 'radio', name: 'state', label: 'Alertness', options: ['Alert', { value: 'Lethargic', tag: 'abnormal finding' }, 'Drowsy', 'Irritable'] },
           { type: 'radio', name: 'appearance', label: 'Appearance', options: [{ value: 'Well', tag: 'Normal finding' }, { value: 'Mildly unwell', tag: 'Normal finding' }, { value: 'Toxic/Septic', tag: 'urgent abnormal finding' }] },
           { type: 'radio', name: 'comfort', label: 'Comfort', options: [{ value: 'Comfortable', tag: 'Normal finding' }, { value: 'Mild pain', tag: 'abnormal finding' }, { value: 'Moderate pain', tag: 'urgent abnormal finding' }, { value: 'Severe pain', tag: 'urgent abnormal finding' }, 'In distress'] },
-          { type: 'radio', name: 'interaction', label: 'Interaction', options: ['Interacting with carer', { value: 'Withdrawn', tag: 'abnormal finding' }, 'Inconsolable'] }
+          { type: 'radio', name: 'interaction', label: 'Interaction', options: [
+            { value: 'Interacting with carer', ageBands: ['0-1', '1-4', '5-11'] },
+            { value: 'Withdrawn', tag: 'abnormal finding', ageBands: ['0-1', '1-4', '5-11'] },
+            { value: 'Inconsolable', ageBands: ['0-1', '1-4', '5-11'] },
+            { value: 'Interacting appropriately', tag: 'Normal finding', ageBands: ['12+'], output: 'Interacting appropriately during visit, no confusion, coherent, and good communication' },
+            { value: 'Withdrawn', tag: 'abnormal finding', ageBands: ['12+'], output: 'Withdrawn and not interacting normally' },
+            { value: 'Unresponsive', tag: 'urgent abnormal finding', ageBands: ['12+'], output: 'Unresponsive to questioning' }
+          ] }
         ]
       },
       {
@@ -1172,7 +1190,12 @@
           { type: 'radio', name: 'bruising', label: 'Bruising', options: ['No bruising', 'Bruising present'] },
           { type: 'radio', name: 'nappy', label: 'Nappy area', ageBands: ['0-1', '1-4'], options: ['Nappy area intact', 'Nappy rash present'] },
           { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm peripheries', 'Cool peripheries'] },
-          { type: 'radio', name: 'exposure', label: 'Exposure', options: ['Uncovered fully for examination'] }
+          { type: 'radio', name: 'exposure', label: 'Exposure', ageBands: ['0-1', '1-4', '5-11'], options: ['Uncovered fully for examination'] },
+          { type: 'checkbox', name: 'exposure', label: 'Exposure', ageBands: ['12+'], options: [
+            { value: 'Fully clothed', tag: 'Normal finding', output: 'Skin observed while fully clothed' },
+            { value: 'Limbs visible', tag: 'Normal finding', output: 'Skin to arms and legs examined' },
+            { value: 'Torso visible', tag: 'Normal finding', output: 'Torso examined' }
+          ] }
         ],
         freeHint: 'Describe rash or bruising (pattern/location)'
       },
@@ -1895,6 +1918,8 @@
       'locked knee'
     ];
     var EXPLICIT_ABNORMAL_PATTERNS = [
+      'raised jvp',
+      'withdrawn and not interacting normally',
       'central crt 2 3 seconds',
       'peripheral crt 2 3 seconds',
       'radial pulses bounding',
@@ -1905,6 +1930,10 @@
     ];
     var EXPLICIT_NORMAL_PATTERNS = [
       'uncovered fully for examination',
+      'skin observed while fully clothed',
+      'skin to arms and legs examined',
+      'torso examined',
+      'jvp normal',
       'tonsils nad',
       'central crt 2 seconds',
       'central crt <2 seconds',
@@ -2457,13 +2486,22 @@
     }
 
     var GENERAL_NAD_KEYS = ['state', 'appearance', 'comfort', 'interaction'];
-    var GENERAL_NAD_VALUES = { state: 'Alert', appearance: 'Well', comfort: 'Comfortable', interaction: 'Interacting with carer' };
+
+    function getGeneralNadValues() {
+      return {
+        state: 'Alert',
+        appearance: 'Well',
+        comfort: 'Comfortable',
+        interaction: selectedAgeBand === '12+' ? 'Interacting appropriately' : 'Interacting with carer'
+      };
+    }
 
     function generalMatchesNadPreset() {
+      var nadValues = getGeneralNadValues();
       for (var i = 0; i < GENERAL_NAD_KEYS.length; i++) {
         var k = GENERAL_NAD_KEYS[i];
         var el = document.querySelector('input[name="general__' + k + '"]:checked');
-        if (!el || el.value !== GENERAL_NAD_VALUES[k]) return false;
+        if (!el || el.value !== nadValues[k]) return false;
       }
       return true;
     }
@@ -2479,9 +2517,10 @@
 
     function applyGeneralNadViaPills() {
       var ev = generalNadStubEv();
+      var nadValues = getGeneralNadValues();
       for (var i = 0; i < GENERAL_NAD_KEYS.length; i++) {
         var k = GENERAL_NAD_KEYS[i];
-        var want = GENERAL_NAD_VALUES[k];
+        var want = nadValues[k];
         var cur = document.querySelector('input[name="general__' + k + '"]:checked');
         if (cur && cur.value === want) continue;
         var lab = getGeneralPillLabelForValue(k, want);
@@ -2611,6 +2650,9 @@
       var poNo = document.getElementById(CVS_FINDINGS_PREFIX + '__peripheralOedema__no');
       var poYes = document.getElementById(CVS_FINDINGS_PREFIX + '__peripheralOedema__yes');
       if (!poNo || !poNo.checked || (poYes && poYes.checked)) return false;
+      var jvpNo = document.getElementById(CVS_FINDINGS_PREFIX + '__jvp__no');
+      var jvpYes = document.getElementById(CVS_FINDINGS_PREFIX + '__jvp__yes');
+      if (jvpNo && (!jvpNo.checked || (jvpYes && jvpYes.checked))) return false;
       return true;
     }
 
@@ -2637,6 +2679,8 @@
       if (!hmNo || !hmNo.checked) setCardiovascularCvsFindingNoSelected('hepatomegaly', true);
       var poNo = document.getElementById(CVS_FINDINGS_PREFIX + '__peripheralOedema__no');
       if (!poNo || !poNo.checked) setCardiovascularCvsFindingNoSelected('peripheralOedema', true);
+      var jvpNoApply = document.getElementById(CVS_FINDINGS_PREFIX + '__jvp__no');
+      if (jvpNoApply && !jvpNoApply.checked) setCardiovascularCvsFindingNoSelected('jvp', true);
       updateOutput();
     }
 
@@ -2654,6 +2698,9 @@
       }
       setCardiovascularCvsFindingNoSelected('hepatomegaly', false);
       setCardiovascularCvsFindingNoSelected('peripheralOedema', false);
+      if (document.getElementById(CVS_FINDINGS_PREFIX + '__jvp__no')) {
+        setCardiovascularCvsFindingNoSelected('jvp', false);
+      }
       updateOutput();
     }
 
@@ -4163,6 +4210,7 @@
             inp.id = makeId(section.key, group.name, o);
             inp.value = radioVal;
             inp.setAttribute('data-finding-tag', radioTag);
+            if (radioOpt && typeof radioOpt === 'object' && radioOpt.output) inp.setAttribute('data-output', radioOpt.output);
 
             pillLabel.appendChild(inp);
             pillLabel.appendChild(document.createTextNode(radioVal));
@@ -4222,15 +4270,16 @@
           row.classList.add('span-full');
           buildNeurologyInfantBlock(row);
         } else {
+          var usePillChecks = section.key === 'skin' && group.name === 'exposure';
           var checkGrid = document.createElement('div');
-          checkGrid.className = 'check-grid';
+          checkGrid.className = usePillChecks ? 'pill-row' : 'check-grid';
           for (var o = 0; o < group.options.length; o++) {
             var checkOpt = group.options[o];
             if (!isVisibleForAge(checkOpt, selectedAgeBand)) continue;
             var checkVal = typeof checkOpt === 'string' ? checkOpt : checkOpt.value;
             var checkTag = typeof checkOpt === 'string' ? resolveFindingTagLabel(checkVal) : (checkOpt.tag || resolveFindingTagLabel(checkVal));
             var checkLabel = document.createElement('label');
-            checkLabel.className = 'check-opt';
+            checkLabel.className = usePillChecks ? 'pill-opt' : 'check-opt';
             checkLabel.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(checkLabel);
 
             var cb = document.createElement('input');
@@ -4239,6 +4288,7 @@
             cb.name = makeId(section.key, group.name, o);
             cb.value = checkVal;
             cb.setAttribute('data-finding-tag', checkTag);
+            if (checkOpt && typeof checkOpt === 'object' && checkOpt.output) cb.setAttribute('data-output', checkOpt.output);
 
             checkLabel.appendChild(cb);
             checkLabel.appendChild(document.createTextNode(checkVal));
@@ -5459,7 +5509,7 @@
         updateRecessionSubtypePanel();
       }
       if (prefix.indexOf('msk__shoulder__') === 0) updateMskShoulderPanels();
-      if (prefix === CVS_FINDINGS_PREFIX && (key === 'hepatomegaly' || key === 'peripheralOedema')) syncCardiovascularNadPill();
+      if (prefix === CVS_FINDINGS_PREFIX && (key === 'hepatomegaly' || key === 'peripheralOedema' || key === 'jvp')) syncCardiovascularNadPill();
       if (prefix === ABDOMEN_PERITONITIC_PREFIX && key === 'peritonitic') syncAbdomenNadPill();
       if (prefix === HEENT_ORAL_YN_PREFIX && key === 'pharyngealEry') syncHeentNadPill();
       if (prefix === HEENT_NECK_MENINGISM_PREFIX && (key === 'neckMovement' || key === 'appearsMeningitic')) syncHeentNadPill();
@@ -5620,7 +5670,8 @@
         var vals = [];
         for (var s = 0; s < selected.length; s++) {
           var rawVal = trimSentence(selected[s].value);
-          var mappedVal = OUTPUT_LABEL_MAP[rawVal] || rawVal;
+          var outputOverride = selected[s].getAttribute('data-output') || '';
+          var mappedVal = outputOverride || OUTPUT_LABEL_MAP[rawVal] || rawVal;
           var rawTag = selected[s].getAttribute('data-finding-tag') || '';
           vals.push(makeTaggedFinding(mappedVal, rawTag));
         }
