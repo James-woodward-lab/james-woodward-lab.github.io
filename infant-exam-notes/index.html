@@ -813,9 +813,103 @@
     .msk-subsection-details.flash-highlight { animation: mskFlashHighlight 1s ease-out; border-radius: 6px; }
 
     .section-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
+
+    /* ===== AGE PICKER ===== */
+    .age-picker {
+      margin: 8px 0 20px;
+      padding: 20px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--card, var(--bg)) 92%, var(--accent) 8%);
+    }
+    .age-picker h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      text-align: center;
+    }
+    .age-picker-lead {
+      margin: 0 0 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+    .age-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (min-width: 640px) {
+      .age-picker-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .age-picker-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 84px;
+      padding: 14px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg, #fff);
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+    }
+    .age-picker-btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .age-picker-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .age-picker-btn.is-selected {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 14%, transparent);
+    }
+    .age-picker-btn-label {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .age-picker-btn-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .age-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 0 0 12px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--card, var(--bg)) 94%, var(--accent) 6%);
+      font-size: 0.9rem;
+    }
+    .age-banner[hidden],
+    .exam-workspace[hidden],
+    .age-picker[hidden] { display: none !important; }
+    .age-banner-text strong { font-weight: 700; }
+    .age-banner-change {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: 0.82rem;
+      padding: 4px 12px;
+      cursor: pointer;
+    }
+    .age-banner-change:hover { border-color: var(--accent); }
+    body.age-not-selected #outputPanel { display: none; }
   </style>
 </head>
-<body>
+<body class="age-not-selected">
   <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">&#9728;&#65039;</button>
   <div class="exam-container">
     <header class="app-header-center">
@@ -823,7 +917,18 @@
       <p>Tool to aid documentation of examination findings</p>
     </header>
 
-    <div id="exam-sections"></div>
+    <section id="agePicker" class="age-picker" aria-label="Select patient age">
+      <h2>Select age</h2>
+      <p class="age-picker-lead">Choose an age band to show age-appropriate examination findings.</p>
+      <div class="age-picker-grid" id="agePickerGrid"></div>
+    </section>
+
+    <div id="ageBanner" class="age-banner" hidden>
+      <span class="age-banner-text">Age band: <strong id="ageBannerLabel"></strong></span>
+      <button type="button" class="age-banner-change" id="changeAgeBtn">Change age</button>
+    </div>
+
+    <div id="exam-sections" class="exam-workspace" hidden></div>
   </div>
 
   <div class="output-panel" id="outputPanel">
@@ -878,9 +983,9 @@
       { key: 'peritonitic', label: 'Peritonitic', yes: 'Peritonitic', no: 'Not peritonitic', normalYes: false, noTag: 'Normal finding' },
       { key: 'rebound', label: 'Rebound tenderness', yes: 'Rebound tenderness present', no: 'No rebound tenderness', normalYes: false },
       { key: 'percussion', label: 'Percussion tenderness', yes: 'Percussion tenderness present', no: 'No percussion tenderness', normalYes: false },
-      { key: 'straightLeg', label: 'Straight leg raise', yes: 'Able to straight leg raise without pain', no: 'Unable to straight leg raise due to pain', normalYes: true, yesTag: 'Normal finding' },
-      { key: 'singleLeg', label: 'Single leg stand', yes: 'able to single leg stand without pain', no: 'unable to single leg stand', normalYes: true, yesTag: 'Normal finding' },
-      { key: 'jump', label: 'Jump', yes: 'able to jump without pain', no: 'Not able to jump due to pain', normalYes: true, yesTag: 'Normal finding' }
+      { key: 'straightLeg', label: 'Straight leg raise', yes: 'Able to straight leg raise without pain', no: 'Unable to straight leg raise due to pain', normalYes: true, yesTag: 'Normal finding', ageBands: ['1-4', '5-11', '12+'] },
+      { key: 'singleLeg', label: 'Single leg stand', yes: 'able to single leg stand without pain', no: 'unable to single leg stand', normalYes: true, yesTag: 'Normal finding', ageBands: ['1-4', '5-11', '12+'] },
+      { key: 'jump', label: 'Jump', yes: 'able to jump without pain', no: 'Not able to jump due to pain', normalYes: true, yesTag: 'Normal finding', ageBands: ['1-4', '5-11', '12+'] }
     ];
 
     var HEENT_ORAL_YN_ROWS = [
@@ -941,10 +1046,10 @@
     var RESPIRATORY_ACCESSORY_YN_ROWS = [
       { key: 'recessions', label: 'Recessions', yes: 'Recessions present', no: 'No recessions', normalYes: false, noTag: 'Normal finding', yesTag: 'abnormal finding' },
       { key: 'accessoryMuscleUse', label: 'Accessory muscle use', yes: 'Accessory muscle use', no: 'No accessory muscle use', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
-      { key: 'headBobbing', label: 'Head bobbing', yes: 'Head bobbing', no: 'No head bobbing', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
+      { key: 'headBobbing', label: 'Head bobbing', yes: 'Head bobbing', no: 'No head bobbing', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding', ageBands: ['0-1', '1-4'] },
       { key: 'trachealTug', label: 'Tracheal tug', yes: 'Tracheal tug present', no: 'No tracheal tug', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
-      { key: 'grunting', label: 'Grunting', yes: 'Grunting', no: 'No grunting', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
-      { key: 'nasalFlaring', label: 'Nasal flaring', yes: 'Nasal flaring present', no: 'No nasal flaring', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' }
+      { key: 'grunting', label: 'Grunting', yes: 'Grunting', no: 'No grunting', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding', ageBands: ['0-1', '1-4'] },
+      { key: 'nasalFlaring', label: 'Nasal flaring', yes: 'Nasal flaring present', no: 'No nasal flaring', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding', ageBands: ['0-1', '1-4'] }
     ];
 
     var NEURO_CN_YN_ROWS = [
@@ -972,7 +1077,7 @@
       { key: 'plantars', label: 'Plantars downgoing', yes: 'Plantars downgoing bilaterally', no: 'Plantars upgoing', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
       { key: 'coordination', label: 'Coordination normal', yes: 'Lower limb coordination normal (heel\u2013shin)', no: 'Lower limb coordination impaired', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
       { key: 'sensation', label: 'Sensation intact', yes: 'Lower limb sensation grossly intact', no: 'Lower limb sensory deficit', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
-      { key: 'gait', label: 'Gait normal', yes: 'Gait normal and age-appropriate', no: 'Gait abnormal', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' }
+      { key: 'gait', label: 'Gait normal', yes: 'Gait normal and age-appropriate', no: 'Gait abnormal', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding', ageBands: ['1-4', '5-11', '12+'] }
     ];
     var NEURO_INFANT_HEAD_YN_ROWS = [
       { key: 'headControl', label: 'Head control age-appropriate', yes: 'Head control age-appropriate', no: 'Head lag present', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' }
@@ -1039,7 +1144,7 @@
           { type: 'radio', name: 'guarding', label: 'Guarding', options: ['No guarding', 'Guarding present'] },
           { type: 'radio', name: 'bowelSounds', label: 'Bowel sounds', options: ['Bowel sounds present', 'Bowel sounds reduced', 'Bowel sounds absent'] },
           { type: 'yesNoToggle', name: 'peritonitic', label: 'Peritonitic', rows: ABDOMEN_PERITONITIC_YN_ROWS },
-          { type: 'checkbox', name: 'checks', label: 'Other findings', options: ['No organomegaly', 'No masses', 'Umbilicus normal', 'No inguinal hernias'] }
+          { type: 'checkbox', name: 'checks', label: 'Other findings', options: ['No organomegaly', 'No masses', { value: 'Umbilicus normal', ageBands: ['0-1'] }, 'No inguinal hernias'] }
         ],
         freeHint: 'Localise tenderness, describe hernia'
       },
@@ -1052,8 +1157,8 @@
           { type: 'radio', name: 'crtPeripheral', label: 'Capillary refill - Peripherally', options: [{ value: '<2s', tag: 'Normal finding' }, '2-3s', '>3s'] },
           { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm and well perfused', 'Cool peripherally', 'Shut down'] },
           { type: 'radio', name: 'mucosa', label: 'Mucous membranes', options: ['Moist mucous membranes', 'Dry mucous membranes'] },
-          { type: 'radio', name: 'tears', label: 'Tears', options: [{ value: 'Good tears', tag: 'Normal finding' }, { value: 'No tears', tag: 'abnormal finding' }] },
-          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', options: ['Fontanelle flat', 'Fontanelle bulging', 'Fontanelle sunken'] }
+          { type: 'radio', name: 'tears', label: 'Tears', ageBands: ['0-1', '1-4'], options: [{ value: 'Good tears', tag: 'Normal finding' }, { value: 'No tears', tag: 'abnormal finding' }] },
+          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', ageBands: ['0-1', '1-4'], options: ['Fontanelle flat', 'Fontanelle bulging', 'Fontanelle sunken'] }
         ],
         freeHint: 'Hydration note if relevant'
       },
@@ -1065,7 +1170,7 @@
           { type: 'radio', name: 'colour', label: 'Colour', options: [{ value: 'No pallor', tag: 'Normal finding' }, { value: 'Pale', tag: 'abnormal finding' }, { value: 'Jaundiced', tag: 'abnormal finding' }, { value: 'Mottled', tag: 'urgent abnormal finding' }, { value: 'Cyanosed', tag: 'urgent abnormal finding' }] },
           { type: 'radio', name: 'rash', label: 'Rash', options: ['No rash', 'Rash (blanching)', 'Rash (non-blanching)'] },
           { type: 'radio', name: 'bruising', label: 'Bruising', options: ['No bruising', 'Bruising present'] },
-          { type: 'radio', name: 'nappy', label: 'Nappy area', options: ['Nappy area intact', 'Nappy rash present'] },
+          { type: 'radio', name: 'nappy', label: 'Nappy area', ageBands: ['0-1', '1-4'], options: ['Nappy area intact', 'Nappy rash present'] },
           { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm peripheries', 'Cool peripheries'] },
           { type: 'radio', name: 'exposure', label: 'Exposure', options: ['Uncovered fully for examination'] }
         ],
@@ -1081,9 +1186,10 @@
           { type: 'yesNoToggle', name: 'cn', label: 'Cranial nerves', rows: NEURO_CN_YN_ROWS },
           { type: 'yesNoToggle', name: 'upperLimb', label: 'Upper limb neurology', rows: NEURO_UL_YN_ROWS },
           { type: 'yesNoToggle', name: 'lowerLimb', label: 'Lower limb neurology', rows: NEURO_LL_YN_ROWS },
-          { type: 'infantSpecific', name: 'infant' }
+          { type: 'infantSpecific', name: 'infant', ageBands: ['0-1'] }
         ],
-        freeHint: 'Optional: focal findings, HINE score, or detailed neurological impression'
+        freeHint: 'Optional: focal findings or detailed neurological impression',
+        freeHintByAge: { '0-1': 'Optional: focal findings, HINE score, or detailed neurological impression' }
       }
     ];
 
@@ -1108,7 +1214,7 @@
               { value: 'Crepitus', tag: TAG_ABNORMAL },
               { value: 'Erythema', tag: TAG_ABNORMAL },
               { value: 'Warmth', tag: TAG_ABNORMAL },
-              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT, ageBands: ['0-1', '1-4'] },
               { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
               { value: 'Open fracture', tag: TAG_URGENT }
             ]
@@ -1146,7 +1252,7 @@
               { value: 'Crepitus', tag: TAG_ABNORMAL },
               { value: 'Erythema', tag: TAG_ABNORMAL },
               { value: 'Warmth', tag: TAG_ABNORMAL },
-              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT, ageBands: ['0-1', '1-4'] },
               { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
               { value: 'Open fracture', tag: TAG_URGENT }
             ]
@@ -1211,7 +1317,7 @@
               { value: 'Leg length discrepancy', tag: TAG_ABNORMAL },
               { value: 'Trendelenburg positive', tag: TAG_ABNORMAL },
               { value: 'Non-weight-bearing', tag: TAG_URGENT },
-              { value: 'Pseudoparalysis', tag: TAG_URGENT }
+              { value: 'Pseudoparalysis', tag: TAG_URGENT, ageBands: ['0-1', '1-4'] }
             ]
           },
           {
@@ -1279,8 +1385,8 @@
               { value: 'Warmth', tag: TAG_ABNORMAL },
               { value: 'Pes planus', tag: TAG_ABNORMAL },
               { value: 'Pes cavus', tag: TAG_ABNORMAL },
-              { value: 'Talipes equinovarus', tag: TAG_ABNORMAL },
-              { value: 'Metatarsus adductus', tag: TAG_ABNORMAL },
+              { value: 'Talipes equinovarus', tag: TAG_ABNORMAL, ageBands: ['0-1', '1-4'] },
+              { value: 'Metatarsus adductus', tag: TAG_ABNORMAL, ageBands: ['0-1', '1-4'] },
               { value: 'Non-weight-bearing', tag: TAG_URGENT }
             ]
           },
@@ -1298,7 +1404,7 @@
               { value: 'Erythema', tag: TAG_ABNORMAL },
               { value: 'Warmth', tag: TAG_ABNORMAL },
               { value: 'Non-weight-bearing', tag: TAG_URGENT },
-              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT, ageBands: ['0-1', '1-4'] },
               { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
               { value: 'Open fracture', tag: TAG_URGENT }
             ]
@@ -1317,7 +1423,7 @@
               { value: 'Erythema', tag: TAG_ABNORMAL },
               { value: 'Warmth', tag: TAG_ABNORMAL },
               { value: 'Non-weight-bearing', tag: TAG_URGENT },
-              { value: 'Pseudoparalysis', tag: TAG_URGENT },
+              { value: 'Pseudoparalysis', tag: TAG_URGENT, ageBands: ['0-1', '1-4'] },
               { value: 'Neurovascular compromise distally', tag: TAG_URGENT },
               { value: 'Open fracture', tag: TAG_URGENT }
             ]
@@ -1530,6 +1636,37 @@
           }
         }
       }
+    }
+
+
+    var AGE_BANDS = [
+      { id: '0-1', label: '0–1', subtitle: 'Infant' },
+      { id: '1-4', label: '1–4', subtitle: 'Toddler / preschool' },
+      { id: '5-11', label: '5–11', subtitle: 'School age' },
+      { id: '12+', label: '12+', subtitle: 'Adolescent' }
+    ];
+    var selectedAgeBand = null;
+
+    function getAgeBandMeta(bandId) {
+      for (var i = 0; i < AGE_BANDS.length; i++) {
+        if (AGE_BANDS[i].id === bandId) return AGE_BANDS[i];
+      }
+      return null;
+    }
+
+    function isVisibleForAge(item, band) {
+      if (!band) return false;
+      if (!item || typeof item === 'string') return true;
+      if (!item.ageBands || !item.ageBands.length) return true;
+      return item.ageBands.indexOf(band) !== -1;
+    }
+
+    function getSectionFreeHint(section) {
+      if (!section) return 'Additional details';
+      if (section.freeHintByAge && selectedAgeBand && section.freeHintByAge[selectedAgeBand]) {
+        return section.freeHintByAge[selectedAgeBand];
+      }
+      return section.freeHint || 'Additional details';
     }
 
     var PRIORITY_KEYS = ['general', 'perfusionHydration', 'cardiovascular', 'respiratory', 'abdomen'];
@@ -3305,8 +3442,10 @@
       wrap.className = 'check-grid yesno-toggle-wrap' + (options.spanFull ? ' span-full' : '');
       wrap.setAttribute('data-yesno-prefix', prefix);
       for (var pr = 0; pr < rowsDef.length; pr++) {
+        if (!isVisibleForAge(rowsDef[pr], selectedAgeBand)) continue;
         appendYesNoToggleRow(wrap, prefix, rowsDef[pr]);
       }
+      if (!wrap.children.length) return null;
       parent.appendChild(wrap);
       return wrap;
     }
@@ -3937,6 +4076,7 @@
 
       for (var g = 0; g < section.groups.length; g++) {
         var group = section.groups[g];
+        if (!isVisibleForAge(group, selectedAgeBand)) continue;
         var row = document.createElement('div');
         row.className = 'group-row';
         if (section.key === 'respiratory' && group.name === 'auscultationMode') row.classList.add('span-full');
@@ -4003,6 +4143,7 @@
           pillRow.className = 'pill-row';
           for (var o = 0; o < group.options.length; o++) {
             var radioOpt = group.options[o];
+            if (!isVisibleForAge(radioOpt, selectedAgeBand)) continue;
             var radioVal = typeof radioOpt === 'string' ? radioOpt : radioOpt.value;
             var radioTag = typeof radioOpt === 'string' ? resolveFindingTagLabel(radioVal) : (radioOpt.tag || resolveFindingTagLabel(radioVal));
             var pillLabel = document.createElement('label');
@@ -4020,6 +4161,7 @@
             pillLabel.appendChild(document.createTextNode(radioVal));
             pillRow.appendChild(pillLabel);
           }
+          if (!pillRow.children.length) continue;
           row.appendChild(pillRow);
         } else if (section.key === 'respiratory' && group.type === 'respiratoryAccessoryYn') {
           row.classList.add('span-full', 'conditional-inline-field');
@@ -4077,6 +4219,7 @@
           checkGrid.className = 'check-grid';
           for (var o = 0; o < group.options.length; o++) {
             var checkOpt = group.options[o];
+            if (!isVisibleForAge(checkOpt, selectedAgeBand)) continue;
             var checkVal = typeof checkOpt === 'string' ? checkOpt : checkOpt.value;
             var checkTag = typeof checkOpt === 'string' ? resolveFindingTagLabel(checkVal) : (checkOpt.tag || resolveFindingTagLabel(checkVal));
             var checkLabel = document.createElement('label');
@@ -4094,6 +4237,7 @@
             checkLabel.appendChild(document.createTextNode(checkVal));
             checkGrid.appendChild(checkLabel);
           }
+          if (!checkGrid.children.length) continue;
           row.appendChild(checkGrid);
         }
 
@@ -4253,7 +4397,7 @@
       var freeInput = document.createElement('textarea');
       freeInput.id = section.key + '__free';
       freeInput.rows = 1;
-      freeInput.placeholder = section.freeHint || 'Additional details';
+      freeInput.placeholder = getSectionFreeHint(section);
       freeInput.addEventListener('input', updateOutput);
       freeField.appendChild(freeInput);
       card.appendChild(freeField);
@@ -4569,6 +4713,7 @@
         rGrid.className = 'check-grid';
         for (var fi = 0; fi < sub.findings.length; fi++) {
           var rf = sub.findings[fi];
+          if (!isVisibleForAge(rf, selectedAgeBand)) continue;
           var rl = document.createElement('label');
           rl.className = 'check-opt';
           rl.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(rl);
@@ -4593,6 +4738,7 @@
         lGrid.className = 'check-grid';
         for (var fj = 0; fj < sub.findings.length; fj++) {
           var lf = sub.findings[fj];
+          if (!isVisibleForAge(lf, selectedAgeBand)) continue;
           var ll = document.createElement('label');
           ll.className = 'check-opt';
           ll.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(ll);
@@ -4613,6 +4759,7 @@
         mGrid.className = 'check-grid';
         for (var fk = 0; fk < sub.findings.length; fk++) {
           var mf = sub.findings[fk];
+          if (!isVisibleForAge(mf, selectedAgeBand)) continue;
           var ml = document.createElement('label');
           ml.className = 'check-opt';
           ml.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(ml);
@@ -4638,7 +4785,7 @@
       { key: 'movesLimbs',    value: 'Moves all four limbs equally',       tag: TAG_NORMAL },
       { key: 'noBonyTender',  value: 'No bony tenderness on palpation',    tag: TAG_NORMAL },
       { key: 'nvIntact',      value: 'Neurovascularly intact distally',    tag: TAG_NORMAL },
-      { key: 'mobility',      value: 'Age-appropriate mobility and gait',  tag: TAG_NORMAL },
+      { key: 'mobility',      value: 'Age-appropriate mobility and gait',  tag: TAG_NORMAL, ageBands: ['1-4', '5-11', '12+'] },
       { key: 'spine',         value: 'Spine straight, no midline tenderness', tag: TAG_NORMAL }
     ];
 
@@ -4653,6 +4800,7 @@
       grid.className = 'check-grid';
       for (var i = 0; i < MSK_QUICK_SCREEN_ITEMS.length; i++) {
         var item = MSK_QUICK_SCREEN_ITEMS[i];
+        if (!isVisibleForAge(item, selectedAgeBand)) continue;
         var lab = document.createElement('label');
         lab.className = 'check-opt';
         lab.onclick = (function(l) { return function() { handleCheckClick(l); }; })(lab);
@@ -4919,6 +5067,7 @@
 
       for (var qi = 0; qi < MSK_QUICK_SCREEN_ITEMS.length; qi++) {
         var qItem = MSK_QUICK_SCREEN_ITEMS[qi];
+        if (!isVisibleForAge(qItem, selectedAgeBand)) continue;
         var qEl = document.getElementById('msk__quickscreen__' + qItem.key);
         if (qEl && qEl.checked) {
           quickScreenPhrases.push(qItem.value.toLowerCase());
@@ -4965,6 +5114,7 @@
 
           var subPhrases = [];
           for (var fk = 0; fk < sub.findings.length; fk++) {
+            if (!isVisibleForAge(sub.findings[fk], selectedAgeBand)) continue;
             var fVal = sub.findings[fk].value;
             if (!allKeys[fVal]) continue;
             var inR = !!rVals[fVal];
@@ -5313,6 +5463,7 @@
       var phrases = [];
       for (var g = 0; g < section.groups.length; g++) {
         var group = section.groups[g];
+        if (!isVisibleForAge(group, selectedAgeBand)) continue;
         if (section.key === 'respiratory' && group.name === 'auscultationMode') continue;
         if (section.key === 'respiratory' && group.name === 'upperAirwayMode') {
           var airwayMode = document.querySelector('input[name="respiratory__upperAirwayMode"]:checked');
@@ -5331,6 +5482,7 @@
           var abPrfx = 'abdomen__peritonitic';
           for (var py = 0; py < group.rows.length; py++) {
             var rdef = group.rows[py];
+            if (!isVisibleForAge(rdef, selectedAgeBand)) continue;
             var yesEl = document.getElementById(abPrfx + '__' + rdef.key + '__yes');
             var noEl = document.getElementById(abPrfx + '__' + rdef.key + '__no');
             if (yesEl && yesEl.checked) phrases.push(makeTaggedFinding(rdef.yes, rdef.yesTag));
@@ -5353,6 +5505,7 @@
           var nYnPrfx = 'neurology__' + group.name;
           for (var nfy = 0; nfy < group.rows.length; nfy++) {
             var nrdef = group.rows[nfy];
+            if (!isVisibleForAge(nrdef, selectedAgeBand)) continue;
             var nYesEl = document.getElementById(nYnPrfx + '__' + nrdef.key + '__yes');
             var nNoEl = document.getElementById(nYnPrfx + '__' + nrdef.key + '__no');
             if (nYesEl && nYesEl.checked) phrases.push(makeTaggedFinding(nrdef.yes, nrdef.yesTag));
@@ -5387,6 +5540,7 @@
             var rap = 'respiratory__accessory';
             for (var ray = 0; ray < group.rows.length; ray++) {
               var rdef = group.rows[ray];
+              if (!isVisibleForAge(rdef, selectedAgeBand)) continue;
               var yEl = document.getElementById(rap + '__' + rdef.key + '__yes');
               var nEl = document.getElementById(rap + '__' + rdef.key + '__no');
               if (rdef.key === 'recessions') {
@@ -5540,6 +5694,15 @@
     function updateOutput() {
       var lines = [];
       var abnormalCollector = [];
+      if (!selectedAgeBand) {
+        var emptyOut = document.getElementById('output');
+        if (emptyOut) {
+          emptyOut.value = '';
+          emptyOut.classList.add('empty');
+        }
+        updateOutputTitle();
+        return;
+      }
       var sectionMap = {};
       for (var si = 0; si < SECTIONS.length; si++) sectionMap[SECTIONS[si].key] = SECTIONS[si];
       for (var oi = 0; oi < OUTPUT_SECTION_KEYS.length; oi++) {
@@ -5706,35 +5869,8 @@
       updateOutput();
     }
 
-    renderSections();
-    updateHeentOralCavityPanel();
-    syncYesNoToggleAllRows();
-    updateRespiratoryWobDependentPanels();
-    updateCvMurmurDetailsPanel();
-    updateHeentTmFindingsPanel();
-    updateAuscultationAddedPanel();
-    updateUpperAirwayFindingsPanel();
-    var lungZoneEls = document.querySelectorAll('.lung-zone');
-    for (var i = 0; i < lungZoneEls.length; i++) {
-      lungZoneEls[i].addEventListener('click', function() { setActiveLungZone(this.getAttribute('data-zone')); });
-      lungZoneEls[i].addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          setActiveLungZone(this.getAttribute('data-zone'));
-        }
-      });
-    }
-    renderLungPickerControls();
-    updateAbdomenTendernessField();
-    updateRecessionSubtypePanel();
-    updateSkinRashBruisingFields();
-    var lungNoteInput = document.getElementById('lungZoneNoteInput');
-    if (lungNoteInput) {
-      lungNoteInput.addEventListener('input', function() {
-        setLungZoneNote(activeLungZone, this.value);
-      });
-    }
     var prependTimestamp = false;
+    var outputOptionsBound = false;
 
     function refreshOptionToggleStyles() {
       var inputs = document.querySelectorAll('.output-options-grid .output-option-switch');
@@ -5759,21 +5895,137 @@
       });
     }
 
-    bindOutputOption('prefixToggle', function(v) { includeSystemPrefixes = v; });
-    bindOutputOption('severityToggle', function(v) { showSeverityMarkers = v; });
-    bindOutputOption('summaryToggle', function(v) { showAbnormalSummary = v; });
-    bindOutputOption('abnormalsOnlyToggle', function(v) { abnormalsOnly = v; });
-    bindOutputOption('expandAbbrevToggle', function(v) { expandAbbreviations = v; });
-    bindOutputOption('timestampToggle', function(v) { prependTimestamp = v; });
-    refreshOptionToggleStyles();
-    var outputTextarea = document.getElementById('output');
-    if (outputTextarea) {
-      outputTextarea.addEventListener('input', function() {
-        this.classList.toggle('empty', !this.value.trim());
-        updateOutputTitle();
-      });
+    function bindOutputOptionsOnce() {
+      if (outputOptionsBound) return;
+      outputOptionsBound = true;
+      bindOutputOption('prefixToggle', function(v) { includeSystemPrefixes = v; });
+      bindOutputOption('severityToggle', function(v) { showSeverityMarkers = v; });
+      bindOutputOption('summaryToggle', function(v) { showAbnormalSummary = v; });
+      bindOutputOption('abnormalsOnlyToggle', function(v) { abnormalsOnly = v; });
+      bindOutputOption('expandAbbrevToggle', function(v) { expandAbbreviations = v; });
+      bindOutputOption('timestampToggle', function(v) { prependTimestamp = v; });
+      refreshOptionToggleStyles();
+      var outputTextarea = document.getElementById('output');
+      if (outputTextarea) {
+        outputTextarea.addEventListener('input', function() {
+          this.classList.toggle('empty', !this.value.trim());
+          updateOutputTitle();
+        });
+      }
     }
-    updateOutput();
+
+    function resetLungZoneState() {
+      for (var z = 0; z < LUNG_ZONES.length; z++) {
+        lungZoneState[LUNG_ZONES[z].key] = [];
+        lungZoneNotes[LUNG_ZONES[z].key] = '';
+      }
+      activeLungZone = 'right_upper';
+    }
+
+    function syncExamPanelsAfterRender() {
+      updateHeentOralCavityPanel();
+      syncYesNoToggleAllRows();
+      updateRespiratoryWobDependentPanels();
+      updateCvMurmurDetailsPanel();
+      updateHeentTmFindingsPanel();
+      updateAuscultationAddedPanel();
+      updateUpperAirwayFindingsPanel();
+      var lungZoneEls = document.querySelectorAll('.lung-zone');
+      for (var i = 0; i < lungZoneEls.length; i++) {
+        lungZoneEls[i].addEventListener('click', function() { setActiveLungZone(this.getAttribute('data-zone')); });
+        lungZoneEls[i].addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setActiveLungZone(this.getAttribute('data-zone'));
+          }
+        });
+      }
+      renderLungPickerControls();
+      updateAbdomenTendernessField();
+      updateRecessionSubtypePanel();
+      updateSkinRashBruisingFields();
+      var lungNoteInput = document.getElementById('lungZoneNoteInput');
+      if (lungNoteInput) {
+        lungNoteInput.addEventListener('input', function() {
+          setLungZoneNote(activeLungZone, this.value);
+        });
+      }
+      updateOutput();
+    }
+
+    function updateAgeChrome() {
+      var picker = document.getElementById('agePicker');
+      var banner = document.getElementById('ageBanner');
+      var workspace = document.getElementById('exam-sections');
+      var label = document.getElementById('ageBannerLabel');
+      var meta = getAgeBandMeta(selectedAgeBand);
+      var hasAge = !!selectedAgeBand;
+      document.body.classList.toggle('age-not-selected', !hasAge);
+      if (picker) picker.hidden = hasAge;
+      if (banner) banner.hidden = !hasAge;
+      if (workspace) workspace.hidden = !hasAge;
+      if (label) label.textContent = meta ? (meta.label + ' · ' + meta.subtitle) : '';
+      var buttons = document.querySelectorAll('.age-picker-btn');
+      for (var bi = 0; bi < buttons.length; bi++) {
+        buttons[bi].classList.toggle('is-selected', buttons[bi].getAttribute('data-age') === selectedAgeBand);
+      }
+    }
+
+    function initExamWorkspace() {
+      resetLungZoneState();
+      renderSections();
+      syncExamPanelsAfterRender();
+    }
+
+    function selectAgeBand(bandId) {
+      if (!getAgeBandMeta(bandId)) return;
+      selectedAgeBand = bandId;
+      updateAgeChrome();
+      bindOutputOptionsOnce();
+      initExamWorkspace();
+    }
+
+    function showAgePickerForChange() {
+      selectedAgeBand = null;
+      var host = document.getElementById('exam-sections');
+      if (host) host.innerHTML = '';
+      resetLungZoneState();
+      updateAgeChrome();
+      updateOutput();
+    }
+
+    function renderAgePicker() {
+      var grid = document.getElementById('agePickerGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      for (var i = 0; i < AGE_BANDS.length; i++) {
+        var band = AGE_BANDS[i];
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'age-picker-btn';
+        btn.setAttribute('data-age', band.id);
+        btn.setAttribute('aria-label', 'Age ' + band.label + ', ' + band.subtitle);
+        var lab = document.createElement('span');
+        lab.className = 'age-picker-btn-label';
+        lab.textContent = band.label;
+        var sub = document.createElement('span');
+        sub.className = 'age-picker-btn-sub';
+        sub.textContent = band.subtitle;
+        btn.appendChild(lab);
+        btn.appendChild(sub);
+        btn.addEventListener('click', (function(id) {
+          return function() { selectAgeBand(id); };
+        })(band.id));
+        grid.appendChild(btn);
+      }
+      var changeBtn = document.getElementById('changeAgeBtn');
+      if (changeBtn) {
+        changeBtn.addEventListener('click', showAgePickerForChange);
+      }
+      updateAgeChrome();
+    }
+
+    renderAgePicker();
   </script>
 </body>
 </html>
