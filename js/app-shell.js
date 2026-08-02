@@ -29,7 +29,7 @@
     // Top tools
     { title: 'WETFLAG Resus Card',              href: '/wetflag-calculator/',              emoji: '🚨', tags: 'resus resuscitation apls paediatric arrest wetflag drugs dose emergency weight tube fluids lorazepam adrenaline glucose', group: 'Top' },
     { title: 'Paediatric Vitals & Ranges',      href: '/paediatric-vitals/',               emoji: '📈', tags: 'vitals obs observations pews rr hr bp sats oxygen temperature crt avpu normal ranges age ward round flag concerning shock', group: 'WIP' },
-    { title: 'Examination Notes',               href: '/infant-exam-notes/',               emoji: '🧾', tags: 'exam examination notes infant baby', group: 'Top' },
+    { title: 'Examination Notes',               href: '/exam-notes/',               emoji: '🧾', tags: 'exam examination notes infant baby', group: 'Top' },
     { title: 'New examination notes test',      href: '/new-examination-notes-test/',     emoji: '🧾', tags: 'exam examination notes infant baby test', group: 'Top' },
     { title: 'Fluid Calculator',                href: '/fluid-calculator/',                emoji: '💧', tags: 'fluid maintenance iv hydration', group: 'Top' },
     { title: 'QTc Calculator',                  href: '/qtc-calculator/',                  emoji: '🫀', tags: 'qtc ecg cardiac rhythm bazett fridericia', group: 'Top' },

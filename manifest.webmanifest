@@ -64,7 +64,7 @@
     {
       "name": "Examination Notes",
       "short_name": "Exam",
-      "url": "/infant-exam-notes/?source=pwa-shortcut",
+      "url": "/exam-notes/?source=pwa-shortcut",
       "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
