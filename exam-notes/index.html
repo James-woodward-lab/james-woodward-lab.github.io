@@ -1183,7 +1183,11 @@
           { type: 'radio', name: 'perfusion', label: 'Perfusion', options: ['Warm and well perfused', 'Cool peripherally', 'Shut down'] },
           { type: 'radio', name: 'mucosa', label: 'Mucous membranes', options: ['Moist mucous membranes', 'Dry mucous membranes'] },
           { type: 'radio', name: 'tears', label: 'Tears', ageBands: ['0-1', '1-4'], options: [{ value: 'Good tears', tag: 'Normal finding' }, { value: 'No tears', tag: 'abnormal finding' }] },
-          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', ageBands: ['0-1', '1-4'], options: ['Fontanelle flat', 'Fontanelle bulging', 'Fontanelle sunken'] }
+          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', ageBands: ['0-1'], options: ['Fontanelle flat', 'Fontanelle bulging', 'Fontanelle sunken'] },
+          { type: 'radio', name: 'fontanelle', label: 'Fontanelle', ageBands: ['1-4'], options: [
+            { value: 'Fontanelle closed', tag: 'Normal finding', output: 'Fontanelle closed' },
+            { value: 'Fontanelle open', tag: 'Normal finding' }
+          ] }
         ],
         freeHint: 'Hydration note if relevant'
       },
@@ -1944,6 +1948,7 @@
       'oral cavity nad, pharynx not visualised',
       'oral cavity nad',
       'pulses normal',
+      'fontanelle closed',
       'skin observed while fully clothed',
       'skin to arms and legs examined',
       'torso examined',
@@ -2427,6 +2432,7 @@
         input.checked = false;
         for (var i = 0; i < siblings.length; i++) siblings[i].classList.remove('selected', 'abnormal', 'pill-normal');
         if (input.name === 'abdomen__tenderness') updateAbdomenTendernessField();
+        if (input.name === 'perfusionHydration__fontanelle') updateFontanelleOpenField();
         if (input.name === 'skin__rash' || input.name === 'skin__bruising') updateSkinRashBruisingFields();
         if (input.name === 'heent__oral_cavity_vis' || input.name === 'heent__tonsils_vis') updateHeentOralCavityPanel();
         if (input.name === 'general__state' || input.name === 'general__appearance' || input.name === 'general__comfort' || input.name === 'general__interaction') syncGeneralNadPill();
@@ -2473,6 +2479,7 @@
         else if (classifyFinding(v) === 'normal') label.classList.add('pill-normal');
       }
       if (n === 'abdomen__tenderness') updateAbdomenTendernessField();
+      if (n === 'perfusionHydration__fontanelle') updateFontanelleOpenField();
       if (n === 'respiratory__wob') updateRespiratoryWobDependentPanels();
       if (n === 'respiratory__upperAirwayMode') updateUpperAirwayFindingsPanel();
       if (n === 'respiratory__auscultationMode') {
@@ -4366,6 +4373,20 @@
           groupsWrap.appendChild(tendernessFieldInline);
         }
 
+        if (section.key === 'perfusionHydration' && group.name === 'fontanelle' && selectedAgeBand === '1-4') {
+          var fontDetailWrap = document.createElement('div');
+          fontDetailWrap.id = 'perfusionFontanelleDetailWrap';
+          fontDetailWrap.className = 'free-text-field conditional-inline-field span-full';
+          var fontDetailTa = document.createElement('textarea');
+          fontDetailTa.id = 'perfusionHydration__fontanelle_detail';
+          fontDetailTa.rows = 2;
+          fontDetailTa.placeholder = 'Fontanelle findings (e.g. soft and flat, bulging, sunken)';
+          fontDetailTa.setAttribute('aria-label', 'Fontanelle findings');
+          fontDetailTa.addEventListener('input', updateOutput);
+          fontDetailWrap.appendChild(fontDetailTa);
+          groupsWrap.appendChild(fontDetailWrap);
+        }
+
         if (section.key === 'respiratory' && group.name === 'auscultationMode') {
           var ausWrap = document.createElement('div');
           ausWrap.id = 'respiratoryAuscultationAddedWrap';
@@ -5451,6 +5472,16 @@
       if (!show) input.value = '';
     }
 
+    function updateFontanelleOpenField() {
+      var wrap = document.getElementById('perfusionFontanelleDetailWrap');
+      var input = document.getElementById('perfusionHydration__fontanelle_detail');
+      if (!wrap || !input) return;
+      var fontSelected = document.querySelector('input[name="perfusionHydration__fontanelle"]:checked');
+      var show = !!(fontSelected && fontSelected.value === 'Fontanelle open');
+      wrap.classList.toggle('show', show);
+      if (!show) input.value = '';
+    }
+
     function updateSkinRashBruisingFields() {
       var rashPick = document.querySelector('input[name="skin__rash"]:checked');
       var rashWrap = document.getElementById('skinRashDetailWrap');
@@ -5685,6 +5716,26 @@
             var skinColourPhrase = 'Skin: ' + toneFragment;
             var scTag = skinColPick.getAttribute('data-finding-tag') || '';
             phrases.push(makeTaggedFinding(skinColourPhrase, scTag || resolveFindingTagLabel(skinColourPhrase)));
+          }
+          continue;
+        }
+        if (section.key === 'perfusionHydration' && group.name === 'fontanelle') {
+          var fontPickOut = document.querySelector('input[name="perfusionHydration__fontanelle"]:checked');
+          if (fontPickOut) {
+            var fontVal = trimSentence(fontPickOut.value);
+            var fontTag = fontPickOut.getAttribute('data-finding-tag') || '';
+            if (fontVal === 'Fontanelle closed') {
+              phrases.push(makeTaggedFinding('Fontanelle closed', fontTag || resolveFindingTagLabel('Fontanelle closed')));
+            } else if (fontVal === 'Fontanelle open') {
+              var fontDetailEl = document.getElementById('perfusionHydration__fontanelle_detail');
+              var fontDetail = fontDetailEl ? trimSentence(fontDetailEl.value) : '';
+              var fontPhrase = 'Fontanelle open';
+              if (fontDetail) fontPhrase += ' ' + fontDetail;
+              phrases.push(makeTaggedFinding(fontPhrase, resolveFindingTagLabel(fontPhrase)));
+            } else {
+              var fontMapped = fontPickOut.getAttribute('data-output') || OUTPUT_LABEL_MAP[fontVal] || fontVal;
+              phrases.push(makeTaggedFinding(fontMapped, fontTag || resolveFindingTagLabel(fontMapped)));
+            }
           }
           continue;
         }
@@ -5942,6 +5993,7 @@
       activeLungZone = 'right_upper';
       renderLungPickerControls();
       updateAbdomenTendernessField();
+      updateFontanelleOpenField();
       updateRespiratoryWobDependentPanels();
       updateRecessionSubtypePanel();
       updateCvMurmurDetailsPanel();
@@ -6029,6 +6081,7 @@
       }
       renderLungPickerControls();
       updateAbdomenTendernessField();
+      updateFontanelleOpenField();
       updateRecessionSubtypePanel();
       updateSkinRashBruisingFields();
       var lungNoteInput = document.getElementById('lungZoneNoteInput');
