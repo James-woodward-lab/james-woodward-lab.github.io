@@ -5963,6 +5963,7 @@
     ];
     var GENITAL_ACUTE_SIGNS_YN_ROWS = [
       { key: 'tenderness', label: 'Tenderness', yes: 'Tenderness', no: 'No tenderness', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
+      { key: 'soft', label: 'Soft', yes: 'Soft', no: 'Not soft', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
       { key: 'highRiding', label: 'High-riding testis', yes: 'High-riding testis', no: 'Not high-riding', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
       { key: 'horizontalLie', label: 'Horizontal lie', yes: 'Horizontal lie', no: 'No horizontal lie', normalYes: false, yesTag: 'urgent abnormal finding', noTag: 'Normal finding' },
       { key: 'scrotalErythema', label: 'Scrotal erythema', yes: 'Scrotal erythema', no: 'No scrotal erythema', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
@@ -6406,6 +6407,8 @@
               }
             } else if (row.key === 'tenderness') {
               phrases.push({ text: sideWord + ' testicular tenderness', tag: row.yesTag || 'urgent abnormal finding' });
+            } else if (row.key === 'soft') {
+              phrases.push({ text: sideWord + ' testis soft', tag: row.yesTag || 'Normal finding' });
             } else if (row.key === 'swelling') {
               phrases.push({ text: sideWord + ' testicular swelling', tag: row.yesTag || 'abnormal finding' });
             } else if (row.key === 'highRiding' || row.key === 'horizontalLie') {
@@ -6418,6 +6421,8 @@
               phrases.push({ text: sideWord + ' testis not equal in size', tag: row.noTag || 'abnormal finding' });
             } else if (row.key === 'tenderness') {
               phrases.push({ text: 'No ' + sideWord.toLowerCase() + ' testicular tenderness', tag: row.noTag || 'Normal finding' });
+            } else if (row.key === 'soft') {
+              phrases.push({ text: sideWord + ' testis not soft', tag: row.noTag || 'abnormal finding' });
             } else {
               phrases.push({ text: row.no + ' (' + sideWord.toLowerCase() + ')', tag: row.noTag || 'Normal finding' });
             }
