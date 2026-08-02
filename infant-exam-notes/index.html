@@ -3355,7 +3355,7 @@
         return;
       }
       var tons = document.querySelector('input[name="heent__tonsils_vis"]:checked');
-      var showTons = tons && tons.value === 'Tonsils visible';
+      var showTons = tons && tons.value === 'Tonsil abnormality';
       if (tWrap) {
         tWrap.classList.toggle('show', showTons);
         if (!showTons) clearHeentTonsilDetailFields();
@@ -3482,7 +3482,7 @@
       tonsLab.style.marginTop = '8px';
       tonsLab.textContent = 'Tonsils';
       oralDetail.appendChild(tonsLab);
-      oralDetail.appendChild(heentPillRow('heent__tonsils_vis', ['Tonsils NAD', 'Tonsils visible', 'Tonsils not visible']));
+      oralDetail.appendChild(heentPillRow('heent__tonsils_vis', ['Tonsils NAD', 'Tonsil abnormality', 'Tonsils not visible']));
       var tonsilCols = document.createElement('div');
       tonsilCols.id = 'heentTonsilsDetailWrap';
       tonsilCols.className = 'heent-tonsil-cols conditional-inline-field';
@@ -3578,7 +3578,7 @@
         parts.push('Tonsils NAD');
       } else if (tons && tons.value === 'Tonsils not visible') {
         parts.push('tonsils not visible');
-      } else if (tons && tons.value === 'Tonsils visible') {
+      } else if (tons && tons.value === 'Tonsil abnormality') {
         var L = heentReadTonsilSide(mBlock, 'L');
         var R = heentReadTonsilSide(mBlock, 'R');
         var anyL = L.ery || L.exo || L.enl;
