@@ -16,7 +16,7 @@ bedside on a phone or trust PC.
 - **🚨 [WETFLAG Resuscitation Card](wetflag-calculator/)** - APLS weight-based
   emergency doses (Weight, Energy, Tube, Fluids, Lorazepam, Adrenaline,
   Glucose) plus the full resus drug set and a print-friendly layout.
-- **🧾 [Examination notes](infant-exam-notes/)** - structured infant
+- **🧾 [Examination notes](exam-notes/)** - structured infant
   examination documentation helper.
 - **💧 [Fluid Calculator](fluid-calculator/)** - maintenance &
   replacement fluids.
