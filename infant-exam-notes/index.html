@@ -2120,7 +2120,14 @@
         if (note) parts.push(note.toLowerCase() + ' at the ' + getLungZoneLabel(zone.key));
       }
       if (!parts.length) return '';
-      return formatOrderedCommaLine(parts, abnormalCollector, 'respiratory');
+      var taggedParts = [];
+      for (var pi = 0; pi < parts.length; pi++) {
+        taggedParts.push(makeTaggedFinding(parts[pi], resolveFindingTagLabel(parts[pi])));
+      }
+      var ordered = reorderPhrases(taggedParts);
+      var lineBody = formatFindingsLine(ordered, abnormalCollector, 'respiratory');
+      if (!lineBody) return '';
+      return withSectionPrefix('respiratory', lineBody, getSeverityFromFindings(ordered));
     }
 
     function renderLungPickerControls() {
