@@ -1090,7 +1090,18 @@
       { key: 'sensation', label: 'Sensation intact', yes: 'Lower limb sensation grossly intact', no: 'Lower limb sensory deficit', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
       { key: 'gait', label: 'Gait normal', yes: 'Gait normal and age-appropriate', no: 'Gait abnormal', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding', ageBands: ['1-4', '5-11', '12+'] }
     ];
-    var NEURO_INFANT_HEAD_YN_ROWS = [
+    var NEURO_INFANT_CRANIAL_YN_ROWS = [
+      { key: 'pupils', label: 'Pupils equal & reactive', yes: 'Pupils equal and reactive to light', no: 'Pupils unequal or non-reactive', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'fixesFollows', label: 'Fixes and follows', yes: 'Fixes and follows', no: 'Does not fix or follow', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'eyeMovements', label: 'Eye movements full', yes: 'Eye movements full with no nystagmus', no: 'Eye movements restricted or nystagmus present', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'faceSymmetry', label: 'Face symmetrical', yes: 'Face symmetrical', no: 'Facial asymmetry present', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'responseToSound', label: 'Responds to sound', yes: 'Responds to sound', no: 'Reduced response to sound', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
+      { key: 'suckSwallow', label: 'Suck and swallow', yes: 'Coordinated suck and swallow', no: 'Poor suck or swallow', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' }
+    ];
+    var NEURO_INFANT_TONE_YN_ROWS = [
+      { key: 'tone', label: 'Tone normal for age', yes: 'Tone normal for age', no: 'Tone abnormal (hypotonia, hypertonia or asymmetry)', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'movements', label: 'Spontaneous movements symmetrical', yes: 'Spontaneous movements symmetrical', no: 'Asymmetrical or reduced spontaneous movements', normalYes: true, yesTag: 'Normal finding', noTag: 'urgent abnormal finding' },
+      { key: 'antigravity', label: 'Antigravity movements', yes: 'Antigravity movements present', no: 'Reduced antigravity movements', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
       { key: 'headControl', label: 'Head control age-appropriate', yes: 'Head control age-appropriate', no: 'Head lag present', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' }
     ];
 
@@ -1104,7 +1115,8 @@
       neurology__cn: NEURO_CN_YN_ROWS,
       neurology__upperLimb: NEURO_UL_YN_ROWS,
       neurology__lowerLimb: NEURO_LL_YN_ROWS,
-      neurology__infantHead: NEURO_INFANT_HEAD_YN_ROWS
+      neurology__infantCranial: NEURO_INFANT_CRANIAL_YN_ROWS,
+      neurology__infantToneMove: NEURO_INFANT_TONE_YN_ROWS
     };
 
     var SECTIONS = [
@@ -1215,11 +1227,24 @@
         label: 'Neurology',
         icon: '🧠',
         groups: [
-          { type: 'radio', name: 'behaviour', label: 'Behaviour / conscious level', options: ['Alert and orientated', 'Drowsy', 'Irritable', 'Inconsolable', 'Obtunded', 'Unresponsive'] },
-          { type: 'radio', name: 'interaction', label: 'Interaction', options: ['Interacting appropriately', 'Reduced interaction'] },
-          { type: 'yesNoToggle', name: 'cn', label: 'Cranial nerves', rows: NEURO_CN_YN_ROWS },
-          { type: 'yesNoToggle', name: 'upperLimb', label: 'Upper limb neurology', rows: NEURO_UL_YN_ROWS },
-          { type: 'yesNoToggle', name: 'lowerLimb', label: 'Lower limb neurology', rows: NEURO_LL_YN_ROWS },
+          { type: 'radio', name: 'behaviour', label: 'Behaviour / conscious level', options: [
+            { value: 'Alert', tag: 'Normal finding', ageBands: ['0-1'] },
+            { value: 'Alert and orientated', tag: 'Normal finding', ageBands: ['1-4', '5-11', '12+'] },
+            { value: 'Drowsy', tag: 'abnormal finding' },
+            { value: 'Irritable', tag: 'abnormal finding' },
+            { value: 'Inconsolable', tag: 'urgent abnormal finding' },
+            { value: 'Obtunded', tag: 'urgent abnormal finding' },
+            { value: 'Unresponsive', tag: 'urgent abnormal finding' }
+          ] },
+          { type: 'radio', name: 'interaction', label: 'Interaction', options: [
+            { value: 'Interacting appropriately', tag: 'Normal finding' },
+            { value: 'Reduced interaction', tag: 'abnormal finding' }
+          ] },
+          { type: 'yesNoToggle', name: 'cn', label: 'Cranial nerves', rows: NEURO_CN_YN_ROWS, ageBands: ['1-4', '5-11', '12+'] },
+          { type: 'yesNoToggle', name: 'upperLimb', label: 'Upper limb neurology', rows: NEURO_UL_YN_ROWS, ageBands: ['1-4', '5-11', '12+'] },
+          { type: 'yesNoToggle', name: 'lowerLimb', label: 'Lower limb neurology', rows: NEURO_LL_YN_ROWS, ageBands: ['1-4', '5-11', '12+'] },
+          { type: 'yesNoToggle', name: 'infantCranial', label: 'Eyes / cranial', rows: NEURO_INFANT_CRANIAL_YN_ROWS, ageBands: ['0-1'] },
+          { type: 'yesNoToggle', name: 'infantToneMove', label: 'Tone and movement', rows: NEURO_INFANT_TONE_YN_ROWS, ageBands: ['0-1'] },
           { type: 'infantSpecific', name: 'infant', ageBands: ['0-1'] }
         ],
         freeHint: 'Optional: focal findings or detailed neurological impression',
@@ -1803,7 +1828,10 @@
       'sensory deficit', 'visual field or fixation deficit', 'nystagmus present',
       'facial asymmetry', 'reduced response to sound', 'pupils unequal', 'pupils non-reactive',
       'plantars upgoing', 'ankle clonus present', 'sustained ankle clonus',
-      'primitive reflex asymmetry', 'primitive reflexes persistent beyond'
+      'primitive reflex asymmetry', 'primitive reflexes persistent beyond',
+      'primitive reflexes absent', 'moro reflex absent', 'does not fix or follow',
+      'poor suck or swallow', 'reduced antigravity', 'asymmetrical or reduced spontaneous',
+      'jitteriness', 'abnormal movements', 'seizure activity observed', 'abnormal posture'
     ];
 
     var NORMAL_PATTERNS = [
@@ -1822,7 +1850,10 @@
       'hearing grossly intact', 'tongue, palate and speech', 'power 5/5', 'sensation grossly intact',
       'coordination normal', 'plantars downgoing', 'ankle clonus absent', 'gait normal',
       'moro present', 'rooting present', 'suck present', 'palmar grasp present',
-      'stepping present', 'atnr present'
+      'plantar grasp present', 'stepping present', 'atnr present',
+      'fixes and follows', 'responds to sound', 'coordinated suck and swallow',
+      'tone normal for age', 'spontaneous movements symmetrical', 'antigravity movements present',
+      'no abnormal movements', 'posture normal for age'
     ];
     var URGENT_ABNORMAL_PATTERNS = [
       'drowsy',
@@ -1843,6 +1874,11 @@
       'shut down',
       'fontanelle bulging',
       'fontanelle sunken',
+      'moro reflex absent',
+      'poor suck or swallow',
+      'seizure activity observed',
+      'abnormal movements',
+      'asymmetrical or reduced spontaneous',
       'murmur',
       'radial pulses weak',
       'radial pulses thready',
@@ -1888,6 +1924,12 @@
       'lower limb power reduced',
       'upper limb tone abnormal or asymmetrical',
       'lower limb tone abnormal or asymmetrical',
+      'tone abnormal (hypotonia, hypertonia or asymmetry)',
+      'asymmetrical or reduced spontaneous movements',
+      'poor suck or swallow',
+      'moro reflex absent or asymmetrical',
+      'seizure activity observed',
+      'abnormal movements',
       'sustained ankle clonus present',
       'plantars upgoing',
       'anterior fontanelle bulging',
@@ -1970,11 +2012,21 @@
       'head control age-appropriate',
       'anterior fontanelle flat and normotensive',
       'moro present and symmetrical',
+      'moro reflex present and symmetrical',
       'rooting present',
       'suck present',
       'palmar grasp present',
+      'plantar grasp present',
       'stepping present',
-      'atnr present'
+      'atnr present',
+      'fixes and follows',
+      'responds to sound',
+      'coordinated suck and swallow',
+      'tone normal for age',
+      'spontaneous movements symmetrical',
+      'antigravity movements present',
+      'no abnormal movements',
+      'posture normal for age'
     ];
     var TAG_NORMAL = 'Normal finding';
     var TAG_ABNORMAL = 'abnormal finding';
@@ -2098,7 +2150,8 @@
     applyTagsToYnRows(NEURO_CN_YN_ROWS);
     applyTagsToYnRows(NEURO_UL_YN_ROWS);
     applyTagsToYnRows(NEURO_LL_YN_ROWS);
-    applyTagsToYnRows(NEURO_INFANT_HEAD_YN_ROWS);
+    applyTagsToYnRows(NEURO_INFANT_CRANIAL_YN_ROWS);
+    applyTagsToYnRows(NEURO_INFANT_TONE_YN_ROWS);
     applyTagsToSectionOptions();
 
     function normalizeFindingTag(tag) {
@@ -3967,31 +4020,32 @@
     ];
     var NEURO_PRIMITIVE_REFLEX_OPTIONS = [
       { value: 'Moro reflex present and symmetrical', tag: TAG_NORMAL },
+      { value: 'Moro reflex absent or asymmetrical', tag: TAG_URGENT },
       { value: 'Rooting reflex present', tag: TAG_NORMAL },
       { value: 'Suck reflex present', tag: TAG_NORMAL },
       { value: 'Palmar grasp present', tag: TAG_NORMAL },
+      { value: 'Plantar grasp present', tag: TAG_NORMAL },
       { value: 'Stepping reflex present', tag: TAG_NORMAL },
       { value: 'ATNR present', tag: TAG_NORMAL },
-      { value: 'Primitive reflex asymmetry present', tag: TAG_ABNORMAL },
+      { value: 'Primitive reflexes absent', tag: TAG_ABNORMAL },
       { value: 'Primitive reflexes persistent beyond expected age', tag: TAG_ABNORMAL }
+    ];
+    var NEURO_INFANT_OTHER_OPTIONS = [
+      { value: 'No abnormal movements', tag: TAG_NORMAL },
+      { value: 'Jitteriness', tag: TAG_ABNORMAL },
+      { value: 'Abnormal movements', tag: TAG_URGENT },
+      { value: 'Seizure activity observed', tag: TAG_URGENT },
+      { value: 'Posture normal for age', tag: TAG_NORMAL },
+      { value: 'Abnormal posture', tag: TAG_ABNORMAL }
     ];
 
     function buildNeurologyInfantBlock(host) {
-      var details = document.createElement('details');
-      details.className = 'lung-map-details';
-      details.id = 'neurologyInfantDetails';
-      var summary = document.createElement('summary');
-      summary.className = 'lung-map-details-summary';
-      summary.textContent = 'Infant-specific findings (optional)';
-      details.appendChild(summary);
-
-      var body = document.createElement('div');
-      body.className = 'lung-map-details-body';
+      host.id = 'neurologyInfantDetails';
 
       var fontLbl = document.createElement('div');
       fontLbl.className = 'group-label';
       fontLbl.textContent = 'Anterior fontanelle';
-      body.appendChild(fontLbl);
+      host.appendChild(fontLbl);
       var fontPillRow = document.createElement('div');
       fontPillRow.className = 'pill-row';
       for (var fi = 0; fi < NEURO_FONTANELLE_OPTIONS.length; fi++) {
@@ -4009,20 +4063,13 @@
         fLabel.appendChild(document.createTextNode(fOpt.value));
         fontPillRow.appendChild(fLabel);
       }
-      body.appendChild(fontPillRow);
-
-      var headLbl = document.createElement('div');
-      headLbl.className = 'group-label';
-      headLbl.textContent = 'Head control / head lag';
-      headLbl.style.marginTop = 'var(--sp-group)';
-      body.appendChild(headLbl);
-      appendYesNoToggleWrap(body, 'neurology__infantHead', NEURO_INFANT_HEAD_YN_ROWS, { id: 'neurologyInfantHeadYnWrap', spanFull: true });
+      host.appendChild(fontPillRow);
 
       var reflexLbl = document.createElement('div');
       reflexLbl.className = 'group-label';
       reflexLbl.textContent = 'Primitive reflexes';
       reflexLbl.style.marginTop = 'var(--sp-group)';
-      body.appendChild(reflexLbl);
+      host.appendChild(reflexLbl);
       var reflexGrid = document.createElement('div');
       reflexGrid.className = 'check-grid';
       for (var pi = 0; pi < NEURO_PRIMITIVE_REFLEX_OPTIONS.length; pi++) {
@@ -4040,10 +4087,31 @@
         pLabel.appendChild(document.createTextNode(pOpt.value));
         reflexGrid.appendChild(pLabel);
       }
-      body.appendChild(reflexGrid);
+      host.appendChild(reflexGrid);
 
-      details.appendChild(body);
-      host.appendChild(details);
+      var otherLbl = document.createElement('div');
+      otherLbl.className = 'group-label';
+      otherLbl.textContent = 'Posture / movements';
+      otherLbl.style.marginTop = 'var(--sp-group)';
+      host.appendChild(otherLbl);
+      var otherGrid = document.createElement('div');
+      otherGrid.className = 'check-grid';
+      for (var oi = 0; oi < NEURO_INFANT_OTHER_OPTIONS.length; oi++) {
+        var oOpt = NEURO_INFANT_OTHER_OPTIONS[oi];
+        var oLabel = document.createElement('label');
+        oLabel.className = 'check-opt';
+        oLabel.onclick = (function(lbl) { return function() { handleCheckClick(lbl); }; })(oLabel);
+        var oCb = document.createElement('input');
+        oCb.type = 'checkbox';
+        oCb.id = 'neurology__infantOther__' + oi;
+        oCb.name = 'neurology__infantOther__' + oi;
+        oCb.value = oOpt.value;
+        oCb.setAttribute('data-finding-tag', oOpt.tag);
+        oLabel.appendChild(oCb);
+        oLabel.appendChild(document.createTextNode(oOpt.value));
+        otherGrid.appendChild(oLabel);
+      }
+      host.appendChild(otherGrid);
     }
 
     function renderSectionCard(section) {
@@ -5632,18 +5700,15 @@
             var fontTag = fontPick.getAttribute('data-finding-tag') || '';
             phrases.push(makeTaggedFinding(fontPick.value, fontTag));
           }
-          var infantHeadPrfx = 'neurology__infantHead';
-          for (var ih = 0; ih < NEURO_INFANT_HEAD_YN_ROWS.length; ih++) {
-            var ihRow = NEURO_INFANT_HEAD_YN_ROWS[ih];
-            var ihYesEl = document.getElementById(infantHeadPrfx + '__' + ihRow.key + '__yes');
-            var ihNoEl = document.getElementById(infantHeadPrfx + '__' + ihRow.key + '__no');
-            if (ihYesEl && ihYesEl.checked) phrases.push(makeTaggedFinding(ihRow.yes, ihRow.yesTag));
-            else if (ihNoEl && ihNoEl.checked) phrases.push(makeTaggedFinding(ihRow.no, ihRow.noTag));
-          }
           var refCbs = document.querySelectorAll('input[id^="neurology__primitiveReflexes__"]:checked');
           for (var rc = 0; rc < refCbs.length; rc++) {
             var refTag = refCbs[rc].getAttribute('data-finding-tag') || '';
             phrases.push(makeTaggedFinding(refCbs[rc].value, refTag));
+          }
+          var otherCbs = document.querySelectorAll('input[id^="neurology__infantOther__"]:checked');
+          for (var oc = 0; oc < otherCbs.length; oc++) {
+            var otherTag = otherCbs[oc].getAttribute('data-finding-tag') || '';
+            phrases.push(makeTaggedFinding(otherCbs[oc].value, otherTag));
           }
           continue;
         }
