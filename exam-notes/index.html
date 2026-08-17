@@ -6021,7 +6021,7 @@
     var GENITAL_TESTICULAR_APPEARANCE_YN_ROWS = [
       { key: 'equalSize', label: 'Equal size', yes: 'Equal size', no: 'Not equal size', normalYes: true, yesTag: 'Normal finding', noTag: 'abnormal finding' },
       { key: 'asymmetry', label: 'Asymmetry', yes: 'Asymmetry', no: 'No asymmetry', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
-      { key: 'atrophy', label: 'Atrophy', yes: 'Atrophy', no: 'No atrophy', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
+      { key: 'atrophy', label: 'Atrophy', yes: 'Atrophy', no: 'No atrophy', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding', ageBands: ['5-11', '12+'] },
       { key: 'swelling', label: 'Swelling', yes: 'Swelling', no: 'No swelling', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
       { key: 'firm', label: 'Firm', yes: 'Firm', no: 'Not firm', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' },
       { key: 'massNodule', label: 'Mass/nodule', yes: 'Mass/nodule', no: 'No mass/nodule', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' }
@@ -6036,34 +6036,135 @@
       { key: 'discolouration', label: 'Discolouration', yes: 'Discolouration', no: 'No discolouration', normalYes: false, yesTag: 'abnormal finding', noTag: 'Normal finding' }
     ];
 
+    var GENITAL_CORE_OPTIONS = {
+      consent: [
+        'Parent/carer consent obtained',
+        { value: 'Child assent obtained where appropriate', ageBands: ['1-4', '5-11', '12+'] }
+      ],
+      chaperone: ['Present', 'Declined', 'Not available'],
+      position: [
+        'Supine',
+        { value: 'Frog-leg', ageBands: ['0-1', '1-4'] },
+        { value: 'Standing', ageBands: ['5-11', '12+'] },
+        'Privacy maintained'
+      ]
+    };
+
     var GENITAL_GROUPS = {
       malePenis: [
-        { title: 'Appearance', mode: 'multi', options: ['Normal', 'Small penis/micropenis concern', 'Concealed/buried penis', 'Oedema', 'Bruising', 'Erythema', 'Lesion/ulcer', 'Rash'] },
-        { title: 'Meatus', mode: 'single', options: ['Orthotopic', 'Hypospadias', 'Epispadias', 'Meatal stenosis concern', 'Discharge'] },
-        { title: 'Foreskin', mode: 'single', options: ['Normal', 'Retractable for age', 'Non-retractile—physiological', 'Tight/scarred foreskin', 'Ballooning on voiding', 'Balanitis', 'Paraphimosis', 'Circumcised'] },
-        { title: 'Shaft/erection', mode: 'single', options: ['Straight', 'Curvature/chordee', 'Painful erection/priapism concern'] }
+        { title: 'Appearance', mode: 'multi', options: [
+          'Normal',
+          { value: 'Ambiguous/atypical genitalia', ageBands: ['0-1'] },
+          { value: 'Small penis/micropenis concern', ageBands: ['0-1', '1-4'] },
+          { value: 'Concealed/buried penis', ageBands: ['0-1', '1-4'] },
+          'Oedema', 'Bruising', 'Erythema', 'Lesion/ulcer', 'Rash'
+        ] },
+        { title: 'Meatus', mode: 'single', options: [
+          'Orthotopic',
+          'Hypospadias',
+          'Epispadias',
+          'Meatal stenosis concern',
+          { value: 'Discharge', ageBands: ['1-4', '5-11', '12+'] }
+        ] },
+        { title: 'Foreskin', mode: 'single', options: [
+          'Normal',
+          'Retractable for age',
+          { value: 'Non-retractile—physiological', ageBands: ['0-1', '1-4', '5-11'] },
+          { value: 'Tight/scarred foreskin', ageBands: ['5-11', '12+'] },
+          { value: 'Ballooning on voiding', ageBands: ['1-4', '5-11'] },
+          { value: 'Balanitis', ageBands: ['1-4', '5-11', '12+'] },
+          { value: 'Paraphimosis', ageBands: ['5-11', '12+'] },
+          'Circumcised'
+        ] },
+        { title: 'Shaft/erection', mode: 'single', options: [
+          'Straight',
+          'Curvature/chordee',
+          { value: 'Painful erection/priapism concern', ageBands: ['1-4', '5-11', '12+'] }
+        ] }
       ],
       maleScrotumControls: [
-        { title: 'Testicular position', mode: 'single', options: ['Both scrotal', 'Right high scrotal', 'Left high scrotal', 'Right impalpable', 'Left impalpable', 'Bilateral impalpable', 'Retractile testis'] },
-        { title: 'Scrotum/groin swellings', mode: 'single', options: ['None', 'Hydrocele', 'Inguinal hernia', 'Reducible groin swelling', 'Non-reducible/tender swelling'] }
+        { title: 'Testicular position', mode: 'single', options: [
+          'Both scrotal',
+          'Right high scrotal',
+          'Left high scrotal',
+          'Right impalpable',
+          'Left impalpable',
+          'Bilateral impalpable',
+          { value: 'Retractile testis', ageBands: ['1-4', '5-11'] }
+        ] },
+        { title: 'Scrotum/groin swellings', mode: 'single', options: [
+          'None',
+          { value: 'Hydrocele', ageBands: ['0-1', '1-4'] },
+          'Inguinal hernia',
+          'Reducible groin swelling',
+          'Non-reducible/tender swelling',
+          { value: 'Varicocele', ageBands: ['12+'] }
+        ] }
       ],
       female: [
-        { title: 'General appearance', mode: 'multi', options: ['Normal', 'Erythema', 'Irritation/excoriation', 'Rash', 'Oedema', 'Bruising', 'Ulcer/lesion', 'Pigment change', 'Scar'] },
-        { title: 'Labia', mode: 'multi', options: ['Normal', 'Labial adhesions—partial', 'Labial adhesions—complete', 'Asymmetry', 'Swelling', 'Cyst/mass'] },
-        { title: 'Discharge/bleeding', mode: 'single', options: ['None', 'Physiological pubertal discharge', 'Offensive discharge', 'Mucoid discharge', 'Purulent discharge', 'Blood staining/vaginal bleeding'] },
-        { title: 'Itch/infection pattern', mode: 'single', options: ['No features', 'Vulvovaginitis appearance', 'Candidal-type appearance', 'Threadworm-associated excoriation suspected'] },
-        { title: 'Urethral region', mode: 'single', options: ['Normal', 'Urethral prolapse concern', 'Prolapsed ureterocele concern', 'Peri-urethral mass'] },
-        { title: 'Introitus', mode: 'single', options: ['Appears normal externally', 'Imperforate hymen concern', 'Vaginal mass/foreign body concern', 'Do not assess / not indicated'] },
-        { title: 'Perineum/anus', mode: 'multi', options: ['Normal', 'Fissure', 'Skin tag', 'Eczema', 'Lichen sclerosus-type pallor', 'Perianal erythema', 'Other lesion'] }
+        { title: 'General appearance', mode: 'multi', options: [
+          'Normal',
+          { value: 'Nappy-associated irritation', ageBands: ['0-1', '1-4'] },
+          'Erythema', 'Irritation/excoriation', 'Rash', 'Oedema', 'Bruising', 'Ulcer/lesion', 'Pigment change', 'Scar'
+        ] },
+        { title: 'Labia', mode: 'multi', options: [
+          'Normal',
+          { value: 'Labial adhesions—partial', ageBands: ['0-1', '1-4', '5-11'] },
+          { value: 'Labial adhesions—complete', ageBands: ['0-1', '1-4'] },
+          'Asymmetry', 'Swelling', 'Cyst/mass'
+        ] },
+        { title: 'Discharge/bleeding', mode: 'single', options: [
+          'None',
+          { value: 'Mucoid neonatal discharge', ageBands: ['0-1'] },
+          { value: 'Neonatal vaginal withdrawal bleed', ageBands: ['0-1'] },
+          { value: 'Physiological pubertal discharge', ageBands: ['5-11', '12+'] },
+          'Offensive discharge',
+          { value: 'Mucoid discharge', ageBands: ['1-4', '5-11', '12+'] },
+          'Purulent discharge',
+          'Blood staining/vaginal bleeding'
+        ] },
+        { title: 'Itch/infection pattern', mode: 'single', options: [
+          'No features',
+          { value: 'Vulvovaginitis appearance', ageBands: ['1-4', '5-11'] },
+          { value: 'Candidal-type appearance', ageBands: ['0-1', '12+'] },
+          { value: 'Threadworm-associated excoriation suspected', ageBands: ['1-4', '5-11'] }
+        ] },
+        { title: 'Urethral region', mode: 'single', options: [
+          'Normal',
+          { value: 'Urethral prolapse concern', ageBands: ['1-4', '5-11'] },
+          { value: 'Prolapsed ureterocele concern', ageBands: ['0-1'] },
+          'Peri-urethral mass'
+        ] },
+        { title: 'Introitus', mode: 'single', options: [
+          'Appears normal externally',
+          { value: 'Imperforate hymen concern', ageBands: ['0-1', '12+'] },
+          { value: 'Vaginal mass/foreign body concern', ageBands: ['1-4', '5-11'] },
+          'Do not assess / not indicated'
+        ] },
+        { title: 'Perineum/anus', mode: 'multi', options: [
+          'Normal', 'Fissure', 'Skin tag', 'Eczema',
+          { value: 'Lichen sclerosus-type pallor', ageBands: ['1-4', '5-11', '12+'] },
+          'Perianal erythema', 'Other lesion'
+        ] }
       ],
       puberty: [
-        { title: 'Pubertal status', mode: 'single', options: ['Pubertal status not assessed', 'Prepubertal'] },
-        { title: 'Tanner breast stage', mode: 'single', options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
-        { title: 'Tanner genital stage', mode: 'single', options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
-        { title: 'Pubic hair stage', mode: 'single', options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
-        { title: 'Axillary hair', mode: 'single', options: ['Absent', 'Present'] },
-        { title: 'Menarche', mode: 'single', options: ['Not commenced', 'Date/age recorded elsewhere', 'Menstrual history discussed'] },
-        { title: 'Pubertal concern', mode: 'multi', options: ['Precocious features', 'Delayed puberty concern', 'Virilisation', 'Gynaecomastia', 'Asymmetrical breast development'] }
+        { title: 'Pubertal status', mode: 'single', options: [
+          'Pubertal status not assessed',
+          { value: 'Prepubertal', ageBands: ['0-1', '1-4', '5-11'] },
+          { value: 'Pubertal', ageBands: ['12+'] }
+        ] },
+        { title: 'Tanner breast stage', mode: 'single', ageBands: ['5-11', '12+'], options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
+        { title: 'Tanner genital stage', mode: 'single', ageBands: ['5-11', '12+'], options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
+        { title: 'Pubic hair stage', mode: 'single', ageBands: ['5-11', '12+'], options: ['Stage I', 'Stage II', 'Stage III', 'Stage IV', 'Stage V'] },
+        { title: 'Axillary hair', mode: 'single', ageBands: ['5-11', '12+'], options: ['Absent', 'Present'] },
+        { title: 'Menarche', mode: 'single', ageBands: ['12+'], options: ['Not commenced', 'Date/age recorded elsewhere', 'Menstrual history discussed'] },
+        { title: 'Pubertal concern', mode: 'multi', options: [
+          { value: 'Precocious features', ageBands: ['0-1', '1-4', '5-11'] },
+          { value: 'Delayed puberty concern', ageBands: ['12+'] },
+          'Virilisation',
+          { value: 'Gynaecomastia', ageBands: ['5-11', '12+'] },
+          { value: 'Asymmetrical breast development', ageBands: ['5-11', '12+'] }
+        ] }
       ]
     };
 
@@ -6075,8 +6176,9 @@
       var normal = [
         'Normal', 'Orthotopic', 'Retractable for age', 'Non-retractile—physiological', 'Straight',
         'Both scrotal', 'Equal size', 'No tenderness', 'None', 'Physiological pubertal discharge',
+        'Mucoid neonatal discharge', 'Neonatal vaginal withdrawal bleed',
         'No features', 'Appears normal externally', 'Do not assess / not indicated',
-        'Pubertal status not assessed', 'Prepubertal', 'Absent', 'Present', 'Not commenced',
+        'Pubertal status not assessed', 'Prepubertal', 'Pubertal', 'Absent', 'Present', 'Not commenced',
         'Date/age recorded elsewhere', 'Menstrual history discussed', 'External inspection only',
         'Not indicated', 'Offered but declined', 'Not performed', 'Performed',
         'Parent/carer consent obtained', 'Child assent obtained where appropriate',
@@ -6086,11 +6188,36 @@
       var urgent = [
         'Painful erection/priapism concern', 'Paraphimosis',
         'High-riding testis', 'Horizontal lie', 'Non-reducible/tender swelling',
-        'Blood staining/vaginal bleeding', 'Vaginal mass/foreign body concern', 'Tenderness'
+        'Blood staining/vaginal bleeding', 'Vaginal mass/foreign body concern', 'Tenderness',
+        'Ambiguous/atypical genitalia'
       ];
       if (normal.indexOf(value) !== -1 || /^Stage [IVX]+$/.test(value)) return 'Normal finding';
       if (urgent.indexOf(value) !== -1) return 'urgent abnormal finding';
       return 'abnormal finding';
+    }
+
+    function genitalOptionValue(opt) {
+      return typeof opt === 'string' ? opt : ((opt && opt.value) || '');
+    }
+
+    function visibleGenitalOptions(options) {
+      var out = [];
+      if (!options) return out;
+      for (var i = 0; i < options.length; i++) {
+        if (!isVisibleForAge(options[i], selectedAgeBand)) continue;
+        var value = genitalOptionValue(options[i]);
+        if (value) out.push(value);
+      }
+      return out;
+    }
+
+    function hasVisibleGenitalGroups(groups) {
+      if (!groups) return false;
+      for (var i = 0; i < groups.length; i++) {
+        if (!isVisibleForAge(groups[i], selectedAgeBand)) continue;
+        if (visibleGenitalOptions(groups[i].options).length) return true;
+      }
+      return false;
     }
 
     function isGenitalNormalExclusive(value) {
@@ -6135,6 +6262,7 @@
     }
 
     function addGenitalControlGroup(parent, title, key, options, mode, sectionName) {
+      if (!options || !options.length) return null;
       var group = document.createElement('div');
       group.className = 'genital-control-group';
       var label = document.createElement('div');
@@ -6181,7 +6309,10 @@
     function addGenitalGroups(parent, groups, sectionName, keyPrefix) {
       for (var i = 0; i < groups.length; i++) {
         var def = groups[i];
-        addGenitalControlGroup(parent, def.title, keyPrefix + '_' + genitalSlug(def.title), def.options, def.mode, sectionName);
+        if (!isVisibleForAge(def, selectedAgeBand)) continue;
+        var opts = visibleGenitalOptions(def.options);
+        if (!opts.length) continue;
+        addGenitalControlGroup(parent, def.title, keyPrefix + '_' + genitalSlug(def.title), opts, def.mode, sectionName);
       }
     }
 
@@ -6246,9 +6377,9 @@
       var performed = document.createElement('div');
       performed.id = 'genitalPerformedWrap';
       performed.className = 'genital-performed';
-      addGenitalControlGroup(performed, 'Consent/assent', 'consent', ['Parent/carer consent obtained', 'Child assent obtained where appropriate'], 'multi', 'core');
-      addGenitalControlGroup(performed, 'Chaperone', 'chaperone', ['Present', 'Declined', 'Not available'], 'single', 'core');
-      addGenitalControlGroup(performed, 'Position/exposure', 'position', ['Supine', 'Frog-leg', 'Standing', 'Privacy maintained'], 'multi', 'core');
+      addGenitalControlGroup(performed, 'Consent/assent', 'consent', visibleGenitalOptions(GENITAL_CORE_OPTIONS.consent), 'multi', 'core');
+      addGenitalControlGroup(performed, 'Chaperone', 'chaperone', visibleGenitalOptions(GENITAL_CORE_OPTIONS.chaperone), 'single', 'core');
+      addGenitalControlGroup(performed, 'Position/exposure', 'position', visibleGenitalOptions(GENITAL_CORE_OPTIONS.position), 'multi', 'core');
       addGenitalControlGroup(performed, 'Gender', 'gender', ['Male', 'Female'], 'single', 'core');
       addGenitalControlGroup(performed, 'Overall', 'overall', ['Normal external genital examination', 'Abnormal—details below'], 'single', 'core');
 
@@ -6278,22 +6409,24 @@
       maleScrotum.appendChild(maleScrotumSummary);
       var maleScrotumBody = document.createElement('div');
       maleScrotumBody.className = 'genital-subdetails-body';
-      addGenitalControlGroup(maleScrotumBody, 'Testicular position', 'male_testicular_position', GENITAL_GROUPS.maleScrotumControls[0].options, 'single', 'male');
+      addGenitalControlGroup(maleScrotumBody, 'Testicular position', 'male_testicular_position', visibleGenitalOptions(GENITAL_GROUPS.maleScrotumControls[0].options), 'single', 'male');
       addGenitalBilateralYnBlock(maleScrotumBody, 'Testicular appearance', 'genital__male_testicular_appearance', GENITAL_TESTICULAR_APPEARANCE_YN_ROWS);
       addGenitalBilateralYnBlock(maleScrotumBody, 'Acute signs', 'genital__male_acute_signs', GENITAL_ACUTE_SIGNS_YN_ROWS);
-      addGenitalControlGroup(maleScrotumBody, 'Scrotum/groin swellings', 'male_scrotum_groin_swellings', GENITAL_GROUPS.maleScrotumControls[1].options, 'single', 'male');
-      var volumeLabel = document.createElement('label');
-      volumeLabel.className = 'group-label';
-      volumeLabel.textContent = 'Testicular volume (mL, optional)';
-      var volume = document.createElement('input');
-      volume.id = 'genital__testicular_volume';
-      volume.type = 'number';
-      volume.min = '0';
-      volume.step = '0.5';
-      volume.placeholder = 'mL';
-      volume.addEventListener('input', updateOutput);
-      volumeLabel.appendChild(volume);
-      maleScrotumBody.appendChild(volumeLabel);
+      addGenitalControlGroup(maleScrotumBody, 'Scrotum/groin swellings', 'male_scrotum_groin_swellings', visibleGenitalOptions(GENITAL_GROUPS.maleScrotumControls[1].options), 'single', 'male');
+      if (selectedAgeBand === '5-11' || selectedAgeBand === '12+') {
+        var volumeLabel = document.createElement('label');
+        volumeLabel.className = 'group-label';
+        volumeLabel.textContent = 'Testicular volume (mL, optional)';
+        var volume = document.createElement('input');
+        volume.id = 'genital__testicular_volume';
+        volume.type = 'number';
+        volume.min = '0';
+        volume.step = '0.5';
+        volume.placeholder = 'mL';
+        volume.addEventListener('input', updateOutput);
+        volumeLabel.appendChild(volume);
+        maleScrotumBody.appendChild(volumeLabel);
+      }
       maleScrotum.appendChild(maleScrotumBody);
       male.appendChild(maleScrotum);
       performed.appendChild(male);
@@ -6350,17 +6483,21 @@
       qualifiers.appendChild(fields);
       performed.appendChild(qualifiers);
 
-      var puberty = document.createElement('details');
-      puberty.id = 'genitalPubertyDetails';
-      puberty.className = 'genital-subdetails';
-      var pubertySummary = document.createElement('summary');
-      pubertySummary.textContent = 'Puberty and development (when age-appropriate)';
-      puberty.appendChild(pubertySummary);
-      var pubertyBody = document.createElement('div');
-      pubertyBody.className = 'genital-subdetails-body';
-      addGenitalGroups(pubertyBody, GENITAL_GROUPS.puberty, 'puberty', 'puberty');
-      puberty.appendChild(pubertyBody);
-      performed.appendChild(puberty);
+      if (hasVisibleGenitalGroups(GENITAL_GROUPS.puberty)) {
+        var puberty = document.createElement('details');
+        puberty.id = 'genitalPubertyDetails';
+        puberty.className = 'genital-subdetails';
+        var pubertySummary = document.createElement('summary');
+        pubertySummary.textContent = selectedAgeBand === '12+'
+          ? 'Puberty and development'
+          : (selectedAgeBand === '5-11' ? 'Puberty and development (when age-appropriate)' : 'Development');
+        puberty.appendChild(pubertySummary);
+        var pubertyBody = document.createElement('div');
+        pubertyBody.className = 'genital-subdetails-body';
+        addGenitalGroups(pubertyBody, GENITAL_GROUPS.puberty, 'puberty', 'puberty');
+        puberty.appendChild(pubertyBody);
+        performed.appendChild(puberty);
+      }
 
       body.appendChild(performed);
       details.appendChild(body);
@@ -6443,7 +6580,13 @@
         'None': title === 'Scrotum/groin swellings' ? 'No scrotal swelling' : 'No discharge or bleeding',
         'Orthotopic': 'Meatus orthotopic',
         'Straight': 'Penile shaft straight',
-        'External inspection only': 'External inspection only'
+        'External inspection only': 'External inspection only',
+        'Ambiguous/atypical genitalia': 'Ambiguous or atypical genitalia',
+        'Nappy-associated irritation': 'Nappy-associated genital irritation',
+        'Mucoid neonatal discharge': 'Mucoid neonatal vaginal discharge',
+        'Neonatal vaginal withdrawal bleed': 'Neonatal vaginal withdrawal bleed',
+        'Varicocele': 'Varicocele',
+        'Pubertal': 'Pubertal'
       };
       if (map[value]) return map[value];
       if (value === 'Normal' && title === 'Foreskin') return 'Foreskin normal appearance';
@@ -6497,6 +6640,25 @@
       return phrases;
     }
 
+    function genitalNormalExamSentence(gender) {
+      var band = selectedAgeBand;
+      if (gender === 'Male') {
+        if (band === '0-1') return 'Infant male genitalia normal for age. Both testes palpable in the scrotum. Foreskin non-retractile as expected in infancy. No inguinal hernia or hydrocele evident. No rash, lesion, swelling, discharge or tenderness.';
+        if (band === '1-4') return 'Male genitalia normal for age. Both testes palpable in the scrotum. Foreskin appearance appropriate for age. No inguinal hernia or hydrocele evident. No rash, lesion, swelling, discharge or tenderness.';
+        if (band === '5-11') return 'Male genitalia normal for age. Both testes palpable in the scrotum. No inguinal hernia. No rash, lesion, swelling, discharge or tenderness.';
+        if (band === '12+') return 'Adolescent male genitalia normal for age. Both testes palpable in the scrotum, non-tender and without swelling. No inguinal hernia or varicocele evident. No rash, lesion, discharge or tenderness.';
+        return 'Penis, testes and scrotum normal for age. Both testes palpable in the scrotum. No inguinal hernia or hydrocele evident. No rash, lesion, swelling, discharge or tenderness.';
+      }
+      if (gender === 'Female') {
+        if (band === '0-1') return 'Infant female external genitalia normal for age. No labial fusion, erythema, rash, lesion, discharge, bleeding or swelling. External inspection only.';
+        if (band === '1-4') return 'Prepubertal female external genitalia normal for age. No labial adhesions, vulval erythema, rash, lesion, discharge, bleeding or swelling. Urethral and vaginal openings appear normal externally.';
+        if (band === '5-11') return 'Prepubertal female external genitalia normal for age. No vulval erythema, rash, lesion, discharge, bleeding or swelling. Urethral and vaginal openings appear normal externally. No labial fusion.';
+        if (band === '12+') return 'Adolescent female external genitalia normal for age. No vulval erythema, rash, lesion, offensive discharge, bleeding or swelling. Urethral and vaginal openings appear normal externally.';
+        return 'Normal external female genitalia. No vulval erythema, rash, lesion, discharge, bleeding or swelling. Urethral and vaginal openings appear normal externally. No labial fusion.';
+      }
+      return 'Normal external genital examination.';
+    }
+
     function getGenitalOutputLine(abnormalCollector) {
       var status = genitalSelectedValue('status');
       if (!status) return '';
@@ -6520,13 +6682,7 @@
       var overall = genitalSelectedValue('overall');
       var sentences = [lead + '.'];
       if (overall === 'Normal external genital examination') {
-        if (gender === 'Male') {
-          sentences.push('Penis, testes and scrotum normal for age. Both testes palpable in the scrotum. No inguinal hernia or hydrocele evident. No rash, lesion, swelling, discharge or tenderness.');
-        } else if (gender === 'Female') {
-          sentences.push('Normal external female genitalia. No vulval erythema, rash, lesion, discharge, bleeding or swelling. Urethral and vaginal openings appear normal externally. No labial fusion.');
-        } else {
-          sentences.push('Normal external genital examination.');
-        }
+        sentences.push(genitalNormalExamSentence(gender));
         return abnormalsOnly ? '' : sentences.join(' ');
       }
 
