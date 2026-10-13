@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#22143d">
+  <meta name="color-scheme" content="dark">
+  <title>Gas Rodeo - Neonatal Acid-Base Round-Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rye&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/app-theme.css">
+  <link rel="stylesheet" href="gas-rodeo.css">
+  <script src="../../js/theme-toggle.js"></script>
+</head>
+<body class="gas-rodeo-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="px-cactus" viewBox="0 0 12 16" shape-rendering="crispEdges">
+      <rect x="5" y="1" width="2" height="15" fill="#2f6b30"/>
+      <rect x="4" y="2" width="1" height="14" fill="#4c9a45"/>
+      <rect x="7" y="2" width="1" height="14" fill="#1f4a20"/>
+      <rect x="1" y="5" width="2" height="5" fill="#2f6b30"/>
+      <rect x="1" y="9" width="4" height="2" fill="#2f6b30"/>
+      <rect x="9" y="3" width="2" height="6" fill="#2f6b30"/>
+      <rect x="7" y="8" width="4" height="2" fill="#2f6b30"/>
+    </symbol>
+    <symbol id="px-mesas" viewBox="0 0 160 30" preserveAspectRatio="none" shape-rendering="crispEdges">
+      <g fill="#7a2f3b">
+        <rect x="0" y="18" width="160" height="12"/>
+        <rect x="8" y="10" width="26" height="8"/>
+        <rect x="12" y="6" width="18" height="4"/>
+        <rect x="58" y="13" width="36" height="5"/>
+        <rect x="64" y="9" width="22" height="4"/>
+        <rect x="116" y="9" width="32" height="9"/>
+        <rect x="122" y="5" width="18" height="4"/>
+      </g>
+      <g fill="#4a1d2c">
+        <rect x="0" y="24" width="160" height="6"/>
+        <rect x="28" y="20" width="24" height="4"/>
+        <rect x="94" y="21" width="30" height="3"/>
+        <rect x="140" y="19" width="20" height="5"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="rodeo-app">
+
+  <!-- ============ TITLE SCREEN ============ -->
+  <section id="screen-attract" class="rodeo-screen screen-title">
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+
+    <div class="title-wrap">
+      <a class="px-link" href="../index.html">&#9664; Gas Saloon</a>
+      <p class="title-kicker">Neonatal acid-base round-up</p>
+      <h1 class="game-title">Gas Rodeo</h1>
+
+      <div class="title-panel">
+        <section class="panel-block">
+          <h2 class="block-title">How to ride</h2>
+          <ol class="how-list">
+            <li><span class="how-num">1</span><span>Blood gas outlaws ride in from the left.</span></li>
+            <li><span class="how-num">2</span><span>Draw a loop round any <strong>abnormal</strong> gas to rope it. Leave the normal ones be.</span></li>
+            <li><span class="how-num">3</span><span>Name the primary acid-base disorder.</span></li>
+            <li><span class="how-num">4</span><span>Let <strong>3 abnormal gases</strong> escape over the canyon and it's game over.</span></li>
+          </ol>
+          <dl class="score-key">
+            <div><dt>Rope an outlaw</dt><dd>+25</dd></div>
+            <div><dt>Correct charge</dt><dd>+75&times;</dd></div>
+            <div><dt>Wrong charge</dt><dd>-5</dd></div>
+            <div><dt>Rope an innocent</dt><dd>-10</dd></div>
+          </dl>
+        </section>
+
+        <section class="panel-block">
+          <h2 class="block-title">Settings</h2>
+          <fieldset class="seg">
+            <legend>Baby's age (pH norms)</legend>
+            <label><input type="radio" name="age" value="day0" checked><span>Day 0</span></label>
+            <label><input type="radio" name="age" value="day1to2"><span>Day 1-2</span></label>
+            <label><input type="radio" name="age" value="child"><span>&gt;2 days</span></label>
+          </fieldset>
+          <fieldset class="seg">
+            <legend>Pace</legend>
+            <label><input type="radio" name="pace" value="gentle"><span>Trot</span></label>
+            <label><input type="radio" name="pace" value="standard" checked><span>Gallop</span></label>
+            <label><input type="radio" name="pace" value="hard"><span>Stampede</span></label>
+          </fieldset>
+          <label class="px-check"><input type="checkbox" id="hints-toggle"><span>Teaching hints (colour abnormal values)</span></label>
+          <label class="px-check"><input type="checkbox" id="sound-toggle" checked><span>Sound effects</span></label>
+          <p class="best-line">Best score <strong id="attract-best">000000</strong></p>
+          <button type="button" class="px-btn px-btn--big blink-soft" id="btn-start">&#9654; Saddle up</button>
+        </section>
+      </div>
+
+      <p class="disclaimer">Teaching aid only. Gases are simulated - not for clinical decisions.</p>
+    </div>
+  </section>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <section id="screen-game" class="rodeo-screen screen-game" hidden>
+    <header class="hud">
+      <div class="hud-group">
+        <button type="button" class="px-btn px-btn--wood px-btn--sm" id="btn-pause" aria-label="Pause">II</button>
+        <span class="hud-title">Gas Rodeo</span>
+      </div>
+      <dl class="hud-stats">
+        <div><dt>Score</dt><dd id="hud-score">000000</dd></div>
+        <div><dt>Streak</dt><dd id="hud-streak">x1.0</dd></div>
+        <div><dt>Best</dt><dd id="hud-best">000000</dd></div>
+        <div class="hud-age-stat"><dt>Age</dt><dd id="hud-age">Day 0</dd></div>
+      </dl>
+      <div class="hud-group">
+        <div class="lives" id="hud-lives" role="img" aria-label="3 strikes left"></div>
+        <button type="button" class="px-btn px-btn--wood px-btn--sm" id="btn-mute" aria-label="Toggle sound">&#9835;</button>
+      </div>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="sky" aria-hidden="true">
+        <div class="px-sun"></div>
+        <svg class="mesas"><use href="#px-mesas"/></svg>
+        <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+        <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+        <div class="tumbleweed"></div>
+      </div>
+
+      <div
+        id="playfield"
+        class="playfield"
+        tabindex="0"
+        aria-label="Blood gas trail. Draw a loop around abnormal gases. Space ropes the abnormal gas closest to escaping. P pauses."
+      >
+        <div class="ruts" id="ruts" aria-hidden="true"></div>
+        <div class="cards-layer" id="cards-layer"></div>
+        <div class="fence" aria-hidden="true"></div>
+        <div class="canyon" aria-hidden="true"><span>Escape</span></div>
+        <svg id="lasso-svg" class="lasso-svg" aria-hidden="true"></svg>
+        <div class="banner" id="banner" aria-live="assertive"></div>
+        <p class="trail-tip">Loop the abnormal gases &middot; Space ropes the closest &middot; P pauses</p>
+      </div>
+
+      <div class="showdown" id="showdown" role="dialog" aria-modal="true" aria-labelledby="charge-title" hidden>
+        <section class="showdown-charges">
+          <h2 id="charge-title" class="sign-title">What's the charge?</h2>
+          <div class="charge-buttons" id="charge-buttons"></div>
+        </section>
+        <section class="showdown-suspect">
+          <div class="poster poster--big" id="suspect"></div>
+          <div class="verdict" id="verdict" aria-live="polite" hidden></div>
+        </section>
+      </div>
+
+      <div class="pause-overlay" id="pause-overlay" hidden>
+        <div class="pause-box">
+          <h2 class="pause-title">Paused</h2>
+          <button type="button" class="px-btn" id="btn-resume">&#9654; Resume</button>
+          <button type="button" class="px-btn px-btn--wood" id="btn-quit">Quit to title</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GAME OVER ============ -->
+  <section id="screen-gameover" class="rodeo-screen screen-title" hidden>
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun px-sun--low"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+
+    <div class="title-wrap">
+      <p class="go-kicker">Game over</p>
+      <h1 class="game-title game-title--sm">The outlaws got away</h1>
+
+      <div class="title-panel title-panel--single">
+        <div class="go-stats">
+          <div class="go-stat"><span class="go-label">Score</span><span class="go-num" id="go-score">0</span></div>
+          <div class="go-stat"><span class="go-label">Best</span><span class="go-num" id="go-best">0</span></div>
+          <div class="go-stat"><span class="go-label">Roped</span><span class="go-num" id="go-caught">0</span></div>
+          <div class="go-stat"><span class="go-label">Charges right</span><span class="go-num" id="go-accuracy">-</span></div>
+        </div>
+        <p class="go-record" id="go-record" hidden>&#9733; New record &#9733;</p>
+
+        <h2 class="block-title">Wanted list - review these</h2>
+        <ol class="review" id="go-review"></ol>
+
+        <div class="go-actions">
+          <button type="button" class="px-btn px-btn--big" id="btn-again">&#9654; Ride again</button>
+          <button type="button" class="px-btn px-btn--wood" id="btn-title">Settings</button>
+          <a class="px-link px-link--dark" href="../index.html">&#9664; Gas Saloon</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="../../js/gas-core.js"></script>
+<script src="gasGameLogic.js"></script>
+<script src="gasGenerator.js"></script>
+<script src="lasso.js"></script>
+<script src="game.js"></script>
+<script src="gasGenerator.testcases.js"></script>
+</body>
+</html>

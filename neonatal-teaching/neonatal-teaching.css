@@ -1,0 +1,247 @@
+/* Gas Saloon hub: same fixed western/pixel palette as the games. */
+
+body.neonatal-teaching-hub {
+  --ink: #1b0f08;
+  --wood-dark: #3b2212;
+  --wood: #6b3f1f;
+  --wood-light: #9a6233;
+  --parchment: #f3dfb1;
+  --parchment-dark: #dcbc7f;
+  --gold: #f2c14e;
+  --gold-dark: #c48a1e;
+  --blood: #b3261e;
+  --sand: #d9a35b;
+  --sand-dark: #b8813f;
+  --font-west: "Rye", Georgia, serif;
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-term: "VT323", ui-monospace, monospace;
+
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #22143d;
+  color: var(--parchment);
+  font-family: var(--font-term);
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+body.neonatal-teaching-hub .theme-toggle,
+body.neonatal-teaching-hub .back-home-link {
+  display: none !important;
+}
+
+.neonatal-teaching-hub .hub-scenery {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #22143d 0 18%,
+    #452058 18% 34%,
+    #84305a 34% 50%,
+    #c9493f 50% 64%,
+    #ec7f3a 64% 78%,
+    #f5b553 78% 100%
+  );
+}
+
+.neonatal-teaching-hub .hub-sun {
+  position: absolute;
+  left: 18%;
+  bottom: 26vh;
+  width: 20vmin;
+  height: 20vmin;
+  background: linear-gradient(to bottom, #fff0a8 0 40%, #ffd25e 40% 70%, #ffb347 70% 100%);
+  clip-path: polygon(
+    30% 0, 70% 0, 70% 8%, 84% 8%, 84% 16%, 92% 16%, 92% 30%, 100% 30%,
+    100% 70%, 92% 70%, 92% 84%, 84% 84%, 84% 92%, 70% 92%, 70% 100%,
+    30% 100%, 30% 92%, 16% 92%, 16% 84%, 8% 84%, 8% 70%, 0 70%,
+    0 30%, 8% 30%, 8% 16%, 16% 16%, 16% 8%, 30% 8%
+  );
+}
+
+.neonatal-teaching-hub .hub-mesas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18vh;
+  height: 14vh;
+  background:
+    linear-gradient(#7a2f3b, #7a2f3b) 6% 30% / 18% 70% no-repeat,
+    linear-gradient(#7a2f3b, #7a2f3b) 46% 50% / 24% 50% no-repeat,
+    linear-gradient(#7a2f3b, #7a2f3b) 86% 20% / 20% 80% no-repeat,
+    linear-gradient(#4a1d2c, #4a1d2c) 0 100% / 100% 35% no-repeat;
+}
+
+.neonatal-teaching-hub .hub-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18vh;
+  border-top: 4px solid var(--ink);
+  background:
+    radial-gradient(circle, var(--sand-dark) 0 2px, transparent 2.5px) 0 0 / 40px 30px,
+    var(--sand);
+}
+
+.neonatal-teaching-hub .hub-main {
+  position: relative;
+  z-index: 1;
+  width: min(900px, 100%);
+  margin: 0 auto;
+  padding: 20px 20px 20vh;
+}
+
+.neonatal-teaching-hub .hub-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.neonatal-teaching-hub .hub-home {
+  align-self: flex-start;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+  text-decoration: none;
+}
+
+.neonatal-teaching-hub .hub-kicker {
+  margin: 14px 0 4px;
+  font-family: var(--font-pixel);
+  font-size: clamp(9px, 1.3vw, 12px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.neonatal-teaching-hub .hub-title {
+  margin: 0;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: clamp(2.8rem, 10vw, 6rem);
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 4px 4px 0 var(--ink), 8px 8px 0 var(--blood), 12px 12px 0 var(--ink);
+}
+
+.neonatal-teaching-hub .hub-tagline {
+  margin: 16px 0 0;
+  font-size: 24px;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.neonatal-teaching-hub .hub-board {
+  margin: 0 16px 34px;
+  padding: 18px 20px;
+  background: var(--parchment);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 4px var(--ink),
+    0 0 0 12px var(--wood),
+    0 0 0 16px var(--ink),
+    12px 14px 0 14px rgba(27, 15, 8, 0.45);
+}
+
+.neonatal-teaching-hub .hub-board-title {
+  margin: 0 0 14px;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: 28px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--blood);
+}
+
+.neonatal-teaching-hub .hub-board p {
+  margin: 0 0 14px;
+}
+
+.neonatal-teaching-hub .hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.neonatal-teaching-hub .hub-game {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 3px;
+  padding: 16px;
+  text-decoration: none;
+  color: var(--parchment);
+  background:
+    repeating-linear-gradient(to bottom, var(--wood) 0 22px, var(--wood-dark) 22px 25px),
+    var(--wood);
+  box-shadow: 0 0 0 3px var(--ink), inset 0 0 0 3px var(--wood-light), 6px 6px 0 3px rgba(27, 15, 8, 0.45);
+}
+
+.neonatal-teaching-hub a.hub-game:hover {
+  transform: translate(-2px, -2px);
+}
+
+.neonatal-teaching-hub a.hub-game:focus-visible {
+  outline: 3px solid var(--blood);
+  outline-offset: 6px;
+}
+
+.neonatal-teaching-hub .hub-game--soon {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.neonatal-teaching-hub .hub-game-tag {
+  align-self: flex-start;
+  padding: 4px 6px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--gold);
+}
+
+.neonatal-teaching-hub .hub-game-title {
+  font-family: var(--font-west);
+  font-size: 30px;
+  color: var(--gold);
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.neonatal-teaching-hub .hub-game-desc {
+  font-size: 21px;
+}
+
+.neonatal-teaching-hub .hub-game-cta,
+.neonatal-teaching-hub .hub-btn {
+  align-self: flex-start;
+  margin: 6px 3px 3px;
+  padding: 10px 14px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--gold);
+  box-shadow:
+    inset -4px -4px 0 var(--gold-dark),
+    inset 4px 4px 0 #ffe39a,
+    0 0 0 3px var(--ink);
+}
+
+.neonatal-teaching-hub .hub-btn:hover {
+  filter: brightness(1.08);
+}
+
+.neonatal-teaching-hub .hub-footer {
+  margin: 0;
+  text-align: center;
+  font-size: 19px;
+  text-shadow: 2px 2px 0 var(--ink);
+}
