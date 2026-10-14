@@ -1,4 +1,4 @@
-﻿# James Woodward Lab
+# James Woodward Lab
 
 A collection of lightweight, single-page paediatric clinical tools and
 calculators hosted at **[jameswoodward.co.uk](https://jameswoodward.co.uk)**.
@@ -18,6 +18,9 @@ bedside on a phone or trust PC.
   Glucose) plus the full resus drug set and a print-friendly layout.
 - **🧾 [Examination notes](exam-notes/)** - structured infant
   examination documentation helper.
+- **👶 [Postnatal review](postnatal-review/)** - postnatal and labour-ward
+  neonatal review note, copied into BadgerNet as Examination, Discussion,
+  and Review.
 - **💧 [Fluid Calculator](fluid-calculator/)** - maintenance &
   replacement fluids.
 - **🫀 [QTc Calculator](qtc-calculator/)** - Bazett / Fridericia with

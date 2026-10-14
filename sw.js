@@ -14,7 +14,7 @@
  * caches are cleaned on activate.
  */
 
-const CACHE_VERSION = 'v8';
+const CACHE_VERSION = 'v20';
 const SHELL_CACHE = `jwl-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `jwl-runtime-${CACHE_VERSION}`;
 
@@ -34,6 +34,10 @@ const APP_SHELL = [
   '/ed-discharge-pack/index.html',
   '/rota-app/index.html',
   '/dosing-calculator/index.html',
+  '/css/postnatal-review.css',
+  '/postnatal-review/index.html',
+  '/postnatal-review/content.js',
+  '/postnatal-review/review.js',
   '/icons/icon.svg',
   '/icons/icon-maskable.svg'
 ];
