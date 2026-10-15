@@ -26,9 +26,6 @@
     return {
       step: 'context',
       shorter: false,
-      includeIdentifiers: false,
-      bed: '',
-      initials: '',
       place: '',
       placeOther: '',
       reasons: [],
@@ -41,14 +38,11 @@
       ageDays: '',
       ageHours: '',
       sex: '',
-      birthWeight: '',
-      currentWeight: '',
       modeOfBirth: '',
       modeOther: '',
       plurality: '',
       apgar1: '',
       apgar5: '',
-      membranes: '',
       romHours: '',
       iapTiming: '',
       centile: '',
@@ -80,7 +74,6 @@
       glucoses: [{ time: '', value: '', method: '' }],
       bilirubin: { kind: '', value: '', ageHours: '', plot: '' },
       gas: { ph: '', be: '', lactate: '', glucose: '' },
-      bloods: { crp: '', wcc: '', platelets: '', cultures: '', coombs: '' },
       resultsNote: '',
       impression: '',
       plan: '',
@@ -98,7 +91,7 @@
   function normalize(partial) {
     var state = emptyState();
     if (!partial || typeof partial !== 'object') return state;
-    var nested = { obs: 1, gas: 1, bloods: 1, bilirubin: 1, answers: 1, multi: 1, exam: 1, kaiser: 1 };
+    var nested = { obs: 1, gas: 1, bilirubin: 1, answers: 1, multi: 1, exam: 1, kaiser: 1 };
     Object.keys(partial).forEach(function (key) {
       if (partial[key] === undefined) return;
       if (nested[key] && partial[key] && typeof partial[key] === 'object' && !Array.isArray(partial[key])) {
@@ -167,20 +160,6 @@
     return weeks + '+' + (days == null ? '0' : days);
   }
 
-  function weightLossPercent(partial) {
-    var state = partial && partial.obs ? partial : normalize(partial);
-    var birth = num(state.birthWeight);
-    var current = num(state.currentWeight);
-    if (birth == null || current == null || birth <= 0) return null;
-    return ((birth - current) / birth) * 100;
-  }
-
-  function formatLoss(percent) {
-    var rounded = Math.round(percent * 10) / 10;
-    if (rounded < 0) return 'gained ' + Math.abs(rounded) + '%';
-    return 'lost ' + rounded + '%';
-  }
-
   function glucoseBand(value) {
     if (value == null) return '';
     if (value < 1) return 'under 1.0 mmol/L';
@@ -192,7 +171,7 @@
     var state = normalize(partial);
     var hours = num(state.romHours);
     var preterm = isPreterm(state);
-    if (hours == null || preterm == null || state.membranes === 'intact') return null;
+    if (hours == null || preterm == null) return null;
     if (preterm && hours > 18) {
       return {
         id: 'rom-preterm-18',
@@ -278,11 +257,14 @@
     }
     if (state.answers['gbs-maternal'] === 'yes' || state.answers['gbs-previous'] === 'yes') add('gbs');
     [
-      'sibling-infection', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
+      'sibling-infection', 'spontaneous-preterm',
       'maternal-sepsis', 'chorio', 'cpr', 'ventilation', 'idm', 'beta-blocker', 'sga', 'wasted'
     ].forEach(function (id) {
       if (state.answers[id] === 'yes') add(id);
     });
+    var preterm = isPreterm(state);
+    if (state.answers['rom-preterm-18'] === 'yes' && preterm !== false) add('rom-preterm-18');
+    if (state.answers['rom-term-24'] === 'yes' && preterm !== true) add('rom-term-24');
     var since = state.multi.sinceBirth || [];
     if (since.indexOf('apnoea') !== -1) add('apnoea');
     if (since.indexOf('seizures') !== -1) add('seizures');
@@ -327,8 +309,6 @@
     if (state.answers.confirmHr === 'yes' && hr != null && (hr < 100 || hr > 160)) add('abnormal-hr');
     if (state.answers.confirmHypoxia === 'yes' && sats != null && sats < 95) add('hypoxia');
     if (state.answers.confirmTachypnoea === 'yes' && rr != null && rr > 60) add('resp-distress');
-    var platelets = num(state.bloods.platelets);
-    if (platelets != null && platelets < 150) add('bleeding-coag');
     if (state.answers.thrombocytopenia === 'yes' || state.answers.coagulation === 'yes') add('bleeding-coag');
     return Object.keys(found).map(function (id) { return found[id]; });
   }
@@ -598,15 +578,13 @@
   }
 
   function membraneSentence(state, factors) {
-    if (state.membranes === 'intact') return 'Membranes intact.';
     var hours = num(state.romHours);
-    if (hours == null && state.membranes !== 'ruptured') return '';
+    if (hours == null) return '';
     var preterm = isPreterm(state);
     var tagged = factors.some(function (factor) {
       return factor.id === 'rom-preterm-18' || factor.id === 'rom-term-24';
     });
-    var sentence = 'Membranes ruptured';
-    if (hours != null) sentence += ' for ' + hours + ' hours';
+    var sentence = 'Membranes ruptured for ' + hours + ' hours';
     if (preterm === true) sentence += ' before a preterm birth';
     if (preterm === false) sentence += ' before a term birth';
     if (tagged) sentence += ' (NICE NG195 risk factor)';
@@ -713,15 +691,6 @@
     if (state.gas.lactate) gasBits.push('lactate ' + state.gas.lactate);
     if (state.gas.glucose) gasBits.push('glucose ' + state.gas.glucose);
     if (gasBits.length) lines.push('Blood gas: ' + gasBits.join(', ') + '.');
-    var bloodBits = [];
-    if (state.bloods.crp) bloodBits.push('CRP ' + state.bloods.crp);
-    if (state.bloods.wcc) bloodBits.push('white cells ' + state.bloods.wcc);
-    if (state.bloods.platelets) bloodBits.push('platelets ' + state.bloods.platelets);
-    if (bloodBits.length) lines.push(bloodBits.join(', ') + '.');
-    if (state.bloods.cultures === 'sent') lines.push('Cultures sent.');
-    if (state.bloods.cultures === 'not') lines.push('Cultures not sent.');
-    if (state.bloods.coombs === 'positive') lines.push('Coombs positive.');
-    if (state.bloods.coombs === 'negative') lines.push('Coombs negative.');
     if (state.answers.thrombocytopenia === 'yes') lines.push('Thrombocytopenia (NICE NG195 clinical indicator).');
     if (state.answers.coagulation === 'yes') lines.push('Abnormal coagulation (NICE NG195 clinical indicator).');
     if (state.resultsNote && state.resultsNote.trim()) lines.push(ensurePeriod(state.resultsNote.trim()));
@@ -737,16 +706,9 @@
     if (gestation) birth += gestation + ' weeks';
     if (mode) birth += (birth ? ', born by ' : 'Born by ') + mode;
     if (age != null) birth += (birth ? ', now ' : 'Now ') + shortAge(age) + ' old';
-    if (state.birthWeight) {
-      birth += (birth ? '. Birth weight ' : 'Birth weight ') + state.birthWeight + ' g.';
-    } else if (birth) birth += '.';
-    if (birth) lines.push(birth);
+    if (birth) lines.push(birth + '.');
     if (state.plurality === 'multiple') lines.push('Multiple pregnancy.');
     if (state.sex) lines.push('Sex: ' + state.sex + '.');
-    var loss = weightLossPercent(state);
-    if (state.currentWeight && loss != null) {
-      lines.push('Current weight ' + state.currentWeight + ' g (' + formatLoss(loss) + ' from birth weight).');
-    }
     if (state.centile && state.centile.trim()) lines.push('Birth-weight centile ' + state.centile.trim() + '.');
     lines.push(membraneSentence(state, factors));
     lines.push(gbsSentences(state));
@@ -827,26 +789,12 @@
     return 'Kaiser Permanente. ' + parts.join('. ') + '.';
   }
 
-  function identifierLine(state) {
-    if (!state.includeIdentifiers) return '';
-    var bits = [];
-    if (state.bed && String(state.bed).trim()) bits.push('Bed ' + String(state.bed).trim());
-    if (state.initials && String(state.initials).trim()) bits.push('initials ' + String(state.initials).trim());
-    return bits.length ? bits.join(', ') + '.' : '';
-  }
-
-  function withIdentifier(text, state) {
-    var line = identifierLine(state);
-    if (!line) return text;
-    return text ? line + '\n' + text : line;
-  }
-
   function buildBoxes(partial) {
     var state = normalize(partial);
     var factors = collectFactors(state);
-    var examination = withIdentifier(examinationText(state, !!state.shorter), state);
-    var discussion = withIdentifier(discussionText(state, factors), state);
-    var review = withIdentifier(reviewText(state, factors, !!state.shorter), state);
+    var examination = examinationText(state, !!state.shorter);
+    var discussion = discussionText(state, factors);
+    var review = reviewText(state, factors, !!state.shorter);
     return {
       examination: examination,
       discussion: discussion,
@@ -887,9 +835,7 @@
     } catch (error) { draft = null; }
     if (draft) state = draft;
     var shorter = document.getElementById('shorter-note');
-    var include = document.getElementById('include-id');
     if (shorter) shorter.checked = !!state.shorter;
-    if (include) include.checked = !!state.includeIdentifiers;
     var app = document.getElementById('review-app');
     app.addEventListener('click', onClick);
     app.addEventListener('input', onInput);
@@ -1011,16 +957,6 @@
         ageEl.textContent = bits.join(' ');
       }
     }
-    var weightEl = document.getElementById('weight-readout');
-    if (weightEl) {
-      var loss = weightLossPercent(state);
-      if (loss == null) weightEl.textContent = '';
-      else {
-        var message = formatLoss(loss) + ' from birth weight.';
-        if (loss > 10) message += ' Weight loss over 10% is a common local concern. Follow the local pathway.';
-        weightEl.textContent = message;
-      }
-    }
     var offer = document.getElementById('rom-offer');
     if (offer) {
       var suggestion = romSuggestion(state);
@@ -1057,8 +993,6 @@
       var value = row ? num(row.value) : null;
       el.textContent = value == null ? '' : glucoseBand(value);
     });
-    var platelets = num(state.bloods.platelets);
-    show('platelet-note', platelets != null && platelets < 150);
     show('stool-prompt', state.stools === 'none' && age != null && age > 24);
     show('urine-prompt', state.urine === 'not' && age != null && age > 24);
     show('jaundice-flag', age != null && age < 24);
@@ -1075,6 +1009,9 @@
     show('age-times', state.ageMode !== 'manual');
     show('age-manual', state.ageMode === 'manual');
     show('sibling-wrap', state.plurality === 'multiple');
+    var preterm = isPreterm(state);
+    show('rom-preterm-wrap', preterm !== false);
+    show('rom-term-wrap', preterm !== true);
     show('iap-timing-wrap', state.answers.iap === 'given');
     show('feed-latch-wrap', state.feedMode === 'breast' || state.feedMode === 'mixed');
     show('feed-duration-wrap', state.feedMode === 'breast' || state.feedMode === 'mixed');
@@ -1089,10 +1026,12 @@
 
   function onInput(event) {
     var target = event.target;
-    if (target.dataset.field) state[target.dataset.field] = target.value;
+    if (target.dataset.field) {
+      state[target.dataset.field] = target.value;
+      if (target.dataset.field === 'gestationWeeks' || target.dataset.field === 'gestationDays') presetPretermAnswer();
+    }
     else if (target.dataset.obs) state.obs[target.dataset.obs] = target.value;
     else if (target.dataset.gas) state.gas[target.dataset.gas] = target.value;
-    else if (target.dataset.blood) state.bloods[target.dataset.blood] = target.value;
     else if (target.dataset.bili) state.bilirubin[target.dataset.bili] = target.value;
     else if (target.dataset.kaiser) state.kaiser[target.dataset.kaiser] = target.value;
     else if (target.dataset.glucoseField) {
@@ -1118,7 +1057,6 @@
 
   function onChange(event) {
     if (event.target.id === 'shorter-note') state.shorter = event.target.checked;
-    if (event.target.id === 'include-id') state.includeIdentifiers = event.target.checked;
     persist();
     refreshChrome();
   }
@@ -1137,7 +1075,6 @@
     if (button.hasAttribute('data-exam-multi')) { toggleExamMulti(button); return; }
     if (button.dataset.obsChoice) { toggleObs(button.dataset.obsChoice, button.dataset.value); return; }
     if (button.dataset.biliChoice) { toggleNested(state.bilirubin, button.dataset.biliChoice, button.dataset.value); return; }
-    if (button.dataset.bloodChoice) { toggleNested(state.bloods, button.dataset.bloodChoice, button.dataset.value); return; }
     if (button.dataset.glucoseMethod) { toggleGlucoseMethod(button); return; }
     if (button.dataset.copy) { copyText(button.dataset.copy, button); return; }
     if (button.dataset.phrase) { appendPhrase(button.dataset.phrase); return; }
@@ -1160,9 +1097,7 @@
       try { sessionStorage.removeItem(DRAFT_KEY); } catch (error) { /* ignore */ }
       document.getElementById('confirm-new').hidden = true;
       var shorter = document.getElementById('shorter-note');
-      var include = document.getElementById('include-id');
       if (shorter) shorter.checked = false;
-      if (include) include.checked = false;
       paint();
       window.scrollTo(0, 0);
     }
@@ -1204,6 +1139,17 @@
     state.answers[key] = state.answers[key] === value ? '' : value;
     persist();
     paint();
+  }
+
+  function presetPretermAnswer() {
+    var preterm = isPreterm(state);
+    state.answers['spontaneous-preterm'] = preterm == null ? '' : (preterm ? 'yes' : 'no');
+    document.querySelectorAll('[data-answer="spontaneous-preterm"]').forEach(function (button) {
+      var on = state.answers['spontaneous-preterm'] === button.dataset.value;
+      button.classList.toggle('is-selected', on);
+      button.classList.toggle('is-abnormal', on && button.dataset.value === 'yes');
+      button.classList.toggle('is-normal', on && button.dataset.value === 'no');
+    });
   }
 
   function toggleMulti(key, value) {
@@ -1438,22 +1384,12 @@
       '</div>' +
       '<p id="age-readout" class="readout"></p>' +
       '<h2 class="group-title">Baby</h2>' +
-      half(bindChoices('sex', 'Sex', [
+      bindChoices('sex', 'Sex', [
         { value: 'female', label: 'Female' },
         { value: 'male', label: 'Male' },
         { value: 'other', label: 'Other or not recorded' }
-      ])) +
-      '<div class="num-row half">' +
-        input('birthWeight', 'Birth weight (g)', state.birthWeight, { type: 'number', mode: 'numeric' }) +
-        input('currentWeight', 'Current weight (g)', state.currentWeight, { type: 'number', mode: 'numeric' }) +
-      '</div>' +
-      '<p id="weight-readout" class="readout"></p>' +
-      '<h2 class="group-title">On this screen only</h2>' +
-      '<p class="hint">Bed and initials stay off the copied note unless you include them on the note panel.</p>' +
-      '<div class="num-row">' +
-        input('bed', 'Bed', state.bed, { placeholder: '4' }) +
-        input('initials', 'Initials', state.initials, { placeholder: 'AB' }) +
-      '</div></section>';
+      ]) +
+      '</section>';
   }
 
   function backgroundHtml() {
@@ -1468,57 +1404,49 @@
         input('apgar1', 'Apgar 1 min', state.apgar1, { type: 'number', mode: 'numeric' }) +
         input('apgar5', 'Apgar 5 min', state.apgar5, { type: 'number', mode: 'numeric' }) +
       '</div>' +
-      yn('cpr', 'Cardiopulmonary resuscitation', 'Needed', 'Not needed', 'red', true) +
-      yn('ventilation', 'Mechanical ventilation', 'Needed', 'Not needed', 'red', true) +
-      yn('meconium', 'Meconium stained liquor', 'Yes', 'No', '', true) +
-      yn('shoulder', 'Shoulder dystocia', 'Yes', 'No', '', true) +
-      '<h2 class="group-title">Membranes</h2>' +
-      half(bindChoices('membranes', 'Membranes', [
-        { value: 'intact', label: 'Intact' },
-        { value: 'ruptured', label: 'Ruptured' }
-      ])) +
+      '<h2 class="group-title">Risk Factors for Sepsis</h2>' +
       half(input('romHours', 'Hours of rupture before birth', state.romHours, { type: 'number', mode: 'decimal' })) +
       '<div id="rom-offer" class="offer" hidden></div>' +
-      yn('rom-preterm-18', 'Rupture for more than 18 hours before a preterm birth', 'Yes', 'No', 'ng195', true) +
-      yn('rom-term-24', 'Rupture for more than 24 hours before a term birth', 'Yes', 'No', 'ng195', true) +
+      '<div id="rom-preterm-wrap" class="half">' + yn('rom-preterm-18', 'Rupture for more than 18 hours before a preterm birth', 'Yes', 'No', 'ng195', true) + '</div>' +
+      '<div id="rom-term-wrap" class="half">' + yn('rom-term-24', 'Rupture for more than 24 hours before a term birth', 'Yes', 'No', 'ng195', true) + '</div>' +
       '<div id="preterm-note" class="guide-note guide-note--preterm" hidden>' + esc(content.GUIDE.preterm) + '</div>' +
       yn('spontaneous-preterm', 'Preterm birth after spontaneous labour, before 37 weeks', 'Yes', 'No', 'ng195', true) +
-      '<p class="hint">Prematurity on its own is not this risk factor. Tick it only when labour was spontaneous.</p>' +
-      '<h2 class="group-title">Intrapartum antibiotics</h2>' +
-      '<p class="hint">Recorded in the story. This is not added to the NICE NG195 count.</p>' +
-      '<div class="field half">' + fieldLabel('Intrapartum antibiotics') + choiceButtons('data-answer', 'iap', [
-        { value: 'none', label: 'None' },
-        { value: 'given', label: 'Given' }
-      ], state.answers.iap || '') + '</div>' +
-      '<div id="iap-timing-wrap" class="half">' + input('iapTiming', 'First dose timing', state.iapTiming, { wide: true, placeholder: 'For example, 2 hours before birth' }) + '</div>' +
-      '<h2 class="group-title">Mother</h2>' +
-      yn('idm', 'Mother with diabetes, including gestational', 'Yes', 'No', 'bapm', true) +
-      yn('beta-blocker', 'Beta-blocker in the third trimester or at birth', 'Yes', 'No', 'bapm', true) +
+      '<p class="hint">Set from the gestation. Change it to No if labour was not spontaneous, for example a pre-labour caesarean.</p>' +
       yn('gbs-maternal', 'Maternal GBS colonisation, bacteriuria, or infection this pregnancy', 'Yes', 'No', 'ng195', true) +
       yn('gbs-previous', 'Invasive GBS in a previous baby', 'Yes', 'No', 'ng195', true) +
       '<p class="hint">These two GBS questions count as one NICE NG195 risk factor if either is yes.</p>' +
       '<div id="sibling-wrap">' + yn('sibling-infection', 'Infection in another baby of this multiple pregnancy', 'Suspected or confirmed', 'No', 'red', true) + '</div>' +
       yn('maternal-sepsis', 'Maternal sepsis in labour or the early postpartum period', 'Yes', 'No', 'ng195', true) +
       yn('chorio', 'Suspected or confirmed chorioamnionitis', 'Yes', 'No', 'ng195', true) +
+      yn('cpr', 'Cardiopulmonary resuscitation', 'Needed', 'Not needed', 'red', true) +
+      yn('ventilation', 'Mechanical ventilation', 'Needed', 'Not needed', 'red', true) +
       yn('fever', 'Intrapartum fever', 'Yes', 'No', '', true) +
       '<p class="hint">Fever is part of the birth story. The current NICE list counts maternal sepsis and chorioamnionitis.</p>' +
+      '<div class="field half">' + fieldLabel('Intrapartum antibiotics') + choiceButtons('data-answer', 'iap', [
+        { value: 'none', label: 'None' },
+        { value: 'given', label: 'Given' }
+      ], state.answers.iap || '') + '</div>' +
+      '<div id="iap-timing-wrap" class="half">' + input('iapTiming', 'First dose timing', state.iapTiming, { wide: true, placeholder: 'For example, 2 hours before birth' }) + '</div>' +
       '<h2 class="group-title">Kaiser Permanente</h2>' +
       '<p class="hint">Early-onset sepsis calculator. Written into the review, and not added to the NICE count.</p>' +
       content.KAISER.map(function (option) {
         return '<label class="field">' + fieldLabel(option.label) + '<input data-kaiser="' + option.id + '" value="' + esc(state.kaiser[option.id] || '') + '" autocomplete="off"></label>';
       }).join('') +
-      '<h2 class="group-title">Growth</h2>' +
+      '<h2 class="group-title">Hypoglycaemia Risk Factors</h2>' +
+      yn('idm', 'Mother with diabetes, including gestational', 'Yes', 'No', 'bapm', true) +
+      yn('beta-blocker', 'Beta-blocker in the third trimester or at birth', 'Yes', 'No', 'bapm', true) +
       yn('sga', 'Birth weight on or under the 2nd centile', 'Yes', 'No', 'bapm', true) +
       yn('wasted', 'Clinically wasted', 'Yes', 'No', 'bapm', true) +
       half(input('centile', 'Centile, if you already know it', state.centile, { placeholder: '9th' })) +
-      '<h2 class="group-title">Other hypoglycaemia prompts</h2>' +
       yn('local-hypothermia', 'Hypothermia', 'Yes', 'No', 'local', true) +
       yn('local-acidosis', 'Perinatal acidosis', 'Yes', 'No', 'local', true) +
       yn('local-polycythaemia', 'Polycythaemia', 'Yes', 'No', 'local', true) +
       yn('local-family', 'Family history of a hypoglycaemia disorder', 'Yes', 'No', 'local', true) +
       yn('local-sepsis', 'Suspected or confirmed early-onset infection', 'Yes', 'No', 'local', true) +
-      '<h2 class="group-title">The rest of the story</h2>' +
-      area('backgroundNote', 'Other antenatal or birth history', state.backgroundNote, 4) +
+      '<h2 class="group-title">Other relevant history</h2>' +
+      yn('meconium', 'Meconium stained liquor', 'Yes', 'No', '', true) +
+      yn('shoulder', 'Shoulder dystocia', 'Yes', 'No', '', true) +
+      area('backgroundNote', 'Other relevant history', state.backgroundNote, 4) +
       '</section>';
   }
 
@@ -1714,24 +1642,11 @@
         { value: 'on', label: 'On' },
         { value: 'above', label: 'Above', abnormal: true }
       ], state.bilirubin.plot) + '</div></div>' +
-      '<h2 class="group-title">Gas and bloods</h2>' +
+      '<h2 class="group-title">Gas</h2>' +
       '<div class="num-row">' +
         gasInput('ph', 'pH') + gasInput('be', 'Base deficit') + gasInput('lactate', 'Lactate') + gasInput('glucose', 'Glucose') +
       '</div>' +
       '<p class="hint">A base deficit of 10 mmol/L or more is recorded as an NICE NG195 clinical indicator.</p>' +
-      '<div class="num-row">' +
-        bloodInput('crp', 'CRP') + bloodInput('wcc', 'White cells') + bloodInput('platelets', 'Platelets') +
-      '</div>' +
-      '<p id="platelet-note" class="guide-note guide-note--indicator" hidden>Under 150 is recorded as the NICE NG195 thrombocytopenia indicator.</p>' +
-      '<div class="field half">' + fieldLabel('Cultures') + choiceButtons('data-blood-choice', 'cultures', [
-        { value: 'not', label: 'Not sent' },
-        { value: 'sent', label: 'Sent' }
-      ], state.bloods.cultures) + '</div>' +
-      '<div class="field half">' + fieldLabel('Coombs') + choiceButtons('data-blood-choice', 'coombs', [
-        { value: 'not', label: 'Not sent' },
-        { value: 'negative', label: 'Negative' },
-        { value: 'positive', label: 'Positive', abnormal: true }
-      ], state.bloods.coombs) + '</div>' +
       yn('thrombocytopenia', 'Thrombocytopenia', 'Yes', 'No', 'indicator', true) +
       yn('coagulation', 'Abnormal coagulation', 'Yes', 'No', 'indicator', true) +
       area('resultsNote', 'Other results', state.resultsNote, 3) +
@@ -1745,10 +1660,6 @@
 
   function gasInput(key, label) {
     return '<label class="field">' + fieldLabel(label) + '<input class="num-input" inputmode="decimal" data-gas="' + key + '" value="' + esc(state.gas[key] || '') + '" autocomplete="off"></label>';
-  }
-
-  function bloodInput(key, label) {
-    return '<label class="field">' + fieldLabel(label) + '<input class="num-input" inputmode="decimal" data-blood="' + key + '" value="' + esc(state.bloods[key] || '') + '" autocomplete="off"></label>';
   }
 
   function impressionHtml() {
@@ -1788,7 +1699,6 @@
     emptyState: emptyState,
     normalize: normalize,
     ageInHours: ageInHours,
-    weightLossPercent: weightLossPercent,
     romSuggestion: romSuggestion,
     collectFactors: collectFactors,
     frameworkSentence: frameworkSentence,

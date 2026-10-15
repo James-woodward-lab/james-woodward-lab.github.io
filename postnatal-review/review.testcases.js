@@ -15,11 +15,7 @@ function routingCase() {
     ageMode: 'manual',
     ageHours: '18',
     modeOfBirth: 'svd',
-    birthWeight: '3400',
-    membranes: 'ruptured',
     romHours: '26',
-    bed: '12',
-    initials: 'AB',
     answers: {
       'rom-term-24': 'yes',
       'gbs-maternal': 'no',
@@ -54,7 +50,6 @@ var boxes = review.buildBoxes(routingCase());
 
 assert.ok(boxes.review.indexOf('39+2') !== -1, 'gestation leads the review');
 assert.ok(boxes.review.indexOf('18 hours') !== -1, 'age is in the review');
-assert.ok(boxes.review.indexOf('3400') !== -1, 'birth weight is in the review');
 assert.ok(boxes.review.indexOf('Meconium passed') !== -1, 'stools are in the review');
 assert.ok(boxes.review.indexOf('Urine passed') !== -1, 'urine is in the review');
 assert.ok(boxes.review.indexOf('No parental concern') !== -1, 'parental concern is in the review');
@@ -91,11 +86,13 @@ assert.strictEqual(boxes.redCount, 0, 'the sample has no red flag');
 assert.strictEqual(boxes.otherCount, 1, 'prolonged rupture counts as one other factor');
 assert.ok(boxes.framework.indexOf('12 hours') !== -1, 'one other factor mentions 12 hours of observations');
 assert.strictEqual(boxes.framework.indexOf('without waiting for results'), -1, 'one other factor does not use the red-flag sentence');
-assert.strictEqual(boxes.examination.indexOf('Bed 12'), -1, 'bed stays off the note');
-assert.strictEqual(boxes.review.indexOf('Bed 12'), -1, 'bed stays off the review');
+assert.ok(boxes.review.indexOf('Membranes ruptured for 26 hours') !== -1, 'rupture hours are written without the old membranes choice');
 
-var identified = review.buildBoxes(Object.assign({}, routingCase(), { includeIdentifiers: true }));
-assert.ok(identified.examination.indexOf('Bed 12') === 0, 'included bed leads the examination copy');
+var pretermGated = review.buildBoxes({ gestationWeeks: '35', answers: { 'rom-term-24': 'yes' } });
+assert.strictEqual(pretermGated.otherCount, 0, 'a term rupture answer does not count for a preterm baby');
+var termGated = review.buildBoxes({ gestationWeeks: '39', answers: { 'rom-preterm-18': 'yes' } });
+assert.strictEqual(termGated.otherCount, 0, 'a preterm rupture answer does not count for a term baby');
+assert.strictEqual(review.buildBoxes({ answers: { 'rom-preterm-18': 'yes' } }).otherCount, 1, 'without gestation either rupture answer counts');
 
 var shorter = review.buildBoxes(Object.assign({}, routingCase(), { shorter: true }));
 assert.strictEqual(shorter.examination.indexOf('Fontanelle soft'), -1, 'shorter examination drops NAD lines');
@@ -234,20 +231,16 @@ assert.strictEqual(review.buildBoxes({ gestationWeeks: '35' }).factors.some(func
 assert.strictEqual(review.isPreterm({ gestationWeeks: '35' }), true, '35 weeks is preterm');
 assert.strictEqual(review.isPreterm({ gestationWeeks: '37', gestationDays: '0' }), false, '37+0 is term');
 
-var termRom = review.romSuggestion({ gestationWeeks: '39', romHours: '26', membranes: 'ruptured' });
+var termRom = review.romSuggestion({ gestationWeeks: '39', romHours: '26' });
 assert.strictEqual(termRom && termRom.id, 'rom-term-24', 'term rupture over 24 hours is offered');
-var pretermRom = review.romSuggestion({ gestationWeeks: '35', romHours: '20', membranes: 'ruptured' });
+var pretermRom = review.romSuggestion({ gestationWeeks: '35', romHours: '20' });
 assert.strictEqual(pretermRom && pretermRom.id, 'rom-preterm-18', 'preterm rupture over 18 hours is offered');
-assert.strictEqual(review.romSuggestion({ gestationWeeks: '39', romHours: '20', membranes: 'ruptured' }), null, 'term rupture under 24 hours is not offered');
-assert.strictEqual(review.romSuggestion({ gestationWeeks: '35', romHours: '10', membranes: 'ruptured' }), null, 'preterm rupture under 18 hours is not offered');
-assert.strictEqual(review.romSuggestion({ gestationWeeks: '35', romHours: '30', membranes: 'intact' }), null, 'intact membranes are not offered');
+assert.strictEqual(review.romSuggestion({ gestationWeeks: '39', romHours: '20' }), null, 'term rupture under 24 hours is not offered');
+assert.strictEqual(review.romSuggestion({ gestationWeeks: '35', romHours: '10' }), null, 'preterm rupture under 18 hours is not offered');
 
 var hours = review.ageInHours({ ageMode: 'times', birthAt: '2026-01-01T00:00', reviewAt: '2026-01-01T18:30' });
 assert.ok(Math.abs(hours - 18.5) < 0.02, 'age from clock times is 18.5 hours');
 assert.strictEqual(review.ageInHours({ ageMode: 'manual', ageDays: '1', ageHours: '6' }), 30, 'manual age adds days and hours');
-
-var loss = review.weightLossPercent({ birthWeight: '3400', currentWeight: '3000' });
-assert.ok(Math.abs(loss - ((400 / 3400) * 100)) < 0.01, 'weight loss uses birth and current weight');
 
 assert.ok(review.buildBoxes({ answers: { idm: 'yes' } }).bapm.some(function (factor) { return factor.id === 'idm'; }), 'maternal diabetes is a BAPM factor');
 assert.strictEqual(review.buildBoxes({ answers: { idm: 'yes' } }).otherCount, 0, 'a BAPM factor is not an NG195 factor');

@@ -249,7 +249,7 @@ body.postnatal-review-app .field textarea {
 .exam-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .choice,
@@ -259,13 +259,14 @@ body.postnatal-review-app .field textarea {
 .note-copy {
   appearance: none;
   font: inherit;
+  font-size: var(--fs-sm);
   cursor: pointer;
-  min-height: 44px;
-  border-radius: 12px;
+  min-height: 36px;
+  border-radius: 10px;
   border: 1.5px solid var(--border-strong);
   background: var(--surface);
   color: var(--text);
-  padding: 8px 12px;
+  padding: 5px 10px;
   line-height: 1.2;
   text-align: left;
 }
@@ -302,8 +303,8 @@ body.postnatal-review-app .field textarea {
 
 .yn {
   background: var(--surface2);
-  padding: 4px;
-  border-radius: 14px;
+  padding: 3px;
+  border-radius: 12px;
   width: fit-content;
   max-width: 100%;
 }
@@ -311,7 +312,8 @@ body.postnatal-review-app .field textarea {
 .yn-btn {
   border-color: transparent;
   background: transparent;
-  min-width: 4.5rem;
+  min-width: 3.5rem;
+  text-align: center;
 }
 
 .ask {
@@ -390,15 +392,15 @@ body.postnatal-review-app .field textarea {
 
 .exam-body > * { grid-column: 1 / -1; }
 .exam-body > .exam-ctl--compact { grid-column: auto; }
-.exam-body .yn-btn { min-width: 3.5rem; }
+.exam-body .yn-btn { min-width: 3rem; }
 
 @media (min-width: 560px) {
   .exam-body > .exam-ctl--half { grid-column: auto; }
 }
 
 .exam-status {
-  min-height: 40px;
-  padding: 6px 10px;
+  min-height: 34px;
+  padding: 4px 12px;
   border-radius: 999px;
 }
 
