@@ -191,6 +191,14 @@ var senior = review.buildBoxes({ antibiotics: 'senior', seniorDecision: 'observe
 assert.ok(senior.discussion.indexOf('Antibiotics discussed with senior. Senior decision: observe for 12 hours.') !== -1, 'senior decision follows the antibiotic choice');
 assert.ok(senior.discussion.indexOf('Senior discussion outcome: Registrar agrees with plan.') !== -1, 'senior discussion outcome is written');
 
+var numbered = review.buildBoxes({
+  plan: 'Remain with mother on the postnatal ward.\nContinue observations and review if they change.',
+  antibiotics: 'none',
+  reviewWhen: '16:00'
+});
+assert.ok(numbered.discussion.indexOf('Plan:\n1. Remain with mother on the postnatal ward.\n2. Continue observations and review if they change.\n3. No antibiotics.\n4. Review at 16:00.') !== -1, 'multiple plan items are numbered on separate lines');
+assert.ok(review.buildBoxes({ antibiotics: 'none' }).discussion.indexOf('Plan: No antibiotics.') !== -1, 'a single plan item stays on one line');
+
 var hours = review.ageInHours({ ageMode: 'times', birthAt: '2026-01-01T00:00', reviewAt: '2026-01-01T18:30' });
 assert.ok(Math.abs(hours - 18.5) < 0.02, 'age from clock times is 18.5 hours');
 assert.strictEqual(review.ageInHours({ ageMode: 'manual', ageDays: '1', ageHours: '6' }), 30, 'manual age adds days and hours');

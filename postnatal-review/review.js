@@ -394,9 +394,14 @@
     return 'Impression: ' + ensurePeriod(text);
   }
 
-  function planParagraph(state) {
+  function planItems(state) {
     var bits = [];
-    if (state.plan && state.plan.trim()) bits.push(ensurePeriod(state.plan.trim()));
+    if (state.plan && state.plan.trim()) {
+      state.plan.split(/\n+/).forEach(function (line) {
+        var trimmed = String(line || '').trim().replace(/^\d+\.\s*/, '');
+        if (trimmed) bits.push(ensurePeriod(trimmed));
+      });
+    }
     if (state.antibiotics === 'none') bits.push('No antibiotics.');
     if (state.antibiotics === 'senior') {
       var discussed = 'Antibiotics discussed with senior.';
@@ -410,8 +415,16 @@
     }
     if (state.reviewWhen && state.reviewWhen.trim()) bits.push('Review at ' + state.reviewWhen.trim() + '.');
     if (state.seniorOutcome && state.seniorOutcome.trim()) bits.push('Senior discussion outcome: ' + ensurePeriod(state.seniorOutcome.trim()));
+    return bits;
+  }
+
+  function planParagraph(state) {
+    var bits = planItems(state);
     if (!bits.length) return '';
-    return 'Plan: ' + bits.join(' ');
+    if (bits.length === 1) return 'Plan: ' + bits[0];
+    return 'Plan:\n' + bits.map(function (bit, index) {
+      return (index + 1) + '. ' + bit;
+    }).join('\n');
   }
 
   function parentParagraph(state) {
@@ -1008,7 +1021,9 @@
     var phrase = content.PLAN_PHRASES.filter(function (item) { return item.id === id; })[0];
     if (!phrase || !phrase.text) return;
     var line = phrase.text;
-    if (state.plan.indexOf(line) === -1) state.plan = state.plan.trim() ? state.plan.trim() + ' ' + line : line;
+    if (state.plan.indexOf(line) === -1) {
+      state.plan = state.plan.trim() ? state.plan.trim() + '\n' + line : line;
+    }
     persist();
     paint();
   }
