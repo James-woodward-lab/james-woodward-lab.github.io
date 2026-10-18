@@ -154,6 +154,19 @@
     els.pauseOverlay.hidden = next !== "paused";
   }
 
+  function shuffleQuestion(q) {
+    const pairs = q.choices.map((text, i) => ({ text, correct: i === q.answer }));
+    const shuffled = bank.shuffle(pairs);
+    return {
+      id: q.id,
+      topic: q.topic,
+      stem: q.stem,
+      why: q.why,
+      choices: shuffled.map((p) => p.text),
+      answer: shuffled.findIndex((p) => p.correct),
+    };
+  }
+
   function nextQuestion() {
     if (state.queueIndex >= state.queue.length) {
       state.queue = bank.questionsForTopic(state.topic);
@@ -161,7 +174,7 @@
     }
     const q = state.queue[state.queueIndex];
     state.queueIndex += 1;
-    showQuestion(q);
+    showQuestion(shuffleQuestion(q));
   }
 
   function showQuestion(q) {

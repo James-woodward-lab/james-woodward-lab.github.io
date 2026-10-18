@@ -725,7 +725,7 @@ body.bicarb-bandit-app .back-home-link {
 /* Chase strip */
 .bicarb-bandit-app .chase-strip {
   flex: none;
-  height: clamp(128px, 20vh, 180px);
+  height: clamp(150px, 22vh, 210px);
   position: relative;
   border-bottom: 4px solid var(--ink);
   overflow: hidden;
@@ -762,23 +762,57 @@ body.bicarb-bandit-app .back-home-link {
 
 .bicarb-bandit-app .sprite {
   position: absolute;
-  bottom: 4px;
+  bottom: 6px;
   transition: left 0.45s steps(8);
   z-index: 2;
-  text-align: center;
-  line-height: 1;
+  line-height: 0;
+  will-change: left;
 }
 
 .bicarb-bandit-app .posse-icon {
-  width: clamp(108px, 16vw, 190px);
+  width: clamp(150px, 18vw, 220px);
   height: auto;
-  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.5));
+  max-width: none;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.55));
+  transform-origin: 50% 100%;
 }
 
 .bicarb-bandit-app .molecule-icon {
-  width: clamp(84px, 12vw, 140px);
+  width: clamp(120px, 14vw, 180px);
   height: auto;
-  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.5));
+  max-width: none;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.55));
+  transform-origin: 50% 80%;
+}
+
+.bicarb-bandit-app .sprite.is-running .posse-icon {
+  animation: bb-run-bob 0.28s steps(2) infinite;
+}
+
+.bicarb-bandit-app .sprite.is-running .molecule-icon {
+  animation: bb-run-jiggle 0.34s steps(2) infinite;
+}
+
+.bicarb-bandit-app .sprite.is-running .run-leg-a {
+  animation: bb-leg-a 0.28s steps(2) infinite;
+}
+
+.bicarb-bandit-app .sprite.is-running .run-leg-b {
+  animation: bb-leg-b 0.28s steps(2) infinite;
+}
+
+.bicarb-bandit-app .chase-strip.is-paused .sprite.is-running .posse-icon,
+.bicarb-bandit-app .chase-strip.is-paused .sprite.is-running .molecule-icon,
+.bicarb-bandit-app .chase-strip.is-paused .sprite.is-running .run-leg-a,
+.bicarb-bandit-app .chase-strip.is-paused .sprite.is-running .run-leg-b {
+  animation-play-state: paused;
+}
+
+.bicarb-bandit-app .sprite.is-caught .posse-icon,
+.bicarb-bandit-app .sprite.is-caught .molecule-icon,
+.bicarb-bandit-app .sprite.is-caught .run-leg-a,
+.bicarb-bandit-app .sprite.is-caught .run-leg-b {
+  animation: none;
 }
 
 .bicarb-bandit-app .gas-val .unit {
@@ -1131,6 +1165,26 @@ body.bicarb-bandit-app .back-home-link {
   50% { filter: brightness(1.3); }
 }
 
+@keyframes bb-run-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes bb-run-jiggle {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-4px) rotate(5deg); }
+}
+
+@keyframes bb-leg-a {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-2px, -3px); }
+}
+
+@keyframes bb-leg-b {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, 2px); }
+}
+
 @keyframes bb-shake {
   0%, 100% { transform: translate(0, 0); }
   20% { transform: translate(-8px, 3px); }
@@ -1152,7 +1206,11 @@ body.bicarb-bandit-app .back-home-link {
   .bicarb-bandit-app .go-record,
   .bicarb-bandit-app .pause-title,
   .bicarb-bandit-app .stage.shake,
-  .bicarb-bandit-app .sprite {
+  .bicarb-bandit-app .sprite,
+  .bicarb-bandit-app .sprite.is-running .posse-icon,
+  .bicarb-bandit-app .sprite.is-running .molecule-icon,
+  .bicarb-bandit-app .sprite.is-running .run-leg-a,
+  .bicarb-bandit-app .sprite.is-running .run-leg-b {
     animation: none;
     transition: none;
   }

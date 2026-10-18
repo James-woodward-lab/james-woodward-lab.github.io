@@ -546,11 +546,12 @@ body.tumbleweed-app .back-home-link { display: none !important; }
 
 .tumbleweed-app .bg-weed {
   position: absolute;
-  left: 0;
-  width: 56px;
-  height: 56px;
-  animation: tw-roll linear infinite;
+  left: -40px;
+  display: block;
+  max-width: none;
+  height: auto;
   filter: drop-shadow(3px 3px 0 rgba(27, 15, 8, 0.35));
+  animation: tw-roll linear infinite;
 }
 .tumbleweed-app .bg-weed-1 { top: 8%; width: 42px; height: 42px; animation-duration: 16s; }
 .tumbleweed-app .bg-weed-2 { top: 28%; width: 72px; height: 72px; animation-duration: 22s; animation-delay: -8s; }
@@ -559,9 +560,9 @@ body.tumbleweed-app .back-home-link { display: none !important; }
 .tumbleweed-app .bg-weed-5 { top: 40%; width: 48px; height: 48px; animation-duration: 26s; animation-delay: -18s; }
 
 .tumbleweed-app .quiz-board {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  height: 100%;
   overflow: auto;
   display: flex;
   align-items: center;

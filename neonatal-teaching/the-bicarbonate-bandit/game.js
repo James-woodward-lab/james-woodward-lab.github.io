@@ -9,6 +9,7 @@
 
   const MAX_GAP = 10;
   const START_GAP = 5;
+  const CATCHES_TO_WIN = 8;
   const MAX_STRIKES = 3;
   const MAX_REVIEW = 8;
   const SETTINGS_KEY = "bicarbBanditSettings";
@@ -275,6 +276,9 @@
     els.score.textContent = pad6(state.score);
     els.streak.textContent = `x${state.streak}`;
     els.gap.textContent = String(state.gap);
+    if (els.catch) {
+      els.catch.textContent = `${state.correct}/${CATCHES_TO_WIN}`;
+    }
     els.timer.textContent = String(Math.max(0, Math.ceil(state.timerLeft)));
     els.timerBadge.classList.toggle("timer-urgent", state.timerLeft <= 5 && state.phase === "chasing");
     els.age.textContent = AGE_SHORT[state.ageGroup] || state.ageGroup;
@@ -283,12 +287,33 @@
   }
 
   function updateChaseSprites() {
-    // gap 0 = caught (bandit left of posse-ish / overlapping), gap MAX = at canyon
-    const track = 78; // percent usable width before canyon
-    const banditPct = 8 + (state.gap / MAX_GAP) * track;
-    const possePct = Math.max(2, banditPct - 14 - (MAX_GAP - state.gap) * 0.4);
+    if (!els.bandit || !els.posse) {
+      return;
+    }
+    // Correct answers push the chase right; gap opens/closes the space between them.
+    const progressT = Math.min(CATCHES_TO_WIN, state.correct) / CATCHES_TO_WIN;
+    const gapT = state.gap / MAX_GAP;
+    let banditPct;
+    let possePct;
+
+    if (state.correct >= CATCHES_TO_WIN) {
+      banditPct = 78;
+      possePct = 74;
+    } else {
+      const pack = 10 + progressT * 58;
+      const sep = 10 + gapT * 34;
+      const canyonPull = gapT * 14;
+      banditPct = Math.min(86, pack + sep * 0.55 + canyonPull);
+      possePct = Math.max(2, banditPct - sep);
+    }
+
     els.bandit.style.left = `${banditPct}%`;
     els.posse.style.left = `${possePct}%`;
+    const running = state.phase === "chasing" || state.phase === "feedback";
+    els.posse.classList.toggle("is-running", running);
+    els.bandit.classList.toggle("is-running", running);
+    els.posse.classList.toggle("is-caught", state.correct >= CATCHES_TO_WIN);
+    els.bandit.classList.toggle("is-caught", state.correct >= CATCHES_TO_WIN);
   }
 
   function showBanner(text, kind) {
@@ -311,9 +336,14 @@
     els.screenGame.hidden = next !== "chasing" && next !== "feedback" && next !== "paused";
     els.screenEnd.hidden = next !== "caught" && next !== "escaped";
     els.pauseOverlay.hidden = next !== "paused";
+    if (els.chaseStrip) {
+      els.chaseStrip.classList.toggle("is-live", next === "chasing" || next === "feedback");
+      els.chaseStrip.classList.toggle("is-paused", next === "paused");
+    }
     if (next !== "chasing") {
       stopTimer();
     }
+    updateChaseSprites();
   }
 
   function refreshAttractBest() {
@@ -492,11 +522,11 @@
       return;
     }
     clearTimeout(state.autoTimer);
-    if (state.gap <= 0) {
+    if (state.correct >= CATCHES_TO_WIN) {
       endGame(true);
       return;
     }
-    if (state.gap >= MAX_GAP || state.strikes >= MAX_STRIKES) {
+    if (state.strikes >= MAX_STRIKES || state.gap >= MAX_GAP) {
       endGame(false);
       return;
     }
@@ -653,6 +683,7 @@
     els.score = $("hud-score");
     els.streak = $("hud-streak");
     els.gap = $("hud-gap");
+    els.catch = $("hud-catch");
     els.timer = $("hud-timer");
     els.timerBadge = $("timer-badge");
     els.age = $("hud-age");
