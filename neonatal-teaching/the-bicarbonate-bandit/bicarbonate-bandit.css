@@ -652,9 +652,38 @@ body.bicarb-bandit-app .back-home-link {
   text-shadow: 2px 2px 0 var(--ink);
 }
 
-.bicarb-bandit-app .hud-stats dd.timer-urgent {
-  color: #ff5a4a;
+.bicarb-bandit-app .timer-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  background: var(--ink);
+  color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold), 4px 4px 0 0 var(--wood-dark);
+}
+
+.bicarb-bandit-app .timer-icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+}
+
+.bicarb-bandit-app .timer-badge span {
+  font-family: var(--font-pixel);
+  font-size: clamp(18px, 2vw, 26px);
+  min-width: 2ch;
+  text-align: center;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.bicarb-bandit-app .timer-badge.timer-urgent {
+  background: #5a1020;
+  box-shadow: 0 0 0 3px #ff5a4a, 4px 4px 0 0 var(--wood-dark);
   animation: bb-blink 0.5s steps(2) infinite;
+}
+
+.bicarb-bandit-app .timer-badge.timer-urgent span {
+  color: #ff5a4a;
 }
 
 .bicarb-bandit-app .lives {
@@ -696,7 +725,7 @@ body.bicarb-bandit-app .back-home-link {
 /* Chase strip */
 .bicarb-bandit-app .chase-strip {
   flex: none;
-  height: clamp(88px, 16vh, 140px);
+  height: clamp(128px, 20vh, 180px);
   position: relative;
   border-bottom: 4px solid var(--ink);
   overflow: hidden;
@@ -740,37 +769,16 @@ body.bicarb-bandit-app .back-home-link {
   line-height: 1;
 }
 
-.bicarb-bandit-app .sprite.posse {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.bicarb-bandit-app .posse-icon {
+  width: clamp(108px, 16vw, 190px);
+  height: auto;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.5));
 }
 
-.bicarb-bandit-app .posse-hat {
-  font-family: var(--font-pixel);
-  font-size: 8px;
-  padding: 6px 6px 4px;
-  background: var(--gold);
-  color: var(--ink);
-  box-shadow: 0 0 0 2px var(--ink);
-}
-
-.bicarb-bandit-app .sprite.bandit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.bicarb-bandit-app .bandit-figure {
-  width: 22px;
-  height: 28px;
-  background:
-    linear-gradient(var(--ink), var(--ink)) 6px 0 / 10px 8px no-repeat,
-    linear-gradient(var(--bicarb), var(--bicarb)) 4px 8px / 14px 12px no-repeat,
-    linear-gradient(var(--ink), var(--ink)) 2px 20px / 6px 8px no-repeat,
-    linear-gradient(var(--ink), var(--ink)) 14px 20px / 6px 8px no-repeat;
-  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.35));
+.bicarb-bandit-app .molecule-icon {
+  width: clamp(84px, 12vw, 140px);
+  height: auto;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.5));
 }
 
 .bicarb-bandit-app .gas-val .unit {
@@ -779,15 +787,6 @@ body.bicarb-bandit-app .back-home-link {
   color: var(--wood);
 }
 
-.bicarb-bandit-app .bandit-badge {
-  font-family: var(--font-pixel);
-  font-size: 7px;
-  padding: 2px 4px;
-  background: var(--bicarb);
-  color: var(--gold);
-  box-shadow: 0 0 0 2px var(--ink);
-  margin-top: -2px;
-}
 
 .bicarb-bandit-app .canyon {
   position: absolute;
@@ -829,7 +828,7 @@ body.bicarb-bandit-app .back-home-link {
 
 .bicarb-bandit-app .quiz-top {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
+  grid-template-columns: minmax(360px, 1.55fr) minmax(220px, 0.7fr);
   gap: 14px;
   align-items: stretch;
 }
@@ -889,8 +888,8 @@ body.bicarb-bandit-app .back-home-link {
 
 .bicarb-bandit-app .poster {
   width: 100%;
-  max-width: 340px;
-  padding: 10px 14px 12px;
+  max-width: none;
+  padding: 14px 20px 16px;
   color: var(--ink);
   background:
     radial-gradient(circle at 15% 20%, rgba(61, 122, 74, 0.15) 0 14px, transparent 15px),
@@ -920,6 +919,22 @@ body.bicarb-bandit-app .back-home-link {
   color: var(--wood);
 }
 
+.bicarb-bandit-app .gas-cols {
+  display: grid;
+  grid-template-columns: minmax(220px, 420px) minmax(220px, 420px);
+  justify-content: center;
+  gap: 6px 40px;
+}
+
+.bicarb-bandit-app .gas-col-title {
+  margin: 4px 0 2px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bicarb);
+}
+
 .bicarb-bandit-app .gas-row {
   display: flex;
   justify-content: space-between;
@@ -934,7 +949,7 @@ body.bicarb-bandit-app .back-home-link {
 }
 
 .bicarb-bandit-app .gas-val {
-  font-size: 30px;
+  font-size: clamp(28px, 3vw, 44px);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1105,6 +1120,10 @@ body.bicarb-bandit-app .back-home-link {
 
   .bicarb-bandit-app .order-buttons {
     grid-template-columns: 1fr;
+  }
+
+  .bicarb-bandit-app .gas-cols {
+    grid-template-columns: 1fr 1fr;
   }
 }
 

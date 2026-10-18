@@ -6,6 +6,8 @@
     { id: "vent", label: "Adjust ventilator settings" },
     { id: "fluid", label: "Give fluid / bolus" },
     { id: "glucose", label: "Correct glucose" },
+    { id: "electrolyte", label: "Correct the electrolyte" },
+    { id: "transfuse", label: "Transfuse red cells" },
     { id: "escalate", label: "Escalate to senior / neonatal team" },
     { id: "repeat_gas", label: "Repeat the gas" },
   ];
@@ -312,7 +314,106 @@
         escalate: "Escalate if the baby deteriorates; otherwise verify the gas.",
       },
     },
+
+    // --- Electrolyte red herrings: gas looks acceptable ---
+    {
+      id: "hyperk-decoy-gas",
+      ageGroup: "day1to2",
+      vignette: "Day-2 baby, peaked T waves on the monitor. The acid–base looks nearly normal. You asked for a full panel.",
+      context: { ecg: "peaked T waves", perfusion: "ok" },
+      values: { pH: 7.34, pco2Kpa: 5.4, po2Kpa: 10.8, baseExcess: -1.0, hco3: 23.0, k: 7.6 },
+      correctAction: "electrolyte",
+      hint: "The gas is a decoy. Potassium 7.6 mmol/L with ECG changes needs urgent electrolyte treatment.",
+      wrongHints: {
+        fio2: "Oxygenation is fine. The danger is the potassium.",
+        vent: "PaCO₂ is not the problem.",
+        fluid: "Volume is not the first move for this ECG and K⁺.",
+        glucose: "Glucose is normal. Treat the potassium.",
+        transfuse: "Hb is not low.",
+        escalate: "Call for help if you are stuck, but the order that matches the number is electrolyte correction.",
+        repeat_gas: "The panel already explains the ECG. Do not wait on a repeat gas.",
+      },
+    },
+    {
+      id: "hyponatraemia-decoy",
+      ageGroup: "any",
+      vignette: "Seizing neonate. Acid–base is unremarkable. Sodium comes back very low.",
+      context: { event: "seizure", gas: "near normal" },
+      values: { pH: 7.38, pco2Kpa: 5.1, po2Kpa: 11.4, baseExcess: 0.4, hco3: 24.2, na: 121 },
+      correctAction: "electrolyte",
+      hint: "Ignore the tidy pH. Sodium 121 mmol/L with a seizure is the emergency.",
+      wrongHints: {
+        fio2: "Not hypoxaemia.",
+        vent: "Ventilation is adequate.",
+        fluid: "A bolus is not the treatment for this sodium.",
+        glucose: "Glucose is normal.",
+        transfuse: "Hb is normal.",
+        escalate: "Get help for the seizure, but the specific order is electrolyte correction.",
+        repeat_gas: "The sodium is already the answer. Do not delay for another gas.",
+      },
+    },
+    {
+      id: "hypocalcaemia-decoy",
+      ageGroup: "day0",
+      vignette: "Jittery day-0 baby, normal glucose on the bedside meter. Gas looks ordinary. Ionised calcium is low.",
+      context: { glucoseStick: "3.9", tone: "jittery" },
+      values: { pH: 7.36, pco2Kpa: 5.3, po2Kpa: 11.0, baseExcess: -0.5, hco3: 23.5, ca: 0.82 },
+      correctAction: "electrolyte",
+      hint: "The acid–base is a red herring. Ionised calcium 0.82 mmol/L explains the jitteriness.",
+      wrongHints: {
+        fio2: "PaO₂ is fine.",
+        vent: "CO₂ is fine.",
+        fluid: "Not a perfusion problem.",
+        glucose: "Bedside glucose is already normal.",
+        transfuse: "Hb is not the issue.",
+        escalate: "Escalate if seizures start, but correct the calcium now.",
+        repeat_gas: "Calcium is already low. Treat it.",
+      },
+    },
+
+    // --- Hb red herrings: gas looks acceptable ---
+    {
+      id: "anaemia-pale",
+      ageGroup: "day1to2",
+      vignette: "Pale, tachycardic day-2 baby. Sats 96% in air. The acid–base is almost normal. Hb is the outlier.",
+      context: { colour: "pale", hr: "190", sats: "96%" },
+      values: { pH: 7.37, pco2Kpa: 5.0, po2Kpa: 11.2, baseExcess: -0.8, hco3: 23.8, hb: 68 },
+      correctAction: "transfuse",
+      hint: "Do not chase a normal gas. Hb 68 g/L with pallor and tachycardia needs red cells.",
+      wrongHints: {
+        fio2: "Sats and PaO₂ are acceptable. The missing oxygen carrier is haemoglobin.",
+        vent: "Ventilation is not the problem.",
+        fluid: "This is anaemia, not hypovolaemia as the first order.",
+        glucose: "Glucose is normal.",
+        electrolyte: "Electrolytes are in range.",
+        escalate: "Tell a senior, but the matching order is transfusion.",
+        repeat_gas: "The Hb is already low enough to act on.",
+      },
+    },
+    {
+      id: "anaemia-mild-acidosis-decoy",
+      ageGroup: "any",
+      vignette: "Preterm with a slightly low pH that looks tempting. Clinically pale and tachypnoeic, but PaCO₂ and PaO₂ are fine. Hb is 62 g/L.",
+      context: { colour: "pale", support: "air" },
+      values: { pH: 7.29, pco2Kpa: 5.2, po2Kpa: 10.6, baseExcess: -3.0, hco3: 21.5, hb: 62 },
+      correctAction: "transfuse",
+      hint: "The mild acidosis is a decoy. Hb 62 g/L is the finding that changes management.",
+      wrongHints: {
+        fio2: "PaO₂ is adequate. Anaemia is why oxygen delivery is poor.",
+        vent: "PaCO₂ is not high.",
+        fluid: "Not the first treatment for this Hb.",
+        glucose: "Glucose is normal.",
+        electrolyte: "Electrolytes are not the outlier.",
+        escalate: "A senior should know, but transfuse is the order.",
+        repeat_gas: "You already have the Hb. Do not wait on another gas.",
+      },
+    },
   ];
+
+  const LAB_DEFAULTS = { na: 139, k: 4.4, ca: 1.22, cl: 105, hb: 168, glucose: 4.1 };
+  SCENARIOS.forEach((scenario) => {
+    scenario.values = Object.assign({}, LAB_DEFAULTS, scenario.values);
+  });
 
   function shuffle(arr) {
     const out = arr.slice();

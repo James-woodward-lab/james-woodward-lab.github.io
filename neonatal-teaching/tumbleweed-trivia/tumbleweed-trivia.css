@@ -536,63 +536,44 @@ body.tumbleweed-app .back-home-link { display: none !important; }
   outline-offset: -3px;
 }
 
-.tumbleweed-app .fence {
+.tumbleweed-app .weed-field {
   position: absolute;
-  left: 0; top: 0; bottom: 0;
-  z-index: 3;
-  width: 18px;
-  background: repeating-linear-gradient(to bottom, var(--wood) 0 30px, var(--wood-dark) 30px 36px);
-  border-right: 4px solid var(--ink);
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
+  z-index: 1;
 }
-.tumbleweed-app .canyon {
+
+.tumbleweed-app .bg-weed {
   position: absolute;
-  right: 0; top: 0; bottom: 0;
-  z-index: 3;
-  width: clamp(44px, 5vw, 72px);
+  left: 0;
+  width: 56px;
+  height: 56px;
+  animation: tw-roll linear infinite;
+  filter: drop-shadow(3px 3px 0 rgba(27, 15, 8, 0.35));
+}
+.tumbleweed-app .bg-weed-1 { top: 8%; width: 42px; height: 42px; animation-duration: 16s; }
+.tumbleweed-app .bg-weed-2 { top: 28%; width: 72px; height: 72px; animation-duration: 22s; animation-delay: -8s; }
+.tumbleweed-app .bg-weed-3 { top: 52%; width: 36px; height: 36px; animation-duration: 13s; animation-delay: -4s; }
+.tumbleweed-app .bg-weed-4 { top: 70%; width: 64px; height: 64px; animation-duration: 19s; animation-delay: -12s; }
+.tumbleweed-app .bg-weed-5 { top: 40%; width: 48px; height: 48px; animation-duration: 26s; animation-delay: -18s; }
+
+.tumbleweed-app .quiz-board {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  overflow: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-left: 4px dashed var(--blood);
-  background: linear-gradient(90deg, rgba(27, 15, 8, 0.25), var(--ink));
-  pointer-events: none;
+  padding: 16px clamp(12px, 3vw, 32px) 20px;
 }
-.tumbleweed-app .canyon span {
-  writing-mode: vertical-rl;
-  font-family: var(--font-pixel);
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: #ff6b5a;
-  text-shadow: 2px 2px 0 var(--ink);
+.tumbleweed-app .quiz-board:focus-visible {
+  outline: none;
 }
-
-.tumbleweed-app .card-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-}
-
-.tumbleweed-app .weed {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: min(520px, 70vw);
-  transform: translateY(-50%);
-  will-change: transform;
-}
-
-.tumbleweed-app .weed-ring {
-  position: absolute;
-  inset: -18px;
-  border: 10px dotted var(--straw-dark);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: tw-spin 8s linear infinite;
-}
-.tumbleweed-app .stage.is-frozen .weed-ring { animation-play-state: paused; }
 
 .tumbleweed-app .plaque {
+  width: min(720px, 100%);
   position: relative;
   padding: 14px 16px 12px;
   background:
@@ -659,16 +640,18 @@ body.tumbleweed-app .back-home-link { display: none !important; }
 .tumbleweed-app .choice.is-correct { background: #9fdc7c; }
 .tumbleweed-app .choice.is-wrong { background: #f08a7e; }
 .tumbleweed-app .plaque-why {
-  margin: 10px 0 0;
-  font-size: 20px;
-  color: var(--wood-dark);
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.2;
+  color: var(--ink);
+  background: #fff6dc;
+  box-shadow: 0 0 0 2px var(--ink);
 }
-
-.tumbleweed-app .weed.is-burst .weed-ring {
-  animation: tw-burst 0.5s steps(5) forwards;
-}
-.tumbleweed-app .weed.is-miss .plaque {
-  animation: tw-fade 0.6s steps(5) forwards;
+.tumbleweed-app .next-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 .tumbleweed-app .banner {
@@ -717,11 +700,13 @@ body.tumbleweed-app .back-home-link { display: none !important; }
 
 @media (max-width: 700px) {
   .tumbleweed-app .hud-title { display: none; }
-  .tumbleweed-app .weed { width: min(520px, 86vw); }
   .tumbleweed-app .plaque-stem { font-size: 20px; }
 }
 
-@keyframes tw-spin { to { transform: rotate(360deg); } }
+@keyframes tw-roll {
+  from { transform: translateX(-18vw) rotate(0deg); }
+  to { transform: translateX(112vw) rotate(720deg); }
+}
 @keyframes tw-blink { 50% { filter: brightness(1.35); } }
 @keyframes tw-shake {
   0%, 100% { transform: translate(0, 0); }
@@ -735,13 +720,8 @@ body.tumbleweed-app .back-home-link { display: none !important; }
   80% { opacity: 1; }
   100% { opacity: 0; }
 }
-@keyframes tw-burst {
-  to { transform: scale(1.35); opacity: 0; }
-}
-@keyframes tw-fade { to { opacity: 0.45; } }
-
 @media (prefers-reduced-motion: reduce) {
-  .tumbleweed-app .weed-ring,
+  .tumbleweed-app .bg-weed,
   .tumbleweed-app .blink-soft,
   .tumbleweed-app .go-kicker,
   .tumbleweed-app .go-record,

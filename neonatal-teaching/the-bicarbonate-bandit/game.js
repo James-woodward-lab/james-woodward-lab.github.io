@@ -27,13 +27,31 @@
     child: ">2 days",
   };
 
-  const FIELDS = [
+  const GAS_FIELDS = [
     { key: "pH", label: "pH", dp: 2 },
     { key: "pco2Kpa", label: "PaCO₂", dp: 1, unit: "kPa" },
     { key: "po2Kpa", label: "PaO₂", dp: 1, unit: "kPa" },
     { key: "baseExcess", label: "BE", dp: 1 },
     { key: "hco3", label: "HCO₃⁻", dp: 1, unit: "mmol/L" },
   ];
+
+  const LAB_FIELDS = [
+    { key: "na", label: "Na⁺", dp: 0, unit: "mmol/L" },
+    { key: "k", label: "K⁺", dp: 1, unit: "mmol/L" },
+    { key: "ca", label: "Ca²⁺", dp: 2, unit: "mmol/L" },
+    { key: "cl", label: "Cl⁻", dp: 0, unit: "mmol/L" },
+    { key: "hb", label: "Hb", dp: 0, unit: "g/L" },
+    { key: "glucose", label: "Glucose", dp: 1, unit: "mmol/L" },
+  ];
+
+  const LAB_RANGES = {
+    na: { low: 135, high: 145 },
+    k: { low: 3.5, high: 6.0 },
+    ca: { low: 1.1, high: 1.35 },
+    cl: { low: 98, high: 110 },
+    hb: { low: 120, high: 220 },
+    glucose: { low: 2.6, high: 7.0 },
+  };
 
   const state = {
     phase: "attract",
@@ -196,18 +214,40 @@
     return Number(v).toFixed(field.dp);
   }
 
-  function posterHtml(values) {
-    const h = core.paramHighlights(values, state.ageGroup);
-    const rows = FIELDS.map((fd) => {
-      const dir = h[fd.key] || "normal";
+  function fieldDir(values, key, highlights) {
+    if (highlights[key]) return highlights[key];
+    const range = LAB_RANGES[key];
+    const value = values[key];
+    if (!range || value == null) return "normal";
+    if (value < range.low) return "low";
+    if (value > range.high) return "high";
+    return "normal";
+  }
+
+  function fieldRows(values, fields, highlights) {
+    return fields.map((fd) => {
+      const dir = fieldDir(values, fd.key, highlights);
       const cls = dir === "high" || dir === "low" ? ` is-${dir}` : "";
       const unit = fd.unit ? ` <span class="unit">${fd.unit}</span>` : "";
       return `<div class="gas-row"><span class="gas-label">${fd.label}</span><span class="gas-val${cls}">${fmtVal(values, fd)}${unit}</span></div>`;
     }).join("");
+  }
+
+  function posterHtml(values) {
+    const h = core.paramHighlights(values, state.ageGroup);
     return `
       <div class="poster-head">WANTED</div>
-      <p class="poster-sub">stolen ABG · Bicarbonate Bandit</p>
-      ${rows}
+      <p class="poster-sub">stolen panel · Bicarbonate Bandit</p>
+      <div class="gas-cols">
+        <div>
+          <p class="gas-col-title">Acid–base</p>
+          ${fieldRows(values, GAS_FIELDS, h)}
+        </div>
+        <div>
+          <p class="gas-col-title">Labs</p>
+          ${fieldRows(values, LAB_FIELDS, h)}
+        </div>
+      </div>
       <p class="poster-sub" style="margin-top:8px">${AGE_LABELS[state.ageGroup]}</p>`;
   }
 
@@ -236,7 +276,7 @@
     els.streak.textContent = `x${state.streak}`;
     els.gap.textContent = String(state.gap);
     els.timer.textContent = String(Math.max(0, Math.ceil(state.timerLeft)));
-    els.timer.classList.toggle("timer-urgent", state.timerLeft <= 5 && state.phase === "chasing");
+    els.timerBadge.classList.toggle("timer-urgent", state.timerLeft <= 5 && state.phase === "chasing");
     els.age.textContent = AGE_SHORT[state.ageGroup] || state.ageGroup;
     renderLives();
     updateChaseSprites();
@@ -585,7 +625,7 @@
       }
       return;
     }
-    if (state.phase === "chasing" && /^[1-6]$/.test(e.key)) {
+    if (state.phase === "chasing" && /^[1-8]$/.test(e.key)) {
       const idx = Number(e.key) - 1;
       const id = state.orderIds[idx];
       if (id) {
@@ -614,6 +654,7 @@
     els.streak = $("hud-streak");
     els.gap = $("hud-gap");
     els.timer = $("hud-timer");
+    els.timerBadge = $("timer-badge");
     els.age = $("hud-age");
     els.lives = $("hud-lives");
     els.soundToggle = $("sound-toggle");

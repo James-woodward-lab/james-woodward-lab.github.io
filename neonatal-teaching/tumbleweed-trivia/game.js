@@ -6,16 +6,13 @@
     throw new Error("questions.js must load before game.js");
   }
 
-  const PACES = { gentle: 18, standard: 12, hard: 8 };
   const MAX_MISSES = 3;
-  const FEEDBACK_MS = 1200;
   const SETTINGS_KEY = "tumbleweedSettings";
   const BEST_KEY = "tumbleweedBest";
 
   const state = {
     phase: "attract",
     topic: "all",
-    pace: "standard",
     score: 0,
     streak: 0,
     misses: 0,
@@ -23,11 +20,7 @@
     asked: 0,
     queue: [],
     queueIndex: 0,
-    card: null,
-    rafId: 0,
-    lastTs: 0,
-    frozen: false,
-    feedbackTimer: 0,
+    question: null,
     mistakes: [],
   };
 
@@ -69,7 +62,6 @@
       start: () => seq([330, 392, 523], "square", 0.08),
       correct: () => seq([523, 659, 784], "square", 0.07),
       wrong: () => seq([220, 165], "sawtooth", 0.14, 0.04),
-      escape: () => seq([392, 262, 196], "triangle", 0.12, 0.06),
       over: () => seq([392, 330, 262, 196], "triangle", 0.16, 0.07),
     };
   })();
@@ -82,7 +74,6 @@
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
         topic: state.topic,
-        pace: state.pace,
         sound: sfx.isEnabled(),
       }));
     } catch (_e) { /* ignore */ }
@@ -102,9 +93,7 @@
 
   function readForm() {
     const topic = document.querySelector('input[name="topic"]:checked');
-    const pace = document.querySelector('input[name="pace"]:checked');
     state.topic = topic ? topic.value : "all";
-    state.pace = pace ? pace.value : "standard";
     sfx.setEnabled(els.soundToggle.checked);
   }
 
@@ -114,7 +103,6 @@
       if (el) el.checked = true;
     };
     if (saved.topic) setRadio("topic", saved.topic);
-    if (saved.pace) setRadio("pace", saved.pace);
     els.soundToggle.checked = saved.sound !== false;
     readForm();
   }
@@ -161,38 +149,9 @@
   function setPhase(next) {
     state.phase = next;
     els.screenAttract.hidden = next !== "attract";
-    els.screenGame.hidden = next !== "rolling" && next !== "feedback" && next !== "paused";
+    els.screenGame.hidden = next !== "asking" && next !== "feedback" && next !== "paused";
     els.screenEnd.hidden = next !== "gameover";
     els.pauseOverlay.hidden = next !== "paused";
-    els.stage.classList.toggle("is-frozen", next !== "rolling");
-    if (next === "rolling") startLoop();
-    else stopLoop();
-  }
-
-  function startLoop() {
-    if (!state.rafId) {
-      state.lastTs = 0;
-      state.rafId = requestAnimationFrame(tick);
-    }
-  }
-  function stopLoop() {
-    if (state.rafId) {
-      cancelAnimationFrame(state.rafId);
-      state.rafId = 0;
-    }
-  }
-
-  function pxPerSecond() {
-    const travel = els.playfield.clientWidth + (state.card ? state.card.w : 400);
-    const seconds = PACES[state.pace] || 12;
-    return travel / seconds;
-  }
-
-  function placeCard() {
-    if (!state.card || !state.card.el) return;
-    const y = els.playfield.clientHeight / 2;
-    state.card.el.style.transform = `translate(${state.card.x.toFixed(1)}px, -50%)`;
-    state.card.el.style.top = `${y}px`;
   }
 
   function nextQuestion() {
@@ -202,124 +161,75 @@
     }
     const q = state.queue[state.queueIndex];
     state.queueIndex += 1;
-    spawnCard(q);
+    showQuestion(q);
   }
 
-  function spawnCard(q) {
-    const el = document.createElement("article");
-    el.className = "weed";
+  function showQuestion(q) {
+    state.question = q;
     const choices = q.choices.map((text, i) =>
       `<button type="button" class="choice" data-index="${i}"><span class="choice-key">${i + 1}</span><span>${text}</span></button>`
     ).join("");
-    el.innerHTML = `
-      <div class="weed-ring" aria-hidden="true"></div>
-      <div class="plaque">
+    els.board.innerHTML = `
+      <article class="plaque">
         <p class="plaque-topic">${bank.topicLabel(q.topic)}</p>
         <p class="plaque-stem">${q.stem}</p>
         <div class="choices">${choices}</div>
         <p class="plaque-why" hidden></p>
-      </div>`;
-    els.screenAttract.hidden = true;
-    els.screenGame.hidden = false;
-    els.cardLayer.appendChild(el);
-    el.querySelectorAll(".choice").forEach((btn) => {
+        <div class="next-row">
+          <button type="button" class="px-btn" id="btn-next" hidden>Next question</button>
+        </div>
+      </article>`;
+    els.board.querySelectorAll(".choice").forEach((btn) => {
       btn.addEventListener("click", () => answer(Number(btn.dataset.index)));
     });
-    const w = el.offsetWidth || 480;
-    state.card = {
-      q,
-      el,
-      x: -w - 8,
-      w,
-      answered: false,
-      born: performance.now(),
-    };
-    placeCard();
-    state.frozen = false;
-    setPhase("rolling");
-  }
-
-  function clearCard() {
-    if (state.card && state.card.el) state.card.el.remove();
-    state.card = null;
-  }
-
-  function secondsLeft() {
-    if (!state.card) return 0;
-    const travel = els.playfield.clientWidth + state.card.w;
-    const remainPx = els.playfield.clientWidth - state.card.x;
-    const speed = pxPerSecond();
-    return Math.max(0, remainPx / speed);
+    els.board.querySelector("#btn-next").addEventListener("click", afterFeedback);
+    setPhase("asking");
+    els.board.focus({ preventScroll: true });
   }
 
   function answer(index) {
-    if (state.phase !== "rolling" || !state.card || state.card.answered) return;
-    state.card.answered = true;
-    state.frozen = true;
+    if (state.phase !== "asking" || !state.question) return;
     state.asked += 1;
-    const q = state.card.q;
+    const q = state.question;
     const right = index === q.answer;
-    const buttons = state.card.el.querySelectorAll(".choice");
-    buttons.forEach((btn) => {
+    els.board.querySelectorAll(".choice").forEach((btn) => {
       btn.disabled = true;
       const i = Number(btn.dataset.index);
       if (i === q.answer) btn.classList.add("is-correct");
       else if (i === index) btn.classList.add("is-wrong");
     });
-    const why = state.card.el.querySelector(".plaque-why");
+    const why = els.board.querySelector(".plaque-why");
     why.hidden = false;
     why.textContent = q.why;
+    const next = els.board.querySelector("#btn-next");
+    next.hidden = false;
+    if (state.misses + (right ? 0 : 1) >= MAX_MISSES && !right) {
+      next.textContent = "See the round";
+    }
 
     if (right) {
       state.streak += 1;
       state.correct += 1;
-      const points = Math.round((100 + secondsLeft() * 5) * streakMultiplier());
+      const points = Math.round(100 * streakMultiplier());
       state.score += points;
-      state.card.el.classList.add("is-burst");
       showBanner(`+${points}`, "good");
       sfx.correct();
     } else {
       state.streak = 0;
       state.misses += 1;
       state.score = Math.max(0, state.score - 10);
-      state.mistakes.push({ q, kind: "wrong", chosen: index });
+      state.mistakes.push({ q, chosen: index });
       shake();
-      showBanner("Wrong weed!", "bad");
+      showBanner("Not that one", "bad");
       sfx.wrong();
     }
     updateHud();
     setPhase("feedback");
-    state.feedbackTimer = setTimeout(afterFeedback, FEEDBACK_MS);
-  }
-
-  function escapeCard() {
-    if (!state.card || state.card.answered) return;
-    state.card.answered = true;
-    state.frozen = true;
-    state.asked += 1;
-    state.streak = 0;
-    state.misses += 1;
-    state.mistakes.push({ q: state.card.q, kind: "escaped" });
-    state.card.el.classList.add("is-miss");
-    const buttons = state.card.el.querySelectorAll(".choice");
-    buttons.forEach((btn) => {
-      btn.disabled = true;
-      if (Number(btn.dataset.index) === state.card.q.answer) btn.classList.add("is-correct");
-    });
-    const why = state.card.el.querySelector(".plaque-why");
-    why.hidden = false;
-    why.textContent = state.card.q.why;
-    showBanner("It rolled on by!", "bad");
-    sfx.escape();
-    shake();
-    updateHud();
-    setPhase("feedback");
-    state.feedbackTimer = setTimeout(afterFeedback, FEEDBACK_MS);
+    next.focus({ preventScroll: true });
   }
 
   function afterFeedback() {
     if (state.phase !== "feedback") return;
-    clearCard();
     if (state.misses >= MAX_MISSES) {
       endGame();
       return;
@@ -327,26 +237,7 @@
     nextQuestion();
   }
 
-  function tick(ts) {
-    state.rafId = 0;
-    if (state.phase !== "rolling") return;
-    if (!state.lastTs) state.lastTs = ts;
-    const dt = Math.min(0.05, (ts - state.lastTs) / 1000);
-    state.lastTs = ts;
-    if (state.card && !state.frozen) {
-      state.card.x += pxPerSecond() * dt;
-      if (state.card.x > els.playfield.clientWidth) {
-        escapeCard();
-        return;
-      }
-      placeCard();
-    }
-    if (state.phase === "rolling") state.rafId = requestAnimationFrame(tick);
-  }
-
   function endGame() {
-    clearTimeout(state.feedbackTimer);
-    clearCard();
     const prev = loadBest();
     const best = saveBest(state.score);
     els.endScore.textContent = pad6(state.score);
@@ -356,21 +247,13 @@
     els.endRecord.hidden = !(state.score > prev && state.score > 0);
     const recent = state.mistakes.slice(-8).reverse();
     els.endReview.innerHTML = recent.length
-      ? recent.map((m) => {
-          const tag = m.kind === "escaped"
-            ? '<span class="review-tag">Rolled by</span>'
-            : '<span class="review-tag">Wrong</span>';
-          const said = m.kind === "wrong"
-            ? `<div>You picked: ${m.q.choices[m.chosen]}</div>`
-            : "";
-          return `<li class="review-item">
+      ? recent.map((m) => `<li class="review-item">
             <div>${m.q.stem}</div>
-            <div>${tag} Answer: <strong>${m.q.choices[m.q.answer]}</strong></div>
-            ${said}
+            <div><span class="review-tag">Wrong</span> Answer: <strong>${m.q.choices[m.q.answer]}</strong></div>
+            <div>You picked: ${m.q.choices[m.chosen]}</div>
             <div class="review-why">${m.q.why}</div>
-          </li>`;
-        }).join("")
-      : '<li class="review-empty">A clean roll.</li>';
+          </li>`).join("")
+      : '<li class="review-empty">A clean round.</li>';
     sfx.over();
     setPhase("gameover");
     window.scrollTo(0, 0);
@@ -378,8 +261,7 @@
   }
 
   function resetRound() {
-    clearTimeout(state.feedbackTimer);
-    clearCard();
+    els.board.innerHTML = "";
     Object.assign(state, {
       score: 0,
       streak: 0,
@@ -388,7 +270,7 @@
       asked: 0,
       queue: bank.questionsForTopic(state.topic),
       queueIndex: 0,
-      frozen: false,
+      question: null,
       mistakes: [],
     });
   }
@@ -399,37 +281,39 @@
     resetRound();
     updateHud();
     sfx.start();
-    showBanner("Here they come!");
     nextQuestion();
-    els.playfield.focus({ preventScroll: true });
   }
 
   function quitToTitle() {
-    clearTimeout(state.feedbackTimer);
-    clearCard();
+    els.board.innerHTML = "";
     setPhase("attract");
     readForm();
     els.attractBest.textContent = pad6(loadBest());
   }
 
   function togglePause() {
-    if (state.phase === "rolling") {
+    if (state.phase === "asking") {
       setPhase("paused");
       $("btn-resume").focus({ preventScroll: true });
     } else if (state.phase === "paused") {
-      setPhase("rolling");
-      els.playfield.focus({ preventScroll: true });
+      setPhase("asking");
+      els.board.focus({ preventScroll: true });
     }
   }
 
   function onKeyDown(e) {
-    if (state.phase === "rolling" && /^[1-4]$/.test(e.key)) {
+    if (state.phase === "feedback" && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      afterFeedback();
+      return;
+    }
+    if (state.phase === "asking" && /^[1-4]$/.test(e.key)) {
       e.preventDefault();
       answer(Number(e.key) - 1);
       return;
     }
     if (e.key === "p" || e.key === "P" || e.key === "Escape") {
-      if (state.phase === "rolling" || state.phase === "paused") {
+      if (state.phase === "asking" || state.phase === "paused") {
         e.preventDefault();
         togglePause();
       }
@@ -441,8 +325,7 @@
     els.screenGame = $("screen-game");
     els.screenEnd = $("screen-end");
     els.stage = $("stage");
-    els.playfield = $("playfield");
-    els.cardLayer = $("card-layer");
+    els.board = $("quiz-board");
     els.banner = $("banner");
     els.pauseOverlay = $("pause-overlay");
     els.score = $("hud-score");
@@ -462,7 +345,7 @@
     els.attractBest.textContent = pad6(loadBest());
     $("btn-mute").style.opacity = sfx.isEnabled() ? "1" : "0.5";
 
-    document.querySelectorAll('input[name="topic"], input[name="pace"], #sound-toggle').forEach((input) => {
+    document.querySelectorAll('input[name="topic"], #sound-toggle').forEach((input) => {
       input.addEventListener("change", () => {
         readForm();
         saveSettings();
@@ -486,10 +369,7 @@
 
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden && state.phase === "rolling") togglePause();
-    });
-    window.addEventListener("resize", () => {
-      if (state.card) placeCard();
+      if (document.hidden && state.phase === "asking") togglePause();
     });
   }
 

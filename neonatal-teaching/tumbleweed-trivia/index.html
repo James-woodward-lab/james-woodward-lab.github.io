@@ -17,6 +17,15 @@
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
+    <symbol id="px-weed" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="6" y="1" width="4" height="2" fill="#c4a15a"/>
+      <rect x="3" y="3" width="10" height="2" fill="#8a6a32"/>
+      <rect x="1" y="5" width="14" height="6" fill="#c4a15a"/>
+      <rect x="3" y="11" width="10" height="2" fill="#8a6a32"/>
+      <rect x="6" y="13" width="4" height="2" fill="#c4a15a"/>
+      <rect x="4" y="6" width="2" height="2" fill="#5c4520"/>
+      <rect x="9" y="8" width="2" height="2" fill="#5c4520"/>
+    </symbol>
     <symbol id="px-cactus" viewBox="0 0 12 16" shape-rendering="crispEdges">
       <rect x="5" y="1" width="2" height="15" fill="#2f6b30"/>
       <rect x="4" y="2" width="1" height="14" fill="#4c9a45"/>
@@ -61,22 +70,21 @@
       <a class="px-link" href="../index.html">&#9664; Gas Saloon</a>
       <p class="title-kicker">Acid&ndash;base questions on the wind</p>
       <h1 class="game-title">Tumbleweed Trivia</h1>
-      <p class="title-sub">Answer before the weed rolls into the canyon.</p>
+      <p class="title-sub">A still question. Tumbleweeds only in the background.</p>
 
       <div class="title-panel">
         <section class="panel-block">
           <h2 class="block-title">How to ride</h2>
           <ol class="how-list">
-            <li><span class="how-num">1</span><span>A question tumbles in from the left.</span></li>
-            <li><span class="how-num">2</span><span>Tap the right answer, or press <strong>1&ndash;4</strong>, before it hits the canyon.</span></li>
-            <li><span class="how-num">3</span><span>A wrong answer or a weed that rolls off counts as a miss.</span></li>
-            <li><span class="how-num">4</span><span>Three misses and the round is over.</span></li>
+            <li><span class="how-num">1</span><span>Read the question. It stays on the card.</span></li>
+            <li><span class="how-num">2</span><span>Tap an answer, or press <strong>1&ndash;4</strong>.</span></li>
+            <li><span class="how-num">3</span><span>The right choice and a short explanation stay up until you continue.</span></li>
+            <li><span class="how-num">4</span><span>Three wrong answers end the round.</span></li>
           </ol>
           <dl class="score-key">
             <div><dt>Correct</dt><dd>+100</dd></div>
-            <div><dt>Time bonus</dt><dd>&times;5s</dd></div>
-            <div><dt>Wrong</dt><dd>-10</dd></div>
-            <div><dt>Escaped</dt><dd>miss</dd></div>
+            <div><dt>Streak</dt><dd>up to &times;2</dd></div>
+            <div><dt>Wrong</dt><dd>&minus;10</dd></div>
           </dl>
         </section>
 
@@ -91,15 +99,9 @@
             <label><input type="radio" name="topic" value="oxygen"><span>Oxygen</span></label>
             <label><input type="radio" name="topic" value="causes"><span>Causes</span></label>
           </fieldset>
-          <fieldset class="seg">
-            <legend>Pace</legend>
-            <label><input type="radio" name="pace" value="gentle"><span>Trot</span></label>
-            <label><input type="radio" name="pace" value="standard" checked><span>Gallop</span></label>
-            <label><input type="radio" name="pace" value="hard"><span>Stampede</span></label>
-          </fieldset>
           <label class="px-check"><input type="checkbox" id="sound-toggle" checked><span>Sound effects</span></label>
           <p class="best-line">Best score <strong id="attract-best">000000</strong></p>
-          <button type="button" class="px-btn px-btn--big blink-soft" id="btn-start">&#9654; Let 'em roll</button>
+          <button type="button" class="px-btn px-btn--big blink-soft" id="btn-start">&#9654; Start the quiz</button>
         </section>
       </div>
 
@@ -131,15 +133,20 @@
         <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
         <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
       </div>
-      <div
-        id="playfield"
-        class="playfield"
-        tabindex="0"
-        aria-label="Tumbleweed trail. Answer the question before it reaches the canyon. Keys 1 to 4. P pauses."
-      >
-        <div class="fence" aria-hidden="true"></div>
-        <div id="card-layer" class="card-layer"></div>
-        <div class="canyon" aria-hidden="true"><span>Escape</span></div>
+      <div class="playfield">
+        <div class="weed-field" aria-hidden="true">
+          <svg class="bg-weed bg-weed-1"><use href="#px-weed"/></svg>
+          <svg class="bg-weed bg-weed-2"><use href="#px-weed"/></svg>
+          <svg class="bg-weed bg-weed-3"><use href="#px-weed"/></svg>
+          <svg class="bg-weed bg-weed-4"><use href="#px-weed"/></svg>
+          <svg class="bg-weed bg-weed-5"><use href="#px-weed"/></svg>
+        </div>
+        <div
+          id="quiz-board"
+          class="quiz-board"
+          tabindex="0"
+          aria-label="Blood gas question. Keys 1 to 4. Enter continues after the answer. P pauses."
+        ></div>
         <div class="banner" id="banner" aria-live="assertive"></div>
       </div>
       <div class="pause-overlay" id="pause-overlay" hidden>
@@ -161,8 +168,8 @@
       <div class="ground-strip"></div>
     </div>
     <div class="title-wrap">
-      <p class="go-kicker">The wind won</p>
-      <h1 class="game-title game-title--sm">Three weeds got away</h1>
+      <p class="go-kicker">Round over</p>
+      <h1 class="game-title game-title--sm">Three misses</h1>
       <div class="title-panel title-panel--single">
         <div class="go-stats">
           <div class="go-stat"><span class="go-label">Score</span><span class="go-num" id="end-score">0</span></div>
@@ -171,10 +178,10 @@
           <div class="go-stat"><span class="go-label">Asked</span><span class="go-num" id="end-asked">0</span></div>
         </div>
         <p class="go-record" id="end-record" hidden>&#9733; New record &#9733;</p>
-        <h2 class="block-title">Weeds you missed</h2>
+        <h2 class="block-title">Questions to revisit</h2>
         <ol class="review" id="end-review"></ol>
         <div class="go-actions">
-          <button type="button" class="px-btn px-btn--big" id="btn-again">&#9654; Roll again</button>
+          <button type="button" class="px-btn px-btn--big" id="btn-again">&#9654; Try again</button>
           <button type="button" class="px-btn px-btn--wood" id="btn-title">Settings</button>
           <a class="px-link px-link--dark" href="../index.html">&#9664; Gas Saloon</a>
         </div>

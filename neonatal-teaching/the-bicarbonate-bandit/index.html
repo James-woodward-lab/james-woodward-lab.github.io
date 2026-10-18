@@ -68,7 +68,7 @@
         <section class="panel-block">
           <h2 class="block-title">How to ride</h2>
           <ol class="how-list">
-            <li><span class="how-num">1</span><span>Read the vignette and the stolen ABG on the WANTED poster.</span></li>
+            <li><span class="how-num">1</span><span>Read the vignette and the whole panel — pH and gases can be a decoy. Check Hb, glucose and electrolytes.</span></li>
             <li><span class="how-num">2</span><span>Pick the next sensible order before the timer runs out.</span></li>
             <li><span class="how-num">3</span><span>Correct answers close the gap. Wrongs and timeouts let the bandit pull away.</span></li>
             <li><span class="how-num">4</span><span>Catch the bandit to win. If the gap maxes out or you miss three in a row, the bandit escapes.</span></li>
@@ -116,9 +116,21 @@
         <div><dt>Score</dt><dd id="hud-score">000000</dd></div>
         <div><dt>Streak</dt><dd id="hud-streak">x0</dd></div>
         <div><dt>Gap</dt><dd id="hud-gap">5</dd></div>
-        <div><dt>Timer</dt><dd id="hud-timer">14</dd></div>
         <div class="hud-age-stat"><dt>Age</dt><dd id="hud-age">Day 0</dd></div>
       </dl>
+      <div class="timer-badge" id="timer-badge" role="timer" aria-label="Seconds left">
+        <svg class="timer-icon" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+          <rect x="6" y="0" width="4" height="2" fill="#1b0f08"/>
+          <rect x="2" y="2" width="12" height="2" fill="#f2c14e"/>
+          <rect x="1" y="4" width="2" height="8" fill="#f2c14e"/>
+          <rect x="13" y="4" width="2" height="8" fill="#f2c14e"/>
+          <rect x="2" y="12" width="12" height="2" fill="#f2c14e"/>
+          <rect x="3" y="14" width="10" height="2" fill="#1b0f08"/>
+          <rect x="7" y="5" width="2" height="5" fill="#1b0f08"/>
+          <rect x="7" y="8" width="5" height="2" fill="#1b0f08"/>
+        </svg>
+        <span id="hud-timer">14</span>
+      </div>
       <div class="hud-group">
         <div class="lives" id="hud-lives" role="img" aria-label="3 strikes left"></div>
         <button type="button" class="px-btn px-btn--wood px-btn--sm" id="btn-mute" aria-label="Toggle sound">&#9835;</button>
@@ -133,11 +145,59 @@
         </div>
         <div class="chase-ground">
           <div class="sprite posse" id="sprite-posse" title="Posse">
-            <span class="posse-hat">POSSE</span>
+            <svg class="posse-icon" viewBox="0 0 78 40" shape-rendering="crispEdges" aria-hidden="true">
+              <g fill="#f7f1e4">
+                <rect x="4" y="14" width="14" height="16"/>
+                <rect x="32" y="14" width="14" height="16"/>
+                <rect x="60" y="14" width="14" height="16"/>
+              </g>
+              <g fill="#f2c9a0">
+                <rect x="7" y="4" width="8" height="8"/>
+                <rect x="35" y="2" width="8" height="8"/>
+                <rect x="63" y="4" width="8" height="8"/>
+              </g>
+              <g fill="#1b0f08">
+                <rect x="8" y="6" width="2" height="2"/>
+                <rect x="12" y="6" width="2" height="2"/>
+                <rect x="36" y="4" width="2" height="2"/>
+                <rect x="40" y="4" width="2" height="2"/>
+                <rect x="64" y="6" width="2" height="2"/>
+                <rect x="68" y="6" width="2" height="2"/>
+                <rect x="6" y="30" width="4" height="8"/>
+                <rect x="12" y="30" width="4" height="8"/>
+                <rect x="34" y="30" width="4" height="8"/>
+                <rect x="40" y="30" width="4" height="8"/>
+                <rect x="62" y="30" width="4" height="8"/>
+                <rect x="68" y="30" width="4" height="8"/>
+              </g>
+              <g fill="#c48a1e">
+                <rect x="10" y="16" width="2" height="8"/>
+                <rect x="8" y="22" width="6" height="2"/>
+                <rect x="38" y="16" width="2" height="8"/>
+                <rect x="36" y="22" width="6" height="2"/>
+                <rect x="66" y="16" width="2" height="8"/>
+                <rect x="64" y="22" width="6" height="2"/>
+              </g>
+            </svg>
           </div>
-          <div class="sprite bandit" id="sprite-bandit" title="Bicarbonate Bandit">
-            <span class="bandit-figure" aria-hidden="true"></span>
-            <span class="bandit-badge">HCO&#8323;</span>
+          <div class="sprite bandit" id="sprite-bandit" title="Bicarbonate molecule">
+            <svg class="molecule-icon" viewBox="0 0 112 70" shape-rendering="crispEdges" aria-hidden="true">
+              <text x="1" y="32" fill="#f3dfb1" font-family="Press Start 2P, monospace" font-size="9">H</text>
+              <text x="98" y="14" fill="#f3dfb1" font-family="Press Start 2P, monospace" font-size="11">−</text>
+              <rect x="28" y="24" width="14" height="4" fill="#f2c14e"/>
+              <rect x="64" y="24" width="14" height="4" fill="#f2c14e"/>
+              <rect x="51" y="38" width="4" height="12" fill="#f2c14e"/>
+              <rect x="12" y="16" width="18" height="18" fill="#f2c14e"/>
+              <rect x="76" y="16" width="18" height="18" fill="#f2c14e"/>
+              <rect x="44" y="14" width="18" height="18" fill="#f3dfb1"/>
+              <rect x="46" y="50" width="16" height="16" fill="#f2c14e"/>
+              <g fill="#1b0f08" font-family="Press Start 2P, monospace" font-size="9" text-anchor="middle">
+                <text x="21" y="29">O</text>
+                <text x="85" y="29">O</text>
+                <text x="53" y="27">C</text>
+                <text x="54" y="62">O</text>
+              </g>
+            </svg>
           </div>
           <div class="canyon"><span>Escape</span></div>
         </div>
@@ -145,13 +205,13 @@
 
       <div class="quiz" id="quiz">
         <div class="quiz-top">
+          <section class="poster-wrap">
+            <div class="poster" id="gas-poster"></div>
+          </section>
           <section class="vignette-panel">
             <h2 class="sign-title">The scene</h2>
             <p class="vignette-text" id="vignette-text"></p>
             <div class="context-chips" id="context-chips"></div>
-          </section>
-          <section class="poster-wrap">
-            <div class="poster" id="gas-poster"></div>
           </section>
         </div>
 
