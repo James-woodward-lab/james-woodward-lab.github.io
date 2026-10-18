@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#22143d">
+  <meta name="color-scheme" content="dark">
+  <title>The Bicarbonate Bandit - Neonatal Teaching</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rye&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/app-theme.css">
+  <link rel="stylesheet" href="bicarbonate-bandit.css">
+  <script src="../../js/theme-toggle.js"></script>
+</head>
+<body class="bicarb-bandit-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="px-cactus" viewBox="0 0 12 16" shape-rendering="crispEdges">
+      <rect x="5" y="1" width="2" height="15" fill="#2f6b30"/>
+      <rect x="4" y="2" width="1" height="14" fill="#4c9a45"/>
+      <rect x="7" y="2" width="1" height="14" fill="#1f4a20"/>
+      <rect x="1" y="5" width="2" height="5" fill="#2f6b30"/>
+      <rect x="1" y="9" width="4" height="2" fill="#2f6b30"/>
+      <rect x="9" y="3" width="2" height="6" fill="#2f6b30"/>
+      <rect x="7" y="8" width="4" height="2" fill="#2f6b30"/>
+    </symbol>
+    <symbol id="px-mesas" viewBox="0 0 160 30" preserveAspectRatio="none" shape-rendering="crispEdges">
+      <g fill="#7a2f3b">
+        <rect x="0" y="18" width="160" height="12"/>
+        <rect x="8" y="10" width="26" height="8"/>
+        <rect x="12" y="6" width="18" height="4"/>
+        <rect x="58" y="13" width="36" height="5"/>
+        <rect x="64" y="9" width="22" height="4"/>
+        <rect x="116" y="9" width="32" height="9"/>
+        <rect x="122" y="5" width="18" height="4"/>
+      </g>
+      <g fill="#4a1d2c">
+        <rect x="0" y="24" width="160" height="6"/>
+        <rect x="28" y="20" width="24" height="4"/>
+        <rect x="94" y="21" width="30" height="3"/>
+        <rect x="140" y="19" width="20" height="5"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="bandit-app">
+
+  <!-- TITLE -->
+  <section id="screen-attract" class="bb-screen screen-title">
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+
+    <div class="title-wrap">
+      <a class="px-link" href="../index.html">&#9664; Gas Saloon</a>
+      <p class="title-kicker">WANTED &middot; Reward: restored acid&ndash;base balance</p>
+      <h1 class="game-title">The Bicarbonate Bandit</h1>
+      <p class="title-sub">Send the right order before the bandit hits the canyon.</p>
+
+      <div class="title-panel">
+        <section class="panel-block">
+          <h2 class="block-title">How to ride</h2>
+          <ol class="how-list">
+            <li><span class="how-num">1</span><span>Read the vignette and the stolen ABG on the WANTED poster.</span></li>
+            <li><span class="how-num">2</span><span>Pick the next sensible order before the timer runs out.</span></li>
+            <li><span class="how-num">3</span><span>Correct answers close the gap. Wrongs and timeouts let the bandit pull away.</span></li>
+            <li><span class="how-num">4</span><span>Catch the bandit to win. If the gap maxes out or you miss three in a row, the bandit escapes.</span></li>
+          </ol>
+          <dl class="score-key">
+            <div><dt>Correct order</dt><dd>+100</dd></div>
+            <div><dt>Time bonus</dt><dd>&times;5s</dd></div>
+            <div><dt>Wrong order</dt><dd>-10</dd></div>
+            <div><dt>Timeout</dt><dd>gap +1</dd></div>
+          </dl>
+        </section>
+
+        <section class="panel-block">
+          <h2 class="block-title">Settings</h2>
+          <fieldset class="seg">
+            <legend>Baby's age</legend>
+            <label><input type="radio" name="age" value="day0" checked><span>Day 0</span></label>
+            <label><input type="radio" name="age" value="day1to2"><span>Day 1-2</span></label>
+            <label><input type="radio" name="age" value="child"><span>&gt;2 days</span></label>
+          </fieldset>
+          <fieldset class="seg">
+            <legend>Pace (timer)</legend>
+            <label><input type="radio" name="pace" value="gentle"><span>Trot</span></label>
+            <label><input type="radio" name="pace" value="standard" checked><span>Gallop</span></label>
+            <label><input type="radio" name="pace" value="hard"><span>Stampede</span></label>
+          </fieldset>
+          <label class="px-check"><input type="checkbox" id="sound-toggle" checked><span>Sound effects</span></label>
+          <p class="best-line">Best score <strong id="attract-best">000000</strong></p>
+          <button type="button" class="px-btn px-btn--big blink-soft" id="btn-start">&#9654; Form a posse</button>
+        </section>
+      </div>
+
+      <p class="disclaimer">Teaching aid only. Scenarios are simulated — not for sole clinical decisions.</p>
+    </div>
+  </section>
+
+  <!-- CHASE -->
+  <section id="screen-game" class="bb-screen screen-game" hidden>
+    <header class="hud">
+      <div class="hud-group">
+        <button type="button" class="px-btn px-btn--wood px-btn--sm" id="btn-pause" aria-label="Pause">II</button>
+        <span class="hud-title">Bicarb Bandit</span>
+      </div>
+      <dl class="hud-stats">
+        <div><dt>Score</dt><dd id="hud-score">000000</dd></div>
+        <div><dt>Streak</dt><dd id="hud-streak">x0</dd></div>
+        <div><dt>Gap</dt><dd id="hud-gap">5</dd></div>
+        <div><dt>Timer</dt><dd id="hud-timer">14</dd></div>
+        <div class="hud-age-stat"><dt>Age</dt><dd id="hud-age">Day 0</dd></div>
+      </dl>
+      <div class="hud-group">
+        <div class="lives" id="hud-lives" role="img" aria-label="3 strikes left"></div>
+        <button type="button" class="px-btn px-btn--wood px-btn--sm" id="btn-mute" aria-label="Toggle sound">&#9835;</button>
+      </div>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="chase-strip" id="chase-strip" aria-hidden="true">
+        <div class="chase-sky">
+          <div class="px-sun"></div>
+          <svg class="mesas"><use href="#px-mesas"/></svg>
+        </div>
+        <div class="chase-ground">
+          <div class="sprite posse" id="sprite-posse" title="Posse">
+            <span class="posse-hat">POSSE</span>
+          </div>
+          <div class="sprite bandit" id="sprite-bandit" title="Bicarbonate Bandit">
+            <span class="bandit-figure" aria-hidden="true"></span>
+            <span class="bandit-badge">HCO&#8323;</span>
+          </div>
+          <div class="canyon"><span>Escape</span></div>
+        </div>
+      </div>
+
+      <div class="quiz" id="quiz">
+        <div class="quiz-top">
+          <section class="vignette-panel">
+            <h2 class="sign-title">The scene</h2>
+            <p class="vignette-text" id="vignette-text"></p>
+            <div class="context-chips" id="context-chips"></div>
+          </section>
+          <section class="poster-wrap">
+            <div class="poster" id="gas-poster"></div>
+          </section>
+        </div>
+
+        <section class="orders-panel">
+          <h2 class="sign-title">Send the right order</h2>
+          <div class="order-buttons" id="order-buttons"></div>
+        </section>
+
+        <div class="banner" id="banner" aria-live="assertive"></div>
+        <div class="feedback" id="feedback" aria-live="polite" hidden></div>
+      </div>
+
+      <div class="pause-overlay" id="pause-overlay" hidden>
+        <div class="pause-box">
+          <h2 class="pause-title">Paused</h2>
+          <button type="button" class="px-btn" id="btn-resume">&#9654; Resume</button>
+          <button type="button" class="px-btn px-btn--wood" id="btn-quit">Quit to title</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="screen-end" class="bb-screen screen-title" hidden>
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun px-sun--low"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+
+    <div class="title-wrap">
+      <p class="go-kicker" id="end-kicker">Bandit in custody</p>
+      <h1 class="game-title game-title--sm" id="end-title">The Bicarbonate Bandit</h1>
+
+      <div class="title-panel title-panel--single">
+        <div class="go-stats">
+          <div class="go-stat"><span class="go-label">Score</span><span class="go-num" id="end-score">0</span></div>
+          <div class="go-stat"><span class="go-label">Best</span><span class="go-num" id="end-best">0</span></div>
+          <div class="go-stat"><span class="go-label">Orders right</span><span class="go-num" id="end-correct">0</span></div>
+          <div class="go-stat"><span class="go-label">Accuracy</span><span class="go-num" id="end-accuracy">-</span></div>
+        </div>
+        <p class="go-record" id="end-record" hidden>&#9733; New record &#9733;</p>
+
+        <h2 class="block-title">Missed warrants — review these</h2>
+        <ol class="review" id="end-review"></ol>
+
+        <div class="go-actions">
+          <button type="button" class="px-btn px-btn--big" id="btn-again">&#9654; Chase again</button>
+          <button type="button" class="px-btn px-btn--wood" id="btn-title">Settings</button>
+          <a class="px-link px-link--dark" href="../index.html">&#9664; Gas Saloon</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="../../js/gas-core.js"></script>
+<script src="scenarios.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

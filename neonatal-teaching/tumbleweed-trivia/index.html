@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#22143d">
+  <meta name="color-scheme" content="dark">
+  <title>Tumbleweed Trivia - Neonatal Teaching</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rye&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/app-theme.css">
+  <link rel="stylesheet" href="tumbleweed-trivia.css">
+  <script src="../../js/theme-toggle.js"></script>
+</head>
+<body class="tumbleweed-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="px-cactus" viewBox="0 0 12 16" shape-rendering="crispEdges">
+      <rect x="5" y="1" width="2" height="15" fill="#2f6b30"/>
+      <rect x="4" y="2" width="1" height="14" fill="#4c9a45"/>
+      <rect x="7" y="2" width="1" height="14" fill="#1f4a20"/>
+      <rect x="1" y="5" width="2" height="5" fill="#2f6b30"/>
+      <rect x="1" y="9" width="4" height="2" fill="#2f6b30"/>
+      <rect x="9" y="3" width="2" height="6" fill="#2f6b30"/>
+      <rect x="7" y="8" width="4" height="2" fill="#2f6b30"/>
+    </symbol>
+    <symbol id="px-mesas" viewBox="0 0 160 30" preserveAspectRatio="none" shape-rendering="crispEdges">
+      <g fill="#7a2f3b">
+        <rect x="0" y="18" width="160" height="12"/>
+        <rect x="8" y="10" width="26" height="8"/>
+        <rect x="12" y="6" width="18" height="4"/>
+        <rect x="58" y="13" width="36" height="5"/>
+        <rect x="64" y="9" width="22" height="4"/>
+        <rect x="116" y="9" width="32" height="9"/>
+        <rect x="122" y="5" width="18" height="4"/>
+      </g>
+      <g fill="#4a1d2c">
+        <rect x="0" y="24" width="160" height="6"/>
+        <rect x="28" y="20" width="24" height="4"/>
+        <rect x="94" y="21" width="30" height="3"/>
+        <rect x="140" y="19" width="20" height="5"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="tw-app">
+
+  <section id="screen-attract" class="tw-screen screen-title">
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+
+    <div class="title-wrap">
+      <a class="px-link" href="../index.html">&#9664; Gas Saloon</a>
+      <p class="title-kicker">Acid&ndash;base questions on the wind</p>
+      <h1 class="game-title">Tumbleweed Trivia</h1>
+      <p class="title-sub">Answer before the weed rolls into the canyon.</p>
+
+      <div class="title-panel">
+        <section class="panel-block">
+          <h2 class="block-title">How to ride</h2>
+          <ol class="how-list">
+            <li><span class="how-num">1</span><span>A question tumbles in from the left.</span></li>
+            <li><span class="how-num">2</span><span>Tap the right answer, or press <strong>1&ndash;4</strong>, before it hits the canyon.</span></li>
+            <li><span class="how-num">3</span><span>A wrong answer or a weed that rolls off counts as a miss.</span></li>
+            <li><span class="how-num">4</span><span>Three misses and the round is over.</span></li>
+          </ol>
+          <dl class="score-key">
+            <div><dt>Correct</dt><dd>+100</dd></div>
+            <div><dt>Time bonus</dt><dd>&times;5s</dd></div>
+            <div><dt>Wrong</dt><dd>-10</dd></div>
+            <div><dt>Escaped</dt><dd>miss</dd></div>
+          </dl>
+        </section>
+
+        <section class="panel-block">
+          <h2 class="block-title">Settings</h2>
+          <fieldset class="seg">
+            <legend>Topic</legend>
+            <label><input type="radio" name="topic" value="all" checked><span>All</span></label>
+            <label><input type="radio" name="topic" value="rules"><span>Rules</span></label>
+            <label><input type="radio" name="topic" value="compensation"><span>Compensation</span></label>
+            <label><input type="radio" name="topic" value="anion_gap"><span>Anion gap</span></label>
+            <label><input type="radio" name="topic" value="oxygen"><span>Oxygen</span></label>
+            <label><input type="radio" name="topic" value="causes"><span>Causes</span></label>
+          </fieldset>
+          <fieldset class="seg">
+            <legend>Pace</legend>
+            <label><input type="radio" name="pace" value="gentle"><span>Trot</span></label>
+            <label><input type="radio" name="pace" value="standard" checked><span>Gallop</span></label>
+            <label><input type="radio" name="pace" value="hard"><span>Stampede</span></label>
+          </fieldset>
+          <label class="px-check"><input type="checkbox" id="sound-toggle" checked><span>Sound effects</span></label>
+          <p class="best-line">Best score <strong id="attract-best">000000</strong></p>
+          <button type="button" class="px-btn px-btn--big blink-soft" id="btn-start">&#9654; Let 'em roll</button>
+        </section>
+      </div>
+
+      <p class="disclaimer">Teaching aid only. Questions are for practice — not for sole clinical decisions.</p>
+    </div>
+  </section>
+
+  <section id="screen-game" class="tw-screen screen-game" hidden>
+    <header class="hud">
+      <div class="hud-group">
+        <button type="button" class="px-btn px-btn--wood px-btn--sm" id="btn-pause" aria-label="Pause">II</button>
+        <span class="hud-title">Tumbleweed</span>
+      </div>
+      <dl class="hud-stats">
+        <div><dt>Score</dt><dd id="hud-score">000000</dd></div>
+        <div><dt>Streak</dt><dd id="hud-streak">x1.0</dd></div>
+        <div><dt>Topic</dt><dd id="hud-topic">All</dd></div>
+      </dl>
+      <div class="hud-group">
+        <div class="lives" id="hud-lives" role="img" aria-label="3 misses left"></div>
+        <button type="button" class="px-btn px-btn--wood px-btn--sm" id="btn-mute" aria-label="Toggle sound">&#9835;</button>
+      </div>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="sky" aria-hidden="true">
+        <div class="px-sun"></div>
+        <svg class="mesas"><use href="#px-mesas"/></svg>
+        <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+        <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      </div>
+      <div
+        id="playfield"
+        class="playfield"
+        tabindex="0"
+        aria-label="Tumbleweed trail. Answer the question before it reaches the canyon. Keys 1 to 4. P pauses."
+      >
+        <div class="fence" aria-hidden="true"></div>
+        <div id="card-layer" class="card-layer"></div>
+        <div class="canyon" aria-hidden="true"><span>Escape</span></div>
+        <div class="banner" id="banner" aria-live="assertive"></div>
+      </div>
+      <div class="pause-overlay" id="pause-overlay" hidden>
+        <div class="pause-box">
+          <h2 class="pause-title">Paused</h2>
+          <button type="button" class="px-btn" id="btn-resume">&#9654; Resume</button>
+          <button type="button" class="px-btn px-btn--wood" id="btn-quit">Quit to title</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screen-end" class="tw-screen screen-title" hidden>
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun px-sun--low"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+    <div class="title-wrap">
+      <p class="go-kicker">The wind won</p>
+      <h1 class="game-title game-title--sm">Three weeds got away</h1>
+      <div class="title-panel title-panel--single">
+        <div class="go-stats">
+          <div class="go-stat"><span class="go-label">Score</span><span class="go-num" id="end-score">0</span></div>
+          <div class="go-stat"><span class="go-label">Best</span><span class="go-num" id="end-best">0</span></div>
+          <div class="go-stat"><span class="go-label">Right</span><span class="go-num" id="end-correct">0</span></div>
+          <div class="go-stat"><span class="go-label">Asked</span><span class="go-num" id="end-asked">0</span></div>
+        </div>
+        <p class="go-record" id="end-record" hidden>&#9733; New record &#9733;</p>
+        <h2 class="block-title">Weeds you missed</h2>
+        <ol class="review" id="end-review"></ol>
+        <div class="go-actions">
+          <button type="button" class="px-btn px-btn--big" id="btn-again">&#9654; Roll again</button>
+          <button type="button" class="px-btn px-btn--wood" id="btn-title">Settings</button>
+          <a class="px-link px-link--dark" href="../index.html">&#9664; Gas Saloon</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="questions.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

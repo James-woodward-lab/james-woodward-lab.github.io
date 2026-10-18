@@ -39,6 +39,8 @@
     { title: 'ED Discharge Pack',               href: '/ed-discharge-pack/',               emoji: '📝', tags: 'discharge pack safety netting gp letter clinical summary note template bronchiolitis gastroenteritis fever head injury asthma uti wound croup febrile convulsion constipation hand foot mouth chickenpox scarlet fever allergic reaction abdominal pain healthier together parent resources', group: 'Top' },
     { title: 'Neonatal Gas Saloon',             href: '/neonatal-teaching/',               emoji: '🤠', tags: 'neonatal teaching blood gas abg acid base rodeo lasso game saloon nursery', group: 'Top' },
     { title: 'Gas Rodeo',                       href: '/neonatal-teaching/gas-analyser-rodeo/', emoji: '🪢', tags: 'neonatal blood gas game lasso acidosis alkalosis teaching', group: 'Top' },
+    { title: 'The Bicarbonate Bandit',          href: '/neonatal-teaching/the-bicarbonate-bandit/', emoji: '🧪', tags: 'neonatal blood gas bicarbonate bandit chase order fio2 ventilator fluid glucose escalate teaching', group: 'Top' },
+    { title: 'Tumbleweed Trivia',               href: '/neonatal-teaching/tumbleweed-trivia/', emoji: '🌵', tags: 'neonatal trivia tumbleweed acid base compensation anion gap oxygenation quiz teaching', group: 'Top' },
 
     // Works in progress
     { title: 'A-E Assessment Notes',            href: '/ae-assessment/',                   emoji: '🅰️', tags: 'abcde a-e assessment primary survey', group: 'WIP' },

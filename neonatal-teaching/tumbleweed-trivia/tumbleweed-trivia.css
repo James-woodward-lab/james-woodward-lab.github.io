@@ -1,0 +1,750 @@
+/* Tumbleweed Trivia — western pixel trail, full-width playfield */
+
+body.tumbleweed-app {
+  --ink: #1b0f08;
+  --wood-dark: #3b2212;
+  --wood: #6b3f1f;
+  --wood-light: #9a6233;
+  --parchment: #f3dfb1;
+  --parchment-dark: #dcbc7f;
+  --gold: #f2c14e;
+  --gold-dark: #c48a1e;
+  --gold-light: #ffe39a;
+  --blood: #b3261e;
+  --straw: #c4a05a;
+  --straw-dark: #8a6a32;
+  --low-blue: #1f4fa8;
+  --sky-1: #22143d;
+  --sky-2: #452058;
+  --sky-3: #84305a;
+  --sky-4: #c9493f;
+  --sky-5: #ec7f3a;
+  --sky-6: #f5b553;
+  --sand: #d9a35b;
+  --sand-dark: #b8813f;
+  --font-west: "Rye", Georgia, serif;
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-term: "VT323", ui-monospace, monospace;
+
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--sky-1);
+  color: var(--parchment);
+  font-family: var(--font-term);
+  font-size: 20px;
+  line-height: 1.2;
+  overflow-x: hidden;
+}
+
+body.tumbleweed-app *,
+body.tumbleweed-app *::before,
+body.tumbleweed-app *::after { box-sizing: border-box; }
+
+body.tumbleweed-app [hidden] { display: none !important; }
+
+body.tumbleweed-app .theme-toggle,
+body.tumbleweed-app .back-home-link { display: none !important; }
+
+.tumbleweed-app .tw-app { min-height: 100vh; min-height: 100dvh; }
+
+.tumbleweed-app .scenery,
+.tumbleweed-app .sky {
+  background: linear-gradient(
+    to bottom,
+    var(--sky-1) 0 18%,
+    var(--sky-2) 18% 34%,
+    var(--sky-3) 34% 50%,
+    var(--sky-4) 50% 64%,
+    var(--sky-5) 64% 78%,
+    var(--sky-6) 78% 100%
+  );
+}
+
+.tumbleweed-app .px-sun {
+  position: absolute;
+  background: linear-gradient(to bottom, #fff0a8 0 40%, #ffd25e 40% 70%, #ffb347 70% 100%);
+  clip-path: polygon(
+    30% 0, 70% 0, 70% 8%, 84% 8%, 84% 16%, 92% 16%, 92% 30%, 100% 30%,
+    100% 70%, 92% 70%, 92% 84%, 84% 84%, 84% 92%, 70% 92%, 70% 100%,
+    30% 100%, 30% 92%, 16% 92%, 16% 84%, 8% 84%, 8% 70%, 0 70%,
+    0 30%, 8% 30%, 8% 16%, 16% 16%, 16% 8%, 30% 8%
+  );
+}
+
+.tumbleweed-app .mesas { position: absolute; left: 0; width: 100%; }
+.tumbleweed-app .cactus { position: absolute; }
+
+.tumbleweed-app .scenery {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tumbleweed-app .scenery .ground-strip {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 18vh;
+  background:
+    radial-gradient(circle, var(--sand-dark) 0 2px, transparent 2.5px) 0 0 / 40px 30px,
+    var(--sand);
+  border-top: 4px solid var(--ink);
+}
+
+.tumbleweed-app .scenery .mesas { bottom: 18vh; height: 16vh; }
+.tumbleweed-app .scenery .px-sun {
+  left: 62%;
+  bottom: calc(18vh + 8vh);
+  width: 22vmin;
+  height: 22vmin;
+}
+.tumbleweed-app .scenery .px-sun--low { bottom: calc(18vh + 2vh); }
+.tumbleweed-app .scenery .cactus { bottom: calc(18vh - 6px); height: 15vh; width: 11vh; }
+.tumbleweed-app .scenery .cactus-a { left: 5%; }
+.tumbleweed-app .scenery .cactus-b { right: 8%; height: 10vh; width: 7.5vh; }
+
+.tumbleweed-app .px-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  width: auto;
+  min-height: 0;
+  margin: 3px;
+  padding: 12px 16px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 0;
+  box-shadow:
+    inset -4px -4px 0 var(--gold-dark),
+    inset 4px 4px 0 var(--gold-light),
+    0 0 0 3px var(--ink),
+    5px 5px 0 3px rgba(27, 15, 8, 0.55);
+}
+.tumbleweed-app .px-btn:hover { filter: brightness(1.08); }
+.tumbleweed-app .px-btn:active { transform: translate(3px, 3px); }
+.tumbleweed-app .px-btn:focus-visible { outline: 3px solid #fff; outline-offset: 5px; }
+.tumbleweed-app .px-btn--wood,
+.tumbleweed-app .px-btn--wood:hover {
+  background: var(--wood-light);
+  color: var(--parchment);
+  box-shadow:
+    inset -4px -4px 0 var(--wood),
+    inset 4px 4px 0 #c08850,
+    0 0 0 3px var(--ink),
+    5px 5px 0 3px rgba(27, 15, 8, 0.55);
+}
+.tumbleweed-app .px-btn--sm { font-size: 10px; padding: 8px 10px; }
+.tumbleweed-app .px-btn--big {
+  width: calc(100% - 6px);
+  font-size: clamp(12px, 1.6vw, 16px);
+  padding: 18px 24px;
+}
+.tumbleweed-app .blink-soft { animation: tw-blink 1.1s steps(2) infinite; }
+
+.tumbleweed-app .px-link {
+  align-self: flex-start;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+  text-decoration: none;
+}
+.tumbleweed-app .px-link:hover { text-decoration: underline; }
+.tumbleweed-app .px-link--dark { align-self: center; color: var(--wood); text-shadow: none; }
+
+.tumbleweed-app .screen-title {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: 20px 16px 20vh;
+}
+
+.tumbleweed-app .title-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(1000px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.tumbleweed-app .title-kicker {
+  margin: 10px 0 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.2vw, 11px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--straw);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.tumbleweed-app .game-title {
+  margin: 0;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 8vw, 5rem);
+  line-height: 1.05;
+  text-align: center;
+  color: var(--gold);
+  text-shadow: 4px 4px 0 var(--ink), 8px 8px 0 var(--blood), 12px 12px 0 var(--ink);
+}
+.tumbleweed-app .game-title--sm { font-size: clamp(1.6rem, 5.5vw, 3.2rem); }
+.tumbleweed-app .title-sub {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.tumbleweed-app .title-panel {
+  width: calc(100% - 32px);
+  margin: 20px 16px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--parchment);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 4px var(--ink),
+    0 0 0 12px var(--wood),
+    0 0 0 16px var(--ink),
+    12px 14px 0 14px rgba(27, 15, 8, 0.45);
+}
+.tumbleweed-app .title-panel--single { grid-template-columns: 1fr; padding: 18px 20px; }
+.tumbleweed-app .panel-block { padding: 18px 20px; }
+.tumbleweed-app .panel-block + .panel-block { border-left: 3px dashed var(--straw-dark); }
+
+.tumbleweed-app .block-title {
+  margin: 0 0 12px;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: 26px;
+  color: var(--blood);
+  text-transform: none;
+}
+
+.tumbleweed-app .how-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  font-size: 21px;
+}
+.tumbleweed-app .how-list li { display: flex; gap: 12px; align-items: flex-start; }
+.tumbleweed-app .how-num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  background: var(--wood);
+  color: var(--gold);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.tumbleweed-app .score-key {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 2px dashed var(--wood-light);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 18px;
+  font-size: 20px;
+}
+.tumbleweed-app .score-key div { display: flex; justify-content: space-between; gap: 8px; }
+.tumbleweed-app .score-key dt { color: var(--wood-dark); }
+.tumbleweed-app .score-key dd {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--blood);
+}
+
+.tumbleweed-app .seg {
+  border: 0;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tumbleweed-app .seg legend {
+  width: 100%;
+  padding: 0;
+  margin-bottom: 8px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--wood-dark);
+}
+.tumbleweed-app .seg label {
+  position: relative;
+  flex: 1 1 90px;
+  margin: 2px;
+}
+.tumbleweed-app .seg input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.tumbleweed-app .seg span {
+  display: block;
+  padding: 6px 8px;
+  text-align: center;
+  font-size: 20px;
+  background: var(--parchment-dark);
+  box-shadow: 0 0 0 2px var(--ink);
+  cursor: pointer;
+}
+.tumbleweed-app .seg input:checked + span {
+  background: var(--wood);
+  color: var(--gold);
+  box-shadow: 0 0 0 2px var(--ink), inset 0 0 0 2px var(--gold);
+}
+.tumbleweed-app .seg input:focus-visible + span {
+  outline: 3px solid var(--blood);
+  outline-offset: 3px;
+}
+
+.tumbleweed-app .px-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  font-size: 21px;
+  cursor: pointer;
+}
+.tumbleweed-app .px-check input {
+  appearance: none;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  background: var(--parchment-dark);
+  box-shadow: 0 0 0 2px var(--ink);
+  cursor: pointer;
+}
+.tumbleweed-app .px-check input:checked { background: var(--wood); }
+.tumbleweed-app .px-check input:checked::after {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 6px;
+  background: var(--gold);
+}
+
+.tumbleweed-app .best-line {
+  margin: 14px 0 12px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--wood-dark);
+}
+.tumbleweed-app .best-line strong { color: var(--blood); font-weight: 400; }
+.tumbleweed-app .disclaimer {
+  margin: 0;
+  font-size: 19px;
+  text-align: center;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+@media (max-width: 760px) {
+  .tumbleweed-app .title-panel { grid-template-columns: 1fr; }
+  .tumbleweed-app .panel-block + .panel-block {
+    border-left: 0;
+    border-top: 3px dashed var(--straw-dark);
+  }
+}
+
+.tumbleweed-app .go-kicker {
+  margin: 14px 0 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(12px, 2.4vw, 20px);
+  color: #ff5a4a;
+  text-shadow: 3px 3px 0 var(--ink);
+  animation: tw-blink 1s steps(2) infinite;
+}
+.tumbleweed-app .go-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.tumbleweed-app .go-stat {
+  padding: 12px 8px;
+  text-align: center;
+  background: var(--wood);
+  color: var(--gold);
+  box-shadow: 0 0 0 3px var(--ink);
+}
+.tumbleweed-app .go-label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--parchment-dark);
+}
+.tumbleweed-app .go-num {
+  font-family: var(--font-pixel);
+  font-size: clamp(12px, 2vw, 18px);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.tumbleweed-app .go-record {
+  margin: 0 0 12px;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: var(--blood);
+  animation: tw-blink 0.8s steps(2) infinite;
+}
+.tumbleweed-app .review {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.tumbleweed-app .review-item {
+  padding: 8px 10px;
+  background: #fff3d1;
+  box-shadow: 0 0 0 2px var(--ink);
+  font-size: 19px;
+}
+.tumbleweed-app .review-tag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 3px 5px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  background: var(--blood);
+  color: var(--parchment);
+  vertical-align: middle;
+}
+.tumbleweed-app .review-why { color: var(--wood); font-size: 18px; }
+.tumbleweed-app .review-empty { font-size: 21px; }
+.tumbleweed-app .go-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.tumbleweed-app .go-actions .px-btn--big { width: auto; flex: 1 1 240px; }
+@media (max-width: 640px) {
+  .tumbleweed-app .go-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.tumbleweed-app .screen-game {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.tumbleweed-app .hud {
+  position: relative;
+  z-index: 20;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 8px 14px;
+  background:
+    repeating-linear-gradient(to bottom, var(--wood) 0 13px, var(--wood-dark) 13px 15px),
+    var(--wood);
+  border-bottom: 4px solid var(--ink);
+}
+.tumbleweed-app .hud-group { display: flex; align-items: center; gap: 12px; }
+.tumbleweed-app .hud-title {
+  font-family: var(--font-west);
+  font-size: 22px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.tumbleweed-app .hud-stats { margin: 0; display: flex; flex-wrap: wrap; gap: 16px; }
+.tumbleweed-app .hud-stats div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tumbleweed-app .hud-stats dt {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--parchment-dark);
+}
+.tumbleweed-app .hud-stats dd {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(12px, 1.1vw, 16px);
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.tumbleweed-app .lives { display: flex; gap: 4px; }
+.tumbleweed-app .life {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.tumbleweed-app .life.is-lost { color: var(--wood-dark); text-shadow: none; }
+
+.tumbleweed-app .stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tumbleweed-app .stage.shake { animation: tw-shake 0.35s steps(6); }
+
+.tumbleweed-app .sky {
+  position: relative;
+  flex: none;
+  height: clamp(56px, 12vh, 110px);
+  overflow: hidden;
+}
+.tumbleweed-app .sky .mesas { bottom: 0; height: 70%; }
+.tumbleweed-app .sky .px-sun { left: 70%; bottom: 28%; width: 8vh; height: 8vh; }
+.tumbleweed-app .sky .cactus { bottom: -2px; height: 55%; width: 40px; }
+.tumbleweed-app .sky .cactus-a { left: 12%; }
+.tumbleweed-app .sky .cactus-b { left: 46%; height: 40%; }
+
+.tumbleweed-app .playfield {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-top: 4px solid var(--ink);
+  background:
+    radial-gradient(circle, var(--sand-dark) 0 2px, transparent 2.5px) 0 0 / 46px 38px,
+    linear-gradient(to bottom, #c98f4a 0 14px, var(--sand) 14px 100%);
+}
+.tumbleweed-app .playfield:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: -3px;
+}
+
+.tumbleweed-app .fence {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  z-index: 3;
+  width: 18px;
+  background: repeating-linear-gradient(to bottom, var(--wood) 0 30px, var(--wood-dark) 30px 36px);
+  border-right: 4px solid var(--ink);
+  pointer-events: none;
+}
+.tumbleweed-app .canyon {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  z-index: 3;
+  width: clamp(44px, 5vw, 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 4px dashed var(--blood);
+  background: linear-gradient(90deg, rgba(27, 15, 8, 0.25), var(--ink));
+  pointer-events: none;
+}
+.tumbleweed-app .canyon span {
+  writing-mode: vertical-rl;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #ff6b5a;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.tumbleweed-app .card-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.tumbleweed-app .weed {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: min(520px, 70vw);
+  transform: translateY(-50%);
+  will-change: transform;
+}
+
+.tumbleweed-app .weed-ring {
+  position: absolute;
+  inset: -18px;
+  border: 10px dotted var(--straw-dark);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: tw-spin 8s linear infinite;
+}
+.tumbleweed-app .stage.is-frozen .weed-ring { animation-play-state: paused; }
+
+.tumbleweed-app .plaque {
+  position: relative;
+  padding: 14px 16px 12px;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(138, 106, 50, 0.18) 0 10px, transparent 11px),
+    var(--parchment);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 7px var(--straw),
+    0 0 0 10px var(--ink),
+    8px 10px 0 6px rgba(27, 15, 8, 0.35);
+}
+.tumbleweed-app .plaque-topic {
+  margin: 0 0 6px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.tumbleweed-app .plaque-stem {
+  margin: 0 0 10px;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.15;
+}
+.tumbleweed-app .choices {
+  display: grid;
+  gap: 8px;
+}
+.tumbleweed-app .choice {
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  font-family: var(--font-term);
+  font-size: clamp(18px, 2.2vw, 22px);
+  line-height: 1.1;
+  color: var(--ink);
+  background: #fff6dc;
+  box-shadow: 0 0 0 2px var(--ink);
+  cursor: pointer;
+}
+.tumbleweed-app .choice:hover:not(:disabled) { background: #fff; }
+.tumbleweed-app .choice:focus-visible { outline: 3px solid var(--blood); outline-offset: 2px; }
+.tumbleweed-app .choice:disabled { cursor: default; }
+.tumbleweed-app .choice-key {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  background: var(--wood-dark);
+  color: var(--gold);
+}
+.tumbleweed-app .choice.is-correct { background: #9fdc7c; }
+.tumbleweed-app .choice.is-wrong { background: #f08a7e; }
+.tumbleweed-app .plaque-why {
+  margin: 10px 0 0;
+  font-size: 20px;
+  color: var(--wood-dark);
+}
+
+.tumbleweed-app .weed.is-burst .weed-ring {
+  animation: tw-burst 0.5s steps(5) forwards;
+}
+.tumbleweed-app .weed.is-miss .plaque {
+  animation: tw-fade 0.6s steps(5) forwards;
+}
+
+.tumbleweed-app .banner {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  z-index: 5;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--font-pixel);
+  font-size: clamp(13px, 2.2vw, 22px);
+  color: var(--gold);
+  text-shadow: 3px 3px 0 var(--ink);
+  opacity: 0;
+  pointer-events: none;
+}
+.tumbleweed-app .banner.show { animation: tw-banner 1.3s steps(8) forwards; }
+.tumbleweed-app .banner.good { color: #a6ff7d; }
+.tumbleweed-app .banner.bad { color: #ff5a4a; }
+
+.tumbleweed-app .pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  background: rgba(27, 15, 8, 0.7);
+}
+.tumbleweed-app .pause-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 30px;
+  background: var(--parchment);
+  box-shadow: 0 0 0 4px var(--ink), 0 0 0 10px var(--wood), 0 0 0 14px var(--ink);
+}
+.tumbleweed-app .pause-title {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--blood);
+  animation: tw-blink 1s steps(2) infinite;
+}
+
+@media (max-width: 700px) {
+  .tumbleweed-app .hud-title { display: none; }
+  .tumbleweed-app .weed { width: min(520px, 86vw); }
+  .tumbleweed-app .plaque-stem { font-size: 20px; }
+}
+
+@keyframes tw-spin { to { transform: rotate(360deg); } }
+@keyframes tw-blink { 50% { filter: brightness(1.35); } }
+@keyframes tw-shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-6px, 2px); }
+  50% { transform: translate(6px, -2px); }
+  75% { transform: translate(-3px, 1px); }
+}
+@keyframes tw-banner {
+  0% { opacity: 1; transform: translateX(-50%) scale(1.3); }
+  20% { opacity: 1; transform: translateX(-50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes tw-burst {
+  to { transform: scale(1.35); opacity: 0; }
+}
+@keyframes tw-fade { to { opacity: 0.45; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tumbleweed-app .weed-ring,
+  .tumbleweed-app .blink-soft,
+  .tumbleweed-app .go-kicker,
+  .tumbleweed-app .go-record,
+  .tumbleweed-app .pause-title,
+  .tumbleweed-app .stage.shake { animation: none; }
+}
