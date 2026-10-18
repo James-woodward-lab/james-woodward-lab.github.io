@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f1117">
   <meta name="color-scheme" content="dark light">
+  <meta name="description" content="A documentation aid that formats clinician-entered neonatal history and examination findings into a readable note for manual transfer into BadgerNet. It does not interpret clinical data, calculate gestational age, assess risk, diagnose, or recommend treatment.">
   <title>Postnatal review</title>
   <link rel="stylesheet" href="../css/app-theme.css">
   <link rel="stylesheet" href="../css/postnatal-review.css">
@@ -18,7 +19,7 @@
   <header class="review-header">
     <div>
       <h1>Postnatal review</h1>
-      <p>A specialist review on the postnatal ward or labour ward.</p>
+      <p>A documentation aid that formats clinician-entered neonatal history and examination findings into a readable note for manual transfer into BadgerNet. It does not interpret clinical data, calculate gestational age, assess risk, diagnose, or recommend treatment.</p>
     </div>
     <button type="button" class="text-button" data-action="new-baby">New baby</button>
   </header>
@@ -35,33 +36,34 @@
         <label class="checkline" for="shorter-note"><input type="checkbox" id="shorter-note"> Shorter note</label>
         <button type="button" class="note-copy" data-copy="all">Copy all</button>
       </div>
+      <p class="note-disclaimer">Documentation aid only. This tool formats clinician-entered findings. It does not interpret observations, calculate gestation, assess sepsis risk, make diagnoses, or recommend management. The clinician remains responsible for reviewing and verifying all content before entering it into BadgerNet.</p>
       <article class="note-sheet">
         <header>
           <h3>Examination</h3>
           <button type="button" class="note-copy" data-copy="examination">Copy</button>
         </header>
-        <div id="out-examination" class="note-body is-empty">Nothing for this box yet.</div>
+        <div id="out-examination" class="note-body is-empty" contenteditable="true" data-note-box="examination" role="textbox" aria-multiline="true">Nothing for this box yet.</div>
       </article>
       <article class="note-sheet">
         <header>
           <h3>Discussion</h3>
           <button type="button" class="note-copy" data-copy="discussion">Copy</button>
         </header>
-        <div id="out-discussion" class="note-body is-empty">Nothing for this box yet.</div>
+        <div id="out-discussion" class="note-body is-empty" contenteditable="true" data-note-box="discussion" role="textbox" aria-multiline="true">Nothing for this box yet.</div>
       </article>
       <article class="note-sheet">
         <header>
           <h3>Review</h3>
           <button type="button" class="note-copy" data-copy="review">Copy</button>
         </header>
-        <div id="out-review" class="note-body is-empty">Nothing for this box yet.</div>
+        <div id="out-review" class="note-body is-empty" contenteditable="true" data-note-box="review" role="textbox" aria-multiline="true">Nothing for this box yet.</div>
       </article>
     </aside>
   </div>
 
   <p class="draft-hint">This draft stays in this browser tab only. On a shared computer, use New baby before you leave.</p>
   <footer class="review-disclaimer">
-    Documentation aid for a postnatal or labour-ward review. Risk factors follow NICE NG195, including the May 2026 amendments. Hypoglycaemia prompts follow the BAPM framework of September 2024 for term babies in the first 72 hours. Your local pathway and a senior review override both. This page does not calculate doses, phototherapy thresholds, or an early-warning score.
+    Documentation aid only. This tool formats clinician-entered findings. It does not interpret observations, calculate gestation, assess sepsis risk, make diagnoses, or recommend management. The clinician remains responsible for reviewing and verifying all content before entering it into BadgerNet.
   </footer>
 
   <div id="confirm-new" class="confirm-layer" hidden>

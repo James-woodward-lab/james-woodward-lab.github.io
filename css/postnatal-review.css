@@ -79,12 +79,26 @@ body.postnatal-review-app [hidden] {
   font-size: var(--fs-sm);
 }
 
-.status-framework,
-.status-preterm {
-  margin: 8px 0 0;
-  color: var(--muted);
+.note-disclaimer {
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface2) 80%, transparent);
+  color: var(--text-soft);
   font-size: var(--fs-sm);
   line-height: var(--lh-normal);
+}
+
+.note-body[contenteditable="true"] {
+  min-height: 4.5rem;
+  white-space: pre-wrap;
+  outline: none;
+}
+
+.note-body[contenteditable="true"]:focus {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #6b8cae) 25%, transparent);
 }
 
 .workspace {

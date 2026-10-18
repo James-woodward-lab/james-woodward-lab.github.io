@@ -18,9 +18,10 @@ bedside on a phone or trust PC.
   Glucose) plus the full resus drug set and a print-friendly layout.
 - **🧾 [Examination notes](exam-notes/)** - structured infant
   examination documentation helper.
-- **👶 [Postnatal review](postnatal-review/)** - postnatal and labour-ward
-  neonatal review note, copied into BadgerNet as Examination, Discussion,
-  and Review.
+- **👶 [Postnatal review](postnatal-review/)** - documentation aid that
+  formats clinician-entered neonatal history and examination findings for
+  manual transfer into BadgerNet. Does not interpret data, calculate
+  gestation, assess risk, diagnose, or recommend treatment.
 - **💧 [Fluid Calculator](fluid-calculator/)** - maintenance &
   replacement fluids.
 - **🫀 [QTc Calculator](qtc-calculator/)** - Bazett / Fridericia with

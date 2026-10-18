@@ -1,15 +1,13 @@
 ﻿/*
- * Postnatal review — clinical content.
+ * Postnatal review — documentation content only.
  *
- * NICE NG195 risk factors and clinical indicators, including the May 2026
- * amendments on the live NICE page (term rupture of membranes, maternal
- * sepsis, and chorioamnionitis). Hypoglycaemia items follow the BAPM
- * framework of September 2024 for term babies in the first 72 hours.
+ * This module lists clinician-facing labels and phrase snippets for a
+ * documentation aid. It must not encode clinical decision support: no risk
+ * scores, thresholds, management rules, or automatic inference from values.
  *
- * A factor id is counted once wherever it is ticked. Box 1 red flags and
- * Box 2 red flags share kind "ng195-red". Other Box 1 and Box 2 items share
- * kind "ng195-other". BAPM items are separate and are not added to the
- * NG195 count.
+ * Optional NICE reference labels are attached only when the clinician
+ * explicitly selects the matching predefined finding button. They are
+ * transcriptional captions, not assessments.
  */
 (function (root, factory) {
   var api = factory();
@@ -18,47 +16,60 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var GUIDE = {
-    red: 'NICE NG195 red flag',
-    ng195: 'NICE NG195 risk factor',
-    indicator: 'NICE NG195 clinical indicator',
-    bapm: 'BAPM hypoglycaemia risk factor',
-    sign: 'Sign that can occur with hypoglycaemia',
-    local: 'Often relevant locally. Confirm against your guideline.',
-    preterm: 'BAPM manages hypoglycaemia in moderate and late preterm babies on the preterm pathway, not the term framework.'
-  };
+  /* Disabled for clinical decision support. Kept empty so older drafts that
+   * referenced factor ids do not gain counting or threshold behaviour. */
+  var FACTORS = [];
 
-  var FACTORS = [
-    { id: 'sibling-infection', kind: 'ng195-red', box: 'risk', summary: 'infection in another baby of a multiple pregnancy' },
-    { id: 'gbs', kind: 'ng195-other', box: 'risk', summary: 'group B streptococcus' },
-    { id: 'spontaneous-preterm', kind: 'ng195-other', box: 'risk', summary: 'preterm birth after spontaneous labour' },
-    { id: 'rom-preterm-18', kind: 'ng195-other', box: 'risk', summary: 'prolonged rupture of membranes' },
-    { id: 'rom-term-24', kind: 'ng195-other', box: 'risk', summary: 'prolonged rupture of membranes' },
-    { id: 'maternal-sepsis', kind: 'ng195-other', box: 'risk', summary: 'maternal sepsis' },
-    { id: 'chorio', kind: 'ng195-other', box: 'risk', summary: 'chorioamnionitis' },
-    { id: 'cpr', kind: 'ng195-red', box: 'indicator', summary: 'cardiopulmonary resuscitation' },
-    { id: 'ventilation', kind: 'ng195-red', box: 'indicator', summary: 'mechanical ventilation' },
-    { id: 'apnoea', kind: 'ng195-red', box: 'indicator', summary: 'apnoea' },
-    { id: 'seizures', kind: 'ng195-red', box: 'indicator', summary: 'seizures' },
-    { id: 'shock', kind: 'ng195-red', box: 'indicator', summary: 'signs of shock' },
-    { id: 'altered-behaviour', kind: 'ng195-other', box: 'indicator', summary: 'altered behaviour or responsiveness' },
-    { id: 'altered-tone', kind: 'ng195-other', box: 'indicator', summary: 'altered muscle tone' },
-    { id: 'feed-refusal', kind: 'ng195-other', box: 'indicator', summary: 'feeding difficulties' },
-    { id: 'feed-intolerance', kind: 'ng195-other', box: 'indicator', summary: 'feed intolerance' },
-    { id: 'abnormal-hr', kind: 'ng195-other', box: 'indicator', summary: 'abnormal heart rate' },
-    { id: 'resp-distress', kind: 'ng195-other', box: 'indicator', summary: 'respiratory distress' },
-    { id: 'hypoxia', kind: 'ng195-other', box: 'indicator', summary: 'hypoxia' },
-    { id: 'jaundice-24h', kind: 'ng195-other', box: 'indicator', summary: 'jaundice within 24 hours' },
-    { id: 'encephalopathy', kind: 'ng195-other', box: 'indicator', summary: 'neonatal encephalopathy' },
-    { id: 'temperature', kind: 'ng195-other', box: 'indicator', summary: 'temperature abnormality' },
-    { id: 'bleeding-coag', kind: 'ng195-other', box: 'indicator', summary: 'bleeding, thrombocytopenia, or coagulopathy' },
-    { id: 'altered-glucose', kind: 'ng195-other', box: 'indicator', summary: 'altered glucose' },
-    { id: 'metabolic-acidosis', kind: 'ng195-other', box: 'indicator', summary: 'metabolic acidosis' },
-    { id: 'idm', kind: 'bapm', box: 'hypo', summary: 'maternal diabetes' },
-    { id: 'beta-blocker', kind: 'bapm', box: 'hypo', summary: 'maternal beta-blocker' },
-    { id: 'sga', kind: 'bapm', box: 'hypo', summary: 'birth weight on or under the 2nd centile' },
-    { id: 'wasted', kind: 'bapm', box: 'hypo', summary: 'clinical wasting' }
-  ];
+  var NICE_DOC = {
+    'gbs-maternal': {
+      fact: 'Maternal group B streptococcal colonisation, bacteriuria, or infection in this pregnancy documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: maternal GBS colonisation.'
+    },
+    'gbs-previous': {
+      fact: 'Invasive group B streptococcal infection in a previous baby documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: invasive GBS in a previous baby.'
+    },
+    'spontaneous-preterm': {
+      fact: 'Preterm birth after spontaneous labour, before 37 weeks, documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: preterm birth after spontaneous labour.'
+    },
+    'rom-preterm-18': {
+      fact: 'Rupture of membranes for more than 18 hours before a preterm birth documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: prolonged rupture of membranes before preterm birth.'
+    },
+    'rom-term-24': {
+      fact: 'Rupture of membranes for more than 24 hours before a term birth documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: prolonged rupture of membranes before term birth.'
+    },
+    'maternal-sepsis': {
+      fact: 'Maternal sepsis in the intrapartum or early postpartum period documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: maternal sepsis.'
+    },
+    chorio: {
+      fact: 'Suspected or confirmed chorioamnionitis documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: chorioamnionitis.'
+    },
+    'sibling-infection': {
+      fact: 'Suspected or confirmed infection in another baby of this multiple pregnancy documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: infection in another baby of a multiple pregnancy.'
+    },
+    cpr: {
+      fact: 'Cardiopulmonary resuscitation was needed.',
+      label: 'NICE early-onset neonatal infection risk factor documented: cardiopulmonary resuscitation.'
+    },
+    ventilation: {
+      fact: 'Mechanical ventilation was needed.',
+      label: 'NICE early-onset neonatal infection risk factor documented: mechanical ventilation.'
+    },
+    thrombocytopenia: {
+      fact: 'Thrombocytopenia documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: thrombocytopenia.'
+    },
+    coagulation: {
+      fact: 'Abnormal coagulation documented.',
+      label: 'NICE early-onset neonatal infection risk factor documented: abnormal coagulation.'
+    }
+  };
 
   var STEPS = [
     { id: 'context', label: 'Context' },
@@ -70,14 +81,14 @@
   ];
 
   var REASONS = [
-    { id: 'sepsis', label: 'Sepsis risk', step: 'background' },
-    { id: 'hypoglycaemia', label: 'Hypoglycaemia', step: 'background' },
+    { id: 'sepsis', label: 'Infection history', step: 'background' },
+    { id: 'hypoglycaemia', label: 'Hypoglycaemia history', step: 'background' },
     { id: 'jaundice', label: 'Jaundice', step: 'results' },
     { id: 'feeding', label: 'Feeding', step: 'history' },
     { id: 'breathing', label: 'Breathing', step: 'examination' },
     { id: 'temperature', label: 'Temperature', step: 'examination' },
     { id: 'vomiting', label: 'Vomiting', step: 'history' },
-    { id: 'weight', label: 'Weight loss', step: 'context' },
+    { id: 'weight', label: 'Weight', step: 'context' },
     { id: 'colour', label: 'Colour', step: 'examination' },
     { id: 'concern', label: 'Parental or midwife concern', step: 'history' },
     { id: 'murmur', label: 'Murmur', step: 'examination' },
@@ -114,20 +125,7 @@
     { id: 'stay-lw', label: 'Stay on labour ward', text: 'Remain on the labour ward with mother.' },
     { id: 'tc', label: 'Transitional care', text: 'Admit to transitional care.' },
     { id: 'nnu', label: 'Neonatal unit', text: 'Admit to the neonatal unit.' },
-    {
-      id: 'obs',
-      label: 'Observations',
-      text: function (state, factors) {
-        var red = 0;
-        var other = 0;
-        factors.forEach(function (f) {
-          if (f.kind === 'ng195-red') red += 1;
-          if (f.kind === 'ng195-other') other += 1;
-        });
-        if (red === 0 && other === 1) return 'Early-warning observations for at least 12 hours.';
-        return 'Continue early-warning observations and review if they change.';
-      }
-    },
+    { id: 'obs', label: 'Observations', text: 'Continue observations and review if they change.' },
     { id: 'bf', label: 'Breastfeeding', text: 'Continue breastfeeding with midwifery support.' },
     { id: 'ebm', label: 'Expressed milk', text: 'Expressed breast milk as the feeding plan.' },
     { id: 'formula', label: 'Formula', text: 'Formula feeds, volume and frequency as charted.' },
@@ -140,7 +138,7 @@
     {
       id: 'safety',
       label: 'Safety-net advice',
-      text: 'Safety-net advice given: seek urgent help for abnormal behaviour (inconsolable crying or listlessness), unusual floppiness, temperature under 36°C or over 38°C, abnormal breathing, a change in skin colour, or new feeding difficulty.'
+      text: 'Safety-net advice given as discussed with the parents.'
     }
   ];
 
@@ -179,7 +177,6 @@
           id: 'cry',
           label: 'Cry',
           type: 'single',
-          guide: 'sign',
           options: [
             opt('normal', 'Usual cry', { normal: true, prose: 'Cry usual.' }),
             opt('high', 'High-pitched', { abnormal: true, prose: 'High-pitched cry.' }),
@@ -190,14 +187,12 @@
           id: 'alertness',
           label: 'Behaviour',
           type: 'single',
-          guide: 'indicator',
-          guideAlso: 'sign',
           options: [
             opt('alert', 'Alert', { normal: true, prose: 'Alert.' }),
             opt('sleepy', 'Sleepy but rousable', { normal: true, prose: 'Sleepy but rousable.' }),
-            opt('lethargic', 'Lethargic', { abnormal: true, factor: 'altered-behaviour', prose: 'Lethargic.' }),
-            opt('irritable', 'Irritable', { abnormal: true, factor: 'altered-behaviour', prose: 'Irritable.' }),
-            opt('inconsolable', 'Inconsolable', { abnormal: true, factor: 'altered-behaviour', prose: 'Inconsolable.' })
+            opt('lethargic', 'Lethargic', { abnormal: true, prose: 'Lethargic.' }),
+            opt('irritable', 'Irritable', { abnormal: true, prose: 'Irritable.' }),
+            opt('inconsolable', 'Inconsolable', { abnormal: true, prose: 'Inconsolable.' })
           ]
         }
       ]
@@ -212,21 +207,19 @@
           id: 'wob',
           label: 'Work of breathing',
           type: 'single',
-          guide: 'indicator',
           options: [
             opt('none', 'None', { normal: true, prose: 'No increased work of breathing.' }),
-            opt('mild', 'Mild', { abnormal: true, factor: 'resp-distress', prose: 'Mild work of breathing.' }),
-            opt('moderate', 'Moderate', { abnormal: true, factor: 'resp-distress', prose: 'Moderate work of breathing.' }),
-            opt('severe', 'Severe', { abnormal: true, factor: 'resp-distress', prose: 'Severe work of breathing.' })
+            opt('mild', 'Mild', { abnormal: true, prose: 'Mild work of breathing.' }),
+            opt('moderate', 'Moderate', { abnormal: true, prose: 'Moderate work of breathing.' }),
+            opt('severe', 'Severe', { abnormal: true, prose: 'Severe work of breathing.' })
           ]
         },
         {
           id: 'grunting',
           label: 'Grunting',
           type: 'yn',
-          guide: 'indicator',
           options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'resp-distress', prose: 'Grunting.' }),
+            opt('yes', 'Yes', { abnormal: true, prose: 'Grunting.' }),
             opt('no', 'No', { normal: true, prose: 'No grunting.' })
           ]
         },
@@ -278,9 +271,8 @@
           id: 'apnoea',
           label: 'Apnoea',
           type: 'yn',
-          guide: 'red',
           options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'apnoea', prose: 'Apnoea.' }),
+            opt('yes', 'Yes', { abnormal: true, prose: 'Apnoea.' }),
             opt('no', 'No', { normal: true, prose: 'No apnoea witnessed.' })
           ]
         }
@@ -357,9 +349,8 @@
           id: 'shock',
           label: 'Signs of shock',
           type: 'yn',
-          guide: 'red',
           options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'shock', prose: 'Signs of shock.' }),
+            opt('yes', 'Yes', { abnormal: true, prose: 'Signs of shock.' }),
             opt('no', 'No', { normal: true, prose: 'No signs of shock.' })
           ]
         }
@@ -384,9 +375,8 @@
           id: 'distension',
           label: 'Distension',
           type: 'yn',
-          guide: 'indicator',
           options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'feed-intolerance', prose: 'Abdomen distended.' }),
+            opt('yes', 'Yes', { abnormal: true, prose: 'Abdomen distended.' }),
             opt('no', 'No', { normal: true, prose: 'Abdomen not distended.' })
           ]
         },
@@ -450,12 +440,10 @@
           id: 'tone',
           label: 'Tone',
           type: 'single',
-          guide: 'indicator',
-          guideAlso: 'sign',
           options: [
             opt('normal', 'Normal', { normal: true, prose: 'Tone normal.' }),
-            opt('low', 'Reduced tone', { abnormal: true, factor: 'altered-tone', prose: 'Tone reduced.' }),
-            opt('high', 'Increased tone', { abnormal: true, factor: 'altered-tone', prose: 'Tone increased.' }),
+            opt('low', 'Reduced tone', { abnormal: true, prose: 'Tone reduced.' }),
+            opt('high', 'Increased tone', { abnormal: true, prose: 'Tone increased.' }),
             opt('other', 'Other', { abnormal: true, fallback: 'Neurological finding not described.' })
           ]
         }
@@ -471,13 +459,12 @@
           id: 'colour',
           label: 'Colour',
           type: 'single',
-          guide: 'indicator',
           options: [
             opt('pink', 'Pink', { normal: true, prose: 'Pink.' }),
             opt('pale', 'Pale', { abnormal: true, prose: 'Pale.' }),
             opt('jaundiced', 'Jaundiced', { abnormal: true, prose: 'Jaundiced.' }),
             opt('mottled', 'Mottled', { abnormal: true, prose: 'Mottled.' }),
-            opt('cyanosed', 'Cyanosed', { abnormal: true, factor: 'hypoxia', prose: 'Centrally cyanosed.' })
+            opt('cyanosed', 'Cyanosed', { abnormal: true, prose: 'Centrally cyanosed.' })
           ]
         },
         {
@@ -504,8 +491,8 @@
   ];
 
   return {
-    GUIDE: GUIDE,
     FACTORS: FACTORS,
+    NICE_DOC: NICE_DOC,
     STEPS: STEPS,
     REASONS: REASONS,
     PLACES: PLACES,
@@ -513,7 +500,6 @@
     DIAGNOSES: DIAGNOSES,
     PLAN_PHRASES: PLAN_PHRASES,
     EXAM_SYSTEMS: EXAM_SYSTEMS,
-    KAISER: KAISER,
-    SAFETY_NET: PLAN_PHRASES.filter(function (p) { return p.id === 'safety'; })[0].text
+    KAISER: KAISER
   };
 });
