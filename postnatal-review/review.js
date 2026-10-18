@@ -214,6 +214,47 @@
     return [entry.fact, entry.label];
   }
 
+  /* Count only explicitly selected findings. Never infer from observation
+   * values, gestation free text, gas results, or glucose numbers. */
+  function collectFactors(partial) {
+    var state = normalize(partial);
+    var byId = {};
+    content.FACTORS.forEach(function (factor) { byId[factor.id] = factor; });
+    var found = {};
+    function add(id) {
+      if (!byId[id] || found[id]) return;
+      if (id === 'sibling-infection' && state.plurality !== 'multiple') return;
+      found[id] = byId[id];
+    }
+    if (state.answers['gbs-maternal'] === 'yes' || state.answers['gbs-previous'] === 'yes') add('gbs');
+    [
+      'sibling-infection', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
+      'maternal-sepsis', 'chorio', 'cpr', 'ventilation', 'idm', 'beta-blocker', 'sga', 'wasted'
+    ].forEach(function (id) {
+      if (state.answers[id] === 'yes') add(id);
+    });
+    var since = state.multi.sinceBirth || [];
+    if (since.indexOf('apnoea') !== -1) add('apnoea');
+    if (since.indexOf('seizures') !== -1) add('seizures');
+    if (since.indexOf('poor-tone') !== -1) add('altered-tone');
+    if (since.indexOf('bleeding') !== -1) add('bleeding-coag');
+    var feeds = state.multi.feedProblems || [];
+    if (feeds.indexOf('refusal') !== -1) add('feed-refusal');
+    if (feeds.indexOf('vomiting') !== -1 || feeds.indexOf('residuals') !== -1) add('feed-intolerance');
+    content.EXAM_SYSTEMS.forEach(function (system) {
+      var row = examRow(state, system.id);
+      if (!findingsActive(row)) return;
+      visibleControls(system, row.choices).forEach(function (control) {
+        selectedOptions(control, row.choices).forEach(function (option) {
+          if (option.factor) add(option.factor);
+        });
+      });
+    });
+    if (state.answers.thrombocytopenia === 'yes' || state.answers.coagulation === 'yes') add('bleeding-coag');
+    if (state.answers.hyperglycaemia === 'yes') add('altered-glucose');
+    return Object.keys(found).map(function (id) { return found[id]; });
+  }
+
   function ensurePeriod(text) {
     var trimmed = String(text || '').trim();
     if (!trimmed) return '';
@@ -569,6 +610,7 @@
 
   function buildBoxes(partial) {
     var state = normalize(partial);
+    var factors = collectFactors(state);
     var examination = examinationText(state, !!state.shorter);
     var discussion = discussionText(state);
     var review = reviewText(state, !!state.shorter);
@@ -576,7 +618,11 @@
       examination: examination,
       discussion: discussion,
       review: review,
-      all: ['Examination', examination, '', 'Discussion', discussion, '', 'Review', review].join('\n').trim()
+      all: ['Examination', examination, '', 'Discussion', discussion, '', 'Review', review].join('\n').trim(),
+      factors: factors,
+      redCount: factors.filter(function (factor) { return factor.kind === 'ng195-red'; }).length,
+      otherCount: factors.filter(function (factor) { return factor.kind === 'ng195-other'; }).length,
+      bapm: factors.filter(function (factor) { return factor.kind === 'bapm'; })
     };
   }
 
@@ -683,13 +729,20 @@
   function renderStatus() {
     var el = document.getElementById('status-strip');
     if (!el) return;
+    var boxes = buildBoxes(state);
     var gestation = gestationText(state);
     var age = ageInHours(state);
     var left = 'Documentation draft';
     if (gestation || age != null || placeLabel(state)) {
       left = [gestation || '', age != null ? shortAge(age) : '', placeLabel(state)].filter(Boolean).join(' · ');
     }
-    el.innerHTML = '<p class="status-main"><strong>' + esc(left) + '</strong><span>Formats clinician-entered findings only</span></p>';
+    var hypo = boxes.bapm.length
+      ? 'Hypoglycaemia items: ' + boxes.bapm.length + ' (' + boxes.bapm.map(function (factor) { return factor.summary; }).join(', ') + ')'
+      : 'No BAPM hypoglycaemia items selected';
+    el.innerHTML = '<p class="status-main"><strong>' + esc(left) + '</strong>' +
+      '<span>NICE: ' + boxes.redCount + ' red flag' + (boxes.redCount === 1 ? '' : 's') + ', ' + boxes.otherCount + ' other</span>' +
+      '<span>' + esc(hypo) + '</span></p>' +
+      '<p class="status-count-note">Counts selected findings only. Not a risk score or management recommendation.</p>';
   }
 
   function renderNote() {
@@ -1008,8 +1061,19 @@
     window.setTimeout(function () { button.textContent = previous; }, 1400);
   }
 
-  function ask(inner, extraClass) {
-    return '<div class="ask' + (extraClass ? ' ' + extraClass : '') + '">' + inner + '</div>';
+  function guideHtml(key) {
+    if (!key || !content.GUIDE || !content.GUIDE[key]) return '';
+    return '<p class="guide-note guide-note--' + key + '">' + esc(content.GUIDE[key]) + '</p>';
+  }
+
+  function ask(guide, inner, extraClass) {
+    if (typeof guide !== 'string') {
+      extraClass = inner;
+      inner = guide;
+      guide = '';
+    }
+    return '<div class="ask' + (guide ? ' ask--' + guide : '') + (extraClass ? ' ' + extraClass : '') + '">' +
+      inner + guideHtml(guide) + '</div>';
   }
 
   function half(html) {
@@ -1038,14 +1102,18 @@
     }).join('') + '</div>';
   }
 
-  function yn(key, label, yes, no) {
+  function yn(key, label, yes, no, guide) {
     var current = state.answers[key] || '';
+    var entry = content.NICE_DOC[key];
+    var tone = guide || (entry && entry.kind) || '';
     function button(value, text) {
       var on = current === value;
-      var className = 'yn-btn' + (on ? ' is-selected' : '') + (on && value === 'yes' ? ' is-selected-yes' : '') + (on && value === 'no' ? ' is-normal' : '');
+      var className = 'yn-btn' + (on ? ' is-selected' : '') +
+        (on && value === 'yes' && tone ? ' is-abnormal' : '') +
+        (on && value === 'no' ? ' is-normal' : '');
       return '<button type="button" class="' + className + '" data-answer="' + esc(key) + '" data-value="' + value + '">' + esc(text) + '</button>';
     }
-    return ask('<div class="field">' + fieldLabel(label) + '<div class="yn" role="group">' + button('yes', yes || 'Yes') + button('no', no || 'No') + '</div></div>');
+    return ask(tone, '<div class="field">' + fieldLabel(label) + '<div class="yn" role="group">' + button('yes', yes || 'Yes') + button('no', no || 'No') + '</div></div>');
   }
 
   function bindChoices(key, label, options) {
@@ -1084,7 +1152,6 @@
       '<div id="reason-other-wrap">' + input('reasonOther', 'Other reason', state.reasonOther, { wide: true }) + '</div>' +
       '<h2 class="group-title">Gestation and age</h2>' +
       input('gestationAtBirth', 'Gestation at birth (as documented by clinician)', state.gestationAtBirth, { wide: true, placeholder: 'For example, 39+2 or term' }) +
-      '<p class="hint">Optional free text. The app does not calculate, validate, or classify gestation.</p>' +
       '<div class="field">' + fieldLabel('How to enter age') + choiceButtons('data-bind', 'ageMode', [
         { value: 'times', label: 'From times' },
         { value: 'manual', label: 'Enter age' }
@@ -1120,7 +1187,6 @@
         input('apgar5', 'Apgar 5 min', state.apgar5, { type: 'number', mode: 'numeric' }) +
       '</div>' +
       '<h2 class="group-title">Documented perinatal history</h2>' +
-      '<p class="hint">Select only findings the clinician has documented. Optional NICE reference labels are transcribed only for selected buttons, and are not counted or interpreted.</p>' +
       half(input('romHours', 'Hours of rupture before birth', state.romHours, { type: 'number', mode: 'decimal' })) +
       half(yn('rom-preterm-18', 'Rupture for more than 18 hours before a preterm birth', 'Yes', 'No')) +
       half(yn('rom-term-24', 'Rupture for more than 24 hours before a term birth', 'Yes', 'No')) +
@@ -1139,21 +1205,20 @@
       ], state.answers.iap || '') + '</div>' +
       '<div id="iap-timing-wrap" class="half">' + input('iapTiming', 'First dose timing', state.iapTiming, { wide: true, placeholder: 'For example, 2 hours before birth' }) + '</div>' +
       '<h2 class="group-title">Kaiser Permanente values</h2>' +
-      '<p class="hint">Optional free text for values recorded elsewhere. Transcribed only.</p>' +
       content.KAISER.map(function (option) {
         return '<label class="field">' + fieldLabel(option.label) + '<input data-kaiser="' + option.id + '" value="' + esc(state.kaiser[option.id] || '') + '" autocomplete="off"></label>';
       }).join('') +
       '<h2 class="group-title">Documented hypoglycaemia-related history</h2>' +
-      yn('idm', 'Mother with diabetes, including gestational', 'Yes', 'No') +
-      yn('beta-blocker', 'Beta-blocker in the third trimester or at birth', 'Yes', 'No') +
-      yn('sga', 'Birth weight on or under the 2nd centile', 'Yes', 'No') +
-      yn('wasted', 'Clinically wasted', 'Yes', 'No') +
+      yn('idm', 'Mother with diabetes, including gestational', 'Yes', 'No', 'bapm') +
+      yn('beta-blocker', 'Beta-blocker in the third trimester or at birth', 'Yes', 'No', 'bapm') +
+      yn('sga', 'Birth weight on or under the 2nd centile', 'Yes', 'No', 'bapm') +
+      yn('wasted', 'Clinically wasted', 'Yes', 'No', 'bapm') +
       half(input('centile', 'Centile, if documented', state.centile, { placeholder: '9th' })) +
-      yn('local-hypothermia', 'Hypothermia', 'Yes', 'No') +
-      yn('local-acidosis', 'Perinatal acidosis', 'Yes', 'No') +
-      yn('local-polycythaemia', 'Polycythaemia', 'Yes', 'No') +
-      yn('local-family', 'Family history of a hypoglycaemia disorder', 'Yes', 'No') +
-      yn('local-sepsis', 'Suspected or confirmed early-onset infection', 'Yes', 'No') +
+      yn('local-hypothermia', 'Hypothermia', 'Yes', 'No', 'local') +
+      yn('local-acidosis', 'Perinatal acidosis', 'Yes', 'No', 'local') +
+      yn('local-polycythaemia', 'Polycythaemia', 'Yes', 'No', 'local') +
+      yn('local-family', 'Family history of a hypoglycaemia disorder', 'Yes', 'No', 'local') +
+      yn('local-sepsis', 'Suspected or confirmed early-onset infection', 'Yes', 'No', 'local') +
       '<h2 class="group-title">Other relevant history</h2>' +
       yn('meconium', 'Meconium stained liquor', 'Yes', 'No') +
       yn('shoulder', 'Shoulder dystocia', 'Yes', 'No') +
@@ -1184,7 +1249,7 @@
       half(input('lastFeed', 'Last feed', state.lastFeed, { wide: true, placeholder: '40 minutes ago' })) +
       yn('topUps', 'Top-ups', 'Yes', 'No') +
       '<div id="topup-amount-wrap" class="half">' + input('topUpAmount', 'Top-up amount (ml)', state.topUpAmount, { type: 'number', mode: 'decimal' }) + '</div>' +
-      ask('<div class="field">' + fieldLabel('Feeding problems') + multiButtons('feedProblems', [
+      ask('indicator', '<div class="field">' + fieldLabel('Feeding problems') + multiButtons('feedProblems', [
         { value: 'none', label: 'None of these' },
         { value: 'vomiting', label: 'Vomiting', abnormal: true },
         { value: 'residuals', label: 'Large residuals', abnormal: true },
@@ -1213,16 +1278,18 @@
       '<div id="parent-words-wrap" class="half">' + area('parentalWords', 'What the parents said', state.parentalWords, 3) + '</div>' +
       '<div id="midwife-words-wrap" class="half">' + area('midwifeWords', 'Midwife concern', state.midwifeWords, 3) + '</div>' +
       '<h2 class="group-title">Since birth</h2>' +
-      '<div class="field">' + fieldLabel('Events and symptoms') + multiButtons('sinceBirth', [
+      ask('red', '<div class="field">' + fieldLabel('Red-flag events') + multiButtons('sinceBirth', [
         { value: 'apnoea', label: 'Apnoea', abnormal: true },
-        { value: 'seizures', label: 'Seizures', abnormal: true },
+        { value: 'seizures', label: 'Seizures', abnormal: true }
+      ], state.multi.sinceBirth || []) + '</div>') +
+      ask('indicator', '<div class="field">' + fieldLabel('Other documented events') + multiButtons('sinceBirth', [
         { value: 'colour-change', label: 'Colour change', abnormal: true },
         { value: 'temp-instability', label: 'Temperature instability', abnormal: true },
         { value: 'jaundice', label: 'Jaundice noticed', abnormal: true },
         { value: 'jitteriness', label: 'Jitteriness', abnormal: true },
         { value: 'poor-tone', label: 'Poor tone', abnormal: true },
         { value: 'bleeding', label: 'Unexplained bleeding', abnormal: true }
-      ], state.multi.sinceBirth || []) + '</div>' +
+      ], state.multi.sinceBirth || []) + '</div>') +
       '<div id="jaundice-hours-wrap" class="half">' + input('jaundiceNoticedHours', 'Jaundice first noticed at (hours)', state.jaundiceNoticedHours, { type: 'number', mode: 'decimal' }) + '</div>' +
       area('historyExtra', 'Anything else', state.historyExtra, 3) +
       '</section>';
@@ -1243,9 +1310,7 @@
         ], state.obs.oxygen) + '</div>' +
         (state.obs.oxygen === 'oxygen' ? obsInput('fio2', '% O2', 'numeric') : '') +
       '</div>' +
-      '<p class="hint">Observations are written exactly as entered. The app does not classify them or add risk labels.</p>' +
       '<h2 class="group-title">Systems</h2>' +
-      '<p class="hint">Record findings directly. NAD writes the normal line for that system only when selected. Not examined is written only when selected. A blank system is left out.</p>' +
       content.EXAM_SYSTEMS.map(examRowHtml).join('') +
       '</section>';
   }
@@ -1296,8 +1361,8 @@
       return '<button type="button" class="' + className + '" data-exam="' + systemId + '" data-control="' + control.id + '" ' + marker + ' data-value="' + esc(option.value) + '">' + esc(option.label) + '</button>';
     }).join('');
     var inner = '<div class="field">' + fieldLabel(control.label) + '<div class="' + (control.type === 'yn' ? 'yn' : 'choices') + '">' + buttons + '</div></div>';
-    if (control.sub) return '<div class="exam-sub">' + ask(inner) + '</div>';
-    return ask(inner, control.row ? '' : 'exam-ctl--' + controlSize(control));
+    if (control.sub) return '<div class="exam-sub">' + ask(control.guide || '', inner) + '</div>';
+    return ask(control.guide || '', inner, control.row ? '' : 'exam-ctl--' + controlSize(control));
   }
 
   function controlSize(control) {
@@ -1319,7 +1384,6 @@
         '</div></div>';
     }).join('');
     return '<section class="step"><h2 class="group-title">Glucose</h2>' +
-      '<p class="hint">Values are transcribed exactly as entered. The app does not band, threshold, or interpret glucose results.</p>' +
       rows +
       '<button type="button" class="text-button" data-action="add-glucose">Add another glucose</button>' +
       yn('hyperglycaemia', 'Hyperglycaemia', 'Yes', 'No') +
@@ -1341,7 +1405,6 @@
       '<div class="num-row">' +
         gasInput('ph', 'pH') + gasInput('be', 'Base deficit') + gasInput('lactate', 'Lactate') + gasInput('glucose', 'Glucose') +
       '</div>' +
-      '<p class="hint">Gas values are transcribed as entered. The app does not interpret them.</p>' +
       yn('thrombocytopenia', 'Thrombocytopenia', 'Yes', 'No') +
       yn('coagulation', 'Abnormal coagulation', 'Yes', 'No') +
       area('resultsNote', 'Other results', state.resultsNote, 3) +
@@ -1359,7 +1422,6 @@
 
   function impressionHtml() {
     return '<section class="step"><h2 class="group-title">Impression</h2>' +
-      '<p class="hint">Optional phrase buttons insert clinician-chosen wording into the free-text boxes. The app does not generate an impression or plan.</p>' +
       '<div class="choices">' + content.DIAGNOSES.map(function (item) {
         return '<button type="button" class="choice" data-diagnosis="' + item.id + '">' + esc(item.label) + '</button>';
       }).join('') + '</div>' +
@@ -1394,6 +1456,7 @@
     normalize: normalize,
     ageInHours: ageInHours,
     buildBoxes: buildBoxes,
+    collectFactors: collectFactors,
     mount: mount
   };
 });

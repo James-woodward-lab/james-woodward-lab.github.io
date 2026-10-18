@@ -79,6 +79,13 @@ body.postnatal-review-app [hidden] {
   font-size: var(--fs-sm);
 }
 
+.status-count-note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
 .note-disclaimer {
   margin: 0 0 var(--sp-3);
   padding: var(--sp-2) var(--sp-3);

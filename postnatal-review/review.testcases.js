@@ -69,10 +69,9 @@ assert.strictEqual(boxes.discussion.indexOf('Abnormal findings'), -1, 'discussio
 assert.strictEqual(boxes.discussion.indexOf('Examination normal'), -1, 'discussion does not invent normality');
 assert.ok(boxes.discussion.indexOf('Impression: Well baby.') !== -1, 'clinician impression is transcribed');
 assert.ok(boxes.discussion.indexOf('No antibiotics.') !== -1, 'antibiotic choice is transcribed');
-assert.ok(!('redCount' in boxes), 'redCount is not returned');
-assert.ok(!('otherCount' in boxes), 'otherCount is not returned');
+assert.strictEqual(boxes.redCount, 0, 'sample has no red flags');
+assert.strictEqual(boxes.otherCount, 2, 'GBS and term rupture count as two other factors');
 assert.ok(!('framework' in boxes), 'framework management sentence is not returned');
-assert.ok(!('factors' in boxes), 'factor aggregation is not returned');
 
 assert.ok(boxes.examination.indexOf('postnatal ward') !== -1, 'place is in the examination');
 assert.ok(boxes.examination.indexOf('Temperature: 36.8') !== -1, 'temperature is transcribed as entered');
@@ -89,28 +88,39 @@ var hot = review.buildBoxes({
 assert.ok(hot.examination.indexOf('Temperature: 38.4') !== -1, 'hot temperature is transcribed');
 assert.ok(hot.examination.indexOf('HR: 175') !== -1, 'high heart rate is transcribed');
 assert.ok(hot.examination.indexOf('RR: 72') !== -1, 'high respiratory rate is transcribed');
-assert.strictEqual(hot.examination.indexOf('risk'), -1, 'abnormal observations do not create risk labels');
-assert.strictEqual(hot.examination.indexOf('clinical indicator'), -1, 'abnormal observations do not create clinical indicators');
+assert.strictEqual(hot.redCount, 0, 'abnormal observations do not create red flags');
+assert.strictEqual(hot.otherCount, 0, 'abnormal observations do not create other factors');
 assert.strictEqual(hot.examination.indexOf('NICE'), -1, 'observations alone do not create NICE labels');
 assert.strictEqual(hot.review.indexOf('NICE'), -1, 'observations alone do not create NICE labels in the review');
 
 var lowGlucose = review.buildBoxes({ glucoses: [{ value: '1.4', time: '', method: 'gas' }] });
 assert.ok(lowGlucose.review.indexOf('Glucose 1.4 mmol/L') !== -1, 'low glucose is transcribed');
-assert.strictEqual(lowGlucose.review.indexOf('altered glucose'), -1, 'glucose values do not become clinical indicators');
+assert.strictEqual(lowGlucose.otherCount, 0, 'glucose values do not become clinical indicators');
 assert.strictEqual(lowGlucose.review.indexOf('NICE'), -1, 'glucose values do not create NICE labels');
 
 var acid = review.buildBoxes({ gas: { be: '12' } });
 assert.ok(acid.review.indexOf('base deficit 12') !== -1, 'base deficit is transcribed');
-assert.strictEqual(acid.review.indexOf('metabolic acidosis'), -1, 'gas values do not create acidosis labels');
+assert.strictEqual(acid.otherCount, 0, 'gas values do not create acidosis factors');
 assert.strictEqual(acid.review.indexOf('NICE'), -1, 'gas values do not create NICE labels');
 
 var noGestationCalc = review.buildBoxes({ gestationAtBirth: '35+0' });
 assert.ok(noGestationCalc.review.indexOf('Gestation at birth: 35+0') !== -1, 'preterm-looking free text is transcribed');
 assert.strictEqual(noGestationCalc.review.indexOf('Preterm baby'), -1, 'gestation free text does not classify prematurity');
-assert.strictEqual(noGestationCalc.review.indexOf('spontaneous labour'), -1, 'gestation free text does not invent the preterm labour finding');
+assert.strictEqual(noGestationCalc.otherCount, 0, 'gestation free text does not invent the preterm labour finding');
 assert.strictEqual(typeof review.isPreterm, 'undefined', 'isPreterm is removed');
 assert.strictEqual(typeof review.romSuggestion, 'undefined', 'romSuggestion is removed');
-assert.strictEqual(typeof review.collectFactors, 'undefined', 'collectFactors is removed');
+
+assert.strictEqual(review.buildBoxes({ answers: { cpr: 'yes' } }).redCount, 1, 'explicit CPR counts as one red flag');
+assert.strictEqual(review.buildBoxes({ answers: { 'gbs-maternal': 'yes', 'gbs-previous': 'yes' } }).otherCount, 1, 'the two GBS questions count as one factor');
+assert.strictEqual(review.buildBoxes({
+  answers: { 'spontaneous-preterm': 'yes', chorio: 'yes' }
+}).otherCount, 2, 'two ordinary factors count separately');
+assert.ok(review.buildBoxes({
+  exam: { respiratory: { status: '', note: '', choices: { grunting: 'yes' } } }
+}).factors.some(function (factor) { return factor.id === 'resp-distress'; }), 'explicit grunting counts as respiratory distress');
+assert.strictEqual(review.buildBoxes({
+  exam: { respiratory: { status: 'nad', note: '', choices: { grunting: 'yes' } } }
+}).otherCount, 0, 'choices left under NAD do not count');
 
 var migrated = review.normalize({ gestationWeeks: '39', gestationDays: '2' });
 assert.strictEqual(migrated.gestationAtBirth, '39+2', 'old numeric drafts migrate to free text');
@@ -128,7 +138,11 @@ var siblingSingleton = review.buildBoxes({ answers: { 'sibling-infection': 'yes'
 assert.strictEqual(siblingSingleton.review.indexOf('NICE'), -1, 'sibling infection without multiple pregnancy is not labelled');
 
 var siblingMultiple = review.buildBoxes({ plurality: 'multiple', answers: { 'sibling-infection': 'yes' } });
-assert.ok(siblingMultiple.review.indexOf('NICE early-onset neonatal infection risk factor documented: infection in another baby of a multiple pregnancy.') !== -1, 'sibling infection NICE label needs an explicit yes and multiple pregnancy');
+assert.ok(siblingMultiple.review.indexOf('NICE early-onset neonatal infection red flag documented: infection in another baby of a multiple pregnancy.') !== -1, 'sibling infection NICE red-flag label needs an explicit yes and multiple pregnancy');
+
+var cpr = review.buildBoxes({ answers: { cpr: 'yes' } });
+assert.ok(cpr.review.indexOf('NICE early-onset neonatal infection red flag documented: cardiopulmonary resuscitation.') !== -1, 'CPR uses the red-flag documentation label');
+assert.ok(review.buildBoxes({ answers: { thrombocytopenia: 'yes' } }).review.indexOf('NICE early-onset neonatal infection clinical indicator documented: thrombocytopenia.') !== -1, 'thrombocytopenia uses the clinical-indicator label');
 
 var jaundiceYoung = review.buildBoxes({
   ageMode: 'manual',
