@@ -47,7 +47,7 @@
 @media print {
   .discharge-pack-app .theme-toggle, .discharge-pack-app .no-print, .discharge-pack-app .app-footer,
   .discharge-pack-app .dp-copy, .discharge-pack-app .dp-copy-all, .discharge-pack-app .dp-copy-link,
-  .discharge-pack-app .dp-open-link, .discharge-pack-app .dp-resource-actions, #jwl-cmdk-launcher { display:none !important; }
+  .discharge-pack-app .dp-open-link, .discharge-pack-app .dp-resource-actions { display:none !important; }
   .discharge-pack-app .container { max-width:100%; padding:10mm; }
   .discharge-pack-app .card, .discharge-pack-app .dp-output, .discharge-pack-app .dp-block, .discharge-pack-app .dp-resources, .discharge-pack-app .dp-resource { background:#fff !important; color:#000 !important; border:1px solid #333 !important; box-shadow:none !important; }
   .discharge-pack-app .dp-sub-textarea { background:#fff !important; color:#000 !important; border:1px solid #333 !important; height:auto !important; overflow:visible !important; }

@@ -188,11 +188,11 @@
     }
   });
 
-  /* ---------- auto-load the shared app shell (PWA + command palette) ----------
+  /* ---------- auto-load the shared app shell (PWA) ----------
    * Historically each page was responsible for explicitly loading additional
-   * shared scripts. To roll out the PWA / command-palette upgrade without
-   * editing 20+ tool templates we load it here on demand. Absolute path
-   * resolves cleanly from both the homepage and any /<tool>/ sub-page.
+   * shared scripts. To roll out the PWA upgrade without editing 20+ tool
+   * templates we load it here on demand. Absolute path resolves cleanly from
+   * both the homepage and any /<tool>/ sub-page.
    */
   (function loadAppShell() {
     if (window.__jwlAppShellLoaded) return;

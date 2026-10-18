@@ -471,8 +471,8 @@
   html, body { background: #fff !important; color: #000 !important; }
   .vitals-app .theme-toggle,
   .vitals-app .no-print,
-  .vitals-app .app-footer,
-  #jwl-cmdk-launcher { display: none !important; }
+  .vitals-app .app-footer { display: none !important; }
+
   .vitals-app .container { max-width: 100%; padding: 10mm; }
   .vitals-app .card {
     background: #fff !important; border: 1px solid #333 !important;
