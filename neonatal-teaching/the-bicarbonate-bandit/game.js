@@ -388,7 +388,7 @@
     state.scenario = state.queue[state.queueIndex];
     state.queueIndex += 1;
     state.feedbackOpen = false;
-    state.orderIds = bank.shuffle(bank.ACTIONS.map((a) => a.id));
+    state.orderIds = bank.ACTIONS.map((a) => a.id);
 
     els.vignette.textContent = state.scenario.vignette;
     els.chips.innerHTML = contextChips(state.scenario.context);
@@ -655,7 +655,7 @@
       }
       return;
     }
-    if (state.phase === "chasing" && /^[1-8]$/.test(e.key)) {
+    if (state.phase === "chasing" && /^[1-7]$/.test(e.key)) {
       const idx = Number(e.key) - 1;
       const id = state.orderIds[idx];
       if (id) {
