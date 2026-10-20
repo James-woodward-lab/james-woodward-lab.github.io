@@ -31,6 +31,7 @@ function sample() {
     stools: 'meconium',
     urine: 'passed',
     parentalConcern: 'none',
+    reasons: ['sepsis'],
     exam: {
       general: { status: 'nad', note: '', choices: {} },
       respiratory: { status: 'nad', note: '', choices: {} },
@@ -49,8 +50,12 @@ function sample() {
 
 var boxes = review.buildBoxes(sample());
 
-assert.ok(boxes.review.indexOf('Gestation at birth: 39+2') !== -1, 'gestation free text is transcribed');
-assert.ok(boxes.review.indexOf('18 hours') !== -1, 'age is in the review');
+assert.ok(boxes.review.indexOf('39+2, born by normal vaginal birth, now 18 hours old.') !== -1, 'gestation and delivery lead the review without a Gestation at birth label');
+assert.strictEqual(boxes.review.indexOf('Gestation at birth'), -1, 'Gestation at birth wording is removed');
+assert.ok(boxes.review.indexOf('Reason for review: infection history.') !== -1, 'reason for review is written');
+assert.ok(boxes.review.indexOf('39+2') < boxes.review.indexOf('Reason for review:'), 'reason follows gestation and delivery');
+assert.ok(boxes.review.indexOf('Reason for review:') < boxes.review.indexOf('BG:'), 'BG follows the reason for review');
+assert.ok(boxes.review.indexOf('BG: Membranes ruptured for 26 hours.') !== -1, 'background features are prefixed with BG');
 assert.ok(boxes.review.indexOf('Meconium passed') !== -1, 'stools are in the review');
 assert.ok(boxes.review.indexOf('Urine passed') !== -1, 'urine is in the review');
 assert.ok(boxes.review.indexOf('No parental concern') !== -1, 'explicit parental concern is transcribed');
@@ -58,7 +63,6 @@ assert.ok(boxes.review.indexOf('breastfeeds') !== -1, 'feeding is in the review'
 assert.ok(boxes.review.indexOf('Glucose 3.4') !== -1, 'glucose is transcribed without a band');
 assert.strictEqual(boxes.review.indexOf('under 1.0'), -1, 'glucose bands are not generated');
 assert.strictEqual(boxes.review.indexOf('2.0 mmol/L or more'), -1, 'glucose categories are not generated');
-assert.ok(boxes.review.indexOf('Membranes ruptured for 26 hours') !== -1, 'rupture hours are transcribed');
 assert.ok(boxes.review.indexOf('NICE early-onset neonatal infection risk factor documented: prolonged rupture of membranes before term birth.') !== -1, 'NICE label follows explicit rupture button');
 assert.ok(boxes.review.indexOf('NICE early-onset neonatal infection risk factor documented: maternal GBS colonisation.') !== -1, 'NICE label follows explicit GBS button');
 assert.strictEqual(boxes.review.indexOf('red flag'), -1, 'red-flag language is not generated');
@@ -104,7 +108,7 @@ assert.strictEqual(acid.otherCount, 0, 'gas values do not create acidosis factor
 assert.strictEqual(acid.review.indexOf('NICE'), -1, 'gas values do not create NICE labels');
 
 var noGestationCalc = review.buildBoxes({ gestationAtBirth: '35+0' });
-assert.ok(noGestationCalc.review.indexOf('Gestation at birth: 35+0') !== -1, 'preterm-looking free text is transcribed');
+assert.ok(noGestationCalc.review.indexOf('35+0.') !== -1, 'preterm-looking free text is transcribed without a label');
 assert.strictEqual(noGestationCalc.review.indexOf('Preterm baby'), -1, 'gestation free text does not classify prematurity');
 assert.strictEqual(noGestationCalc.otherCount, 0, 'gestation free text does not invent the preterm labour finding');
 assert.strictEqual(typeof review.isPreterm, 'undefined', 'isPreterm is removed');
@@ -163,8 +167,34 @@ var abnormal = review.buildBoxes({
     skin: { status: 'not', note: '', choices: {} }
   }
 });
-assert.ok(abnormal.examination.indexOf('Grunting') !== -1, 'grunting is written');
+assert.ok(abnormal.examination.indexOf('Respiratory: Grunting.') !== -1, 'grunting is grouped under Respiratory');
+assert.ok(abnormal.examination.indexOf('Cardiovascular:') !== -1, 'NAD cardiovascular stays grouped under its system');
+assert.ok(abnormal.examination.indexOf('Respiratory:') < abnormal.examination.indexOf('Cardiovascular:'), 'systems with abnormal findings lead');
 assert.ok(abnormal.examination.indexOf('Grunting') < abnormal.examination.indexOf('Fontanelle soft'), 'selected abnormal findings lead');
+
+var abdomen = review.buildBoxes({
+  exam: {
+    abdomen: {
+      status: '',
+      note: '',
+      choices: { feel: 'soft', tenderness: 'no', distension: 'no', organs: 'no', cord: 'healthy' }
+    }
+  }
+});
+assert.ok(abdomen.examination.indexOf('Abdomen soft, non-tender, not distended, no organomegaly. Cord healthy.') !== -1, 'abdomen findings are comma-joined after one Abdomen');
+assert.strictEqual(abdomen.examination.indexOf('Abdomen soft.'), -1, 'abdomen findings are not written as separate Abdomen sentences');
+
+var withNote = review.buildBoxes({
+  exam: {
+    general: { status: 'nad', note: '', choices: {} },
+    respiratory: { status: '', note: 'Louder on handling.', choices: { grunting: 'yes' } },
+    cardiovascular: { status: '', note: 'Soft systolic murmur at the left sternal edge.', choices: { sounds: 'murmur' } }
+  }
+});
+assert.ok(withNote.examination.indexOf('Respiratory: Grunting. Louder on handling.') !== -1, 'respiratory free text stays under Respiratory');
+assert.ok(withNote.examination.indexOf('Cardiovascular: Murmur present. Soft systolic murmur at the left sternal edge.') !== -1, 'cardiovascular free text stays under Cardiovascular');
+assert.ok(withNote.examination.indexOf('Respiratory:') < withNote.examination.indexOf('Cardiovascular:'), 'system order is preserved with free text');
+assert.strictEqual(withNote.examination.indexOf('Louder on handling.'), withNote.examination.indexOf('Respiratory: Grunting. Louder on handling.') + 'Respiratory: Grunting. '.length, 'custom text is not lifted above its system heading');
 
 var oxygen = review.buildBoxes({ obs: { sats: '92', oxygen: 'oxygen', fio2: '30' } });
 assert.ok(oxygen.examination.indexOf('Sats: 92% in 30% oxygen') !== -1, 'oxygen requirement is transcribed');
@@ -184,7 +214,7 @@ var kaiser = review.buildBoxes({
   shorter: true,
   kaiser: { well: '0.4 per 1000, routine care', equivocal: 'Blood culture.', unwell: '' }
 });
-assert.ok(kaiser.review.indexOf('Kaiser Permanente. Well appearing: 0.4 per 1000, routine care. Equivocal: Blood culture.') !== -1, 'filled Kaiser boxes are transcribed');
+assert.ok(kaiser.review.indexOf('BG: Kaiser Permanente. Well appearing: 0.4 per 1000, routine care. Equivocal: Blood culture.') !== -1, 'filled Kaiser boxes are transcribed under BG');
 assert.strictEqual(kaiser.review.indexOf('Unwell appearing'), -1, 'an empty Kaiser box is left out');
 
 var senior = review.buildBoxes({ antibiotics: 'senior', seniorDecision: 'observe for 12 hours', seniorOutcome: 'Registrar agrees with plan' });

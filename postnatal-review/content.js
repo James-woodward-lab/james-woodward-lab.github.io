@@ -411,15 +411,24 @@
       id: 'abdomen',
       label: 'Abdomen',
       shortLabel: 'Abdomen',
-      nad: 'Abdomen soft, not distended, cord healthy. Genitalia normal for sex. Anus patent.',
+      nad: 'Abdomen soft, non-tender, not distended, no organomegaly. Cord healthy. Genitalia normal for sex. Anus patent.',
       controls: [
         {
           id: 'feel',
           label: 'Feel',
           type: 'single',
           options: [
-            opt('soft', 'Soft', { normal: true, prose: 'Abdomen soft.' }),
-            opt('tense', 'Tense', { abnormal: true, prose: 'Abdomen tense.' })
+            opt('soft', 'Soft', { normal: true, fragment: true, prose: 'soft' }),
+            opt('tense', 'Tense', { abnormal: true, fragment: true, prose: 'tense' })
+          ]
+        },
+        {
+          id: 'tenderness',
+          label: 'Tenderness',
+          type: 'yn',
+          options: [
+            opt('yes', 'Yes', { abnormal: true, fragment: true, prose: 'tender' }),
+            opt('no', 'No', { normal: true, fragment: true, prose: 'non-tender' })
           ]
         },
         {
@@ -428,17 +437,8 @@
           type: 'yn',
           guide: 'indicator',
           options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'feed-intolerance', prose: 'Abdomen distended.' }),
-            opt('no', 'No', { normal: true, prose: 'Abdomen not distended.' })
-          ]
-        },
-        {
-          id: 'tenderness',
-          label: 'Tenderness',
-          type: 'yn',
-          options: [
-            opt('yes', 'Yes', { abnormal: true, prose: 'Abdomen tender.' }),
-            opt('no', 'No', { normal: true, prose: 'Abdomen non-tender.' })
+            opt('yes', 'Yes', { abnormal: true, factor: 'feed-intolerance', fragment: true, prose: 'distended' }),
+            opt('no', 'No', { normal: true, fragment: true, prose: 'not distended' })
           ]
         },
         {
@@ -446,8 +446,8 @@
           label: 'Organomegaly',
           type: 'yn',
           options: [
-            opt('yes', 'Yes', { abnormal: true, prose: 'Organomegaly.' }),
-            opt('no', 'No', { normal: true, prose: 'No organomegaly.' })
+            opt('yes', 'Yes', { abnormal: true, fragment: true, prose: 'organomegaly' }),
+            opt('no', 'No', { normal: true, fragment: true, prose: 'no organomegaly' })
           ]
         },
         {

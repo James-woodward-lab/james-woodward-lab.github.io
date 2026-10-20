@@ -383,6 +383,13 @@ body.postnatal-review-app .field textarea {
 
 .offer p { margin: 0; }
 
+.exam-systems {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .exam-row {
   border-top: 1px solid var(--border);
   padding: 8px 0;
@@ -425,12 +432,20 @@ body.postnatal-review-app .field textarea {
   border-radius: 999px;
 }
 
-.exam-row.is-settled .exam-body {
+.exam-note {
+  display: block;
+  margin-top: 8px;
+}
+
+.exam-row.is-settled .exam-body,
+.exam-row.is-settled .exam-note {
   opacity: 0.55;
 }
 
 .exam-row.is-settled .exam-body:focus-within,
-.exam-row.is-settled .exam-body:hover {
+.exam-row.is-settled .exam-body:hover,
+.exam-row.is-settled .exam-note:focus-within,
+.exam-row.is-settled .exam-note:hover {
   opacity: 1;
 }
 

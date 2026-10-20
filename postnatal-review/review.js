@@ -314,7 +314,9 @@
   function findingsProse(system, row) {
     var abnormal = [];
     var normal = [];
+    var fragments = [];
     var flagged = false;
+    var note = '';
     var choices = row.choices || {};
     var shown = visibleControls(system, choices);
     var shownIds = shown.map(function (control) { return control.id; });
@@ -326,15 +328,17 @@
           var detail = choices[option.supersededBy];
           if (Array.isArray(detail) ? detail.length : detail) return;
         }
+        if (option.fragment) {
+          fragments.push(option.prose);
+          return;
+        }
         if (option.abnormal) abnormal.push(option.prose);
         else normal.push(option.prose);
       });
     });
     var hasNote = noteVisible(system, choices) && row.note && String(row.note).trim();
     if (hasNote) {
-      var note = ensurePeriod(row.note);
-      if (flagged) abnormal.push(note);
-      else normal.push(note);
+      note = ensurePeriod(row.note);
     } else {
       shown.forEach(function (control) {
         selectedOptions(control, choices).forEach(function (option) {
@@ -342,7 +346,21 @@
         });
       });
     }
-    return { abnormal: abnormal, normal: normal, flagged: flagged };
+    return { abnormal: abnormal, normal: normal, fragments: fragments, flagged: flagged, note: note };
+  }
+
+  function formatExamBlock(system, split, shorter) {
+    var sentences = split.abnormal.concat(shorter ? [] : split.normal);
+    if (split.note) sentences.push(split.note);
+    var chunks = [];
+    if (split.fragments && split.fragments.length) {
+      chunks.push(ensurePeriod(system.label + ' ' + split.fragments.join(', ')));
+    }
+    if (sentences.length) {
+      if (chunks.length) chunks.push(sentences.join(' '));
+      else chunks.push(system.label + ': ' + sentences.join(' '));
+    }
+    return chunks.join(' ');
   }
 
   function notExaminedSentence(labels) {
@@ -360,8 +378,8 @@
       if (age != null) opening += ' at ' + shortAge(age) + ' of age';
       lines.push(opening + '.');
     }
-    var abnormal = [];
-    var normal = [];
+    var abnormalBlocks = [];
+    var normalBlocks = [];
     var skipped = [];
     content.EXAM_SYSTEMS.forEach(function (system) {
       var row = examRow(state, system.id);
@@ -372,17 +390,19 @@
         return;
       }
       if (row.status === 'nad') {
-        normal.push(system.nad);
+        if (!shorter) normalBlocks.push(system.label + ': ' + system.nad);
         return;
       }
       var split = findingsProse(system, row);
-      abnormal = abnormal.concat(split.abnormal);
-      normal = normal.concat(split.normal);
+      var block = formatExamBlock(system, split, shorter);
+      if (!block) return;
+      if (split.abnormal.length || split.flagged) abnormalBlocks.push(block);
+      else normalBlocks.push(block);
     });
     var observations = obsSentence(state);
     if (observations) lines.push(observations);
-    lines = lines.concat(abnormal);
-    if (!shorter) lines = lines.concat(normal);
+    lines = lines.concat(abnormalBlocks);
+    if (!shorter) lines = lines.concat(normalBlocks);
     if (skipped.length) lines.push(notExaminedSentence(skipped));
     return cleanLines(lines);
   }
@@ -532,54 +552,68 @@
     return lines;
   }
 
+  function reasonSentence(state) {
+    if (!state.reasons || !state.reasons.length) return '';
+    var reasonLabels = content.REASONS.filter(function (reason) {
+      return state.reasons.indexOf(reason.id) !== -1;
+    }).map(function (reason) { return reason.label.toLowerCase(); });
+    if (state.reasons.indexOf('other') !== -1 && state.reasonOther && state.reasonOther.trim()) {
+      reasonLabels = reasonLabels.filter(function (label) { return label !== 'other'; });
+      reasonLabels.push(state.reasonOther.trim());
+    }
+    if (!reasonLabels.length) return '';
+    return 'Reason for review: ' + reasonLabels.join(', ') + '.';
+  }
+
+  function backgroundFeatures(state) {
+    var bits = [];
+    if (state.plurality === 'multiple') bits.push('Multiple pregnancy.');
+    if (state.sex) bits.push('Sex: ' + state.sex + '.');
+    if (state.centile && state.centile.trim()) bits.push('Birth-weight centile ' + state.centile.trim() + '.');
+    bits.push(membraneSentence(state));
+    [
+      'gbs-maternal', 'gbs-previous', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
+      'maternal-sepsis', 'chorio', 'sibling-infection', 'cpr', 'ventilation'
+    ].forEach(function (key) {
+      bits = bits.concat(niceLines(key, state));
+    });
+    if (state.answers.idm === 'yes') bits.push('Mother with diabetes, including gestational, documented.');
+    if (state.answers['beta-blocker'] === 'yes') bits.push('Beta-blocker in the third trimester or at birth documented.');
+    if (state.answers.sga === 'yes') bits.push('Birth weight on or under the 2nd centile documented.');
+    if (state.answers.wasted === 'yes') bits.push('Clinically wasted documented.');
+    if (state.answers['local-hypothermia'] === 'yes') bits.push('Hypothermia documented.');
+    if (state.answers['local-acidosis'] === 'yes') bits.push('Perinatal acidosis documented.');
+    if (state.answers['local-polycythaemia'] === 'yes') bits.push('Polycythaemia documented.');
+    if (state.answers['local-family'] === 'yes') bits.push('Family history of a hypoglycaemia disorder documented.');
+    if (state.answers['local-sepsis'] === 'yes') bits.push('Suspected or confirmed early-onset infection documented.');
+    if (state.answers.iap === 'given') bits.push('Intrapartum antibiotics given' + (state.iapTiming && state.iapTiming.trim() ? ' (' + state.iapTiming.trim() + ')' : '') + '.');
+    if (state.answers.iap === 'none') bits.push('No intrapartum antibiotics.');
+    if (state.answers.fever === 'yes') bits.push('Intrapartum fever documented.');
+    if (state.answers.meconium === 'yes') bits.push('Meconium stained liquor.');
+    if (state.answers.shoulder === 'yes') bits.push('Shoulder dystocia.');
+    if (state.backgroundNote && state.backgroundNote.trim()) bits.push(ensurePeriod(state.backgroundNote.trim()));
+    bits.push(kaiserSentence(state));
+    return bits.map(function (bit) { return String(bit || '').trim(); }).filter(Boolean);
+  }
+
   function reviewText(state, shorter) {
     var lines = [];
     var birth = '';
     var gestation = gestationText(state);
     var mode = modePhrase(state);
     var age = ageInHours(state);
-    if (gestation) birth += 'Gestation at birth: ' + gestation;
+    if (gestation) birth += gestation;
     if (mode) birth += (birth ? ', born by ' : 'Born by ') + mode;
     if (age != null) birth += (birth ? ', now ' : 'Now ') + shortAge(age) + ' old';
-    if (birth) lines.push(birth + '.');
-    if (state.plurality === 'multiple') lines.push('Multiple pregnancy.');
-    if (state.sex) lines.push('Sex: ' + state.sex + '.');
-    if (state.centile && state.centile.trim()) lines.push('Birth-weight centile ' + state.centile.trim() + '.');
-    lines.push(membraneSentence(state));
-    [
-      'gbs-maternal', 'gbs-previous', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
-      'maternal-sepsis', 'chorio', 'sibling-infection', 'cpr', 'ventilation'
-    ].forEach(function (key) {
-      lines = lines.concat(niceLines(key, state));
-    });
-    if (state.answers.idm === 'yes') lines.push('Mother with diabetes, including gestational, documented.');
-    if (state.answers['beta-blocker'] === 'yes') lines.push('Beta-blocker in the third trimester or at birth documented.');
-    if (state.answers.sga === 'yes') lines.push('Birth weight on or under the 2nd centile documented.');
-    if (state.answers.wasted === 'yes') lines.push('Clinically wasted documented.');
-    if (state.answers['local-hypothermia'] === 'yes') lines.push('Hypothermia documented.');
-    if (state.answers['local-acidosis'] === 'yes') lines.push('Perinatal acidosis documented.');
-    if (state.answers['local-polycythaemia'] === 'yes') lines.push('Polycythaemia documented.');
-    if (state.answers['local-family'] === 'yes') lines.push('Family history of a hypoglycaemia disorder documented.');
-    if (state.answers['local-sepsis'] === 'yes') lines.push('Suspected or confirmed early-onset infection documented.');
-    if (state.answers.iap === 'given') lines.push('Intrapartum antibiotics given' + (state.iapTiming && state.iapTiming.trim() ? ' (' + state.iapTiming.trim() + ')' : '') + '.');
-    if (state.answers.iap === 'none') lines.push('No intrapartum antibiotics.');
-    if (state.answers.fever === 'yes') lines.push('Intrapartum fever documented.');
-    if (state.answers.meconium === 'yes') lines.push('Meconium stained liquor.');
-    if (state.answers.shoulder === 'yes') lines.push('Shoulder dystocia.');
-    if (state.apgar1 || state.apgar5) lines.push('Apgars ' + (state.apgar1 || '?') + ' at 1 minute and ' + (state.apgar5 || '?') + ' at 5 minutes.');
-    if (state.reasons && state.reasons.length) {
-      var reasonLabels = content.REASONS.filter(function (reason) {
-        return state.reasons.indexOf(reason.id) !== -1;
-      }).map(function (reason) { return reason.label.toLowerCase(); });
-      if (state.reasons.indexOf('other') !== -1 && state.reasonOther && state.reasonOther.trim()) {
-        reasonLabels = reasonLabels.filter(function (label) { return label !== 'other'; });
-        reasonLabels.push(state.reasonOther.trim());
-      }
-      if (reasonLabels.length) lines.push('Reason for review: ' + reasonLabels.join(', ') + '.');
+    if (state.apgar1 || state.apgar5) {
+      birth += (birth ? '. Apgars ' : 'Apgars ') + (state.apgar1 || '?') + ' at 1 minute and ' + (state.apgar5 || '?') + ' at 5 minutes';
     }
-    if (state.backgroundNote && state.backgroundNote.trim()) lines.push(ensurePeriod(state.backgroundNote.trim()));
+    if (birth) lines.push(/[.!?]$/.test(birth) ? birth : birth + '.');
+    var reason = reasonSentence(state);
+    if (reason) lines.push(reason);
+    var bg = backgroundFeatures(state);
+    if (bg.length) lines.push('BG: ' + bg.join(' '));
     if (state.historyNote && state.historyNote.trim()) lines.push(ensurePeriod(state.historyNote.trim()));
-    lines.push(kaiserSentence(state));
     lines.push(feedingSentence(state, shorter));
     lines.push(stoolSentence(state));
     lines.push(urineSentence(state));
@@ -1326,7 +1360,7 @@
         (state.obs.oxygen === 'oxygen' ? obsInput('fio2', '% O2', 'numeric') : '') +
       '</div>' +
       '<h2 class="group-title">Systems</h2>' +
-      content.EXAM_SYSTEMS.map(examRowHtml).join('') +
+      '<div class="exam-systems">' + content.EXAM_SYSTEMS.map(examRowHtml).join('') + '</div>' +
       '</section>';
   }
 
@@ -1360,11 +1394,11 @@
     }
     var noteLabel = system.noteLabel || (system.id === 'cardiovascular' ? 'Murmur site, grade, and radiation, or any other finding' : 'Anything the buttons do not cover');
     var note = noteVisible(system, choices)
-      ? '<label class="field field--stack">' + fieldLabel(noteLabel) + '<textarea data-exam-note="' + system.id + '" rows="2" autocomplete="off">' + esc(findingsActive(row) ? row.note || '' : '') + '</textarea></label>'
+      ? '<label class="exam-note field field--stack">' + fieldLabel(noteLabel) + '<textarea data-exam-note="' + system.id + '" rows="2" autocomplete="off">' + esc(findingsActive(row) ? row.note || '' : '') + '</textarea></label>'
       : '';
     var settled = row.status === 'nad' || row.status === 'not';
     return '<article class="exam-row' + (settled ? ' is-settled' : '') + '"><div class="exam-row-head"><h3>' + esc(system.label) + '</h3><div class="exam-actions">' + statusButton('nad', 'NAD') + statusButton('not', 'Not examined') + '</div></div>' +
-      '<div class="exam-body">' + parts.join('') + note + '</div></article>';
+      '<div class="exam-body">' + parts.join('') + '</div>' + note + '</article>';
   }
 
   function examControlHtml(systemId, control, choices) {
