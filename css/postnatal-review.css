@@ -192,22 +192,23 @@ body.postnatal-review-app [hidden] {
 }
 
 .step {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--sp-2);
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
   padding-bottom: 4px;
 }
 
-@media (min-width: 720px) {
-  .step { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--sp-3); }
-  .step > * { grid-column: 1 / -1; }
-  .step > .half,
-  .step > .ask { grid-column: auto; align-self: stretch; }
+.group-card,
+.exam-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
 }
 
 .group-title {
-  margin: var(--sp-3) 0 0;
+  margin: 0 0 8px;
   font-size: var(--fs-xl);
   font-weight: var(--fw-bold);
   color: var(--text);
@@ -216,7 +217,19 @@ body.postnatal-review-app [hidden] {
   text-transform: none;
 }
 
-.group-title:first-child { margin-top: 0; }
+.group-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+@media (min-width: 720px) {
+  .group-body { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--sp-3); }
+  .group-body > * { grid-column: 1 / -1; }
+  .group-body > .half,
+  .group-body > .ask { grid-column: auto; align-self: stretch; }
+}
 
 .hint,
 .quiet-prompt,
@@ -284,8 +297,8 @@ body.postnatal-review-app .field textarea {
   cursor: pointer;
   min-height: 36px;
   border-radius: 10px;
-  border: 1.5px solid var(--border-strong);
-  background: var(--surface);
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
   color: var(--text);
   padding: 5px 10px;
   line-height: 1.2;
@@ -323,38 +336,23 @@ body.postnatal-review-app .field textarea {
 }
 
 .yn {
-  background: var(--surface2);
-  padding: 3px;
-  border-radius: 12px;
   width: fit-content;
   max-width: 100%;
 }
 
 .yn-btn {
-  border-color: transparent;
-  background: transparent;
   min-width: 3.5rem;
   text-align: center;
 }
 
 .ask {
-  padding: 10px 12px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--border-strong);
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  padding: 0;
+  border: 0;
+  background: transparent;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
-
-.ask--ng195 { border-left-color: var(--warn); }
-.ask--indicator { border-left-color: var(--warn); }
-.ask--red { border-left-color: var(--danger); }
-.ask--bapm { border-left-color: var(--info); }
-.ask--sign { border-left-color: var(--info); }
-.ask--local { border-left-color: var(--muted); }
-.ask--preterm { border-left-color: var(--info); }
 
 .guide-note {
   margin: 0;
@@ -384,15 +382,9 @@ body.postnatal-review-app .field textarea {
 .offer p { margin: 0; }
 
 .exam-systems {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
-  gap: 0;
-}
-
-.exam-row {
-  border-top: 1px solid var(--border);
-  padding: 8px 0;
+  gap: 12px;
 }
 
 .exam-row-head {

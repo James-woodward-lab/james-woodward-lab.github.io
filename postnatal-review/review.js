@@ -35,7 +35,7 @@
       reasons: [],
       reasonOther: '',
       gestationAtBirth: '',
-      ageMode: 'times',
+      ageMode: 'manual',
       birthAt: '',
       reviewAt: '',
       ageDays: '',
@@ -1129,6 +1129,12 @@
     return '<div class="half">' + html + '</div>';
   }
 
+  function groupCard(title, inner) {
+    return '<article class="group-card">' +
+      (title ? '<h2 class="group-title">' + esc(title) + '</h2>' : '') +
+      '<div class="group-body">' + inner + '</div></article>';
+  }
+
   function fieldLabel(text) {
     return '<span class="field-label">' + esc(text) + '</span>';
   }
@@ -1190,176 +1196,191 @@
   function contextHtml() {
     return '<section class="step">' +
       '<p id="context-needed" class="quiet-prompt">Age at review is still needed.</p>' +
-      '<h2 class="group-title">Where and why</h2>' +
-      half(bindChoices('place', 'Place', content.PLACES)) +
-      '<div id="place-other-wrap" class="half">' + input('placeOther', 'Where', state.placeOther, { wide: true, placeholder: 'For example, recovery' }) + '</div>' +
-      '<div class="field">' + fieldLabel('Reason for review') +
-      '<div class="choices">' + content.REASONS.map(function (reason) {
-        var on = state.reasons.indexOf(reason.id) !== -1;
-        return '<button type="button" class="choice' + (on ? ' is-selected' : '') + '" data-reason="' + reason.id + '">' + esc(reason.label) + '</button>';
-      }).join('') + '</div></div>' +
-      '<div id="reason-other-wrap">' + input('reasonOther', 'Other reason', state.reasonOther, { wide: true }) + '</div>' +
-      '<h2 class="group-title">Gestation and age</h2>' +
-      input('gestationAtBirth', 'Gestation at birth (as documented by clinician)', state.gestationAtBirth, { wide: true, placeholder: 'For example, 39+2 or term' }) +
-      '<div class="field">' + fieldLabel('How to enter age') + choiceButtons('data-bind', 'ageMode', [
-        { value: 'times', label: 'From times' },
-        { value: 'manual', label: 'Enter age' }
-      ], state.ageMode) + '</div>' +
-      '<div id="age-times" class="num-row num-row--time">' +
-        input('birthAt', 'Time of birth', state.birthAt, { type: 'datetime-local', wide: true }) +
-        input('reviewAt', 'Time of review', state.reviewAt, { type: 'datetime-local', wide: true }) +
-      '</div>' +
-      '<div id="age-manual" class="num-row">' +
-        input('ageDays', 'Days', state.ageDays, { type: 'number', mode: 'numeric', placeholder: '0' }) +
-        input('ageHours', 'Hours', state.ageHours, { type: 'number', mode: 'decimal', placeholder: '18' }) +
-      '</div>' +
-      '<p id="age-readout" class="readout"></p>' +
-      '<h2 class="group-title">Baby</h2>' +
-      bindChoices('sex', 'Sex', [
-        { value: 'female', label: 'Female' },
-        { value: 'male', label: 'Male' },
-        { value: 'other', label: 'Other or not recorded' }
-      ]) +
+      groupCard('Where and why',
+        half(bindChoices('place', 'Place', content.PLACES)) +
+        '<div id="place-other-wrap" class="half">' + input('placeOther', 'Where', state.placeOther, { wide: true, placeholder: 'For example, recovery' }) + '</div>' +
+        '<div class="field">' + fieldLabel('Reason for review') +
+        '<div class="choices">' + content.REASONS.map(function (reason) {
+          var on = state.reasons.indexOf(reason.id) !== -1;
+          return '<button type="button" class="choice' + (on ? ' is-selected' : '') + '" data-reason="' + reason.id + '">' + esc(reason.label) + '</button>';
+        }).join('') + '</div></div>' +
+        '<div id="reason-other-wrap">' + input('reasonOther', 'Other reason', state.reasonOther, { wide: true }) + '</div>'
+      ) +
+      groupCard('Gestation and age',
+        input('gestationAtBirth', 'Gestation at birth (as documented by clinician)', state.gestationAtBirth, { wide: true, placeholder: 'For example, 39+2 or term' }) +
+        '<div class="field">' + fieldLabel('Current age') + choiceButtons('data-bind', 'ageMode', [
+          { value: 'times', label: 'From times' },
+          { value: 'manual', label: 'Enter age' }
+        ], state.ageMode) + '</div>' +
+        '<div id="age-times" class="num-row num-row--time">' +
+          input('birthAt', 'Time of birth', state.birthAt, { type: 'datetime-local', wide: true }) +
+          input('reviewAt', 'Time of review', state.reviewAt, { type: 'datetime-local', wide: true }) +
+        '</div>' +
+        '<div id="age-manual" class="num-row">' +
+          input('ageDays', 'Days', state.ageDays, { type: 'number', mode: 'numeric', placeholder: '0' }) +
+          input('ageHours', 'Hours', state.ageHours, { type: 'number', mode: 'decimal', placeholder: '18' }) +
+        '</div>' +
+        '<p id="age-readout" class="readout"></p>'
+      ) +
+      groupCard('Baby',
+        bindChoices('sex', 'Sex', [
+          { value: 'female', label: 'Female' },
+          { value: 'male', label: 'Male' },
+          { value: 'other', label: 'Other or not recorded' }
+        ])
+      ) +
       '</section>';
   }
 
   function backgroundHtml() {
-    return '<section class="step"><h2 class="group-title">Birth</h2>' +
-      half(bindChoices('modeOfBirth', 'Mode of birth', content.MODES)) +
-      '<div id="mode-other-wrap" class="half">' + input('modeOther', 'Mode', state.modeOther, { wide: true }) + '</div>' +
-      half(bindChoices('plurality', 'Plurality', [
-        { value: 'single', label: 'Singleton' },
-        { value: 'multiple', label: 'Twins or more' }
-      ])) +
-      '<div class="num-row half">' +
-        input('apgar1', 'Apgar 1 min', state.apgar1, { type: 'number', mode: 'numeric' }) +
-        input('apgar5', 'Apgar 5 min', state.apgar5, { type: 'number', mode: 'numeric' }) +
-      '</div>' +
-      '<h2 class="group-title">Documented perinatal history</h2>' +
-      half(input('romHours', 'Hours of rupture before birth', state.romHours, { type: 'number', mode: 'decimal' })) +
-      half(yn('rom-preterm-18', 'Rupture for more than 18 hours before a preterm birth', 'Yes', 'No')) +
-      half(yn('rom-term-24', 'Rupture for more than 24 hours before a term birth', 'Yes', 'No')) +
-      yn('spontaneous-preterm', 'Preterm birth after spontaneous labour, before 37 weeks', 'Yes', 'No') +
-      yn('gbs-maternal', 'Maternal GBS colonisation, bacteriuria, or infection this pregnancy', 'Yes', 'No') +
-      yn('gbs-previous', 'Invasive GBS in a previous baby', 'Yes', 'No') +
-      '<div id="sibling-wrap">' + yn('sibling-infection', 'Infection in another baby of this multiple pregnancy', 'Suspected or confirmed', 'No') + '</div>' +
-      yn('maternal-sepsis', 'Maternal sepsis in labour or the early postpartum period', 'Yes', 'No') +
-      yn('chorio', 'Suspected or confirmed chorioamnionitis', 'Yes', 'No') +
-      yn('cpr', 'Cardiopulmonary resuscitation', 'Needed', 'Not needed') +
-      yn('ventilation', 'Mechanical ventilation', 'Needed', 'Not needed') +
-      yn('fever', 'Intrapartum fever', 'Yes', 'No') +
-      '<div class="field half">' + fieldLabel('Intrapartum antibiotics') + choiceButtons('data-answer', 'iap', [
-        { value: 'none', label: 'None' },
-        { value: 'given', label: 'Given' }
-      ], state.answers.iap || '') + '</div>' +
-      '<div id="iap-timing-wrap" class="half">' + input('iapTiming', 'First dose timing', state.iapTiming, { wide: true, placeholder: 'For example, 2 hours before birth' }) + '</div>' +
-      '<h2 class="group-title">Kaiser Permanente values</h2>' +
-      content.KAISER.map(function (option) {
-        return '<label class="field">' + fieldLabel(option.label) + '<input data-kaiser="' + option.id + '" value="' + esc(state.kaiser[option.id] || '') + '" autocomplete="off"></label>';
-      }).join('') +
-      '<h2 class="group-title">Documented hypoglycaemia-related history</h2>' +
-      yn('idm', 'Mother with diabetes, including gestational', 'Yes', 'No', 'bapm') +
-      yn('beta-blocker', 'Beta-blocker in the third trimester or at birth', 'Yes', 'No', 'bapm') +
-      yn('sga', 'Birth weight on or under the 2nd centile', 'Yes', 'No', 'bapm') +
-      yn('wasted', 'Clinically wasted', 'Yes', 'No', 'bapm') +
-      half(input('centile', 'Centile, if documented', state.centile, { placeholder: '9th' })) +
-      yn('local-hypothermia', 'Hypothermia', 'Yes', 'No', 'local') +
-      yn('local-acidosis', 'Perinatal acidosis', 'Yes', 'No', 'local') +
-      yn('local-polycythaemia', 'Polycythaemia', 'Yes', 'No', 'local') +
-      yn('local-family', 'Family history of a hypoglycaemia disorder', 'Yes', 'No', 'local') +
-      yn('local-sepsis', 'Suspected or confirmed early-onset infection', 'Yes', 'No', 'local') +
-      '<h2 class="group-title">Other relevant history</h2>' +
-      yn('meconium', 'Meconium stained liquor', 'Yes', 'No') +
-      yn('shoulder', 'Shoulder dystocia', 'Yes', 'No') +
-      area('backgroundNote', 'Other relevant history', state.backgroundNote, 4) +
+    return '<section class="step">' +
+      groupCard('Birth',
+        half(bindChoices('modeOfBirth', 'Mode of birth', content.MODES)) +
+        '<div id="mode-other-wrap" class="half">' + input('modeOther', 'Mode', state.modeOther, { wide: true }) + '</div>' +
+        half(bindChoices('plurality', 'Plurality', [
+          { value: 'single', label: 'Singleton' },
+          { value: 'multiple', label: 'Twins or more' }
+        ])) +
+        '<div class="num-row half">' +
+          input('apgar1', 'Apgar 1 min', state.apgar1, { type: 'number', mode: 'numeric' }) +
+          input('apgar5', 'Apgar 5 min', state.apgar5, { type: 'number', mode: 'numeric' }) +
+        '</div>'
+      ) +
+      groupCard('Documented perinatal history',
+        half(input('romHours', 'Hours of rupture before birth', state.romHours, { type: 'number', mode: 'decimal' })) +
+        half(yn('rom-preterm-18', 'Rupture for more than 18 hours before a preterm birth', 'Yes', 'No')) +
+        half(yn('rom-term-24', 'Rupture for more than 24 hours before a term birth', 'Yes', 'No')) +
+        yn('spontaneous-preterm', 'Preterm birth after spontaneous labour, before 37 weeks', 'Yes', 'No') +
+        yn('gbs-maternal', 'Maternal GBS colonisation, bacteriuria, or infection this pregnancy', 'Yes', 'No') +
+        yn('gbs-previous', 'Invasive GBS in a previous baby', 'Yes', 'No') +
+        '<div id="sibling-wrap">' + yn('sibling-infection', 'Infection in another baby of this multiple pregnancy', 'Suspected or confirmed', 'No') + '</div>' +
+        yn('maternal-sepsis', 'Maternal sepsis in labour or the early postpartum period', 'Yes', 'No') +
+        yn('chorio', 'Suspected or confirmed chorioamnionitis', 'Yes', 'No') +
+        yn('cpr', 'Cardiopulmonary resuscitation', 'Needed', 'Not needed') +
+        yn('ventilation', 'Mechanical ventilation', 'Needed', 'Not needed') +
+        yn('fever', 'Intrapartum fever', 'Yes', 'No') +
+        '<div class="field half">' + fieldLabel('Intrapartum antibiotics') + choiceButtons('data-answer', 'iap', [
+          { value: 'none', label: 'None' },
+          { value: 'given', label: 'Given' }
+        ], state.answers.iap || '') + '</div>' +
+        '<div id="iap-timing-wrap" class="half">' + input('iapTiming', 'First dose timing', state.iapTiming, { wide: true, placeholder: 'For example, 2 hours before birth' }) + '</div>'
+      ) +
+      groupCard('Kaiser Permanente values',
+        content.KAISER.map(function (option) {
+          return '<label class="field">' + fieldLabel(option.label) + '<input data-kaiser="' + option.id + '" value="' + esc(state.kaiser[option.id] || '') + '" autocomplete="off"></label>';
+        }).join('')
+      ) +
+      groupCard('Documented hypoglycaemia-related history',
+        yn('idm', 'Mother with diabetes, including gestational', 'Yes', 'No', 'bapm') +
+        yn('beta-blocker', 'Beta-blocker in the third trimester or at birth', 'Yes', 'No', 'bapm') +
+        yn('sga', 'Birth weight on or under the 2nd centile', 'Yes', 'No', 'bapm') +
+        yn('wasted', 'Clinically wasted', 'Yes', 'No', 'bapm') +
+        half(input('centile', 'Centile, if documented', state.centile, { placeholder: '9th' })) +
+        yn('local-hypothermia', 'Hypothermia', 'Yes', 'No', 'local') +
+        yn('local-acidosis', 'Perinatal acidosis', 'Yes', 'No', 'local') +
+        yn('local-polycythaemia', 'Polycythaemia', 'Yes', 'No', 'local') +
+        yn('local-family', 'Family history of a hypoglycaemia disorder', 'Yes', 'No', 'local') +
+        yn('local-sepsis', 'Suspected or confirmed early-onset infection', 'Yes', 'No', 'local')
+      ) +
+      groupCard('Other relevant history',
+        yn('meconium', 'Meconium stained liquor', 'Yes', 'No') +
+        yn('shoulder', 'Shoulder dystocia', 'Yes', 'No') +
+        area('backgroundNote', 'Other relevant history', state.backgroundNote, 4)
+      ) +
       '</section>';
   }
 
   function historyHtml() {
     return '<section class="step">' +
       '<p id="history-needed" class="quiet-prompt">Feeding, stools, urine, and parental concern are still needed.</p>' +
-      area('historyNote', 'History', state.historyNote, 4) +
-      '<h2 class="group-title">Feeding</h2>' +
-      bindChoices('feedMode', 'Feeding', [
-        { value: 'breast', label: 'Breast' },
-        { value: 'expressed', label: 'Expressed milk' },
-        { value: 'formula', label: 'Formula' },
-        { value: 'mixed', label: 'Mixed' },
-        { value: 'tube', label: 'Tube' }
-      ]) +
-      '<div id="feed-latch-wrap" class="half">' + bindChoices('latch', 'Latch', [
-        { value: 'good', label: 'Effective' },
-        { value: 'poor', label: 'Poor', abnormal: true },
-        { value: 'not', label: 'Not assessed' }
-      ]) + '</div>' +
-      '<div id="feed-duration-wrap" class="half">' + input('feedDuration', 'Breastfeed length', state.feedDuration, { wide: true, placeholder: '10 to 15 minutes' }) + '</div>' +
-      '<div id="feed-amount-wrap" class="half">' + input('feedAmount', 'Amount (ml)', state.feedAmount, { type: 'number', mode: 'decimal' }) + '</div>' +
-      half(input('feedFrequency', 'Frequency', state.feedFrequency, { wide: true, placeholder: 'every 2 to 3 hours' })) +
-      half(input('lastFeed', 'Last feed', state.lastFeed, { wide: true, placeholder: '40 minutes ago' })) +
-      yn('topUps', 'Top-ups', 'Yes', 'No') +
-      '<div id="topup-amount-wrap" class="half">' + input('topUpAmount', 'Top-up amount (ml)', state.topUpAmount, { type: 'number', mode: 'decimal' }) + '</div>' +
-      ask('indicator', '<div class="field">' + fieldLabel('Feeding problems') + multiButtons('feedProblems', [
-        { value: 'none', label: 'None of these' },
-        { value: 'vomiting', label: 'Vomiting', abnormal: true },
-        { value: 'residuals', label: 'Large residuals', abnormal: true },
-        { value: 'sleepy', label: 'Sleepy at the breast', abnormal: true },
-        { value: 'refusal', label: 'Feed refusal', abnormal: true }
-      ], state.multi.feedProblems || []) + '</div>') +
-      '<h2 class="group-title">Stools, urine, and concern</h2>' +
-      half(bindChoices('stools', 'Stools', [
-        { value: 'none', label: 'None yet' },
-        { value: 'meconium', label: 'Meconium' },
-        { value: 'changing', label: 'Changing' }
-      ])) +
-      half(input('stoolCount', 'How many', state.stoolCount, { placeholder: '2' })) +
-      '<div class="field half">' + fieldLabel('Urine since birth') + choiceButtons('data-bind', 'urine', [
-        { value: 'passed', label: 'Passed' },
-        { value: 'not', label: 'Not passed', abnormal: true }
-      ], state.urine) + '</div>' +
-      half(bindChoices('parentalConcern', 'Parental concern', [
-        { value: 'none', label: 'None voiced' },
-        { value: 'concerned', label: 'Concerned', abnormal: true }
-      ])) +
-      half(bindChoices('midwifeConcern', 'Midwife concern', [
-        { value: 'no', label: 'None' },
-        { value: 'yes', label: 'Concerned', abnormal: true }
-      ])) +
-      '<div id="parent-words-wrap" class="half">' + area('parentalWords', 'What the parents said', state.parentalWords, 3) + '</div>' +
-      '<div id="midwife-words-wrap" class="half">' + area('midwifeWords', 'Midwife concern', state.midwifeWords, 3) + '</div>' +
-      '<h2 class="group-title">Since birth</h2>' +
-      ask('red', '<div class="field">' + fieldLabel('Red-flag events') + multiButtons('sinceBirth', [
-        { value: 'apnoea', label: 'Apnoea', abnormal: true },
-        { value: 'seizures', label: 'Seizures', abnormal: true }
-      ], state.multi.sinceBirth || []) + '</div>') +
-      ask('indicator', '<div class="field">' + fieldLabel('Other documented events') + multiButtons('sinceBirth', [
-        { value: 'colour-change', label: 'Colour change', abnormal: true },
-        { value: 'temp-instability', label: 'Temperature instability', abnormal: true },
-        { value: 'jaundice', label: 'Jaundice noticed', abnormal: true },
-        { value: 'jitteriness', label: 'Jitteriness', abnormal: true },
-        { value: 'poor-tone', label: 'Poor tone', abnormal: true },
-        { value: 'bleeding', label: 'Unexplained bleeding', abnormal: true }
-      ], state.multi.sinceBirth || []) + '</div>') +
-      '<div id="jaundice-hours-wrap" class="half">' + input('jaundiceNoticedHours', 'Jaundice first noticed at (hours)', state.jaundiceNoticedHours, { type: 'number', mode: 'decimal' }) + '</div>' +
-      area('historyExtra', 'Anything else', state.historyExtra, 3) +
+      groupCard('History',
+        area('historyNote', 'History', state.historyNote, 4)
+      ) +
+      groupCard('Feeding',
+        bindChoices('feedMode', 'Feeding', [
+          { value: 'breast', label: 'Breast' },
+          { value: 'expressed', label: 'Expressed milk' },
+          { value: 'formula', label: 'Formula' },
+          { value: 'mixed', label: 'Mixed' },
+          { value: 'tube', label: 'Tube' }
+        ]) +
+        '<div id="feed-latch-wrap" class="half">' + bindChoices('latch', 'Latch', [
+          { value: 'good', label: 'Effective' },
+          { value: 'poor', label: 'Poor', abnormal: true },
+          { value: 'not', label: 'Not assessed' }
+        ]) + '</div>' +
+        '<div id="feed-duration-wrap" class="half">' + input('feedDuration', 'Breastfeed length', state.feedDuration, { wide: true, placeholder: '10 to 15 minutes' }) + '</div>' +
+        '<div id="feed-amount-wrap" class="half">' + input('feedAmount', 'Amount (ml)', state.feedAmount, { type: 'number', mode: 'decimal' }) + '</div>' +
+        half(input('feedFrequency', 'Frequency', state.feedFrequency, { wide: true, placeholder: 'every 2 to 3 hours' })) +
+        half(input('lastFeed', 'Last feed', state.lastFeed, { wide: true, placeholder: '40 minutes ago' })) +
+        yn('topUps', 'Top-ups', 'Yes', 'No') +
+        '<div id="topup-amount-wrap" class="half">' + input('topUpAmount', 'Top-up amount (ml)', state.topUpAmount, { type: 'number', mode: 'decimal' }) + '</div>' +
+        ask('indicator', '<div class="field">' + fieldLabel('Feeding problems') + multiButtons('feedProblems', [
+          { value: 'none', label: 'None of these' },
+          { value: 'vomiting', label: 'Vomiting', abnormal: true },
+          { value: 'residuals', label: 'Large residuals', abnormal: true },
+          { value: 'sleepy', label: 'Sleepy at the breast', abnormal: true },
+          { value: 'refusal', label: 'Feed refusal', abnormal: true }
+        ], state.multi.feedProblems || []) + '</div>')
+      ) +
+      groupCard('Stools, urine, and concern',
+        half(bindChoices('stools', 'Stools', [
+          { value: 'none', label: 'None yet' },
+          { value: 'meconium', label: 'Meconium' },
+          { value: 'changing', label: 'Changing' }
+        ])) +
+        half(input('stoolCount', 'How many', state.stoolCount, { placeholder: '2' })) +
+        '<div class="field half">' + fieldLabel('Urine since birth') + choiceButtons('data-bind', 'urine', [
+          { value: 'passed', label: 'Passed' },
+          { value: 'not', label: 'Not passed', abnormal: true }
+        ], state.urine) + '</div>' +
+        half(bindChoices('parentalConcern', 'Parental concern', [
+          { value: 'none', label: 'None voiced' },
+          { value: 'concerned', label: 'Concerned', abnormal: true }
+        ])) +
+        half(bindChoices('midwifeConcern', 'Midwife concern', [
+          { value: 'no', label: 'None' },
+          { value: 'yes', label: 'Concerned', abnormal: true }
+        ])) +
+        '<div id="parent-words-wrap" class="half">' + area('parentalWords', 'What the parents said', state.parentalWords, 3) + '</div>' +
+        '<div id="midwife-words-wrap" class="half">' + area('midwifeWords', 'Midwife concern', state.midwifeWords, 3) + '</div>'
+      ) +
+      groupCard('Since birth',
+        ask('red', '<div class="field">' + fieldLabel('Red-flag events') + multiButtons('sinceBirth', [
+          { value: 'apnoea', label: 'Apnoea', abnormal: true },
+          { value: 'seizures', label: 'Seizures', abnormal: true }
+        ], state.multi.sinceBirth || []) + '</div>') +
+        ask('indicator', '<div class="field">' + fieldLabel('Other documented events') + multiButtons('sinceBirth', [
+          { value: 'colour-change', label: 'Colour change', abnormal: true },
+          { value: 'temp-instability', label: 'Temperature instability', abnormal: true },
+          { value: 'jaundice', label: 'Jaundice noticed', abnormal: true },
+          { value: 'jitteriness', label: 'Jitteriness', abnormal: true },
+          { value: 'poor-tone', label: 'Poor tone', abnormal: true },
+          { value: 'bleeding', label: 'Unexplained bleeding', abnormal: true }
+        ], state.multi.sinceBirth || []) + '</div>') +
+        '<div id="jaundice-hours-wrap" class="half">' + input('jaundiceNoticedHours', 'Jaundice first noticed at (hours)', state.jaundiceNoticedHours, { type: 'number', mode: 'decimal' }) + '</div>' +
+        area('historyExtra', 'Anything else', state.historyExtra, 3)
+      ) +
       '</section>';
   }
 
   function examinationHtml() {
-    return '<section class="step"><h2 class="group-title">Observations</h2>' +
-      '<div class="num-row half">' +
-        obsInput('temp', 'Temperature', 'decimal') +
-        obsInput('hr', 'Heart rate', 'numeric') +
-        obsInput('rr', 'Respiratory rate', 'numeric') +
-      '</div>' +
-      '<div class="sats-field half">' +
-        obsInput('sats', 'Saturations (%)', 'numeric') +
-        '<div class="field">' + fieldLabel('Breathing') + choiceButtons('data-obs-choice', 'oxygen', [
-          { value: 'air', label: 'Air', normal: true },
-          { value: 'oxygen', label: 'Oxygen', abnormal: true }
-        ], state.obs.oxygen) + '</div>' +
-        (state.obs.oxygen === 'oxygen' ? obsInput('fio2', '% O2', 'numeric') : '') +
-      '</div>' +
-      '<h2 class="group-title">Systems</h2>' +
+    return '<section class="step">' +
+      groupCard('Observations',
+        '<div class="num-row half">' +
+          obsInput('temp', 'Temperature', 'decimal') +
+          obsInput('hr', 'Heart rate', 'numeric') +
+          obsInput('rr', 'Respiratory rate', 'numeric') +
+        '</div>' +
+        '<div class="sats-field half">' +
+          obsInput('sats', 'Saturations (%)', 'numeric') +
+          '<div class="field">' + fieldLabel('Breathing') + choiceButtons('data-obs-choice', 'oxygen', [
+            { value: 'air', label: 'Air', normal: true },
+            { value: 'oxygen', label: 'Oxygen', abnormal: true }
+          ], state.obs.oxygen) + '</div>' +
+          (state.obs.oxygen === 'oxygen' ? obsInput('fio2', '% O2', 'numeric') : '') +
+        '</div>'
+      ) +
       '<div class="exam-systems">' + content.EXAM_SYSTEMS.map(examRowHtml).join('') + '</div>' +
       '</section>';
   }
@@ -1432,31 +1453,35 @@
         (state.glucoses.length > 1 ? '<button type="button" class="text-button" data-action="remove-glucose" data-index="' + index + '">Remove</button>' : '') +
         '</div></div>';
     }).join('');
-    return '<section class="step"><h2 class="group-title">Glucose</h2>' +
-      rows +
-      '<button type="button" class="text-button" data-action="add-glucose">Add another glucose</button>' +
-      yn('hyperglycaemia', 'Hyperglycaemia', 'Yes', 'No') +
-      '<h2 class="group-title">Bilirubin</h2>' +
-      '<div class="field half">' + fieldLabel('Bilirubin') + choiceButtons('data-bili-choice', 'kind', [
-        { value: 'none', label: 'Not sent' },
-        { value: 'tcb', label: 'Transcutaneous' },
-        { value: 'tsb', label: 'Serum' }
-      ], state.bilirubin.kind) + '</div>' +
-      '<div id="bili-detail"><div class="num-row">' +
-        '<label class="field">' + fieldLabel('Value') + '<input class="num-input" inputmode="decimal" data-bili="value" value="' + esc(state.bilirubin.value) + '" autocomplete="off"></label>' +
-        '<label class="field">' + fieldLabel('Age in hours') + '<input class="num-input" type="number" inputmode="decimal" data-bili="ageHours" value="' + esc(state.bilirubin.ageHours) + '" autocomplete="off"></label>' +
-      '</div><div class="field">' + fieldLabel('Treatment line, from your chart') + choiceButtons('data-bili-choice', 'plot', [
-        { value: 'below', label: 'Below' },
-        { value: 'on', label: 'On' },
-        { value: 'above', label: 'Above', abnormal: true }
-      ], state.bilirubin.plot) + '</div></div>' +
-      '<h2 class="group-title">Gas</h2>' +
-      '<div class="num-row">' +
-        gasInput('ph', 'pH') + gasInput('be', 'Base deficit') + gasInput('lactate', 'Lactate') + gasInput('glucose', 'Glucose') +
-      '</div>' +
-      yn('thrombocytopenia', 'Thrombocytopenia', 'Yes', 'No') +
-      yn('coagulation', 'Abnormal coagulation', 'Yes', 'No') +
-      area('resultsNote', 'Other results', state.resultsNote, 3) +
+    return '<section class="step">' +
+      groupCard('Glucose',
+        rows +
+        '<button type="button" class="text-button" data-action="add-glucose">Add another glucose</button>' +
+        yn('hyperglycaemia', 'Hyperglycaemia', 'Yes', 'No')
+      ) +
+      groupCard('Bilirubin',
+        '<div class="field half">' + fieldLabel('Bilirubin') + choiceButtons('data-bili-choice', 'kind', [
+          { value: 'none', label: 'Not sent' },
+          { value: 'tcb', label: 'Transcutaneous' },
+          { value: 'tsb', label: 'Serum' }
+        ], state.bilirubin.kind) + '</div>' +
+        '<div id="bili-detail"><div class="num-row">' +
+          '<label class="field">' + fieldLabel('Value') + '<input class="num-input" inputmode="decimal" data-bili="value" value="' + esc(state.bilirubin.value) + '" autocomplete="off"></label>' +
+          '<label class="field">' + fieldLabel('Age in hours') + '<input class="num-input" type="number" inputmode="decimal" data-bili="ageHours" value="' + esc(state.bilirubin.ageHours) + '" autocomplete="off"></label>' +
+        '</div><div class="field">' + fieldLabel('Treatment line, from your chart') + choiceButtons('data-bili-choice', 'plot', [
+          { value: 'below', label: 'Below' },
+          { value: 'on', label: 'On' },
+          { value: 'above', label: 'Above', abnormal: true }
+        ], state.bilirubin.plot) + '</div></div>'
+      ) +
+      groupCard('Gas',
+        '<div class="num-row">' +
+          gasInput('ph', 'pH') + gasInput('be', 'Base deficit') + gasInput('lactate', 'Lactate') + gasInput('glucose', 'Glucose') +
+        '</div>' +
+        yn('thrombocytopenia', 'Thrombocytopenia', 'Yes', 'No') +
+        yn('coagulation', 'Abnormal coagulation', 'Yes', 'No') +
+        area('resultsNote', 'Other results', state.resultsNote, 3)
+      ) +
       '</section>';
   }
 
@@ -1470,33 +1495,37 @@
   }
 
   function impressionHtml() {
-    return '<section class="step"><h2 class="group-title">Impression</h2>' +
-      '<div class="choices">' + content.DIAGNOSES.map(function (item) {
-        return '<button type="button" class="choice" data-diagnosis="' + item.id + '">' + esc(item.label) + '</button>';
-      }).join('') + '</div>' +
-      area('impression', 'Impression', state.impression, 3) +
-      '<h2 class="group-title">Plan</h2>' +
-      '<div class="choices">' + content.PLAN_PHRASES.map(function (item) {
-        return '<button type="button" class="choice" data-phrase="' + item.id + '">' + esc(item.label) + '</button>';
-      }).join('') + '</div>' +
-      area('plan', 'Plan', state.plan, 4) +
-      '<div class="field">' + fieldLabel('Antibiotics') + choiceButtons('data-bind', 'antibiotics', [
-        { value: 'none', label: 'Not started' },
-        { value: 'senior', label: 'Discussed with senior' },
-        { value: 'started', label: 'Started' }
-      ], state.antibiotics) + '</div>' +
-      '<p class="hint">Names and times only. Doses stay on the drug chart.</p>' +
-      '<div id="senior-decision-wrap">' + input('seniorDecision', 'Senior decision', state.seniorDecision, { wide: true }) + '</div>' +
-      '<div id="antibiotic-detail-wrap">' + input('antibioticDetail', 'Drug names and times', state.antibioticDetail, { wide: true }) + '</div>' +
-      '<div class="num-row">' +
-        input('reviewWhen', 'Review at', state.reviewWhen, { wide: true, placeholder: '16:00 or sooner if concerned' }) +
-        input('seniorOutcome', 'Senior discussion outcome', state.seniorOutcome, { wide: true }) +
-      '</div>' +
-      '<h2 class="group-title">Discussion with parents</h2>' +
-      input('parentsWho', 'Who was present', state.parentsWho, { wide: true }) +
-      area('parentsExplained', 'What was explained', state.parentsExplained, 3) +
-      input('parentsUnderstanding', 'Their understanding', state.parentsUnderstanding, { wide: true }) +
-      area('parentsConcerns', 'Concerns remaining', state.parentsConcerns, 2) +
+    return '<section class="step">' +
+      groupCard('Impression',
+        '<div class="choices">' + content.DIAGNOSES.map(function (item) {
+          return '<button type="button" class="choice" data-diagnosis="' + item.id + '">' + esc(item.label) + '</button>';
+        }).join('') + '</div>' +
+        area('impression', 'Impression', state.impression, 3)
+      ) +
+      groupCard('Plan',
+        '<div class="choices">' + content.PLAN_PHRASES.map(function (item) {
+          return '<button type="button" class="choice" data-phrase="' + item.id + '">' + esc(item.label) + '</button>';
+        }).join('') + '</div>' +
+        area('plan', 'Plan', state.plan, 4) +
+        '<div class="field">' + fieldLabel('Antibiotics') + choiceButtons('data-bind', 'antibiotics', [
+          { value: 'none', label: 'Not started' },
+          { value: 'senior', label: 'Discussed with senior' },
+          { value: 'started', label: 'Started' }
+        ], state.antibiotics) + '</div>' +
+        '<p class="hint">Names and times only. Doses stay on the drug chart.</p>' +
+        '<div id="senior-decision-wrap">' + input('seniorDecision', 'Senior decision', state.seniorDecision, { wide: true }) + '</div>' +
+        '<div id="antibiotic-detail-wrap">' + input('antibioticDetail', 'Drug names and times', state.antibioticDetail, { wide: true }) + '</div>' +
+        '<div class="num-row">' +
+          input('reviewWhen', 'Review at', state.reviewWhen, { wide: true, placeholder: '16:00 or sooner if concerned' }) +
+          input('seniorOutcome', 'Senior discussion outcome', state.seniorOutcome, { wide: true }) +
+        '</div>'
+      ) +
+      groupCard('Discussion with parents',
+        input('parentsWho', 'Who was present', state.parentsWho, { wide: true }) +
+        area('parentsExplained', 'What was explained', state.parentsExplained, 3) +
+        input('parentsUnderstanding', 'Their understanding', state.parentsUnderstanding, { wide: true }) +
+        area('parentsConcerns', 'Concerns remaining', state.parentsConcerns, 2)
+      ) +
       '<div class="note-inline" id="note-inline-anchor"></div></section>';
   }
 

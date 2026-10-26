@@ -332,7 +332,7 @@
       id: 'cardiovascular',
       label: 'Cardiovascular',
       shortLabel: 'Cardiovascular',
-      nad: 'Heart sounds normal, femorals palpable. Capillary refill under 2 seconds, warm and well perfused. Fontanelle soft.',
+      nad: 'Heart sounds normal, femorals palpable. CRT under 2 seconds, warm and well perfused. Fontanelle soft.',
       controls: [
         {
           id: 'sounds',
@@ -359,9 +359,9 @@
           type: 'single',
           row: 'crt',
           options: [
-            opt('<2', '<2s', { normal: true, prose: 'Central capillary refill under 2 seconds.' }),
-            opt('2-3', '2-3s', { abnormal: true, prose: 'Central capillary refill 2 to 3 seconds.' }),
-            opt('>3', '>3s', { abnormal: true, prose: 'Central capillary refill over 3 seconds.' })
+            opt('<2', '<2s', { normal: true, prose: 'Central CRT under 2 seconds.' }),
+            opt('2-3', '2-3s', { abnormal: true, prose: 'Central CRT 2 to 3 seconds.' }),
+            opt('>3', '>3s', { abnormal: true, prose: 'Central CRT over 3 seconds.' })
           ]
         },
         {
@@ -370,9 +370,9 @@
           type: 'single',
           row: 'crt',
           options: [
-            opt('<2', '<2s', { normal: true, prose: 'Peripheral capillary refill under 2 seconds.' }),
-            opt('2-3', '2-3s', { abnormal: true, prose: 'Peripheral capillary refill 2 to 3 seconds.' }),
-            opt('>3', '>3s', { abnormal: true, prose: 'Peripheral capillary refill over 3 seconds.' })
+            opt('<2', '<2s', { normal: true, prose: 'Peripheral CRT under 2 seconds.' }),
+            opt('2-3', '2-3s', { abnormal: true, prose: 'Peripheral CRT 2 to 3 seconds.' }),
+            opt('>3', '>3s', { abnormal: true, prose: 'Peripheral CRT over 3 seconds.' })
           ]
         },
         {

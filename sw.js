@@ -14,7 +14,7 @@
  * caches are cleaned on activate.
  */
 
-const CACHE_VERSION = 'v34';
+const CACHE_VERSION = 'v37';
 const SHELL_CACHE = `jwl-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `jwl-runtime-${CACHE_VERSION}`;
 
