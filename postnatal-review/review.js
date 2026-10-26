@@ -1503,13 +1503,13 @@
       var text = choices[control.id] || '';
       var field = '<label class="field field--stack">' + fieldLabel(control.label) +
         '<textarea data-exam="' + systemId + '" data-exam-text="' + control.id + '" rows="2" autocomplete="off">' + esc(text) + '</textarea></label>';
-      if (control.sub) return '<div class="exam-sub">' + ask(control.guide || '', field) + '</div>';
+      if (control.sub) return '<div class="exam-sub exam-ctl--wide">' + ask(control.guide || '', field) + '</div>';
       return ask(control.guide || '', field, 'exam-ctl--wide');
     }
     var current = choices[control.id];
     var buttons = control.options.map(function (option) {
       var on = control.type === 'multi' ? Array.isArray(current) && current.indexOf(option.value) !== -1 : current === option.value;
-      var className = (control.type === 'yn' ? 'yn-btn' : 'choice') + (on ? ' is-selected' : '') + (on && option.abnormal ? ' is-abnormal' : '') + (on && option.normal ? ' is-normal' : '');
+      var className = (control.type === 'yn' ? 'yn-btn' : 'choice') + (control.tight ? ' choice--tight' : '') + (on ? ' is-selected' : '') + (on && option.abnormal ? ' is-abnormal' : '') + (on && option.normal ? ' is-normal' : '');
       var marker = control.type === 'multi' ? 'data-exam-multi' : 'data-exam-choice';
       return '<button type="button" class="' + className + '" data-exam="' + systemId + '" data-control="' + control.id + '" ' + marker + ' data-value="' + esc(option.value) + '">' + esc(option.label) + '</button>';
     }).join('');
@@ -1519,10 +1519,14 @@
   }
 
   function controlSize(control) {
-    var chars = control.options.reduce(function (total, option) { return total + option.label.length; }, 0);
-    if (control.type === 'yn' || chars <= 12) return 'compact';
-    if (chars <= 30) return 'half';
-    return 'wide';
+    if (control.span) return control.span;
+    if (control.type === 'yn' || control.tight) return 'compact';
+    var labels = (control.options || []).map(function (option) { return option.label; });
+    var chars = labels.reduce(function (total, label) { return total + label.length; }, 0);
+    var longest = labels.reduce(function (max, label) { return Math.max(max, label.length); }, 0);
+    if (chars <= 14) return 'compact';
+    if (longest >= 28 || chars > 60) return 'wide';
+    return 'half';
   }
 
   function resultsHtml() {

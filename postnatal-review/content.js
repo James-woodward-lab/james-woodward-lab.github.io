@@ -255,7 +255,7 @@
           id: 'crtCentral',
           label: 'Central CRT',
           type: 'single',
-          row: 'crt',
+          tight: true,
           options: [
             opt('<2', '<2s', { normal: true, prose: 'Central CRT under 2 seconds.' }),
             opt('2-3', '2-3s', { abnormal: true, prose: 'Central CRT 2 to 3 seconds.' }),
@@ -266,7 +266,7 @@
           id: 'crtPeripheral',
           label: 'Peripheral CRT',
           type: 'single',
-          row: 'crt',
+          tight: true,
           options: [
             opt('<2', '<2s', { normal: true, prose: 'Peripheral CRT under 2 seconds.' }),
             opt('2-3', '2-3s', { abnormal: true, prose: 'Peripheral CRT 2 to 3 seconds.' }),

@@ -406,16 +406,36 @@ body.postnatal-review-app .field textarea {
 .exam-body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 10px 16px;
   padding: 10px 0 4px;
+  align-items: start;
 }
 
-.exam-body > * { grid-column: 1 / -1; }
-.exam-body > .exam-ctl--compact { grid-column: auto; }
-.exam-body .yn-btn { min-width: 3rem; }
+.exam-body > .exam-heading,
+.exam-body > .exam-panel,
+.exam-body > .exam-sub,
+.exam-body > .exam-ctl--wide,
+.exam-body > .control-row {
+  grid-column: 1 / -1;
+}
 
-@media (min-width: 560px) {
-  .exam-body > .exam-ctl--half { grid-column: auto; }
+.exam-body .yn-btn { min-width: 3rem; }
+.exam-body .choices .choice {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 100%;
+}
+
+.choice--tight {
+  min-height: 32px;
+  min-width: 0;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+@media (max-width: 479px) {
+  .exam-body,
+  .exam-panel { grid-template-columns: minmax(0, 1fr); }
 }
 
 .exam-status {
@@ -446,10 +466,20 @@ body.postnatal-review-app .field textarea {
 }
 
 .exam-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
   padding: 8px 0 0;
+}
+
+.exam-panel > .exam-sub {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.exam-panel > .exam-ctl--wide {
+  grid-column: 1 / -1;
 }
 
 .exam-row.is-settled .exam-body,
