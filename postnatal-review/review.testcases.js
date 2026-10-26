@@ -34,6 +34,7 @@ function sample() {
     reasons: ['sepsis'],
     exam: {
       general: { status: 'nad', note: '', choices: {} },
+      perfusion: { status: 'nad', note: '', choices: {} },
       respiratory: { status: 'nad', note: '', choices: {} },
       cardiovascular: { status: 'nad', note: '', choices: {} },
       neurology: { status: 'nad', note: '', choices: {} },
@@ -162,6 +163,7 @@ var abnormal = review.buildBoxes({
   ageMode: 'manual',
   ageHours: '6',
   exam: {
+    perfusion: { status: 'nad', note: '', choices: {} },
     cardiovascular: { status: 'nad', note: '', choices: {} },
     respiratory: { status: '', note: '', choices: { grunting: 'yes' } },
     skin: { status: 'not', note: '', choices: {} }
@@ -228,6 +230,83 @@ var numbered = review.buildBoxes({
 });
 assert.ok(numbered.discussion.indexOf('Plan:\n1. Remain with mother on the postnatal ward.\n2. Continue observations and review if they change.\n3. No antibiotics.\n4. Review at 16:00.') !== -1, 'multiple plan items are numbered on separate lines');
 assert.ok(review.buildBoxes({ antibiotics: 'none' }).discussion.indexOf('Plan: No antibiotics.') !== -1, 'a single plan item stays on one line');
+
+var perfusion = review.buildBoxes({
+  exam: {
+    perfusion: {
+      status: '',
+      note: '',
+      choices: { crtCentral: '>3', perfusion: 'cool', mucosa: 'dry', fontanelle: 'sunken' }
+    }
+  }
+});
+assert.ok(perfusion.examination.indexOf('Perfusion: Central CRT over 3 seconds. Cool peripherally. Fontanelle sunken. Dry mucous membranes.') !== -1, 'perfusion findings stay under Perfusion');
+
+var auscultation = review.buildBoxes({
+  exam: {
+    respiratory: {
+      status: '',
+      note: '',
+      choices: { auscultation: 'clear', cyanosis: 'none', chestAppearance: 'good' }
+    }
+  }
+});
+assert.ok(auscultation.examination.indexOf('Chest clear on auscultation with equal air entry.') !== -1, 'clear chest uses the auscultation sentence');
+assert.ok(auscultation.examination.indexOf('Good chest rise.') !== -1, 'chest appearance is transcribed');
+assert.ok(auscultation.examination.indexOf('No cyanosis.') !== -1, 'cyanosis is transcribed');
+
+var added = review.buildBoxes({
+  exam: {
+    respiratory: {
+      status: '',
+      note: '',
+      choices: { auscultation: 'added', addedSounds: ['crackles', 'wheeze'] }
+    }
+  }
+});
+assert.ok(added.examination.indexOf('Crackles.') !== -1 && added.examination.indexOf('Wheeze.') !== -1, 'added sounds are listed');
+assert.strictEqual(added.examination.indexOf('Added sounds.'), -1, 'generic added-sounds sentence is dropped once details are chosen');
+
+var murmur = review.buildBoxes({
+  exam: {
+    cardiovascular: {
+      status: '',
+      note: '',
+      choices: {
+        sounds: 'murmur',
+        murmurTiming: ['ejection'],
+        murmurGrade: '2',
+        murmurLocation: ['llse'],
+        murmurRadiation: ['axilla'],
+        murmurCharacter: ['soft'],
+        murmurPitch: ['high']
+      }
+    }
+  }
+});
+assert.ok(murmur.examination.indexOf('Murmur present (ejection systolic; grade 2; at lower left sternal edge; radiation axilla; soft; high-pitched).') !== -1, 'murmur details follow the examination-notes pattern');
+
+var reflexes = review.buildBoxes({
+  exam: {
+    neurology: {
+      status: '',
+      note: '',
+      choices: { tone: 'normal', moro: 'yes', grasp: 'yes', stepping: 'yes', suck: 'good', gag: 'yes' }
+    }
+  }
+});
+assert.ok(reflexes.examination.indexOf('Moro equal and present.') !== -1, 'Moro is transcribed');
+assert.ok(reflexes.examination.indexOf('Palmar and plantar grasp present.') !== -1, 'grasp is transcribed');
+assert.ok(reflexes.examination.indexOf('Suck good.') !== -1, 'suck is transcribed');
+
+var extraNote = review.buildBoxes({
+  exam: {
+    general: { status: '', note: 'Handles well in the cot.', noteOpen: true, choices: { alertness: 'alert', cry: 'settled' } }
+  }
+});
+assert.ok(extraNote.examination.indexOf('Alert and active.') !== -1, 'alert and active is transcribed');
+assert.ok(extraNote.examination.indexOf('Settled.') !== -1, 'settled cry is transcribed');
+assert.ok(extraNote.examination.indexOf('Handles well in the cot.') !== -1, 'other notes stay under the system');
 
 var hours = review.ageInHours({ ageMode: 'times', birthAt: '2026-01-01T00:00', reviewAt: '2026-01-01T18:30' });
 assert.ok(Math.abs(hours - 18.5) < 0.02, 'age from clock times is 18.5 hours');

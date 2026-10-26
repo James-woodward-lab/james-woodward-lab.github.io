@@ -429,15 +429,41 @@ body.postnatal-review-app .field textarea {
   margin-top: 8px;
 }
 
+.exam-extra {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.exam-heading {
+  margin: 8px 0 0;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  color: var(--text);
+}
+
+.exam-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 0 0;
+}
+
 .exam-row.is-settled .exam-body,
-.exam-row.is-settled .exam-note {
+.exam-row.is-settled .exam-note,
+.exam-row.is-settled .exam-extra {
   opacity: 0.55;
 }
 
 .exam-row.is-settled .exam-body:focus-within,
 .exam-row.is-settled .exam-body:hover,
 .exam-row.is-settled .exam-note:focus-within,
-.exam-row.is-settled .exam-note:hover {
+.exam-row.is-settled .exam-note:hover,
+.exam-row.is-settled .exam-extra:focus-within,
+.exam-row.is-settled .exam-extra:hover {
   opacity: 1;
 }
 

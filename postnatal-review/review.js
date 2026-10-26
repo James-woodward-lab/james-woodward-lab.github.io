@@ -170,8 +170,13 @@
   }
 
   function selectedOptions(control, choices) {
+    if (control.type === 'text') {
+      var text = choices ? String(choices[control.id] || '').trim() : '';
+      if (!text) return [];
+      return [{ value: text, prose: ensurePeriod(text), abnormal: !!control.abnormal }];
+    }
     var chosen = choices ? choices[control.id] : undefined;
-    return control.options.filter(function (option) {
+    return (control.options || []).filter(function (option) {
       if (control.type === 'multi') return Array.isArray(chosen) && chosen.indexOf(option.value) !== -1;
       return chosen === option.value;
     });
@@ -204,6 +209,30 @@
   function noteVisible(system, choices) {
     if (!system.noteWhen) return true;
     return !!choices && choices[system.noteWhen.control] === system.noteWhen.value;
+  }
+
+  function selectedLabels(system, controlId, choices) {
+    var control = findControl(system, controlId);
+    if (!control) return [];
+    return selectedOptions(control, choices).map(function (option) { return option.label; });
+  }
+
+  function murmurProse(system, choices) {
+    var details = [];
+    selectedLabels(system, 'murmurTiming', choices).forEach(function (label) {
+      details.push(label.toLowerCase());
+    });
+    if (choices.murmurGrade) details.push('grade ' + choices.murmurGrade);
+    var loc = selectedLabels(system, 'murmurLocation', choices).map(function (label) { return label.toLowerCase(); });
+    if (loc.length) details.push('at ' + loc.join(', '));
+    var rad = selectedLabels(system, 'murmurRadiation', choices).map(function (label) { return label.toLowerCase(); });
+    if (rad.length) details.push('radiation ' + rad.join(', '));
+    var character = selectedLabels(system, 'murmurCharacter', choices).map(function (label) { return label.toLowerCase(); });
+    if (character.length) details.push(character.join(', '));
+    var pitch = selectedLabels(system, 'murmurPitch', choices).map(function (label) { return label.toLowerCase() + '-pitched'; });
+    if (pitch.length) details.push(pitch.join(', '));
+    if (!details.length) return 'Murmur present.';
+    return 'Murmur present (' + details.join('; ') + ').';
   }
 
   function niceLines(answerKey, state) {
@@ -323,6 +352,12 @@
     shown.forEach(function (control) {
       selectedOptions(control, choices).forEach(function (option) {
         if (option.abnormal) flagged = true;
+        if (option.compose === 'murmur') {
+          var murmur = murmurProse(system, choices);
+          if (option.abnormal) abnormal.push(murmur);
+          else normal.push(murmur);
+          return;
+        }
         if (!option.prose) return;
         if (option.supersededBy && shownIds.indexOf(option.supersededBy) !== -1) {
           var detail = choices[option.supersededBy];
@@ -867,9 +902,24 @@
     else if (target.dataset.glucoseField) {
       var row = state.glucoses[Number(target.dataset.index)];
       if (row) row[target.dataset.glucoseField] = target.value;
+    } else if (target.dataset.examText) {
+      var examText = ensureExam(target.dataset.exam);
+      if (!examText.choices) examText.choices = {};
+      examText.choices[target.dataset.examText] = target.value;
+      if (examText.status) {
+        examText.status = '';
+        var textArticle = target.closest('.exam-row');
+        if (textArticle) {
+          textArticle.classList.remove('is-settled');
+          textArticle.querySelectorAll('.exam-status').forEach(function (button) {
+            button.classList.remove('is-selected', 'is-normal');
+          });
+        }
+      }
     } else if (target.dataset.examNote) {
       var exam = ensureExam(target.dataset.examNote);
       exam.note = target.value;
+      exam.noteOpen = true;
       if (exam.status && exam.note.trim()) {
         exam.status = '';
         var article = target.closest('.exam-row');
@@ -901,6 +951,7 @@
     if (button.dataset.answer) { toggleAnswer(button.dataset.answer, button.dataset.value); return; }
     if (button.dataset.multi) { toggleMulti(button.dataset.multi, button.dataset.value); return; }
     if (button.dataset.examStatus) { toggleExamStatus(button.dataset.exam, button.dataset.examStatus); return; }
+    if (button.dataset.examNoteToggle) { toggleExamNote(button.dataset.examNoteToggle); return; }
     if (button.hasAttribute('data-exam-choice')) { toggleExamChoice(button); return; }
     if (button.hasAttribute('data-exam-multi')) { toggleExamMulti(button); return; }
     if (button.dataset.obsChoice) { toggleObs(button.dataset.obsChoice, button.dataset.value); return; }
@@ -979,8 +1030,11 @@
   }
 
   function ensureExam(id) {
-    if (!state.exam[id]) state.exam[id] = { status: '', note: '', choices: {} };
+    if (!state.exam[id]) state.exam[id] = { status: '', note: '', noteOpen: false, choices: {} };
     if (!state.exam[id].choices) state.exam[id].choices = {};
+    if (state.exam[id].noteOpen == null) {
+      state.exam[id].noteOpen = !!(state.exam[id].note && String(state.exam[id].note).trim());
+    }
     return state.exam[id];
   }
 
@@ -1002,6 +1056,7 @@
     if (row.status) {
       row.choices = {};
       row.note = '';
+      row.noteOpen = false;
     }
     persist();
     paint();
@@ -1026,6 +1081,14 @@
     row.choices[button.dataset.control] = list;
     row.status = '';
     pruneHiddenChoices(button.dataset.exam, row);
+    persist();
+    paint();
+  }
+
+  function toggleExamNote(id) {
+    var row = ensureExam(id);
+    row.noteOpen = !row.noteOpen;
+    if (row.noteOpen) row.status = '';
     persist();
     paint();
   }
@@ -1401,7 +1464,19 @@
     var parts = [];
     for (var i = 0; i < controls.length; i += 1) {
       var control = controls[i];
-      if (control.row) {
+      if (control.heading) {
+        parts.push('<h4 class="exam-heading">' + esc(control.heading) + '</h4>');
+      }
+      if (control.panel) {
+        var panel = [];
+        var panelId = control.panel;
+        while (i < controls.length && controls[i].panel === panelId) {
+          panel.push(examControlHtml(system.id, controls[i], choices));
+          i += 1;
+        }
+        i -= 1;
+        parts.push('<div class="exam-panel">' + panel.join('') + '</div>');
+      } else if (control.row) {
         var group = [];
         while (i < controls.length && controls[i].row === control.row) {
           group.push(examControlHtml(system.id, controls[i], choices));
@@ -1413,16 +1488,24 @@
         parts.push(examControlHtml(system.id, control, choices));
       }
     }
-    var noteLabel = system.noteLabel || (system.id === 'cardiovascular' ? 'Murmur site, grade, and radiation, or any other finding' : 'Anything the buttons do not cover');
-    var note = noteVisible(system, choices)
-      ? '<label class="exam-note field field--stack">' + fieldLabel(noteLabel) + '<textarea data-exam-note="' + system.id + '" rows="2" autocomplete="off">' + esc(findingsActive(row) ? row.note || '' : '') + '</textarea></label>'
+    var showNote = !!row.noteOpen;
+    var noteBtn = '<button type="button" class="choice' + (showNote || (row.note && String(row.note).trim()) ? ' is-selected' : '') + '" data-exam-note-toggle="' + system.id + '">Other notes</button>';
+    var note = showNote
+      ? '<label class="exam-note field field--stack">' + fieldLabel('Other notes') + '<textarea data-exam-note="' + system.id + '" rows="2" autocomplete="off">' + esc(findingsActive(row) ? row.note || '' : '') + '</textarea></label>'
       : '';
     var settled = row.status === 'nad' || row.status === 'not';
     return '<article class="exam-row' + (settled ? ' is-settled' : '') + '"><div class="exam-row-head"><h3>' + esc(system.label) + '</h3><div class="exam-actions">' + statusButton('nad', 'NAD') + statusButton('not', 'Not examined') + '</div></div>' +
-      '<div class="exam-body">' + parts.join('') + '</div>' + note + '</article>';
+      '<div class="exam-body">' + parts.join('') + '</div><div class="exam-extra">' + noteBtn + note + '</div></article>';
   }
 
   function examControlHtml(systemId, control, choices) {
+    if (control.type === 'text') {
+      var text = choices[control.id] || '';
+      var field = '<label class="field field--stack">' + fieldLabel(control.label) +
+        '<textarea data-exam="' + systemId + '" data-exam-text="' + control.id + '" rows="2" autocomplete="off">' + esc(text) + '</textarea></label>';
+      if (control.sub) return '<div class="exam-sub">' + ask(control.guide || '', field) + '</div>';
+      return ask(control.guide || '', field, 'exam-ctl--wide');
+    }
     var current = choices[control.id];
     var buttons = control.options.map(function (option) {
       var on = control.type === 'multi' ? Array.isArray(current) && current.indexOf(option.value) !== -1 : current === option.value;

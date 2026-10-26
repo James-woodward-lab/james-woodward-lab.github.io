@@ -224,6 +224,7 @@
           label: 'Cry',
           type: 'single',
           options: [
+            opt('settled', 'Settled', { normal: true, prose: 'Settled.' }),
             opt('normal', 'Usual cry', { normal: true, prose: 'Cry usual.' }),
             opt('high', 'High-pitched', { abnormal: true, prose: 'High-pitched cry.' }),
             opt('weak', 'Weak', { abnormal: true, prose: 'Weak cry.' })
@@ -235,7 +236,7 @@
           type: 'single',
           guide: 'indicator',
           options: [
-            opt('alert', 'Alert', { normal: true, prose: 'Alert.' }),
+            opt('alert', 'Alert and active', { normal: true, prose: 'Alert and active.' }),
             opt('sleepy', 'Sleepy but rousable', { normal: true, prose: 'Sleepy but rousable.' }),
             opt('lethargic', 'Lethargic', { abnormal: true, factor: 'altered-behaviour', prose: 'Lethargic.' }),
             opt('irritable', 'Irritable', { abnormal: true, factor: 'altered-behaviour', prose: 'Irritable.' }),
@@ -245,10 +246,69 @@
       ]
     },
     {
+      id: 'perfusion',
+      label: 'Perfusion',
+      shortLabel: 'Perfusion',
+      nad: 'Warm and well perfused. CRT under 2 seconds. Fontanelle soft. Mucous membranes moist.',
+      controls: [
+        {
+          id: 'crtCentral',
+          label: 'Central CRT',
+          type: 'single',
+          row: 'crt',
+          options: [
+            opt('<2', '<2s', { normal: true, prose: 'Central CRT under 2 seconds.' }),
+            opt('2-3', '2-3s', { abnormal: true, prose: 'Central CRT 2 to 3 seconds.' }),
+            opt('>3', '>3s', { abnormal: true, prose: 'Central CRT over 3 seconds.' })
+          ]
+        },
+        {
+          id: 'crtPeripheral',
+          label: 'Peripheral CRT',
+          type: 'single',
+          row: 'crt',
+          options: [
+            opt('<2', '<2s', { normal: true, prose: 'Peripheral CRT under 2 seconds.' }),
+            opt('2-3', '2-3s', { abnormal: true, prose: 'Peripheral CRT 2 to 3 seconds.' }),
+            opt('>3', '>3s', { abnormal: true, prose: 'Peripheral CRT over 3 seconds.' })
+          ]
+        },
+        {
+          id: 'perfusion',
+          label: 'Perfusion',
+          type: 'single',
+          options: [
+            opt('warm', 'Warm and well perfused', { normal: true, prose: 'Warm and well perfused.' }),
+            opt('cool', 'Cool peripherally', { abnormal: true, prose: 'Cool peripherally.' }),
+            opt('shut', 'Shut down', { abnormal: true, prose: 'Peripherally shut down.' })
+          ]
+        },
+        {
+          id: 'fontanelle',
+          label: 'Fontanelle',
+          type: 'single',
+          options: [
+            opt('soft', 'Soft', { normal: true, prose: 'Fontanelle soft.' }),
+            opt('bulging', 'Bulging', { abnormal: true, prose: 'Fontanelle bulging.' }),
+            opt('sunken', 'Sunken', { abnormal: true, prose: 'Fontanelle sunken.' })
+          ]
+        },
+        {
+          id: 'mucosa',
+          label: 'Mucous membranes',
+          type: 'single',
+          options: [
+            opt('moist', 'Moist mucous membranes', { normal: true, prose: 'Moist mucous membranes.' }),
+            opt('dry', 'Dry mucous membranes', { abnormal: true, prose: 'Dry mucous membranes.' })
+          ]
+        }
+      ]
+    },
+    {
       id: 'respiratory',
       label: 'Respiratory',
       shortLabel: 'Chest',
-      nad: 'Chest clear, no increased work of breathing or grunting.',
+      nad: 'Good chest rise. Chest clear, no increased work of breathing or grunting. No cyanosis.',
       controls: [
         {
           id: 'wob',
@@ -298,23 +358,69 @@
           ]
         },
         {
-          id: 'air',
-          label: 'Air entry',
+          id: 'chestAppearance',
+          label: 'Chest appearance',
           type: 'single',
           options: [
-            opt('equal', 'Equal', { normal: true, prose: 'Air entry equal.' }),
-            opt('reduced', 'Reduced', { abnormal: true, prose: 'Air entry reduced.' })
+            opt('good', 'Good chest rise', { normal: true, prose: 'Good chest rise.' }),
+            opt('poor', 'Poor chest rise', { abnormal: true, prose: 'Poor chest rise.' }),
+            opt('asymmetrical', 'Asymmetrical chest rise', { abnormal: true, prose: 'Asymmetrical chest rise.' })
           ]
         },
         {
-          id: 'sounds',
-          label: 'Added sounds',
+          id: 'airway',
+          label: 'Upper airway sounds',
           type: 'single',
           options: [
-            opt('none', 'None', { normal: true, prose: 'No added sounds.' }),
-            opt('crackles', 'Crackles', { abnormal: true, prose: 'Crackles.' }),
-            opt('wheeze', 'Wheeze', { abnormal: true, prose: 'Wheeze.' })
+            opt('none', 'No airway noises', { normal: true, prose: 'No added upper airway sounds.' }),
+            opt('sounds', 'Upper airway sounds', { abnormal: true, prose: 'Upper airway sounds.', supersededBy: 'airwayFindings' })
           ]
+        },
+        {
+          id: 'airwayFindings',
+          label: 'Upper airway sound findings',
+          type: 'multi',
+          sub: true,
+          panel: 'airway',
+          showIf: { control: 'airway', values: ['sounds'] },
+          options: [
+            opt('soft-stridor', 'Soft stridor', { abnormal: true, prose: 'Soft stridor.' }),
+            opt('harsh-stridor', 'Harsh stridor', { abnormal: true, prose: 'Harsh stridor.' }),
+            opt('stertorous', 'Stertorous', { abnormal: true, prose: 'Stertorous.' }),
+            opt('secretions', 'Upper airway secretions audible', { abnormal: true, prose: 'Upper airway secretions audible.' })
+          ]
+        },
+        {
+          id: 'auscultation',
+          label: 'Auscultation',
+          type: 'single',
+          options: [
+            opt('clear', 'Chest clear and equal air entry', { normal: true, prose: 'Chest clear on auscultation with equal air entry.' }),
+            opt('added', 'Added sounds', { abnormal: true, prose: 'Added sounds.', supersededBy: 'addedSounds' })
+          ]
+        },
+        {
+          id: 'addedSounds',
+          label: 'Added sounds',
+          type: 'multi',
+          sub: true,
+          panel: 'added',
+          showIf: { control: 'auscultation', values: ['added'] },
+          options: [
+            opt('crackles', 'Crackles', { abnormal: true, prose: 'Crackles.' }),
+            opt('wheeze', 'Wheeze', { abnormal: true, prose: 'Wheeze.' }),
+            opt('reduced', 'Reduced air entry', { abnormal: true, prose: 'Reduced air entry.' }),
+            opt('other', 'Other', { abnormal: true, prose: 'Other added sounds.', supersededBy: 'addedOther' })
+          ]
+        },
+        {
+          id: 'addedOther',
+          label: 'Other added sounds',
+          type: 'text',
+          abnormal: true,
+          sub: true,
+          panel: 'added',
+          showIf: { control: 'addedSounds', values: ['other'] }
         },
         {
           id: 'apnoea',
@@ -325,6 +431,16 @@
             opt('yes', 'Yes', { abnormal: true, factor: 'apnoea', prose: 'Apnoea.' }),
             opt('no', 'No', { normal: true, prose: 'No apnoea witnessed.' })
           ]
+        },
+        {
+          id: 'cyanosis',
+          label: 'Cyanosis',
+          type: 'single',
+          options: [
+            opt('none', 'No cyanosis', { normal: true, prose: 'No cyanosis.' }),
+            opt('peripheral', 'Peripheral cyanosis', { abnormal: true, prose: 'Peripheral cyanosis.' }),
+            opt('central', 'Central cyanosis', { abnormal: true, factor: 'hypoxia', prose: 'Central cyanosis.' })
+          ]
         }
       ]
     },
@@ -332,7 +448,7 @@
       id: 'cardiovascular',
       label: 'Cardiovascular',
       shortLabel: 'Cardiovascular',
-      nad: 'Heart sounds normal, femorals palpable. CRT under 2 seconds, warm and well perfused. Fontanelle soft.',
+      nad: 'Heart sounds normal, femoral and brachial pulses palpable. No peripheral oedema.',
       controls: [
         {
           id: 'sounds',
@@ -340,7 +456,93 @@
           type: 'single',
           options: [
             opt('normal', 'Normal', { normal: true, prose: 'Heart sounds normal.' }),
-            opt('murmur', 'Murmur', { abnormal: true, prose: 'Murmur present.' })
+            opt('murmur', 'Murmur', { abnormal: true, compose: 'murmur' })
+          ]
+        },
+        {
+          id: 'murmurTiming',
+          label: 'Timing',
+          type: 'multi',
+          sub: true,
+          panel: 'murmur',
+          showIf: { control: 'sounds', values: ['murmur'] },
+          options: [
+            opt('ejection', 'Ejection systolic'),
+            opt('pansystolic', 'Pansystolic'),
+            opt('diastolic', 'Diastolic'),
+            opt('continuous', 'Continuous')
+          ]
+        },
+        {
+          id: 'murmurGrade',
+          label: 'Grade',
+          type: 'single',
+          sub: true,
+          panel: 'murmur',
+          showIf: { control: 'sounds', values: ['murmur'] },
+          options: [
+            opt('1', '1'),
+            opt('2', '2'),
+            opt('3', '3'),
+            opt('4', '4'),
+            opt('5', '5'),
+            opt('6', '6')
+          ]
+        },
+        {
+          id: 'murmurLocation',
+          label: 'Location',
+          type: 'multi',
+          sub: true,
+          panel: 'murmur',
+          showIf: { control: 'sounds', values: ['murmur'] },
+          options: [
+            opt('ulse', 'Upper left sternal edge'),
+            opt('urse', 'Upper right sternal edge'),
+            opt('llse', 'Lower left sternal edge'),
+            opt('apex', 'Apex')
+          ]
+        },
+        {
+          id: 'murmurRadiation',
+          label: 'Radiation',
+          type: 'multi',
+          sub: true,
+          panel: 'murmur',
+          showIf: { control: 'sounds', values: ['murmur'] },
+          options: [
+            opt('axilla', 'Axilla'),
+            opt('carotids', 'Carotids'),
+            opt('back', 'Back'),
+            opt('none', 'None')
+          ]
+        },
+        {
+          id: 'murmurCharacter',
+          label: 'Character',
+          type: 'multi',
+          sub: true,
+          panel: 'murmur',
+          showIf: { control: 'sounds', values: ['murmur'] },
+          options: [
+            opt('soft', 'Soft'),
+            opt('harsh', 'Harsh'),
+            opt('blowing', 'Blowing'),
+            opt('rumbling', 'Rumbling'),
+            opt('vibratory', 'Vibratory')
+          ]
+        },
+        {
+          id: 'murmurPitch',
+          label: 'Pitch',
+          type: 'multi',
+          sub: true,
+          panel: 'murmur',
+          showIf: { control: 'sounds', values: ['murmur'] },
+          options: [
+            opt('low', 'Low'),
+            opt('medium', 'Medium'),
+            opt('high', 'High')
           ]
         },
         {
@@ -354,45 +556,22 @@
           ]
         },
         {
-          id: 'crtCentral',
-          label: 'Central CRT',
+          id: 'brachials',
+          label: 'Brachial pulses',
           type: 'single',
-          row: 'crt',
           options: [
-            opt('<2', '<2s', { normal: true, prose: 'Central CRT under 2 seconds.' }),
-            opt('2-3', '2-3s', { abnormal: true, prose: 'Central CRT 2 to 3 seconds.' }),
-            opt('>3', '>3s', { abnormal: true, prose: 'Central CRT over 3 seconds.' })
+            opt('normal', 'Palpable', { normal: true, prose: 'Brachial pulses palpable.' }),
+            opt('weak', 'Weak', { abnormal: true, prose: 'Brachial pulses weak.' }),
+            opt('absent', 'Absent', { abnormal: true, prose: 'Brachial pulses absent.' })
           ]
         },
         {
-          id: 'crtPeripheral',
-          label: 'Peripheral CRT',
-          type: 'single',
-          row: 'crt',
-          options: [
-            opt('<2', '<2s', { normal: true, prose: 'Peripheral CRT under 2 seconds.' }),
-            opt('2-3', '2-3s', { abnormal: true, prose: 'Peripheral CRT 2 to 3 seconds.' }),
-            opt('>3', '>3s', { abnormal: true, prose: 'Peripheral CRT over 3 seconds.' })
-          ]
-        },
-        {
-          id: 'perfusion',
-          label: 'Perfusion',
+          id: 'oedema',
+          label: 'Oedema',
           type: 'single',
           options: [
-            opt('warm', 'Warm and well perfused', { normal: true, prose: 'Warm and well perfused.' }),
-            opt('cool', 'Cool peripherally', { abnormal: true, prose: 'Cool peripherally.' }),
-            opt('shut', 'Shut down', { abnormal: true, prose: 'Peripherally shut down.' })
-          ]
-        },
-        {
-          id: 'fontanelle',
-          label: 'Fontanelle',
-          type: 'single',
-          options: [
-            opt('soft', 'Soft', { normal: true, prose: 'Fontanelle soft.' }),
-            opt('bulging', 'Bulging', { abnormal: true, prose: 'Fontanelle bulging.' }),
-            opt('sunken', 'Sunken', { abnormal: true, prose: 'Fontanelle sunken.' })
+            opt('none', 'No peripheral oedema', { normal: true, prose: 'No peripheral oedema.' }),
+            opt('present', 'Oedema present', { abnormal: true, prose: 'Oedema present.' })
           ]
         },
         {
@@ -484,9 +663,7 @@
       id: 'neurology',
       label: 'Neurology',
       shortLabel: 'Neurology',
-      nad: 'Tone normal.',
-      noteWhen: { control: 'tone', value: 'other' },
-      noteLabel: 'Describe the neurological finding',
+      nad: 'Tone normal. Primitive reflexes present.',
       controls: [
         {
           id: 'tone',
@@ -498,6 +675,54 @@
             opt('low', 'Reduced tone', { abnormal: true, factor: 'altered-tone', prose: 'Tone reduced.' }),
             opt('high', 'Increased tone', { abnormal: true, factor: 'altered-tone', prose: 'Tone increased.' }),
             opt('other', 'Other', { abnormal: true, fallback: 'Neurological finding not described.' })
+          ]
+        },
+        {
+          id: 'moro',
+          heading: 'Reflexes',
+          label: 'Moro equal and present',
+          type: 'yn',
+          options: [
+            opt('yes', 'Yes', { normal: true, prose: 'Moro equal and present.' }),
+            opt('no', 'No', { abnormal: true, prose: 'Moro not equal and present.' })
+          ]
+        },
+        {
+          id: 'grasp',
+          label: 'Palmar and plantar grasp',
+          type: 'yn',
+          options: [
+            opt('yes', 'Yes', { normal: true, prose: 'Palmar and plantar grasp present.' }),
+            opt('no', 'No', { abnormal: true, prose: 'Palmar and plantar grasp not present.' })
+          ]
+        },
+        {
+          id: 'stepping',
+          label: 'Stepping reflex',
+          type: 'yn',
+          options: [
+            opt('yes', 'Yes', { normal: true, prose: 'Stepping reflex present.' }),
+            opt('no', 'No', { abnormal: true, prose: 'Stepping reflex not present.' })
+          ]
+        },
+        {
+          id: 'suck',
+          label: 'Sucking',
+          type: 'single',
+          options: [
+            opt('good', 'Good', { normal: true, prose: 'Suck good.' }),
+            opt('poor', 'Poor', { abnormal: true, prose: 'Suck poor.' }),
+            opt('uncoordinated', 'Uncoordinated', { abnormal: true, prose: 'Suck uncoordinated.' }),
+            opt('absent', 'Absent', { abnormal: true, prose: 'Suck absent.' })
+          ]
+        },
+        {
+          id: 'gag',
+          label: 'Gag reflex',
+          type: 'yn',
+          options: [
+            opt('yes', 'Yes', { normal: true, prose: 'Gag reflex present.' }),
+            opt('no', 'No', { abnormal: true, prose: 'Gag reflex not present.' })
           ]
         }
       ]
