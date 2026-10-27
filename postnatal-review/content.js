@@ -37,8 +37,14 @@
     { id: 'feed-intolerance', kind: 'ng195-other', box: 'indicator', summary: 'feed intolerance' },
     { id: 'resp-distress', kind: 'ng195-other', box: 'indicator', summary: 'respiratory distress' },
     { id: 'hypoxia', kind: 'ng195-other', box: 'indicator', summary: 'hypoxia' },
+    { id: 'abnormal-hr', kind: 'ng195-other', box: 'indicator', summary: 'abnormal heart rate' },
+    { id: 'pphn', kind: 'ng195-other', box: 'indicator', summary: 'persistent pulmonary hypertension' },
+    { id: 'jaundice-24h', kind: 'ng195-other', box: 'indicator', summary: 'jaundice within 24 hours of birth' },
+    { id: 'encephalopathy', kind: 'ng195-other', box: 'indicator', summary: 'signs of neonatal encephalopathy' },
+    { id: 'temp-abnormal', kind: 'ng195-other', box: 'indicator', summary: 'temperature abnormality' },
     { id: 'bleeding-coag', kind: 'ng195-other', box: 'indicator', summary: 'bleeding, thrombocytopenia, or coagulopathy' },
     { id: 'altered-glucose', kind: 'ng195-other', box: 'indicator', summary: 'altered glucose' },
+    { id: 'metabolic-acidosis', kind: 'ng195-other', box: 'indicator', summary: 'metabolic acidosis' },
     { id: 'idm', kind: 'bapm', box: 'hypo', summary: 'maternal diabetes' },
     { id: 'beta-blocker', kind: 'bapm', box: 'hypo', summary: 'maternal beta-blocker' },
     { id: 'sga', kind: 'bapm', box: 'hypo', summary: 'birth weight on or under the 2nd centile' },
@@ -58,7 +64,7 @@
     'gbs-maternal': {
       kind: 'ng195',
       fact: 'Maternal group B streptococcal colonisation, bacteriuria, or infection in this pregnancy documented.',
-      label: 'NICE early-onset neonatal infection risk factor documented: maternal GBS colonisation.'
+      label: 'NICE early-onset neonatal infection risk factor documented: maternal GBS colonisation, bacteriuria, or infection.'
     },
     'gbs-previous': {
       kind: 'ng195',
@@ -67,22 +73,22 @@
     },
     'spontaneous-preterm': {
       kind: 'ng195',
-      fact: 'Preterm birth after spontaneous labour, before 37 weeks, documented.',
+      fact: 'Preterm birth following spontaneous labour before 37 weeks documented.',
       label: 'NICE early-onset neonatal infection risk factor documented: preterm birth after spontaneous labour.'
     },
     'rom-preterm-18': {
       kind: 'ng195',
-      fact: 'Rupture of membranes for more than 18 hours before a preterm birth documented.',
+      fact: 'Confirmed rupture of membranes for more than 18 hours before a preterm birth documented.',
       label: 'NICE early-onset neonatal infection risk factor documented: prolonged rupture of membranes before preterm birth.'
     },
     'rom-term-24': {
       kind: 'ng195',
-      fact: 'Rupture of membranes for more than 24 hours before a term birth documented.',
+      fact: 'Confirmed rupture of membranes for more than 24 hours before a term birth documented.',
       label: 'NICE early-onset neonatal infection risk factor documented: prolonged rupture of membranes before term birth.'
     },
     'maternal-sepsis': {
       kind: 'ng195',
-      fact: 'Maternal sepsis in the intrapartum or early postpartum period documented.',
+      fact: 'Suspected or confirmed maternal sepsis in the intrapartum or early postpartum period documented.',
       label: 'NICE early-onset neonatal infection risk factor documented: maternal sepsis.'
     },
     chorio: {
@@ -104,6 +110,91 @@
       kind: 'red',
       fact: 'Mechanical ventilation was needed.',
       label: 'NICE early-onset neonatal infection red flag documented: mechanical ventilation.'
+    },
+    apnoea: {
+      kind: 'red',
+      fact: 'Apnoea documented.',
+      label: 'NICE early-onset neonatal infection red flag documented: apnoea.'
+    },
+    seizures: {
+      kind: 'red',
+      fact: 'Seizures documented.',
+      label: 'NICE early-onset neonatal infection red flag documented: seizures.'
+    },
+    shock: {
+      kind: 'red',
+      fact: 'Signs of shock documented.',
+      label: 'NICE early-onset neonatal infection red flag documented: signs of shock.'
+    },
+    'altered-behaviour': {
+      kind: 'indicator',
+      fact: 'Altered behaviour or responsiveness documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: altered behaviour or responsiveness.'
+    },
+    'altered-tone': {
+      kind: 'indicator',
+      fact: 'Altered muscle tone documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: altered muscle tone.'
+    },
+    'feed-refusal': {
+      kind: 'indicator',
+      fact: 'Feeding difficulties documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: feeding difficulties.'
+    },
+    'feed-intolerance': {
+      kind: 'indicator',
+      fact: 'Feed intolerance documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: feed intolerance.'
+    },
+    'abnormal-hr': {
+      kind: 'indicator',
+      fact: 'Abnormal heart rate documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: abnormal heart rate.'
+    },
+    'resp-distress': {
+      kind: 'indicator',
+      fact: 'Signs of respiratory distress documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: respiratory distress.'
+    },
+    hypoxia: {
+      kind: 'indicator',
+      fact: 'Hypoxia documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: hypoxia.'
+    },
+    pphn: {
+      kind: 'indicator',
+      fact: 'Persistent pulmonary hypertension of the newborn documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: persistent pulmonary hypertension of the newborn.'
+    },
+    'jaundice-24h': {
+      kind: 'indicator',
+      fact: 'Jaundice within 24 hours of birth documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: jaundice within 24 hours of birth.'
+    },
+    encephalopathy: {
+      kind: 'indicator',
+      fact: 'Signs of neonatal encephalopathy documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: signs of neonatal encephalopathy.'
+    },
+    'temp-abnormal': {
+      kind: 'indicator',
+      fact: 'Temperature abnormality unexplained by environmental factors documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: temperature abnormality.'
+    },
+    'bleeding-coag': {
+      kind: 'indicator',
+      fact: 'Unexplained excessive bleeding, thrombocytopenia, or abnormal coagulation documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: bleeding, thrombocytopenia, or abnormal coagulation.'
+    },
+    'altered-glucose': {
+      kind: 'indicator',
+      fact: 'Altered glucose homeostasis documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: altered glucose homeostasis.'
+    },
+    'metabolic-acidosis': {
+      kind: 'indicator',
+      fact: 'Metabolic acidosis documented.',
+      label: 'NICE early-onset neonatal infection clinical indicator documented: metabolic acidosis.'
     },
     thrombocytopenia: {
       kind: 'indicator',

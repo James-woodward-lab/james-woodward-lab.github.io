@@ -237,7 +237,6 @@
 
   function niceLines(answerKey, state) {
     if (!state.answers || state.answers[answerKey] !== 'yes') return [];
-    if (answerKey === 'sibling-infection' && state.plurality !== 'multiple') return [];
     var entry = content.NICE_DOC[answerKey];
     if (!entry) return [];
     return [entry.fact, entry.label];
@@ -252,13 +251,15 @@
     var found = {};
     function add(id) {
       if (!byId[id] || found[id]) return;
-      if (id === 'sibling-infection' && state.plurality !== 'multiple') return;
       found[id] = byId[id];
     }
     if (state.answers['gbs-maternal'] === 'yes' || state.answers['gbs-previous'] === 'yes') add('gbs');
     [
       'sibling-infection', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
-      'maternal-sepsis', 'chorio', 'cpr', 'ventilation', 'idm', 'beta-blocker', 'sga', 'wasted'
+      'maternal-sepsis', 'chorio', 'cpr', 'ventilation', 'idm', 'beta-blocker', 'sga', 'wasted',
+      'apnoea', 'seizures', 'shock', 'altered-behaviour', 'altered-tone', 'feed-refusal',
+      'feed-intolerance', 'abnormal-hr', 'resp-distress', 'hypoxia', 'pphn', 'jaundice-24h',
+      'encephalopathy', 'temp-abnormal', 'bleeding-coag', 'altered-glucose', 'metabolic-acidosis'
     ].forEach(function (id) {
       if (state.answers[id] === 'yes') add(id);
     });
@@ -608,7 +609,7 @@
     bits.push(membraneSentence(state));
     [
       'gbs-maternal', 'gbs-previous', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
-      'maternal-sepsis', 'chorio', 'sibling-infection', 'cpr', 'ventilation'
+      'maternal-sepsis', 'chorio', 'sibling-infection'
     ].forEach(function (key) {
       bits = bits.concat(niceLines(key, state));
     });
@@ -677,6 +678,17 @@
       lines.push(sinceLine);
     }
     if (state.historyExtra && state.historyExtra.trim()) lines.push(ensurePeriod(state.historyExtra.trim()));
+    [
+      'apnoea', 'seizures', 'cpr', 'ventilation', 'shock',
+      'altered-behaviour', 'altered-tone', 'feed-refusal', 'feed-intolerance',
+      'abnormal-hr', 'resp-distress', 'hypoxia', 'pphn', 'jaundice-24h',
+      'encephalopathy', 'temp-abnormal', 'bleeding-coag', 'altered-glucose', 'metabolic-acidosis'
+    ].forEach(function (key) {
+      lines = lines.concat(niceLines(key, state));
+    });
+    if (state.answers['jaundice-24h'] === 'yes' && state.jaundiceNoticedHours) {
+      lines.push('Jaundice noticed at ' + state.jaundiceNoticedHours + ' hours.');
+    }
     return cleanLines(lines.concat(resultsSentences(state)));
   }
 
@@ -870,7 +882,6 @@
     show('mode-other-wrap', state.modeOfBirth === 'other');
     show('age-times', state.ageMode !== 'manual');
     show('age-manual', state.ageMode === 'manual');
-    show('sibling-wrap', state.plurality === 'multiple');
     show('iap-timing-wrap', state.answers.iap === 'given');
     show('feed-latch-wrap', state.feedMode === 'breast' || state.feedMode === 'mixed');
     show('feed-duration-wrap', state.feedMode === 'breast' || state.feedMode === 'mixed');
@@ -878,7 +889,7 @@
     show('topup-amount-wrap', state.answers.topUps === 'yes');
     show('parent-words-wrap', state.parentalConcern === 'concerned');
     show('midwife-words-wrap', state.midwifeConcern === 'yes');
-    show('jaundice-hours-wrap', (state.multi.sinceBirth || []).indexOf('jaundice') !== -1);
+    show('jaundice-hours-wrap', state.answers['jaundice-24h'] === 'yes' || (state.multi.sinceBirth || []).indexOf('jaundice') !== -1);
     show('antibiotic-detail-wrap', state.antibiotics === 'started');
     show('senior-decision-wrap', state.antibiotics === 'senior');
     show('bili-detail', state.bilirubin.kind === 'tcb' || state.bilirubin.kind === 'tsb');
@@ -1309,18 +1320,20 @@
           input('apgar5', 'Apgar 5 min', state.apgar5, { type: 'number', mode: 'numeric' }) +
         '</div>'
       ) +
+      groupCard('NICE Box 1: early-onset infection risk factors',
+        '<h3 class="group-subhead">Red-flag risk factor</h3>' +
+        yn('sibling-infection', 'Suspected or confirmed infection in another baby of a multiple pregnancy', 'Yes', 'No') +
+        '<h3 class="group-subhead">Other risk factors</h3>' +
+        yn('gbs-previous', 'Invasive group B streptococcal infection in a previous baby', 'Yes', 'No') +
+        yn('gbs-maternal', 'Maternal group B streptococcal colonisation, bacteriuria, or infection in this pregnancy', 'Yes', 'No') +
+        yn('spontaneous-preterm', 'Preterm birth following spontaneous labour before 37 weeks', 'Yes', 'No') +
+        yn('rom-preterm-18', 'Confirmed rupture of membranes for more than 18 hours before a preterm birth', 'Yes', 'No') +
+        yn('rom-term-24', 'Confirmed rupture of membranes for more than 24 hours before a term birth', 'Yes', 'No') +
+        yn('maternal-sepsis', 'Suspected or confirmed maternal sepsis in the intrapartum or early postpartum period', 'Yes', 'No') +
+        yn('chorio', 'Suspected or confirmed chorioamnionitis', 'Yes', 'No')
+      ) +
       groupCard('Documented perinatal history',
         half(input('romHours', 'Hours of rupture before birth', state.romHours, { type: 'number', mode: 'decimal' })) +
-        half(yn('rom-preterm-18', 'Rupture for more than 18 hours before a preterm birth', 'Yes', 'No')) +
-        half(yn('rom-term-24', 'Rupture for more than 24 hours before a term birth', 'Yes', 'No')) +
-        yn('spontaneous-preterm', 'Preterm birth after spontaneous labour, before 37 weeks', 'Yes', 'No') +
-        yn('gbs-maternal', 'Maternal GBS colonisation, bacteriuria, or infection this pregnancy', 'Yes', 'No') +
-        yn('gbs-previous', 'Invasive GBS in a previous baby', 'Yes', 'No') +
-        '<div id="sibling-wrap">' + yn('sibling-infection', 'Infection in another baby of this multiple pregnancy', 'Suspected or confirmed', 'No') + '</div>' +
-        yn('maternal-sepsis', 'Maternal sepsis in labour or the early postpartum period', 'Yes', 'No') +
-        yn('chorio', 'Suspected or confirmed chorioamnionitis', 'Yes', 'No') +
-        yn('cpr', 'Cardiopulmonary resuscitation', 'Needed', 'Not needed') +
-        yn('ventilation', 'Mechanical ventilation', 'Needed', 'Not needed') +
         yn('fever', 'Intrapartum fever', 'Yes', 'No') +
         '<div class="field half">' + fieldLabel('Intrapartum antibiotics') + choiceButtons('data-answer', 'iap', [
           { value: 'none', label: 'None' },
@@ -1408,20 +1421,35 @@
         '<div id="parent-words-wrap" class="half">' + area('parentalWords', 'What the parents said', state.parentalWords, 3) + '</div>' +
         '<div id="midwife-words-wrap" class="half">' + area('midwifeWords', 'Midwife concern', state.midwifeWords, 3) + '</div>'
       ) +
-      groupCard('Since birth',
-        ask('red', '<div class="field">' + fieldLabel('Red-flag events') + multiButtons('sinceBirth', [
-          { value: 'apnoea', label: 'Apnoea', abnormal: true },
-          { value: 'seizures', label: 'Seizures', abnormal: true }
-        ], state.multi.sinceBirth || []) + '</div>') +
-        ask('indicator', '<div class="field">' + fieldLabel('Other documented events') + multiButtons('sinceBirth', [
-          { value: 'colour-change', label: 'Colour change', abnormal: true },
-          { value: 'temp-instability', label: 'Temperature instability', abnormal: true },
-          { value: 'jaundice', label: 'Jaundice noticed', abnormal: true },
-          { value: 'jitteriness', label: 'Jitteriness', abnormal: true },
-          { value: 'poor-tone', label: 'Poor tone', abnormal: true },
-          { value: 'bleeding', label: 'Unexplained bleeding', abnormal: true }
-        ], state.multi.sinceBirth || []) + '</div>') +
+      groupCard('NICE Box 2: clinical indicators',
+        '<h3 class="group-subhead">Red-flag clinical indicators</h3>' +
+        yn('apnoea', 'Apnoea (temporary stopping of breathing)', 'Yes', 'No') +
+        yn('seizures', 'Seizures', 'Yes', 'No') +
+        yn('cpr', 'Need for cardiopulmonary resuscitation', 'Yes', 'No') +
+        yn('ventilation', 'Need for mechanical ventilation', 'Yes', 'No') +
+        yn('shock', 'Signs of shock', 'Yes', 'No') +
+        '<h3 class="group-subhead">Other clinical indicators</h3>' +
+        yn('altered-behaviour', 'Altered behaviour or responsiveness', 'Yes', 'No') +
+        yn('altered-tone', 'Altered muscle tone (for example, floppiness)', 'Yes', 'No') +
+        yn('feed-refusal', 'Feeding difficulties (for example, feed refusal)', 'Yes', 'No') +
+        yn('feed-intolerance', 'Feed intolerance, including vomiting, excessive gastric aspirates, and abdominal distension', 'Yes', 'No') +
+        yn('abnormal-hr', 'Abnormal heart rate (bradycardia or tachycardia)', 'Yes', 'No') +
+        yn('resp-distress', 'Signs of respiratory distress (including grunting, recession, tachypnoea)', 'Yes', 'No') +
+        yn('hypoxia', 'Hypoxia (for example, central cyanosis or reduced oxygen saturation)', 'Yes', 'No') +
+        yn('pphn', 'Persistent pulmonary hypertension of the newborn', 'Yes', 'No') +
+        yn('jaundice-24h', 'Jaundice within 24 hours of birth', 'Yes', 'No') +
         '<div id="jaundice-hours-wrap" class="half">' + input('jaundiceNoticedHours', 'Jaundice first noticed at (hours)', state.jaundiceNoticedHours, { type: 'number', mode: 'decimal' }) + '</div>' +
+        yn('encephalopathy', 'Signs of neonatal encephalopathy', 'Yes', 'No') +
+        yn('temp-abnormal', 'Temperature abnormality (lower than 36°C or higher than 38°C) unexplained by environmental factors', 'Yes', 'No') +
+        yn('bleeding-coag', 'Unexplained excessive bleeding, thrombocytopenia, or abnormal coagulation', 'Yes', 'No') +
+        yn('altered-glucose', 'Altered glucose homeostasis (hypoglycaemia or hyperglycaemia)', 'Yes', 'No') +
+        yn('metabolic-acidosis', 'Metabolic acidosis (base deficit of 10 mmol/L or greater)', 'Yes', 'No')
+      ) +
+      groupCard('Other events since birth',
+        ask('', '<div class="field">' + fieldLabel('Other documented events') + multiButtons('sinceBirth', [
+          { value: 'colour-change', label: 'Colour change', abnormal: true },
+          { value: 'jitteriness', label: 'Jitteriness', abnormal: true }
+        ], state.multi.sinceBirth || []) + '</div>') +
         area('historyExtra', 'Anything else', state.historyExtra, 3)
       ) +
       '</section>';

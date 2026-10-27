@@ -65,7 +65,7 @@ assert.ok(boxes.review.indexOf('Glucose 3.4') !== -1, 'glucose is transcribed wi
 assert.strictEqual(boxes.review.indexOf('under 1.0'), -1, 'glucose bands are not generated');
 assert.strictEqual(boxes.review.indexOf('2.0 mmol/L or more'), -1, 'glucose categories are not generated');
 assert.ok(boxes.review.indexOf('NICE early-onset neonatal infection risk factor documented: prolonged rupture of membranes before term birth.') !== -1, 'NICE label follows explicit rupture button');
-assert.ok(boxes.review.indexOf('NICE early-onset neonatal infection risk factor documented: maternal GBS colonisation.') !== -1, 'NICE label follows explicit GBS button');
+assert.ok(boxes.review.indexOf('NICE early-onset neonatal infection risk factor documented: maternal GBS colonisation, bacteriuria, or infection.') !== -1, 'NICE label follows explicit GBS button');
 assert.strictEqual(boxes.review.indexOf('red flag'), -1, 'red-flag language is not generated');
 assert.strictEqual(boxes.review.indexOf('risk factors selected'), -1, 'risk counts are not generated');
 assert.strictEqual(boxes.review.indexOf('meets NICE threshold'), -1, 'threshold statements are not generated');
@@ -107,6 +107,8 @@ var acid = review.buildBoxes({ gas: { be: '12' } });
 assert.ok(acid.review.indexOf('base deficit 12') !== -1, 'base deficit is transcribed');
 assert.strictEqual(acid.otherCount, 0, 'gas values do not create acidosis factors');
 assert.strictEqual(acid.review.indexOf('NICE'), -1, 'gas values do not create NICE labels');
+assert.strictEqual(review.buildBoxes({ answers: { 'metabolic-acidosis': 'yes' } }).otherCount, 1, 'explicit metabolic acidosis counts as one indicator');
+assert.ok(review.buildBoxes({ answers: { 'metabolic-acidosis': 'yes' } }).review.indexOf('NICE early-onset neonatal infection clinical indicator documented: metabolic acidosis.') !== -1, 'explicit metabolic acidosis uses the NICE label');
 
 var noGestationCalc = review.buildBoxes({ gestationAtBirth: '35+0' });
 assert.ok(noGestationCalc.review.indexOf('35+0.') !== -1, 'preterm-looking free text is transcribed without a label');
@@ -132,18 +134,16 @@ assert.strictEqual(migrated.gestationAtBirth, '39+2', 'old numeric drafts migrat
 assert.strictEqual(migrated.gestationWeeks, undefined, 'numeric weeks are not kept as active state');
 
 var pretermButton = review.buildBoxes({ answers: { 'spontaneous-preterm': 'yes' } });
-assert.ok(pretermButton.review.indexOf('Preterm birth after spontaneous labour, before 37 weeks, documented.') !== -1, 'explicit preterm button is transcribed');
+assert.ok(pretermButton.review.indexOf('Preterm birth following spontaneous labour before 37 weeks documented.') !== -1, 'explicit preterm button is transcribed');
 assert.ok(pretermButton.review.indexOf('NICE early-onset neonatal infection risk factor documented: preterm birth after spontaneous labour.') !== -1, 'NICE label follows the explicit preterm button');
 
 var unsetNice = review.buildBoxes({ answers: { 'gbs-maternal': 'no' } });
 assert.strictEqual(unsetNice.review.indexOf('NICE'), -1, 'a No answer does not create a NICE label');
 assert.strictEqual(unsetNice.review.indexOf('No maternal GBS'), -1, 'negative findings are not auto-generated from No');
 
-var siblingSingleton = review.buildBoxes({ answers: { 'sibling-infection': 'yes' } });
-assert.strictEqual(siblingSingleton.review.indexOf('NICE'), -1, 'sibling infection without multiple pregnancy is not labelled');
-
-var siblingMultiple = review.buildBoxes({ plurality: 'multiple', answers: { 'sibling-infection': 'yes' } });
-assert.ok(siblingMultiple.review.indexOf('NICE early-onset neonatal infection red flag documented: infection in another baby of a multiple pregnancy.') !== -1, 'sibling infection NICE red-flag label needs an explicit yes and multiple pregnancy');
+var sibling = review.buildBoxes({ answers: { 'sibling-infection': 'yes' } });
+assert.ok(sibling.review.indexOf('NICE early-onset neonatal infection red flag documented: infection in another baby of a multiple pregnancy.') !== -1, 'sibling infection NICE red-flag label follows an explicit yes');
+assert.strictEqual(sibling.redCount, 1, 'sibling infection counts as one red-flag risk factor');
 
 var cpr = review.buildBoxes({ answers: { cpr: 'yes' } });
 assert.ok(cpr.review.indexOf('NICE early-onset neonatal infection red flag documented: cardiopulmonary resuscitation.') !== -1, 'CPR uses the red-flag documentation label');
@@ -156,6 +156,10 @@ var jaundiceYoung = review.buildBoxes({
 });
 assert.ok(jaundiceYoung.examination.indexOf('Jaundiced.') !== -1, 'jaundice finding is transcribed');
 assert.strictEqual(jaundiceYoung.review.indexOf('within 24 hours'), -1, 'age plus jaundice does not create a clinical indicator');
+assert.ok(review.buildBoxes({ answers: { 'jaundice-24h': 'yes' } }).review.indexOf('NICE early-onset neonatal infection clinical indicator documented: jaundice within 24 hours of birth.') !== -1, 'explicit jaundice within 24 hours uses the NICE label');
+assert.ok(review.buildBoxes({ answers: { pphn: 'yes' } }).review.indexOf('Persistent pulmonary hypertension of the newborn documented.') !== -1, 'PPHN is transcribed when selected');
+assert.ok(review.buildBoxes({ answers: { encephalopathy: 'yes' } }).review.indexOf('Signs of neonatal encephalopathy documented.') !== -1, 'encephalopathy is transcribed when selected');
+assert.strictEqual(review.buildBoxes({ obs: { hr: '180', temp: '38.4' } }).otherCount, 0, 'heart rate and temperature values do not become clinical indicators');
 assert.strictEqual(jaundiceYoung.examination.indexOf('NICE'), -1, 'exam findings do not auto-tag NICE');
 
 var abnormal = review.buildBoxes({
