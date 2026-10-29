@@ -299,6 +299,7 @@
     .choice-btn.selected { background: rgba(56,189,248,0.08); border-color: var(--blue-border); }
     .choice-btn.correct { background: var(--green-dim); border-color: var(--green-border); }
     .choice-btn.wrong { background: var(--red-dim); border-color: var(--red-border); }
+    .choice-btn.possible { background: var(--amber-dim); border-color: var(--amber-border); }
     .choice-btn[disabled] { cursor: default; }
 
     .letter {
@@ -315,10 +316,12 @@
     }
     .choice-btn.correct .letter { color: var(--green); background: var(--green-dim); }
     .choice-btn.wrong .letter { color: var(--red); background: var(--red-dim); }
+    .choice-btn.possible .letter { color: var(--amber); background: var(--amber-dim); }
     .choice-text { flex: 1; }
     .result-badge { font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
     .choice-btn.correct .result-badge { color: var(--green); }
     .choice-btn.wrong .result-badge { color: var(--red); }
+    .choice-btn.possible .result-badge { color: var(--amber); }
 
     .reveal {
       margin-top: 0.8rem;
@@ -795,9 +798,9 @@
         type: "meet",
         chapter: "THE CASE BEGINS",
         title: "Meet Theo",
-        narrative: "It's 03:17 on Tuesday morning. After a quiet start to the shift you've finished ward round and all the jobs are done. Your bleep goes off - it's the postnatal ward.",
+        narrative: "It's 03:17 on Tuesday morning. After a quiet start to the shift you've finished ward round and all the jobs are done. There is no one expected to delivery imminenetly but you are aware of a 26+3 on B8 that has SROM. You retire to the office and open your book when your bleep goes off - it's the postnatal ward.",
         details: [
-          ["Age", "2 days old"], ["Gestation", "37+6"], ["Presenting complaint", "Floppy, not feeding since yesterday"], ["Delivery", "Unassisted home birth"],
+          ["Age", "2 days old"], ["Gestation", "37+6"], ["Presenting complaint", "Floppy, not feeding since yesterday"], ["Delivery", "SVD with no concerns"],
           ["Antenatal care", "None"], ["Newborn screening", "Not done"], ["Vitamin K", "Not given"]
         ]
       },
@@ -819,8 +822,8 @@
         },
         correctChoice: "a",
         correct: "A: Attend immediately",
-        teaching: "BM 1.7 in a floppy neonate is an emergency. You need to attend now, start treatment, and investigate in parallel. Feeding and waiting, or dismissing a low BM as a cold foot, delays glucose, airway support, and a proper assessment.",
-        danger: "A floppy neonate with BM 1.7 is not safe to feed and wait, and a low reading is not explained by a cold foot. Delay lets glucose fall further and the baby can become unresponsive on the postnatal ward before help arrives.",
+        teaching: "Blood glucose of 1.7 with reduced tone is an emergency. Immediate review, investigation, and treatment is required. Feeding and waiting may mask or delay intervention, and dismissing results without review is dangerous.",
+        danger: "A floppy neonate with low blood glucose may not be safe to feed at all as there is risk of choking or aspiriation. Additionally a baby with poor tone regardless of other features warrents prompt assessement for a variety of possible causes",
         wrongOutcomes: {
           b: "The midwife tries a feed. Theo is too floppy to feed safely, milk sits in his mouth. An hour later his BM is even lower and you are crash bleeped to postnates",
           c: "You ignore the midwife as it was probably just a bad sample or a cold foot and you get on with reading your book. 30 minutes later you are crash called to the postnatal ward, probably unrelated right?"
@@ -838,32 +841,55 @@
       },
       {
         type: "assessment",
-        chapter: "RESUS BAY: 03:22",
-        title: "Primary Survey & Clinical Findings",
-        narrative: "Theo arrives in resus. He is pale, jaundiced, floppy. Mum is distressed. You begin your assessment.",
+        chapter: "B7 03:22",
+        title: "Initial review",
+        narrative: "You tell the midwife you will be right there and them to take some observations and repeat a blood sugar while you make your way over",
         vitals: [
           ["HR", "178 /min", true], ["RR", "68 /min", true], ["SpO₂", "96% on air", false],
-          ["Temp", "36.2°C", false], ["Cap refill", "3s", true], ["BM", "1.0 mmol/L", true]
+          ["Temp", "36.6°C", false], ["Cap refill", ">3s", true], ["Glucose", "1.3 mmol/L", true]
         ]
       },
       {
         type: "assessment-exam",
-        chapter: "RESUS BAY: 03:22",
-        title: "Primary Survey & Clinical Findings",
+        chapter: "B7 03:22",
+        title: "Initial review",
         exam: [
-          "Tone: globally reduced; weak cry, head lag",
+          "Tone: globally reduced tone, poor suck, weak cry",
+          "No increased WOB. Chest clear",
+          "HS normal. No murmurs",
           "Jaundice: visible +2, scleral icterus present",
           "Fontanelle: flat (not bulging)",
           "Moving all limbs spontaneously but sluggish",
           "No dysmorphic features, no focal neurology",
           "Abdomen: soft, no organomegaly detected",
           "Femorals equal and good pulse",
-          "Skin pink, warm well perfused"
+          "Skin cool peripherally"
         ],
-        keyFlag: "⚠️ You note: no newborn bloodspot screening card in the hand-held notes. No Vitamin K documentation. No GP registration. Parents unsure of birth weight.",
+        keyFlag: "⚠️ You note: no newborn bloodspot screening card in the hand-held notes. No Vitamin K documentation. No GP registration.",
         examImage: {
           src: "../images/neonatal-examination.png",
           alt: "Newborn infant being examined with a stethoscope in a hospital bassinet"
+        }
+      },
+      {
+        type: "choice",
+        chapter: "ACT 1",
+        title: "The Crash Bleep",
+        narrative: "Just as you finish your examination you realise you need some help. You turn to ask one of the midwifes to bleep your registrar urgently but as you open your mouth your crash bleep goes off. Cat 1 section Room 12. Its the 26 weeker.",
+        question: "What do you do next?",
+        choices: {
+          a: "Leave the baby you are with and attend the delivery",
+          b: "Stay with baby but ask someone to inform your SpR/Cons"
+        },
+        correctChoice: "b",
+        acceptEither: true,
+        correctLabel: "BOTH DEFENSIBLE",
+        correct: "Stay with this baby and get a senior to the Cat 1 if you can. Leaving can still be justified if you are the only paediatrician, but you already have an unstable neonate in front of you.",
+        teaching: "<strong>Leave and attend the delivery.</strong> Pros: a Cat 1 for a 26 weeker is a true emergency, and that baby may need immediate resuscitation. If you are the only paediatrician in the hospital, nobody else may reach Room 12 in time. Cons: Theo is already floppy, hypoglycaemic and poorly perfused. Walking away from an unstable patient without a handover leaves him untreated, and a 26 week resuscitation is often better started by a senior anyway.<br><br><strong>Stay and ask someone to inform your SpR/consultant.</strong> Pros: you do not abandon a collapsing neonate, treatment can start now, and a named senior can take the Cat 1 or swap with you. Cons: this only works if the message actually gets through. If you are truly the only paediatrician, the extreme preterm baby may deliver with no paediatric presence unless you send someone immediately and confirm they are going.",
+        danger: "Whichever you choose, do not leave a vacuum. Either stay and make sure a senior is actually coming to the Cat 1, or leave only after handing Theo to someone who can treat glucose, airway and circulation now.",
+        revealImage: {
+          src: "../images/cat1-caesarean-section.jpg",
+          alt: "Surgical team delivering a baby at caesarean section"
         }
       },
       {
@@ -1245,9 +1271,12 @@
       const choicesHtml = Object.entries(s.choices).map(([id, txt]) => {
         const isSelected = selectedChoice === id;
         const isCorrect = revealShown && id === s.correctChoice;
-        const isWrong = revealShown && isSelected && id !== s.correctChoice;
-        const klass = ["choice-btn", isSelected ? "selected" : "", isCorrect ? "correct" : "", isWrong ? "wrong" : ""].join(" ").trim();
-        const badge = isCorrect ? '<span class="result-badge">✓ Correct</span>' : (isWrong ? '<span class="result-badge">✗ Wrong</span>' : "");
+        const isWrong = revealShown && isSelected && id !== s.correctChoice && !s.acceptEither;
+        const isAlsoOk = revealShown && s.acceptEither && isSelected && id !== s.correctChoice;
+        const klass = ["choice-btn", isSelected ? "selected" : "", isCorrect ? "correct" : "", isWrong ? "wrong" : "", isAlsoOk ? "possible" : ""].join(" ").trim();
+        const badge = isCorrect
+          ? `<span class="result-badge">${s.acceptEither ? "✓ Preferred" : "✓ Correct"}</span>`
+          : (isWrong ? '<span class="result-badge">✗ Wrong</span>' : (isAlsoOk ? '<span class="result-badge">Also possible</span>' : ""));
         return `<button class="${klass}" data-choice="${id}" ${disabled} aria-label="Select option ${letters[id]}"><span class="letter">${letters[id]}</span><span class="choice-text">${txt}</span>${badge}</button>`;
       }).join("");
       const narrativeHtml = s.narrativeImage
@@ -1260,7 +1289,8 @@
         <div class="choices">${choicesHtml}</div>
         <div class="reveal ${revealShown ? "show" : ""}">
           ${revealShown ? `
-            <div class="box correct"><div class="label">CORRECT PATH</div>${s.correct}</div>
+            ${s.revealImage ? `<figure class="choice-vignette-image-wrap" style="margin:0 0 0.85rem;"><img class="choice-vignette-image" src="${s.revealImage.src}" alt="${s.revealImage.alt}" loading="lazy" decoding="async"></figure>` : ""}
+            <div class="box correct"><div class="label">${s.correctLabel || "CORRECT PATH"}</div>${s.correct}</div>
             <div class="box teaching"><div class="label">TEACHING POINT</div>${s.teaching}</div>
             ${s.danger ? `<div class="box danger"><div class="label">⚠ DANGER</div>${s.danger}</div>` : ""}
             ${s.keyFlag ? `<div class="box flag"><div class="label">🔑 KEY FLAG</div>${s.keyFlag}</div>` : ""}
@@ -1472,12 +1502,14 @@
       sectionState[currentSection].selected = selectedChoice;
 
       if (!sectionState[currentSection].counted) {
-        totalChoicesMade += 1;
-        if (selectedChoice === section.correctChoice) score += 1;
+        if (!section.acceptEither) {
+          totalChoicesMade += 1;
+          if (selectedChoice === section.correctChoice) score += 1;
+        }
         sectionState[currentSection].counted = true;
       }
 
-      if (selectedChoice !== section.correctChoice) {
+      if (!section.acceptEither && selectedChoice !== section.correctChoice) {
         wrongTimeline = { sectionIndex: currentSection, choiceId: selectedChoice };
       }
       renderSection();
