@@ -797,7 +797,7 @@
         title: "Meet Theo",
         narrative: "It's 03:17 on Tuesday morning. After a quiet start to the shift you've finished ward round and all the jobs are done. Your bleep goes off - it's the postnatal ward.",
         details: [
-          ["Age", "2 days old"], ["Presenting complaint", "Floppy, not feeding since yesterday"], ["Delivery", "Unassisted home birth"],
+          ["Age", "2 days old"], ["Gestation", "37+6"], ["Presenting complaint", "Floppy, not feeding since yesterday"], ["Delivery", "Unassisted home birth"],
           ["Antenatal care", "None"], ["Newborn screening", "Not done"], ["Vitamin K", "Not given"]
         ]
       },
@@ -809,31 +809,21 @@
       {
         type: "choice",
         chapter: "ACT 1",
-        title: "The Paramedic Adds",
-        narrative: "The paramedic adds: <strong>'Oh the BM is 1.7, where would you like us to meet you?'</strong>",
-        question: "Where do you direct the crew?",
+        title: "The Midwife Adds",
+        narrative: "The midwife adds: <strong>'Oh the BM is 1.7, is there anything else youd like us to do?'</strong>",
+        question: "What would you like to do?",
         choices: {
-          a: "Resus",
-          b: "Acute",
-          c: "Triage"
+          a: "Attend immediately",
+          b: "Ask them to feed and recheck in 1 hour",
+          c: "Ignore its probably just a cold foot"
         },
         correctChoice: "a",
-        correct: "A: Meet in resus",
-        teaching: "BM 1.7 in a floppy neonate is an emergency. Resus gives priority to this unwell baby, prepares a team to start investigation and treatment in parrallel, and provides adequate space and resource if the patient deteriorates",
-        danger: "Meeting in acute assessment or triage risks delayed handover, fragmented monitoring, and slower access to resuscitation equipment. In possible neonatal collapse the safest default is straight to resus with the team pre-alerted.",
+        correct: "A: Attend immediately",
+        teaching: "BM 1.7 in a floppy neonate is an emergency. You need to attend now, start treatment, and investigate in parallel. Feeding and waiting, or dismissing a low BM as a cold foot, delays glucose, airway support, and a proper assessment.",
+        danger: "A floppy neonate with BM 1.7 is not safe to feed and wait, and a low reading is not explained by a cold foot. Delay lets glucose fall further and the baby can become unresponsive on the postnatal ward before help arrives.",
         wrongOutcomes: {
-          b: "The paramedics arrive in acute and Theo is put in bay 1. The unit is very busy and it takes a few minutes to get Theo booked in and for the ambulance to handover. By the time observations are done Theo is now completely unresponsive worht alarming observations",
-          c: "The paramedics arrive to triage, unfortunately its 3am and there is no one in triage so after waiting a couple of minutes they come round to acute. By this time the baby is now completely unresponsive and you rush round to resus"
-        },
-        wrongOutcomeImages: {
-          b: {
-            src: "../images/acute-assessment-corridor.png",
-            alt: "Hospital corridor with acute assessment bays and equipment staged along the walls"
-          },
-          c: {
-            src: "../images/emergency-department-exterior.png",
-            alt: "Hospital emergency department exterior with separate children's and adults' entrances"
-          }
+          b: "The midwife tries a feed. Theo is too floppy to feed safely, milk sits in his mouth, and an hour later the BM is lower. By the time you arrive he is unresponsive.",
+          c: "The call is left as a likely cold-foot reading. Later the midwife finds Theo completely unresponsive and you are crashed to the postnatal ward."
         }
       },
       {
