@@ -208,7 +208,52 @@
     }
   };
 
+  /* Problems list. Clinician picks each one; nothing is added automatically
+   * from gestation, results, or any other entered value. */
+  var PROBLEMS = [
+    { id: 'suspected-sepsis', label: 'Suspected sepsis' },
+    { id: 'sepsis-risk', label: 'Sepsis risk factors' },
+    { id: 'hypo', label: 'Hypoglycaemia' },
+    { id: 'hypo-risk', label: 'Hypoglycaemia risk factors' },
+    { id: 'late-preterm', label: 'Late preterm' },
+    { id: 'jaundice', label: 'Jaundice' },
+    { id: 'feeding', label: 'Feeding difficulty' },
+    { id: 'weight-loss', label: 'Weight loss' },
+    { id: 'idm', label: 'Infant of diabetic mother' },
+    { id: 'sga', label: 'Small for gestational age' },
+    { id: 'lga', label: 'Large for gestational age' },
+    { id: 'resp', label: 'Respiratory symptoms' },
+    { id: 'temperature', label: 'Temperature instability' },
+    { id: 'murmur', label: 'Murmur' },
+    { id: 'antenatal', label: 'Antenatal finding' },
+    { id: 'maternal-meds', label: 'Maternal medication' },
+    { id: 'hips', label: 'Hip risk factors' },
+    { id: 'other', label: 'Other' }
+  ];
+
+  var PROBLEM_STATUSES = [
+    { value: 'new', label: 'New' },
+    { value: 'ongoing', label: 'Ongoing' },
+    { value: 'resolved', label: 'Resolved' }
+  ];
+
+  /* Items the clinician marks as still awaited at the next review. */
+  var PENDING_ITEMS = [
+    { value: 'culture', label: 'Blood culture' },
+    { value: 'crp', label: 'CRP' },
+    { value: 'bilirubin', label: 'Bilirubin' },
+    { value: 'glucose', label: 'Blood glucose' },
+    { value: 'gas', label: 'Blood gas' },
+    { value: 'weight', label: 'Weight' },
+    { value: 'senior', label: 'Senior review' },
+    { value: 'nipe', label: 'NIPE' },
+    { value: 'hearing', label: 'Hearing screen' },
+    { value: 'hepb', label: 'Hep B vaccine' },
+    { value: 'other', label: 'Other' }
+  ];
+
   var STEPS = [
+    { id: 'problems', label: 'Problems' },
     { id: 'context', label: 'Context' },
     { id: 'background', label: 'Background' },
     { id: 'history', label: 'History' },
@@ -865,6 +910,9 @@
     FACTORS: FACTORS,
     NICE_DOC: NICE_DOC,
     STEPS: STEPS,
+    PROBLEMS: PROBLEMS,
+    PROBLEM_STATUSES: PROBLEM_STATUSES,
+    PENDING_ITEMS: PENDING_ITEMS,
     REASONS: REASONS,
     PLACES: PLACES,
     MODES: MODES,

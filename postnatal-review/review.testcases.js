@@ -232,7 +232,7 @@ var numbered = review.buildBoxes({
   antibiotics: 'none',
   reviewWhen: '16:00'
 });
-assert.ok(numbered.discussion.indexOf('Plan:\n1. Remain with mother on the postnatal ward.\n2. Continue observations and review if they change.\n3. No antibiotics.\n4. Review at 16:00.') !== -1, 'multiple plan items are numbered on separate lines');
+assert.ok(numbered.discussion.indexOf('Plan:\n1. Remain with mother on the postnatal ward.\n2. Continue observations and review if they change.\n3. No antibiotics.\nNext review: 16:00.') !== -1, 'multiple plan items are numbered, then the next review line');
 assert.ok(review.buildBoxes({ antibiotics: 'none' }).discussion.indexOf('Plan: No antibiotics.') !== -1, 'a single plan item stays on one line');
 
 var perfusion = review.buildBoxes({
@@ -323,3 +323,30 @@ assert.strictEqual(cleared.impression, '', 'a new baby has no impression');
 assert.ok(boxes.all.indexOf('Examination') !== -1 && boxes.all.indexOf('Discussion') !== -1 && boxes.all.indexOf('Review') !== -1, 'copy all names the three boxes');
 
 console.log('postnatal review tests passed');
+
+/* Problems list and next review: clinician-chosen only. */
+var noProblems = review.buildBoxes({ gestationAtBirth: '35+4', glucoses: [{ time: '', value: '1.9', method: 'meter' }] });
+assert.strictEqual(noProblems.problems, '', 'no problems are inferred from gestation or glucose');
+
+var withProblems = review.buildBoxes({
+  problems: [
+    { type: 'hypo', status: 'ongoing', detail: 'pre-feed glucose 2.4', plan: 'continue pre-feed checks' },
+    { type: 'other', label: 'Tongue tie', status: 'new', detail: '', plan: '' },
+    { type: 'jaundice', status: 'resolved', detail: 'below line', plan: 'none' }
+  ],
+  reviewWhen: '16:00',
+  multi: { pending: ['culture', 'other'] },
+  pendingOther: 'repeat SBR',
+  escalation: 'temperature unstable or feeding worsens'
+});
+assert.ok(withProblems.problems.indexOf('Problems:\n1. Hypoglycaemia (ongoing): pre-feed glucose 2.4. Plan: continue pre-feed checks.') === 0, 'first problem written with status, detail and plan');
+assert.ok(withProblems.problems.indexOf('2. Tongue tie (new).') !== -1, 'custom problem uses its typed name');
+assert.ok(withProblems.problems.indexOf('3. Jaundice (resolved)') !== -1, 'resolved problems stay in the full note');
+assert.ok(withProblems.all.indexOf('Problems:') === 0, 'copy all starts with the problems list');
+assert.ok(withProblems.discussion.indexOf('Next review: 16:00. Awaiting: Blood culture, repeat SBR. Escalate sooner if: temperature unstable or feeding worsens.') !== -1, 'next review line is written');
+assert.strictEqual(withProblems.discussion.indexOf('Review at'), -1, 'old review line is replaced');
+
+var shorterProblems = review.buildBoxes({ shorter: true, problems: [{ type: 'jaundice', status: 'resolved' }, { type: 'murmur', status: 'new' }] });
+assert.strictEqual(shorterProblems.problems, 'Problems:\n1. Murmur (new).', 'shorter note leaves out resolved problems');
+
+console.log('problems list tests passed');

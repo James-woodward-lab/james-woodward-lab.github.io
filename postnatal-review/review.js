@@ -28,8 +28,11 @@
 
   function emptyState() {
     return {
-      step: 'context',
+      step: 'problems',
       shorter: false,
+      problems: [],
+      pendingOther: '',
+      escalation: '',
       place: '',
       placeOther: '',
       reasons: [],
@@ -108,6 +111,10 @@
       state.glucoses = [{ time: '', value: '', method: '' }];
     }
     if (!Array.isArray(state.reasons)) state.reasons = [];
+    if (!Array.isArray(state.problems)) state.problems = [];
+    state.problems = state.problems.filter(function (p) { return p && typeof p === 'object'; }).map(function (p) {
+      return { type: p.type || 'other', label: p.label || '', status: p.status || '', detail: p.detail || '', plan: p.plan || '' };
+    });
     if (!state.answers) state.answers = {};
     if (!state.multi) state.multi = {};
     if (!state.exam) state.exam = {};
@@ -469,7 +476,6 @@
       if (state.antibioticDetail && state.antibioticDetail.trim()) started += ' ' + ensurePeriod(state.antibioticDetail.trim());
       bits.push(started);
     }
-    if (state.reviewWhen && state.reviewWhen.trim()) bits.push('Review at ' + state.reviewWhen.trim() + '.');
     if (state.seniorOutcome && state.seniorOutcome.trim()) bits.push('Senior discussion outcome: ' + ensurePeriod(state.seniorOutcome.trim()));
     return bits;
   }
@@ -481,6 +487,47 @@
     return 'Plan:\n' + bits.map(function (bit, index) {
       return (index + 1) + '. ' + bit;
     }).join('\n');
+  }
+
+  function problemLabel(problem) {
+    if (problem.type === 'other') return String(problem.label || '').trim();
+    var match = content.PROBLEMS.filter(function (item) { return item.id === problem.type; })[0];
+    var base = match ? match.label : '';
+    var custom = String(problem.label || '').trim();
+    return custom || base;
+  }
+
+  /* Formats only what the clinician selected and typed, in their order. */
+  function problemsText(state, shorter) {
+    var statuses = {};
+    content.PROBLEM_STATUSES.forEach(function (item) { statuses[item.value] = item.label.toLowerCase(); });
+    var rows = (state.problems || []).filter(function (problem) {
+      if (!problemLabel(problem)) return false;
+      return !(shorter && problem.status === 'resolved');
+    });
+    if (!rows.length) return '';
+    return 'Problems:\n' + rows.map(function (problem, index) {
+      var line = (index + 1) + '. ' + problemLabel(problem);
+      if (statuses[problem.status]) line += ' (' + statuses[problem.status] + ')';
+      var detail = String(problem.detail || '').trim();
+      var plan = String(problem.plan || '').trim();
+      line += detail ? ': ' + ensurePeriod(detail) : '.';
+      if (plan && !(shorter && problem.status === 'resolved')) line += ' Plan: ' + ensurePeriod(plan);
+      return line;
+    }).join('\n');
+  }
+
+  function nextReviewParagraph(state) {
+    var bits = [];
+    if (state.reviewWhen && state.reviewWhen.trim()) bits.push('Next review: ' + ensurePeriod(state.reviewWhen.trim()));
+    var pending = (state.multi.pending || []);
+    var labels = content.PENDING_ITEMS.filter(function (item) {
+      return pending.indexOf(item.value) !== -1 && item.value !== 'other';
+    }).map(function (item) { return item.label; });
+    if (pending.indexOf('other') !== -1 && state.pendingOther && state.pendingOther.trim()) labels.push(state.pendingOther.trim());
+    if (labels.length) bits.push('Awaiting: ' + labels.join(', ') + '.');
+    if (state.escalation && state.escalation.trim()) bits.push('Escalate sooner if: ' + ensurePeriod(state.escalation.trim()));
+    return bits.join(' ');
   }
 
   function parentParagraph(state) {
@@ -496,6 +543,7 @@
     return cleanLines([
       impressionParagraph(state),
       planParagraph(state),
+      nextReviewParagraph(state),
       parentParagraph(state)
     ]);
   }
@@ -708,11 +756,13 @@
     var examination = examinationText(state, !!state.shorter);
     var discussion = discussionText(state);
     var review = reviewText(state, !!state.shorter);
+    var problems = problemsText(state, !!state.shorter);
     return {
+      problems: problems,
       examination: examination,
       discussion: discussion,
       review: review,
-      all: ['Examination', examination, '', 'Discussion', discussion, '', 'Review', review].join('\n').trim(),
+      all: (problems ? problems + '\n\n' : '') + ['Examination', examination, '', 'Discussion', discussion, '', 'Review', review].join('\n').trim(),
       factors: factors,
       redCount: factors.filter(function (factor) { return factor.kind === 'ng195-red'; }).length,
       otherCount: factors.filter(function (factor) { return factor.kind === 'ng195-other'; }).length,
@@ -841,6 +891,7 @@
 
   function renderNote() {
     var boxes = buildBoxes(state);
+    setBox('out-problems', boxes.problems);
     setBox('out-examination', boxes.examination);
     setBox('out-discussion', boxes.discussion);
     setBox('out-review', boxes.review);
@@ -892,6 +943,7 @@
     show('jaundice-hours-wrap', state.answers['jaundice-24h'] === 'yes' || (state.multi.sinceBirth || []).indexOf('jaundice') !== -1);
     show('antibiotic-detail-wrap', state.antibiotics === 'started');
     show('senior-decision-wrap', state.antibiotics === 'senior');
+    show('pending-other-wrap', (state.multi.pending || []).indexOf('other') !== -1);
     show('bili-detail', state.bilirubin.kind === 'tcb' || state.bilirubin.kind === 'tsb');
   }
 
@@ -910,6 +962,10 @@
     else if (target.dataset.gas) state.gas[target.dataset.gas] = target.value;
     else if (target.dataset.bili) state.bilirubin[target.dataset.bili] = target.value;
     else if (target.dataset.kaiser) state.kaiser[target.dataset.kaiser] = target.value;
+    else if (target.dataset.problemField) {
+      var problem = state.problems[Number(target.dataset.index)];
+      if (problem) problem[target.dataset.problemField] = target.value;
+    }
     else if (target.dataset.glucoseField) {
       var row = state.glucoses[Number(target.dataset.index)];
       if (row) row[target.dataset.glucoseField] = target.value;
@@ -958,6 +1014,10 @@
     if (button.dataset.step) { go(button.dataset.step); return; }
     if (button.dataset.action) { runAction(button.dataset.action, button); return; }
     if (button.dataset.reason) { toggleReason(button.dataset.reason); return; }
+    if (button.dataset.problemAdd) { addProblem(button.dataset.problemAdd); return; }
+    if (button.dataset.problemStatus) { setProblemStatus(button); return; }
+    if (button.dataset.problemMove) { moveProblem(button); return; }
+    if (button.dataset.problemRemove != null) { removeProblem(Number(button.dataset.problemRemove)); return; }
     if (button.dataset.bind) { toggleBind(button.dataset.bind, button.dataset.value); return; }
     if (button.dataset.answer) { toggleAnswer(button.dataset.answer, button.dataset.value); return; }
     if (button.dataset.multi) { toggleMulti(button.dataset.multi, button.dataset.value); return; }
@@ -1010,6 +1070,37 @@
     var index = state.reasons.indexOf(id);
     if (index === -1) state.reasons.push(id);
     else state.reasons.splice(index, 1);
+    persist();
+    paint();
+  }
+
+  function addProblem(type) {
+    var exists = type !== 'other' && state.problems.some(function (p) { return p.type === type; });
+    if (!exists) state.problems.push({ type: type, label: '', status: '', detail: '', plan: '' });
+    persist();
+    paint();
+  }
+
+  function setProblemStatus(button) {
+    var problem = state.problems[Number(button.dataset.index)];
+    if (!problem) return;
+    problem.status = problem.status === button.dataset.problemStatus ? '' : button.dataset.problemStatus;
+    persist();
+    paint();
+  }
+
+  function moveProblem(button) {
+    var from = Number(button.dataset.index);
+    var to = from + (button.dataset.problemMove === 'up' ? -1 : 1);
+    if (to < 0 || to >= state.problems.length) return;
+    var item = state.problems.splice(from, 1)[0];
+    state.problems.splice(to, 0, item);
+    persist();
+    paint();
+  }
+
+  function removeProblem(index) {
+    if (index >= 0 && index < state.problems.length) state.problems.splice(index, 1);
     persist();
     paint();
   }
@@ -1157,7 +1248,8 @@
   function copyText(which, button) {
     var text;
     if (which === 'all') {
-      text = ['Examination', noteBoxText('examination'), '', 'Discussion', noteBoxText('discussion'), '', 'Review', noteBoxText('review')].join('\n').trim();
+      var problemsBox = noteBoxText('problems');
+      text = (problemsBox ? problemsBox + '\n\n' : '') + ['Examination', noteBoxText('examination'), '', 'Discussion', noteBoxText('discussion'), '', 'Review', noteBoxText('review')].join('\n').trim();
     } else {
       text = noteBoxText(which);
     }
@@ -1259,12 +1351,51 @@
   }
 
   function stepHtml(step) {
+    if (step === 'problems') return problemsHtml();
     if (step === 'context') return contextHtml();
     if (step === 'background') return backgroundHtml();
     if (step === 'history') return historyHtml();
     if (step === 'examination') return examinationHtml();
     if (step === 'results') return resultsHtml();
     return impressionHtml();
+  }
+
+  function problemsHtml() {
+    var added = {};
+    state.problems.forEach(function (p) { added[p.type] = true; });
+    var chips = '<div class="choices" role="group" aria-label="Add a problem">' + content.PROBLEMS.map(function (item) {
+      var on = item.id !== 'other' && added[item.id];
+      return '<button type="button" class="choice' + (on ? ' is-selected' : '') + '" data-problem-add="' + item.id + '"' +
+        (on ? ' aria-pressed="true"' : '') + '>' + (on ? '' : '+ ') + esc(item.label) + '</button>';
+    }).join('') + '</div>';
+    var total = state.problems.length;
+    var rows = state.problems.map(function (problem, index) {
+      var match = content.PROBLEMS.filter(function (item) { return item.id === problem.type; })[0];
+      var title = problem.type === 'other'
+        ? '<label class="field problem-name"><input data-problem-field="label" data-index="' + index + '" value="' + esc(problem.label) + '" placeholder="Name this problem" autocomplete="off" aria-label="Problem name"></label>'
+        : '<h3 class="problem-title">' + esc(match ? match.label : 'Problem') + '</h3>';
+      var statuses = '<div class="choices" role="group" aria-label="Status">' + content.PROBLEM_STATUSES.map(function (item) {
+        var on = problem.status === item.value;
+        return '<button type="button" class="choice choice--tight' + (on ? ' is-selected' : '') + '" data-problem-status="' + item.value + '" data-index="' + index + '">' + esc(item.label) + '</button>';
+      }).join('') + '</div>';
+      var tools = '<div class="problem-tools">' +
+        '<button type="button" class="text-button" data-problem-move="up" data-index="' + index + '" aria-label="Move up"' + (index === 0 ? ' disabled' : '') + '>\u2191</button>' +
+        '<button type="button" class="text-button" data-problem-move="down" data-index="' + index + '" aria-label="Move down"' + (index === total - 1 ? ' disabled' : '') + '>\u2193</button>' +
+        '<button type="button" class="text-button" data-problem-remove="' + index + '">Remove</button></div>';
+      return '<div class="problem-row' + (problem.status === 'resolved' ? ' is-resolved' : '') + '">' +
+        '<div class="problem-head"><span class="step-index">' + (index + 1) + '</span>' + title + tools + '</div>' +
+        statuses +
+        '<label class="field">' + fieldLabel('Detail') + '<input data-problem-field="detail" data-index="' + index + '" value="' + esc(problem.detail) + '" autocomplete="off" placeholder="What you have documented"></label>' +
+        '<label class="field">' + fieldLabel('Plan for this problem') + '<input data-problem-field="plan" data-index="' + index + '" value="' + esc(problem.plan) + '" autocomplete="off"></label>' +
+        '</div>';
+    }).join('');
+    return '<section class="step">' +
+      groupCard('Problems list',
+        '<p class="hint">Tap to add. Only problems you choose appear in the note, in the order shown here.</p>' +
+        chips +
+        (rows ? '<div class="problem-list">' + rows + '</div>' : '')
+      ) +
+      '</section>';
   }
 
   function contextHtml() {
@@ -1630,10 +1761,13 @@
         '<p class="hint">Names and times only. Doses stay on the drug chart.</p>' +
         '<div id="senior-decision-wrap">' + input('seniorDecision', 'Senior decision', state.seniorDecision, { wide: true }) + '</div>' +
         '<div id="antibiotic-detail-wrap">' + input('antibioticDetail', 'Drug names and times', state.antibioticDetail, { wide: true }) + '</div>' +
-        '<div class="num-row">' +
-          input('reviewWhen', 'Review at', state.reviewWhen, { wide: true, placeholder: '16:00 or sooner if concerned' }) +
-          input('seniorOutcome', 'Senior discussion outcome', state.seniorOutcome, { wide: true }) +
-        '</div>'
+        input('seniorOutcome', 'Senior discussion outcome', state.seniorOutcome, { wide: true })
+      ) +
+      groupCard('Next review',
+        input('reviewWhen', 'When', state.reviewWhen, { wide: true, placeholder: 'For example, 16:00, or after the next feed' }) +
+        '<div class="field">' + fieldLabel('Awaiting') + multiButtons('pending', content.PENDING_ITEMS, state.multi.pending || []) + '</div>' +
+        '<div id="pending-other-wrap">' + input('pendingOther', 'Other awaited item', state.pendingOther, { wide: true }) + '</div>' +
+        area('escalation', 'Escalate sooner if (as agreed)', state.escalation, 2)
       ) +
       groupCard('Discussion with parents',
         input('parentsWho', 'Who was present', state.parentsWho, { wide: true }) +
@@ -1649,6 +1783,7 @@
     normalize: normalize,
     ageInHours: ageInHours,
     buildBoxes: buildBoxes,
+    problemsText: problemsText,
     collectFactors: collectFactors,
     mount: mount
   };

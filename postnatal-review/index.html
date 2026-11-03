@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../css/postnatal-review.css">
   <script src="../js/theme-toggle.js"></script>
 </head>
-<body class="postnatal-review-app" data-step="context">
+<body class="postnatal-review-app" data-step="problems">
 <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
   <span aria-hidden="true">☀️</span>
 </button>
@@ -37,6 +37,13 @@
         <button type="button" class="note-copy" data-copy="all">Copy all</button>
       </div>
       <p class="note-disclaimer">Documentation aid only. This tool formats clinician-entered findings. It does not interpret observations, calculate gestation, assess sepsis risk, make diagnoses, or recommend management. The clinician remains responsible for reviewing and verifying all content before entering it into BadgerNet.</p>
+      <article class="note-sheet">
+        <header>
+          <h3>Problems</h3>
+          <button type="button" class="note-copy" data-copy="problems">Copy</button>
+        </header>
+        <div id="out-problems" class="note-body is-empty" contenteditable="true" data-note-box="problems" role="textbox" aria-multiline="true">Nothing for this box yet.</div>
+      </article>
       <article class="note-sheet">
         <header>
           <h3>Examination</h3>
