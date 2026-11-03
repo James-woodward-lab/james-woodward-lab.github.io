@@ -39,6 +39,44 @@
     { id: 'hypoglycaemia', label: 'Hypoglycaemia' }
   ];
 
+  /* Problems beyond the four pathways. Clinician picks each one; nothing is
+   * added from gestation, results, or any other entered value. */
+  var EXTRA_PROBLEMS = [
+    { id: 'jaundice', label: 'Jaundice' },
+    { id: 'feeding', label: 'Feeding difficulty' },
+    { id: 'weight-loss', label: 'Weight loss' },
+    { id: 'idm', label: 'Infant of diabetic mother' },
+    { id: 'sga', label: 'Small for gestational age' },
+    { id: 'lga', label: 'Large for gestational age' },
+    { id: 'resp', label: 'Respiratory symptoms' },
+    { id: 'murmur', label: 'Murmur' },
+    { id: 'antenatal', label: 'Antenatal finding' },
+    { id: 'maternal-meds', label: 'Maternal medication' },
+    { id: 'hips', label: 'Hip risk factors' },
+    { id: 'other', label: 'Other' }
+  ];
+
+  var PROBLEM_STATUSES = [
+    { value: 'new', label: 'New' },
+    { value: 'ongoing', label: 'Ongoing' },
+    { value: 'resolved', label: 'Resolved' }
+  ];
+
+  /* Items the clinician marks as still awaited at the next review. */
+  var PENDING_ITEMS = [
+    { value: 'culture', label: 'Blood culture' },
+    { value: 'crp', label: 'CRP' },
+    { value: 'bilirubin', label: 'Bilirubin' },
+    { value: 'glucose', label: 'Blood glucose' },
+    { value: 'gas', label: 'Blood gas' },
+    { value: 'weight', label: 'Weight' },
+    { value: 'senior', label: 'Senior review' },
+    { value: 'nipe', label: 'NIPE' },
+    { value: 'hearing', label: 'Hearing screen' },
+    { value: 'hepb', label: 'Hep B vaccine' },
+    { value: 'other', label: 'Other' }
+  ];
+
   var THERMAL_CARE = [
     { value: 'cot', label: 'Cot', prose: 'Cared for in a cot.' },
     { value: 'skin', label: 'Skin-to-skin', prose: 'Skin-to-skin documented.' },
@@ -207,6 +245,9 @@
     STEPS: STEPS,
     PLACES: PLACES,
     PATHWAYS: PATHWAYS,
+    EXTRA_PROBLEMS: EXTRA_PROBLEMS,
+    PROBLEM_STATUSES: PROBLEM_STATUSES,
+    PENDING_ITEMS: PENDING_ITEMS,
     THERMAL_CARE: THERMAL_CARE,
     HYPO_REASONS: HYPO_REASONS,
     HYPO_SYMPTOMS: HYPO_SYMPTOMS,

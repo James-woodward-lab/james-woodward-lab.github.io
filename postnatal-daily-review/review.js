@@ -38,6 +38,9 @@
       ageDays: '',
       ageHours: '',
       pathways: [],
+      problems: [],
+      pendingOther: '',
+      escalation: '',
       sinceLast: '',
       feedMode: '',
       latch: '',
@@ -91,6 +94,17 @@
       }
     });
     if (!Array.isArray(state.pathways)) state.pathways = [];
+    if (!Array.isArray(state.problems)) state.problems = [];
+    state.problems = state.problems.filter(function (p) { return p && typeof p === 'object' && p.type; }).map(function (p) {
+      return { type: p.type, label: p.label || '', status: p.status || '', detail: p.detail || '', plan: p.plan || '' };
+    });
+    /* Keep pathway problems and ticked pathways in step, for older drafts too. */
+    state.problems = state.problems.filter(function (p) {
+      return !isPathwayId(p.type) || state.pathways.indexOf(p.type) !== -1;
+    });
+    state.pathways.forEach(function (id) {
+      if (!state.problems.some(function (p) { return p.type === id; })) state.problems.push(blankProblem(id));
+    });
     if (!Array.isArray(state.glucoses) || !state.glucoses.length) {
       state.glucoses = [{ time: '', value: '', method: '' }];
     }
@@ -101,6 +115,55 @@
     if (!state.multi) state.multi = {};
     if (!state.exam) state.exam = {};
     return state;
+  }
+
+  function isPathwayId(id) {
+    return content.PATHWAYS.some(function (item) { return item.id === id; });
+  }
+
+  function blankProblem(type) {
+    return { type: type, label: '', status: '', detail: '', plan: '' };
+  }
+
+  function problemBaseLabel(type) {
+    var all = content.PATHWAYS.concat(content.EXTRA_PROBLEMS);
+    var match = all.filter(function (item) { return item.id === type; })[0];
+    return match ? match.label : '';
+  }
+
+  function problemLabel(problem) {
+    if (problem.type === 'other') return String(problem.label || '').trim();
+    return problemBaseLabel(problem.type);
+  }
+
+  /* Formats only what the clinician selected and typed, in their order. */
+  function problemsText(state) {
+    var statuses = {};
+    content.PROBLEM_STATUSES.forEach(function (item) { statuses[item.value] = item.label.toLowerCase(); });
+    var rows = (state.problems || []).filter(function (problem) { return !!problemLabel(problem); });
+    if (!rows.length) return '';
+    return 'Problems:\n' + rows.map(function (problem, index) {
+      var line = (index + 1) + '. ' + problemLabel(problem);
+      if (statuses[problem.status]) line += ' (' + statuses[problem.status] + ')';
+      var detail = String(problem.detail || '').trim();
+      var plan = String(problem.plan || '').trim();
+      line += detail ? ': ' + ensurePeriod(detail) : '.';
+      if (plan) line += ' Plan: ' + ensurePeriod(plan);
+      return line;
+    }).join('\n');
+  }
+
+  function nextReviewParagraph(state) {
+    var bits = [];
+    if (state.reviewWhen && state.reviewWhen.trim()) bits.push('Next review: ' + ensurePeriod(state.reviewWhen.trim()));
+    var pending = state.multi.pending || [];
+    var labels = content.PENDING_ITEMS.filter(function (item) {
+      return pending.indexOf(item.value) !== -1 && item.value !== 'other';
+    }).map(function (item) { return item.label; });
+    if (pending.indexOf('other') !== -1 && state.pendingOther && state.pendingOther.trim()) labels.push(state.pendingOther.trim());
+    if (labels.length) bits.push('Awaiting: ' + labels.join(', ') + '.');
+    if (state.escalation && state.escalation.trim()) bits.push('Escalate sooner if: ' + ensurePeriod(state.escalation.trim()));
+    return bits.join(' ');
   }
 
   function num(value) {
@@ -519,7 +582,6 @@
         if (trimmed) bits.push(ensurePeriod(trimmed));
       });
     }
-    if (state.reviewWhen && state.reviewWhen.trim()) bits.push('Review at ' + state.reviewWhen.trim() + '.');
     return bits;
   }
 
@@ -535,6 +597,7 @@
   function buildNote(partial) {
     var state = normalize(partial);
     var blocks = [];
+    var problems = problemsText(state);
     blocks.push(openingLine(state));
     if (state.gestationAtBirth && String(state.gestationAtBirth).trim()) {
       blocks.push('Gestation at birth ' + String(state.gestationAtBirth).trim() + '.');
@@ -549,7 +612,10 @@
     blocks = blocks.concat(temperatureSection(state));
     blocks = blocks.concat(hypoglycaemiaSection(state));
     blocks.push(planParagraph(state));
-    return cleanLines(blocks);
+    blocks.push(nextReviewParagraph(state));
+    var body = cleanLines(blocks);
+    if (!problems) return body;
+    return body ? problems + '\n\n' + body : problems;
   }
 
   function missingRequired(state) {
@@ -716,6 +782,7 @@
     show('culture-detail-wrap', state.cultureStatus === 'growth');
     show('jaundice-detail', state.jaundice === 'tcb' || state.jaundice === 'tsb');
     show('hypo-reason-other-wrap', (state.multi.hypoReasons || []).indexOf('other') !== -1);
+    show('pending-other-wrap', (state.multi.pending || []).indexOf('other') !== -1);
     show('hypo-symptom-other-wrap', (state.multi.hypoSymptoms || []).indexOf('other') !== -1);
   }
 
@@ -731,6 +798,10 @@
     state.noteEdits = {};
     if (target.dataset.field) state[target.dataset.field] = target.value;
     else if (target.dataset.obs) state.obs[target.dataset.obs] = target.value;
+    else if (target.dataset.problemField) {
+      var problem = state.problems[Number(target.dataset.index)];
+      if (problem) problem[target.dataset.problemField] = target.value;
+    }
     else if (target.dataset.glucoseField) {
       var glucoseRow = state.glucoses[Number(target.dataset.index)];
       if (glucoseRow) glucoseRow[target.dataset.glucoseField] = target.value;
@@ -758,6 +829,10 @@
     if (button.dataset.step) { go(button.dataset.step); return; }
     if (button.dataset.action) { runAction(button.dataset.action, button); return; }
     if (button.dataset.pathway) { togglePathway(button.dataset.pathway); return; }
+    if (button.dataset.problemAdd) { addProblem(button.dataset.problemAdd); return; }
+    if (button.dataset.problemStatus) { setProblemStatus(button); return; }
+    if (button.dataset.problemMove) { moveProblem(button); return; }
+    if (button.dataset.problemRemove != null) { removeProblem(Number(button.dataset.problemRemove)); return; }
     if (button.dataset.bind) { toggleBind(button.dataset.bind, button.dataset.value); return; }
     if (button.dataset.answer) { toggleAnswer(button.dataset.answer, button.dataset.value); return; }
     if (button.dataset.multi) { toggleMulti(button.dataset.multi, button.dataset.value); return; }
@@ -813,8 +888,49 @@
 
   function togglePathway(id) {
     var index = state.pathways.indexOf(id);
-    if (index === -1) state.pathways.push(id);
-    else state.pathways.splice(index, 1);
+    if (index === -1) {
+      state.pathways.push(id);
+      state.problems.push(blankProblem(id));
+    } else {
+      state.pathways.splice(index, 1);
+      state.problems = state.problems.filter(function (p) { return p.type !== id; });
+    }
+    persist();
+    paint();
+  }
+
+  function addProblem(type) {
+    var exists = type !== 'other' && state.problems.some(function (p) { return p.type === type; });
+    if (!exists) state.problems.push(blankProblem(type));
+    persist();
+    paint();
+  }
+
+  function setProblemStatus(button) {
+    var problem = state.problems[Number(button.dataset.index)];
+    if (!problem) return;
+    problem.status = problem.status === button.dataset.problemStatus ? '' : button.dataset.problemStatus;
+    persist();
+    paint();
+  }
+
+  function moveProblem(button) {
+    var from = Number(button.dataset.index);
+    var to = from + (button.dataset.problemMove === 'up' ? -1 : 1);
+    if (to < 0 || to >= state.problems.length) return;
+    var item = state.problems.splice(from, 1)[0];
+    state.problems.splice(to, 0, item);
+    persist();
+    paint();
+  }
+
+  function removeProblem(index) {
+    var problem = state.problems[index];
+    if (!problem) return;
+    state.problems.splice(index, 1);
+    if (isPathwayId(problem.type)) {
+      state.pathways = state.pathways.filter(function (id) { return id !== problem.type; });
+    }
     persist();
     paint();
   }
@@ -1006,6 +1122,45 @@
     return planHtml();
   }
 
+  function problemsCard() {
+    var added = {};
+    state.problems.forEach(function (p) { added[p.type] = true; });
+    var pathwayChips = '<div class="choices" role="group" aria-label="Pathways">' + content.PATHWAYS.map(function (item) {
+      var on = hasPathway(state, item.id);
+      return '<button type="button" class="choice' + (on ? ' is-selected' : '') + '" data-pathway="' + item.id + '" aria-pressed="' + on + '">' + esc(item.label) + '</button>';
+    }).join('') + '</div>';
+    var extraChips = '<div class="choices" role="group" aria-label="Add another problem">' + content.EXTRA_PROBLEMS.map(function (item) {
+      var on = item.id !== 'other' && added[item.id];
+      return '<button type="button" class="choice' + (on ? ' is-selected' : '') + '" data-problem-add="' + item.id + '">' + (on ? '' : '+ ') + esc(item.label) + '</button>';
+    }).join('') + '</div>';
+    var total = state.problems.length;
+    var rows = state.problems.map(function (problem, index) {
+      var title = problem.type === 'other'
+        ? '<label class="field problem-name"><input data-problem-field="label" data-index="' + index + '" value="' + esc(problem.label) + '" placeholder="Name this problem" autocomplete="off" aria-label="Problem name"></label>'
+        : '<h3 class="problem-title">' + esc(problemBaseLabel(problem.type)) + '</h3>';
+      var statuses = '<div class="choices" role="group" aria-label="Status">' + content.PROBLEM_STATUSES.map(function (item) {
+        var on = problem.status === item.value;
+        return '<button type="button" class="choice choice--tight' + (on ? ' is-selected' : '') + '" data-problem-status="' + item.value + '" data-index="' + index + '">' + esc(item.label) + '</button>';
+      }).join('') + '</div>';
+      var tools = '<div class="problem-tools">' +
+        '<button type="button" class="text-button" data-problem-move="up" data-index="' + index + '" aria-label="Move up"' + (index === 0 ? ' disabled' : '') + '>\u2191</button>' +
+        '<button type="button" class="text-button" data-problem-move="down" data-index="' + index + '" aria-label="Move down"' + (index === total - 1 ? ' disabled' : '') + '>\u2193</button>' +
+        '<button type="button" class="text-button" data-problem-remove="' + index + '">Remove</button></div>';
+      return '<div class="problem-row' + (problem.status === 'resolved' ? ' is-resolved' : '') + '">' +
+        '<div class="problem-head"><span class="step-index">' + (index + 1) + '</span>' + title + tools + '</div>' +
+        statuses +
+        '<label class="field">' + fieldLabel('Detail') + '<input data-problem-field="detail" data-index="' + index + '" value="' + esc(problem.detail) + '" autocomplete="off" placeholder="One line for the list"></label>' +
+        '<label class="field">' + fieldLabel('Plan for this problem') + '<input data-problem-field="plan" data-index="' + index + '" value="' + esc(problem.plan) + '" autocomplete="off"></label>' +
+        '</div>';
+    }).join('');
+    return groupCard('Problems list',
+      '<div class="field">' + fieldLabel('Pathways') + '<p class="hint">Each pathway you tick opens its own section in Pathways.</p>' + pathwayChips + '</div>' +
+      '<div class="field">' + fieldLabel('Other problems') + extraChips + '</div>' +
+      '<p class="hint">Only problems you choose appear at the top of the note, in the order shown here.</p>' +
+      (rows ? '<div class="problem-list">' + rows + '</div>' : '')
+    );
+  }
+
   function contextHtml() {
     return '<section class="step">' +
       '<p id="context-needed" class="quiet-prompt">Age at review is still needed.</p>' +
@@ -1013,13 +1168,7 @@
         half(bindChoices('place', 'Place', content.PLACES)) +
         '<div id="place-other-wrap" class="half">' + input('placeOther', 'Where', state.placeOther, { wide: true, placeholder: 'For example, recovery' }) + '</div>'
       ) +
-      groupCard('Pathways',
-        '<div class="field">' + fieldLabel('Select every pathway that applies') +
-        '<div class="choices">' + content.PATHWAYS.map(function (item) {
-          var on = hasPathway(state, item.id);
-          return '<button type="button" class="choice' + (on ? ' is-selected' : '') + '" data-pathway="' + item.id + '">' + esc(item.label) + '</button>';
-        }).join('') + '</div></div>'
-      ) +
+      problemsCard() +
       groupCard('Gestation and age',
         input('gestationAtBirth', 'Gestation at birth (as documented by clinician)', state.gestationAtBirth, { wide: true, placeholder: 'For example, 34+2' }) +
         '<div class="field">' + fieldLabel('Current age') + choiceButtons('data-bind', 'ageMode', [
@@ -1248,8 +1397,13 @@
             return '<button type="button" class="choice" data-phrase="' + item.id + '">' + esc(item.label) + '</button>';
           }).join('') + '</div>'
           : '<p class="hint">Select a pathway to see optional plan phrases. Phrases are never added from numbers.</p>') +
-        area('plan', 'Plan', state.plan, 4) +
-        input('reviewWhen', 'Review at', state.reviewWhen, { wide: true, placeholder: 'tomorrow or 16:00' })
+        area('plan', 'Plan', state.plan, 4)
+      ) +
+      groupCard('Next review',
+        input('reviewWhen', 'When', state.reviewWhen, { wide: true, placeholder: 'tomorrow or 16:00' }) +
+        '<div class="field">' + fieldLabel('Awaiting') + multiButtons('pending', content.PENDING_ITEMS, state.multi.pending || []) + '</div>' +
+        '<div id="pending-other-wrap">' + input('pendingOther', 'Other awaited item', state.pendingOther, { wide: true }) + '</div>' +
+        area('escalation', 'Escalate sooner if (as agreed)', state.escalation, 2)
       ) +
       '</section>';
   }
@@ -1259,6 +1413,7 @@
     normalize: normalize,
     ageInHours: ageInHours,
     buildNote: buildNote,
+    problemsText: problemsText,
     glucoseOwner: glucoseOwner,
     tempOwner: tempOwner,
     mount: mount

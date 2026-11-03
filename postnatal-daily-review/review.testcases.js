@@ -61,7 +61,7 @@ assert.ok(note.indexOf('Blood glucose, recorded for the late preterm pathway and
 assert.strictEqual(note.split('2.8 mmol/L').length - 1, 1, 'glucose value is written once');
 assert.strictEqual(note.indexOf('Blood glucose: 2.8'), -1, 'unlabelled glucose line is not also written');
 assert.ok(note.indexOf('Plan: Continue current feeding plan.') !== -1 || note.indexOf('Continue current feeding plan.') !== -1, 'plan is transcribed');
-assert.ok(note.indexOf('Review at tomorrow.') !== -1, 'review time is transcribed');
+assert.ok(note.indexOf('Next review: tomorrow.') !== -1, 'next review time is transcribed');
 assert.ok(note.indexOf('Temperature: 36.8') !== -1, 'examination temperature is transcribed as entered');
 assert.ok(note.indexOf('Appears well.') !== -1, 'NAD general is transcribed');
 assert.strictEqual(forbidden(note), false, 'combined sample does not generate forbidden words');
@@ -184,5 +184,33 @@ var migrated = review.normalize({ pathways: 'late-preterm', glucoses: null, temp
 assert.deepStrictEqual(migrated.pathways, [], 'a non-array pathways value is cleared');
 assert.strictEqual(migrated.glucoses.length, 1, 'missing glucose rows become one empty row');
 assert.strictEqual(migrated.temps.length, 1, 'missing temperature rows become one empty row');
+
+/* Problems list and next review: clinician-chosen only. */
+var bare = review.buildNote({ gestationAtBirth: '35+1', glucoses: [{ time: '', value: '1.8', method: 'meter' }] });
+assert.strictEqual(bare.indexOf('Problems:'), -1, 'no problems are inferred from gestation or glucose');
+
+var migratedPathways = review.normalize({ pathways: ['sepsis', 'hypoglycaemia'] });
+assert.deepStrictEqual(migratedPathways.problems.map(function (p) { return p.type; }), ['sepsis', 'hypoglycaemia'], 'ticked pathways appear as problems');
+
+var listed = review.buildNote({
+  place: 'postnatal',
+  pathways: ['sepsis'],
+  problems: [
+    { type: 'jaundice', status: 'new', detail: 'SBR below line', plan: 'repeat as planned' },
+    { type: 'sepsis', status: 'ongoing', detail: 'day 2 antibiotics', plan: '' },
+    { type: 'other', label: 'Tongue tie', status: '', detail: '', plan: '' }
+  ],
+  reviewWhen: 'tomorrow',
+  multi: { pending: ['culture', 'other'] },
+  pendingOther: 'repeat SBR',
+  escalation: 'temperature unstable'
+});
+assert.strictEqual(listed.indexOf('Problems:\n1. Jaundice (new): SBR below line. Plan: repeat as planned.\n2. Suspected sepsis (ongoing): day 2 antibiotics.\n3. Tongue tie.'), 0, 'problems lead the note in the chosen order');
+assert.ok(listed.indexOf('Suspected sepsis.') > listed.indexOf('3. Tongue tie.'), 'pathway sections still follow below');
+assert.ok(listed.indexOf('Next review: tomorrow. Awaiting: Blood culture, repeat SBR. Escalate sooner if: temperature unstable.') !== -1, 'next review line is written');
+assert.strictEqual(listed.indexOf('Review at'), -1, 'old review line is replaced');
+
+var dropped = review.normalize({ pathways: [], problems: [{ type: 'sepsis' }, { type: 'murmur' }] });
+assert.deepStrictEqual(dropped.problems.map(function (p) { return p.type; }), ['murmur'], 'unticked pathways leave the problems list');
 
 console.log('postnatal daily review tests passed');
