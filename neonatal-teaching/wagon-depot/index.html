@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#22143d">
+  <meta name="color-scheme" content="dark">
+  <title>The Wagon Depot - Neonatal Teaching</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rye&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/app-theme.css">
+  <link rel="stylesheet" href="wagon-depot.css?v=20261103c">
+  <script src="../../js/theme-toggle.js"></script>
+</head>
+<body class="wagon-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="px-cactus" viewBox="0 0 12 16" shape-rendering="crispEdges">
+      <rect x="5" y="1" width="2" height="15" fill="#2f6b30"/>
+      <rect x="4" y="2" width="1" height="14" fill="#4c9a45"/>
+      <rect x="7" y="2" width="1" height="14" fill="#1f4a20"/>
+      <rect x="1" y="5" width="2" height="5" fill="#2f6b30"/>
+      <rect x="1" y="9" width="4" height="2" fill="#2f6b30"/>
+      <rect x="9" y="3" width="2" height="6" fill="#2f6b30"/>
+      <rect x="7" y="8" width="4" height="2" fill="#2f6b30"/>
+    </symbol>
+    <symbol id="px-mesas" viewBox="0 0 160 30" preserveAspectRatio="none" shape-rendering="crispEdges">
+      <g fill="#7a2f3b">
+        <rect x="0" y="18" width="160" height="12"/>
+        <rect x="8" y="10" width="26" height="8"/>
+        <rect x="12" y="6" width="18" height="4"/>
+        <rect x="58" y="13" width="36" height="5"/>
+        <rect x="64" y="9" width="22" height="4"/>
+        <rect x="116" y="9" width="32" height="9"/>
+        <rect x="122" y="5" width="18" height="4"/>
+      </g>
+      <g fill="#4a1d2c">
+        <rect x="0" y="24" width="160" height="6"/>
+        <rect x="28" y="20" width="24" height="4"/>
+        <rect x="94" y="21" width="30" height="3"/>
+        <rect x="140" y="19" width="20" height="5"/>
+      </g>
+    </symbol>
+
+    <!-- CO2 wagon: covered wagon, 36 x 22 -->
+    <symbol id="px-wagon" viewBox="0 0 36 22" shape-rendering="crispEdges">
+      <rect x="6" y="2" width="22" height="9" fill="#f3dfb1"/>
+      <rect x="8" y="1" width="18" height="1" fill="#f3dfb1"/>
+      <rect x="6" y="2" width="22" height="1" fill="#e2c892"/>
+      <rect x="10" y="3" width="1" height="8" fill="#c9ad7a"/>
+      <rect x="16" y="3" width="1" height="8" fill="#c9ad7a"/>
+      <rect x="22" y="3" width="1" height="8" fill="#c9ad7a"/>
+      <rect x="4" y="11" width="26" height="6" fill="#6b3f1f"/>
+      <rect x="4" y="11" width="26" height="1" fill="#8b5a2b"/>
+      <rect x="4" y="16" width="26" height="1" fill="#3b2212"/>
+      <rect x="30" y="13" width="4" height="2" fill="#3b2212"/>
+      <rect x="2" y="13" width="2" height="2" fill="#3b2212"/>
+      <rect x="7" y="15" width="6" height="6" fill="#3b2212"/>
+      <rect x="9" y="17" width="2" height="2" fill="#c48a1e"/>
+      <rect x="22" y="15" width="6" height="6" fill="#3b2212"/>
+      <rect x="24" y="17" width="2" height="2" fill="#c48a1e"/>
+    </symbol>
+
+    <!-- Outlaw (H+): black hat, bandana, 13 x 17 -->
+    <symbol id="px-outlaw" viewBox="0 0 13 17" shape-rendering="crispEdges">
+      <rect x="2" y="2" width="9" height="1" fill="#1b0f08"/>
+      <rect x="4" y="0" width="5" height="2" fill="#1b0f08"/>
+      <rect x="4" y="3" width="5" height="3" fill="#e9b887"/>
+      <rect x="5" y="4" width="1" height="1" fill="#1b0f08"/>
+      <rect x="7" y="4" width="1" height="1" fill="#1b0f08"/>
+      <rect x="4" y="6" width="5" height="2" fill="#b3261e"/>
+      <rect x="3" y="8" width="7" height="5" fill="#3b2a3a"/>
+      <rect x="1" y="8" width="2" height="4" fill="#3b2a3a"/>
+      <rect x="10" y="8" width="2" height="4" fill="#3b2a3a"/>
+      <rect x="3" y="13" width="3" height="4" fill="#2a2024"/>
+      <rect x="7" y="13" width="3" height="4" fill="#2a2024"/>
+      <rect x="5" y="9" width="3" height="3" fill="#f2c14e"/>
+      <rect x="6" y="9" width="1" height="3" fill="#1b0f08"/>
+      <rect x="5" y="10" width="3" height="1" fill="#1b0f08"/>
+    </symbol>
+
+    <!-- Sheriff (HCO3-): tan hat, blue shirt, gold star, 13 x 17 -->
+    <symbol id="px-sheriff" viewBox="0 0 13 17" shape-rendering="crispEdges">
+      <rect x="2" y="2" width="9" height="1" fill="#c48a1e"/>
+      <rect x="4" y="0" width="5" height="2" fill="#d9a35b"/>
+      <rect x="4" y="3" width="5" height="4" fill="#e9b887"/>
+      <rect x="5" y="4" width="1" height="1" fill="#1b0f08"/>
+      <rect x="7" y="4" width="1" height="1" fill="#1b0f08"/>
+      <rect x="3" y="7" width="7" height="6" fill="#2f5d8a"/>
+      <rect x="1" y="7" width="2" height="4" fill="#2f5d8a"/>
+      <rect x="10" y="7" width="2" height="4" fill="#2f5d8a"/>
+      <rect x="3" y="13" width="3" height="4" fill="#6b3f1f"/>
+      <rect x="7" y="13" width="3" height="4" fill="#6b3f1f"/>
+      <rect x="4" y="8" width="3" height="3" fill="#f2c14e"/>
+      <rect x="5" y="9" width="1" height="1" fill="#c48a1e"/>
+    </symbol>
+
+    <!-- Doctor (bunkhouse deputy / haemoglobin) -->
+    <symbol id="px-deputy" viewBox="0 0 13 17" shape-rendering="crispEdges">
+      <rect x="4" y="0" width="5" height="4" fill="#e9b887"/>
+      <rect x="4" y="0" width="5" height="1" fill="#6b3f1f"/>
+      <rect x="5" y="2" width="1" height="1" fill="#1b0f08"/>
+      <rect x="7" y="2" width="1" height="1" fill="#1b0f08"/>
+      <rect x="3" y="4" width="7" height="9" fill="#f3dfb1"/>
+      <rect x="1" y="4" width="2" height="5" fill="#f3dfb1"/>
+      <rect x="10" y="4" width="2" height="5" fill="#f3dfb1"/>
+      <rect x="6" y="4" width="1" height="9" fill="#d9c49a"/>
+      <rect x="4" y="5" width="1" height="4" fill="#b3261e"/>
+      <rect x="8" y="5" width="1" height="4" fill="#b3261e"/>
+      <rect x="4" y="9" width="5" height="1" fill="#b3261e"/>
+      <rect x="3" y="13" width="3" height="4" fill="#2a2024"/>
+      <rect x="7" y="13" width="3" height="4" fill="#2a2024"/>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="wd-app">
+
+  <header class="wd-header">
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+    <div class="header-inner">
+      <a class="px-link" href="../index.html">&#9664; Gas Saloon</a>
+      <p class="title-kicker">The Henderson&ndash;Hasselbalch equation, one wagon at a time</p>
+      <h1 class="game-title">The Wagon Depot</h1>
+      <p class="title-sub">CO&#8322; wagons bring both outlaws and sheriffs. Outlaws are hydrogen ions. Sheriffs are bicarbonate.</p>
+    </div>
+  </header>
+
+  <!-- Cast strip -->
+  <section class="cast-strip" aria-label="Who is who">
+    <div class="cast-item">
+      <svg class="cast-art wagon-cast" viewBox="0 0 36 22" width="72" height="44"><use href="#px-wagon"/></svg>
+      <div><strong>CO&#8322; wagon</strong><span>PaCO&#8322;. Each wagon unloads one outlaw and one sheriff.</span></div>
+    </div>
+    <div class="cast-item">
+      <svg class="cast-art" viewBox="0 0 13 17" width="39" height="51"><use href="#px-outlaw"/></svg>
+      <div><strong>Outlaw</strong><span>Hydrogen ion, H&#8314;. Outlaws roaming free set the pH.</span></div>
+    </div>
+    <div class="cast-item">
+      <svg class="cast-art" viewBox="0 0 13 17" width="39" height="51"><use href="#px-sheriff"/></svg>
+      <div><strong>Sheriff</strong><span>Bicarbonate, HCO&#8323;&#8315;. Catches an outlaw and takes it back to a wagon.</span></div>
+    </div>
+    <div class="cast-item">
+      <svg class="cast-art" viewBox="0 0 13 17" width="39" height="51"><use href="#px-deputy"/></svg>
+      <div><strong>Bunkhouse deputy</strong><span>Haemoglobin and proteins. Holds outlaws for a short while during a surge.</span></div>
+    </div>
+  </section>
+
+  <!-- Main layout -->
+  <section class="wd-layout">
+
+    <div class="wd-main">
+
+    <!-- Scenario buttons -->
+    <div class="scenario-bar" aria-label="Guided scenarios">
+      <span class="scenario-bar-label">Scenarios</span>
+      <div class="btn-row">
+        <button class="px-btn px-btn-scn" type="button" data-scenario="normal">Quiet town</button>
+        <button class="px-btn px-btn-scn" type="button" data-scenario="acute-surge">Acute wagon surge</button>
+        <button class="px-btn px-btn-scn" type="button" data-scenario="chronic">Chronic surge (5 days)</button>
+        <button class="px-btn px-btn-scn" type="button" data-scenario="posse">Outlaw posse</button>
+        <button class="px-btn px-btn-scn" type="button" data-scenario="posse-lungs">Posse + Marshal responds</button>
+        <button class="px-btn px-btn-scn" type="button" data-scenario="hyperventilation">Hyperventilation</button>
+        <button class="px-btn px-btn-scn" type="button" data-scenario="sheriff-train">Sheriff train</button>
+      </div>
+    </div>
+
+    <!-- Town -->
+    <div class="town-panel">
+      <div class="town-top">
+        <div class="town-live" aria-live="off">
+          <span><b id="live-wagons">0</b> wagons in the depot</span>
+          <span><b id="live-outlaws">0</b> outlaws roaming free</span>
+          <span><b id="live-sheriffs">0</b> sheriffs in town</span>
+        </div>
+        <div class="town-banner" id="town-banner" aria-live="polite"></div>
+      </div>
+
+      <div class="depot" id="town-depot" aria-label="Wagon depot (carbonic acid)">
+        <div class="depot-sign">WAGON DEPOT <small>carbonic acid, H&#8322;CO&#8323;</small></div>
+        <div class="depot-road"></div>
+        <div class="wagon-layer" id="wagon-layer"></div>
+        <div class="depot-marshal" title="The Marshal's Wagon Patrol removes wagons (lungs)">
+          <span>Marshal&rsquo;s Wagon Patrol &rarr;</span>
+          <small>lungs</small>
+        </div>
+      </div>
+
+      <div class="street" id="town-street" aria-label="Main street">
+        <div class="building bunkhouse" id="bunkhouse">
+          <div class="building-roof"></div>
+          <div class="building-sign">BUNKHOUSE</div>
+          <div class="building-body">
+            <svg class="building-icon" viewBox="0 0 13 17" width="26" height="34"><use href="#px-deputy"/></svg>
+            <div class="building-count"><b id="bunkhouse-count">0</b><span>held</span></div>
+          </div>
+          <small class="building-note">haemoglobin</small>
+        </div>
+
+        <div class="street-ground"></div>
+        <div class="actor-layer" id="actor-layer"></div>
+
+        <div class="building-stack">
+          <div class="building recruit" id="recruit-office">
+            <div class="building-roof"></div>
+            <div class="building-sign">RECRUITMENT</div>
+            <div class="building-body small">
+              <span class="recruit-note">adds sheriffs over days</span>
+            </div>
+            <small class="building-note">kidneys</small>
+          </div>
+          <div class="building office" id="sheriff-office">
+            <div class="building-roof"></div>
+            <div class="building-sign">SHERIFF</div>
+            <div class="building-body">
+              <div class="office-grid" id="office-grid"></div>
+              <div class="building-count"><b id="office-count">0</b><span>on duty</span></div>
+            </div>
+            <small class="building-note">bicarbonate reserve</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="town-legend">
+        <span>Town targets from the equation:</span>
+        <span><b id="legend-wagons">8</b> wagons</span>
+        <span><b id="legend-sheriffs">12</b> sheriffs</span>
+        <span><b id="legend-outlaws">8</b> free outlaws</span>
+        <span><b id="legend-held">0</b> in the bunkhouse</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <section class="controls-panel" aria-label="Controls">
+      <div class="control-group">
+        <h2>Marshal&rsquo;s Wagon Patrol <small>lungs: set the wagon traffic</small></h2>
+        <label class="slider-row" for="co2-slider">
+          <span>PaCO&#8322;</span>
+          <input type="range" id="co2-slider" min="2" max="12" step="0.1" value="5.3">
+          <output id="co2-slider-out" for="co2-slider">5.3 kPa</output>
+        </label>
+        <label class="slider-row" for="days-slider">
+          <span>Days since change</span>
+          <input type="range" id="days-slider" min="0" max="5" step="0.5" value="0">
+          <output id="days-slider-out" for="days-slider">just now (acute)</output>
+        </label>
+        <p class="control-note">The Sheriff Recruitment Office adds sheriffs over time. Slide the days forward to let the kidneys respond.</p>
+      </div>
+
+      <div class="control-group">
+        <h2>Metabolic events <small>change the sheriff count directly</small></h2>
+        <div class="btn-row">
+          <button class="px-btn px-btn-danger" id="btn-posse" type="button" title="P">Outlaw posse <small>&minus;4 HCO&#8323;&#8315;</small></button>
+          <button class="px-btn px-btn-good" id="btn-train" type="button" title="T">Sheriff train <small>+4 HCO&#8323;&#8315;</small></button>
+          <button class="px-btn px-btn-ghost" id="btn-offset-reset" type="button">Clear</button>
+        </div>
+        <p class="control-note">Offset: <b id="offset-out">+0 mmol/L</b>. Posses are lactate, ketones, or lost bicarbonate. Trains are bicarbonate given or acid vomited away.</p>
+        <div class="btn-row">
+          <button class="px-btn" id="btn-pause" type="button" aria-pressed="false" title="Space">Pause town</button>
+          <button class="px-btn px-btn-ghost" id="btn-reset" type="button" title="R">Reset</button>
+        </div>
+        <p class="control-note">Keys: <kbd>P</kbd> posse, <kbd>T</kbd> train, <kbd>R</kbd> reset, <kbd>Space</kbd> pause.</p>
+      </div>
+    </section>
+
+    <!-- Scenario text -->
+    <section class="scenario-panel" id="scenario-panel" aria-label="Scenario notes">
+      <h3 id="scenario-title">A quiet town</h3>
+      <p id="scenario-text"></p>
+      <ol class="how-list" id="scenario-steps"></ol>
+    </section>
+
+    </div>
+
+    <!-- Readouts -->
+    <aside class="readout-panel">
+
+      <div class="meter-card">
+        <div class="meter-head">
+          <h2>Town Order Meter</h2>
+          <span class="meter-sub">pH reports the number of outlaws roaming free</span>
+        </div>
+        <div class="meter-big">
+          <span class="meter-label">pH</span>
+          <span class="meter-value" id="ph-value">7.40</span>
+          <span class="meter-zone zone-good" id="ph-zone">Orderly</span>
+        </div>
+        <div class="order-meter zone-good" id="ph-meter" aria-hidden="true">
+          <div class="order-band band-bad" style="left:0;width:40%"></div>
+          <div class="order-band band-warn" style="left:40%;width:15%"></div>
+          <div class="order-band band-good" style="left:55%;width:10%"></div>
+          <div class="order-band band-warn" style="left:65%;width:15%"></div>
+          <div class="order-band band-bad" style="left:80%;width:20%"></div>
+          <div class="order-needle" id="ph-needle" style="left:60%"></div>
+          <div class="order-ticks"><span>6.8</span><span>7.2</span><span>7.35</span><span>7.45</span><span>7.8</span></div>
+        </div>
+        <p class="meter-foot">Free outlaws: <b id="h-value">40</b> nmol/L H&#8314;. More free outlaws means lower pH.</p>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-head">
+          <h2>Sheriff-to-Wagon Ratio Dial</h2>
+          <span class="meter-sub">HCO&#8323;&#8315; &divide; dissolved CO&#8322;. This ratio is what sets pH.</span>
+        </div>
+        <div class="meter-big">
+          <span class="meter-label">ratio</span>
+          <span class="meter-value" id="ratio-value">20.0 : 1</span>
+        </div>
+        <div class="ratio-bar zone-good" id="ratio-bar" aria-hidden="true">
+          <div class="ratio-fill" id="ratio-fill" style="width:50%"></div>
+          <div class="ratio-tick" style="left:50%"><span>20 : 1</span></div>
+        </div>
+        <p class="meter-foot" id="ratio-note">About 20 sheriffs per unit of wagon pressure. Normal.</p>
+      </div>
+
+      <dl class="stat-grid">
+        <div class="stat">
+          <dt>PaCO&#8322; <span>wagons</span></dt>
+          <dd><span class="stat-value" id="co2-value">5.3</span> <span class="stat-unit">kPa</span><small id="co2-mmhg">40 mmHg</small></dd>
+        </div>
+        <div class="stat">
+          <dt>HCO&#8323;&#8315; <span>sheriffs</span></dt>
+          <dd><span class="stat-value" id="hco3-value">24.0</span> <span class="stat-unit">mmol/L</span></dd>
+        </div>
+        <div class="stat">
+          <dt>Base excess <span>posse check</span></dt>
+          <dd><span class="stat-value" id="be-value">0.0</span> <span class="stat-unit">mmol/L</span></dd>
+        </div>
+      </dl>
+
+      <div class="interp-card">
+        <span class="interp-label">Gas reads as</span>
+        <strong id="interp">Normal acid&ndash;base</strong>
+      </div>
+
+      <div class="equation-card">
+        <h2>The equation, live</h2>
+        <div class="equation">
+          <span class="eq-ph">pH</span> = 6.1 + log<sub>10</sub>
+          <span class="frac">
+            <span class="num"><span id="eq-hco3">24.0</span> <small>HCO&#8323;&#8315;</small></span>
+            <span class="den">0.23 &times; <span id="eq-co2">5.3</span> <small>PaCO&#8322; kPa</small></span>
+          </span>
+        </div>
+        <div class="equation-steps">
+          <span>= 6.1 + log<sub>10</sub>(<span id="eq-ratio">20.0</span>)</span>
+          <span>= 6.1 + <span id="eq-log">1.30</span></span>
+          <span>= <b id="eq-ph">7.40</b></span>
+        </div>
+        <p class="equation-mmhg">
+          Dissolved CO&#8322; = <span id="eq-dissolved">1.20</span> mmol/L.
+          In mmHg: 0.03 &times; <span id="eq-co2-mmhg">40</span> = <span id="eq-dissolved-mmhg">1.20</span> mmol/L.
+        </p>
+      </div>
+
+      <div class="be-card">
+        <h2>Base excess: park the wagons at 5.3 kPa</h2>
+        <p>To tell a posse from a wagon problem, imagine the Marshal parks exactly the normal number of wagons (PaCO&#8322; 5.3 kPa, 40 mmHg) and count the sheriffs that would be left.</p>
+        <dl class="be-grid">
+          <div><dt>Sheriffs at 5.3 kPa</dt><dd><span id="be-std-hco3">24.0</span> mmol/L</dd></div>
+          <div><dt>Versus a normal town</dt><dd><span id="be-std-sheriffs">0.0</span></dd></div>
+          <div><dt>pH would be</dt><dd><span id="be-std-ph">7.40</span></dd></div>
+          <div><dt>Free outlaws would be</dt><dd><span id="be-std-h">40</span> nmol/L</dd></div>
+        </dl>
+        <p class="be-word" id="be-word">With the wagons parked normally the sheriff count is about right.</p>
+        <p class="comp-hint" id="comp-hint" hidden></p>
+      </div>
+
+    </aside>
+  </section>
+
+  <!-- Reference -->
+  <section class="reference-panel">
+    <details open>
+      <summary>How to read the town</summary>
+      <ul class="ref-list">
+        <li><strong>CO&#8322; wagons bring both outlaws and sheriffs.</strong> CO&#8322; + H&#8322;O &#8652; H&#8322;CO&#8323; &#8652; H&#8314; + HCO&#8323;&#8315;. One wagon, one of each.</li>
+        <li><strong>pH reports the number of outlaws roaming free.</strong> More free outlaws means lower pH. pH 7.40 is 40 nmol/L of H&#8314;; pH 7.10 is 80 nmol/L.</li>
+        <li><strong>The ratio, not the count, sets pH.</strong> A town with 40 sheriffs and twice the wagons has the same pH as a normal town. That is why the Sheriff-to-Wagon Ratio Dial sits beside the Town Order Meter.</li>
+        <li><strong>The Marshal&rsquo;s Posse removes CO&#8322; wagons.</strong> Breathing faster clears wagons in minutes. Breathing less lets them pile up.</li>
+        <li><strong>The Sheriff Recruitment Office adds sheriffs over time.</strong> The kidneys take days to recruit (or stand down) sheriffs, so a chronic wagon surge has a far better pH than an acute one.</li>
+        <li><strong>Bunkhouse deputies temporarily contain outlaws during an acute wagon surge.</strong> Haemoglobin and proteins buffer H&#8314; within minutes, which is why bicarbonate rises by only about 1 mmol/L per 10 mmHg acutely.</li>
+        <li><strong>Base excess</strong> fixes the wagons at 5.3 kPa and asks how many sheriffs are missing or spare. Missing sheriffs mean a posse has been through (metabolic acidosis). Spare sheriffs mean a sheriff train or a busy Recruitment Office (metabolic alkalosis or renal compensation).</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Acute versus chronic wagon surge</summary>
+      <table class="ref-table">
+        <thead><tr><th>PaCO&#8322;</th><th>Acute HCO&#8323;&#8315;</th><th>Acute pH</th><th>Chronic HCO&#8323;&#8315;</th><th>Chronic pH</th></tr></thead>
+        <tbody>
+          <tr><td>5.3 kPa (40)</td><td>24</td><td>7.40</td><td>24</td><td>7.40</td></tr>
+          <tr><td>6.7 kPa (50)</td><td>25</td><td>7.32</td><td>27.5</td><td>7.36</td></tr>
+          <tr><td>8.0 kPa (60)</td><td>26</td><td>7.26</td><td>31</td><td>7.33</td></tr>
+          <tr><td>9.3 kPa (70)</td><td>27</td><td>7.21</td><td>34.5</td><td>7.31</td></tr>
+          <tr><td>10.7 kPa (80)</td><td>28</td><td>7.17</td><td>38</td><td>7.30</td></tr>
+        </tbody>
+      </table>
+      <p class="ref-note">Rules of thumb: acute +1 mmol/L HCO&#8323;&#8315; per 10 mmHg rise (&minus;2 per 10 mmHg fall); chronic +3.5 per 10 mmHg rise (&minus;5 per 10 mmHg fall). Winter&rsquo;s formula for expected PaCO&#8322; in metabolic acidosis: 1.5 &times; HCO&#8323;&#8315; + 8 (&plusmn;2) mmHg.</p>
+    </details>
+    <details>
+      <summary>Units and limits</summary>
+      <p class="ref-note">kPa are used throughout; mmHg appear in small print. 1 kPa = 7.5 mmHg. The equation constant is 0.03 mmol/L per mmHg, which is 0.225 per kPa (shown as 0.23). The sprite counts are scaled to keep the town readable: one wagon per 5 mmHg, one sheriff per 2 mmol/L, one free outlaw per 5 nmol/L. The numbers on the dials are the real values.</p>
+      <p class="ref-note">Teaching aid only. The model uses textbook compensation rules and a simplified Van Slyke base excess. It is not for clinical decision making.</p>
+    </details>
+  </section>
+
+  <footer class="wd-footer">
+    <a class="px-link" href="../index.html">&#9664; Back to the Gas Saloon</a>
+  </footer>
+
+</main>
+
+<script src="../../js/gas-core.js?v=20261103c"></script>
+<script src="model.js?v=20261103c"></script>
+<script src="sim.js?v=20261103c"></script>
+<script src="app.js?v=20261103c"></script>
+</body>
+</html>

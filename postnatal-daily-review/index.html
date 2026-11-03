@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="A documentation aid that formats clinician-entered daily postnatal and transitional care review findings into a readable note for manual transfer into BadgerNet. It does not interpret clinical data, calculate gestational age, assess risk, diagnose, or recommend treatment.">
+  <title>Postnatal daily review</title>
+  <link rel="stylesheet" href="../css/app-theme.css">
+  <link rel="stylesheet" href="../css/postnatal-review.css">
+  <script src="../js/theme-toggle.js"></script>
+</head>
+<body class="postnatal-review-app postnatal-daily-review-app" data-step="context">
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+  <span aria-hidden="true">☀️</span>
+</button>
+<main id="review-app" class="review-shell">
+  <header class="review-header">
+    <div>
+      <h1>Postnatal daily review</h1>
+      <p>A documentation aid for babies already on the postnatal ward or transitional care. It formats clinician-entered findings into one note for manual transfer into BadgerNet. It does not interpret clinical data, calculate gestational age, assess risk, diagnose, or recommend treatment.</p>
+    </div>
+    <button type="button" class="text-button" data-action="new-baby">New baby</button>
+  </header>
+
+  <div id="status-strip" class="status-strip" aria-live="polite"></div>
+
+  <div class="workspace">
+    <nav id="step-bar" class="step-bar" aria-label="Jump to a section"></nav>
+    <div id="step-panel"></div>
+
+    <aside id="note-panel" class="note-panel" aria-label="BadgerNet note">
+      <div class="note-panel-head">
+        <h2>BadgerNet</h2>
+        <button type="button" class="note-copy" data-copy="note">Copy</button>
+      </div>
+      <p class="note-disclaimer">Documentation aid only. This tool formats clinician-entered findings. It does not interpret observations, calculate gestation, assess sepsis risk, make diagnoses, or recommend management. The clinician remains responsible for reviewing and verifying all content before entering it into BadgerNet.</p>
+      <article class="note-sheet">
+        <header>
+          <h3>Review</h3>
+        </header>
+        <div id="out-note" class="note-body is-empty" contenteditable="true" data-note-box="note" role="textbox" aria-multiline="true">Nothing for this box yet.</div>
+      </article>
+    </aside>
+  </div>
+
+  <p class="draft-hint">This draft stays in this browser tab only. On a shared computer, use New baby before you leave.</p>
+  <footer class="review-disclaimer">
+    Documentation aid only. This tool formats clinician-entered findings. It does not interpret observations, calculate gestation, assess sepsis risk, make diagnoses, or recommend management. The clinician remains responsible for reviewing and verifying all content before entering it into BadgerNet.
+  </footer>
+
+  <div id="confirm-new" class="confirm-layer" hidden>
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-new-title">
+      <p id="confirm-new-title">Clear this review and the draft saved in this tab?</p>
+      <div class="confirm-actions">
+        <button type="button" class="text-button" data-action="keep-baby">Keep</button>
+        <button type="button" class="text-button is-primary" data-action="clear-baby">Clear</button>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="content.js"></script>
+<script src="review.js"></script>
+</body>
+</html>

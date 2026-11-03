@@ -1,0 +1,932 @@
+/* The Wagon Depot — animated Henderson–Hasselbalch sandbox */
+
+body.wagon-app {
+  --ink: #1b0f08;
+  --wood-dark: #3b2212;
+  --wood: #6b3f1f;
+  --wood-light: #9a6233;
+  --parchment: #f3dfb1;
+  --parchment-dark: #dcbc7f;
+  --gold: #f2c14e;
+  --gold-dark: #c48a1e;
+  --gold-light: #ffe39a;
+  --blood: #b3261e;
+  --straw: #c4a05a;
+  --straw-dark: #8a6a32;
+  --law-blue: #2f5d8a;
+  --good: #2f6b30;
+  --good-light: #4c9a45;
+  --warn: #ec7f3a;
+  --sky-1: #22143d;
+  --sky-2: #452058;
+  --sky-3: #84305a;
+  --sky-4: #c9493f;
+  --sky-5: #ec7f3a;
+  --sky-6: #f5b553;
+  --sand: #d9a35b;
+  --sand-dark: #b8813f;
+  --font-west: "Rye", Georgia, serif;
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-term: "VT323", ui-monospace, monospace;
+
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--sky-1);
+  color: var(--parchment);
+  font-family: var(--font-term);
+  font-size: 20px;
+  line-height: 1.2;
+  overflow-x: hidden;
+}
+
+body.wagon-app *,
+body.wagon-app *::before,
+body.wagon-app *::after { box-sizing: border-box; }
+
+body.wagon-app [hidden] { display: none !important; }
+
+body.wagon-app .theme-toggle,
+body.wagon-app .back-home-link { display: none !important; }
+
+.wagon-app .wd-app {
+  width: min(1320px, 100%);
+  margin: 0 auto;
+  padding: 0 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.wagon-app svg { max-width: none; }
+
+/* ---------- header ---------- */
+.wagon-app .wd-header {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -16px;
+  padding: 14px 16px 18px;
+  min-height: 190px;
+  display: flex;
+  align-items: flex-end;
+}
+.wagon-app .scenery {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--sky-1) 0 18%,
+    var(--sky-2) 18% 34%,
+    var(--sky-3) 34% 50%,
+    var(--sky-4) 50% 64%,
+    var(--sky-5) 64% 78%,
+    var(--sky-6) 78% 100%
+  );
+}
+.wagon-app .scenery .ground-strip {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 44px;
+  background:
+    radial-gradient(circle, var(--sand-dark) 0 2px, transparent 2.5px) 0 0 / 40px 30px,
+    var(--sand);
+  border-top: 4px solid var(--ink);
+}
+.wagon-app .scenery .mesas { position: absolute; left: 0; width: 100%; bottom: 44px; height: 60px; }
+.wagon-app .scenery .cactus { position: absolute; bottom: 38px; height: 56px; width: 42px; }
+.wagon-app .scenery .cactus-a { left: 4%; }
+.wagon-app .scenery .cactus-b { right: 6%; height: 40px; width: 30px; }
+.wagon-app .px-sun {
+  position: absolute;
+  left: 70%;
+  bottom: 90px;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(to bottom, #fff0a8 0 40%, #ffd25e 40% 70%, #ffb347 70% 100%);
+  clip-path: polygon(
+    30% 0, 70% 0, 70% 8%, 84% 8%, 84% 16%, 92% 16%, 92% 30%, 100% 30%,
+    100% 70%, 92% 70%, 92% 84%, 84% 84%, 84% 92%, 70% 92%, 70% 100%,
+    30% 100%, 30% 92%, 16% 92%, 16% 84%, 8% 84%, 8% 70%, 0 70%,
+    0 30%, 8% 30%, 8% 16%, 16% 16%, 16% 8%, 30% 8%
+  );
+}
+.wagon-app .header-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 30px;
+}
+.wagon-app .px-link {
+  align-self: flex-start;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+  text-decoration: none;
+}
+.wagon-app .px-link:hover { text-decoration: underline; }
+.wagon-app .title-kicker {
+  margin: 6px 0 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.2vw, 11px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--straw);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.wagon-app .game-title {
+  margin: 0;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  text-align: center;
+  color: var(--gold);
+  text-shadow: 4px 4px 0 var(--ink), 8px 8px 0 var(--blood), 12px 12px 0 var(--ink);
+}
+.wagon-app .title-sub {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ---------- shared panel chrome ---------- */
+.wagon-app .panel-chrome,
+.wagon-app .town-panel,
+.wagon-app .readout-panel > *,
+.wagon-app .controls-panel,
+.wagon-app .scenario-panel,
+.wagon-app .reference-panel,
+.wagon-app .cast-strip {
+  background: var(--parchment);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 9px var(--wood),
+    0 0 0 12px var(--ink),
+    8px 10px 0 12px rgba(27, 15, 8, 0.45);
+}
+
+.wagon-app h2 {
+  margin: 0;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--blood);
+}
+.wagon-app h2 small {
+  display: block;
+  font-family: var(--font-term);
+  font-size: 17px;
+  color: var(--wood-dark);
+}
+
+/* ---------- cast strip ---------- */
+.wagon-app .cast-strip {
+  margin-top: 12px;
+  padding: 8px 14px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+.wagon-app .cast-item { display: flex; gap: 10px; align-items: center; }
+.wagon-app .cast-art { flex: none; shape-rendering: crispEdges; width: 26px; height: 34px; }
+.wagon-app .cast-art.wagon-cast { width: 52px; height: 32px; }
+.wagon-app .cast-item strong {
+  display: block;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  margin-bottom: 3px;
+  color: var(--wood-dark);
+}
+.wagon-app .cast-item span { font-size: 16px; line-height: 1.1; display: block; }
+
+/* ---------- layout ---------- */
+.wagon-app .wd-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
+  gap: 26px;
+  align-items: start;
+}
+.wagon-app .wd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+/* scenario bar above the town */
+.wagon-app .scenario-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 12px;
+  background: var(--parchment);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 9px var(--wood),
+    0 0 0 12px var(--ink),
+    8px 10px 0 12px rgba(27, 15, 8, 0.45);
+}
+.wagon-app .scenario-bar-label {
+  flex: none;
+  font-family: var(--font-west);
+  font-size: 20px;
+  color: var(--blood);
+}
+.wagon-app .scenario-bar .btn-row { flex: 1; gap: 4px 6px; }
+.wagon-app .scenario-bar .px-btn { font-size: 8px; padding: 7px 9px; margin: 3px; }
+
+/* ---------- town ---------- */
+.wagon-app .town-panel {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.wagon-app .town-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 30px;
+}
+.wagon-app .town-live {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 18px;
+  color: var(--wood-dark);
+}
+.wagon-app .town-live b {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--blood);
+}
+.wagon-app .town-banner {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  padding: 6px 10px;
+  color: var(--parchment);
+  background: var(--ink);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+.wagon-app .town-banner.show { animation: wd-banner 2.6s steps(1) forwards; opacity: 1; transform: none; }
+.wagon-app .town-banner.bad { background: var(--blood); }
+.wagon-app .town-banner.good { background: var(--law-blue); }
+@keyframes wd-banner {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* depot */
+.wagon-app .depot {
+  position: relative;
+  height: 112px;
+  overflow: hidden;
+  background:
+    linear-gradient(to bottom, #e7c48c 0 56%, var(--sand) 56% 100%);
+  border: 3px solid var(--ink);
+}
+.wagon-app .depot-sign {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 3px 10px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  background: var(--wood-dark);
+  color: var(--gold);
+  box-shadow: 0 0 0 2px var(--ink);
+  white-space: nowrap;
+}
+.wagon-app .depot-sign small {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-term);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--parchment);
+  text-align: center;
+}
+.wagon-app .depot-road {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 40%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 28px, rgba(27, 15, 8, 0.18) 28px 32px),
+    var(--sand-dark);
+  border-top: 2px solid var(--ink);
+}
+.wagon-app .depot-marshal {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  z-index: 3;
+  text-align: right;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--wood-dark);
+  pointer-events: none;
+}
+.wagon-app .depot-marshal small {
+  display: block;
+  font-family: var(--font-term);
+  font-size: 14px;
+}
+.wagon-app .wagon-layer { position: absolute; inset: 0; z-index: 2; }
+.wagon-app .wagon {
+  position: absolute;
+  left: 0; top: 0;
+  width: 72px;
+  height: 44px;
+  will-change: transform;
+}
+.wagon-app .wagon-art {
+  width: 72px;
+  height: 44px;
+  shape-rendering: crispEdges;
+  filter: drop-shadow(2px 2px 0 rgba(27, 15, 8, 0.4));
+  animation: wd-wagon-sway 0.9s steps(2) infinite;
+}
+.wagon-app .wagon-tag {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--wood-dark);
+  pointer-events: none;
+}
+/* pair aboard: the CO2 tag glows; empty wagon: tag dims */
+.wagon-app .wagon .wagon-tag { opacity: 0.45; }
+.wagon-app .wagon.is-occupied .wagon-tag { opacity: 1; color: var(--blood); }
+.wagon-app .wagon.is-boarding .wagon-art { animation: wd-wagon-board 0.6s steps(2) infinite; }
+@keyframes wd-wagon-board { 0%, 100% { filter: drop-shadow(2px 2px 0 rgba(27,15,8,.4)); } 50% { filter: drop-shadow(2px 2px 0 rgba(27,15,8,.4)) brightness(1.35); } }
+.wagon-app .wagon.is-flash .wagon-art { animation: wd-wagon-flash 0.5s steps(2); }
+.wagon-app .wagon.is-unload .wagon-art { animation: wd-wagon-bounce 0.35s steps(3); }
+@keyframes wd-wagon-sway { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(1px); } }
+@keyframes wd-wagon-flash { 0%, 100% { filter: drop-shadow(2px 2px 0 rgba(27,15,8,.4)); } 50% { filter: drop-shadow(0 0 0 #fff) brightness(1.8); } }
+@keyframes wd-wagon-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* street */
+.wagon-app .street {
+  position: relative;
+  height: clamp(220px, 30vh, 300px);
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  background:
+    radial-gradient(circle, rgba(184, 129, 63, 0.55) 0 2px, transparent 2.5px) 0 0 / 34px 26px,
+    var(--sand);
+}
+.wagon-app .street-ground { position: absolute; inset: 0; pointer-events: none; }
+.wagon-app .actor-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.wagon-app .actor {
+  position: absolute;
+  left: 0; top: 0;
+  width: 26px;
+  height: 34px;
+  shape-rendering: crispEdges;
+  will-change: transform;
+  filter: drop-shadow(1px 1px 0 rgba(27, 15, 8, 0.45));
+}
+.wagon-app .actor.is-moving { animation: wd-step 0.32s steps(2) infinite; }
+.wagon-app .actor.is-riding { animation: wd-ride 0.2s steps(2) infinite; }
+.wagon-app .actor.is-escorting { filter: drop-shadow(0 0 0 var(--gold)) drop-shadow(1px 1px 0 rgba(27, 15, 8, 0.45)); }
+.wagon-app .actor.idle {
+  position: static;
+  width: 16px;
+  height: 21px;
+  filter: none;
+}
+@keyframes wd-step { 0%, 100% { margin-top: 0; } 50% { margin-top: -2px; } }
+@keyframes wd-ride { 0%, 100% { margin-top: 0; } 50% { margin-top: -3px; } }
+
+.wagon-app .street.is-paused .actor,
+.wagon-app .depot.is-paused .wagon-art { animation-play-state: paused; }
+
+/* buildings */
+.wagon-app .building {
+  position: absolute;
+  z-index: 1;
+  width: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.wagon-app .bunkhouse { left: 10px; top: 52px; }
+.wagon-app .building-stack {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  bottom: 8px;
+  width: 148px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+.wagon-app .building-stack .building { position: relative; width: 100%; }
+.wagon-app .building-roof {
+  height: 12px;
+  background: var(--wood-dark);
+  box-shadow: 0 0 0 2px var(--ink);
+  clip-path: polygon(0 100%, 8% 0, 92% 0, 100% 100%);
+}
+.wagon-app .building-sign {
+  padding: 5px 6px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  text-align: center;
+  letter-spacing: 0.06em;
+  background: var(--wood);
+  color: var(--gold);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.wagon-app .building-body {
+  min-height: 72px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background:
+    repeating-linear-gradient(180deg, var(--wood-light) 0 10px, var(--wood) 10px 12px);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.wagon-app .building-body.small { min-height: 44px; justify-content: center; }
+.wagon-app .building-icon { flex: none; shape-rendering: crispEdges; }
+.wagon-app .building-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--parchment);
+  line-height: 1;
+}
+.wagon-app .building-count b {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--gold);
+}
+.wagon-app .building-count span { font-size: 15px; }
+.wagon-app .building-note {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--wood-dark);
+}
+.wagon-app .recruit-note { font-size: 15px; color: var(--parchment); text-align: center; line-height: 1.1; }
+.wagon-app .office .building-body { flex-direction: column; align-items: stretch; min-height: 96px; }
+.wagon-app .office-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  align-content: flex-start;
+  min-height: 44px;
+  max-height: 72px;
+  overflow: hidden;
+}
+.wagon-app .office .building-count { flex-direction: row; align-items: baseline; justify-content: center; gap: 6px; }
+
+.wagon-app .town-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 17px;
+  color: var(--wood-dark);
+}
+.wagon-app .town-legend b {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--ink);
+}
+
+/* ---------- readouts ---------- */
+.wagon-app .readout-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  /* room for the pixel box-shadows inside the scroll box */
+  padding: 14px 24px 26px 14px;
+  margin: -14px -24px -26px -14px;
+  scrollbar-width: thin;
+}
+.wagon-app .readout-panel > * { padding: 12px 14px; flex: none; }
+
+.wagon-app .meter-head { margin-bottom: 8px; }
+.wagon-app .meter-sub { display: block; font-size: 17px; color: var(--wood-dark); }
+.wagon-app .meter-big {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.wagon-app .meter-label {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--wood-dark);
+}
+.wagon-app .meter-value {
+  font-family: var(--font-pixel);
+  font-size: clamp(26px, 3vw, 40px);
+  color: var(--ink);
+  line-height: 1;
+}
+.wagon-app .meter-zone {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  padding: 5px 8px;
+  color: var(--parchment);
+  background: var(--good);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.wagon-app .meter-zone.zone-warn { background: var(--warn); color: var(--ink); }
+.wagon-app .meter-zone.zone-bad { background: var(--blood); }
+
+.wagon-app .order-meter {
+  position: relative;
+  margin: 14px 0 28px;
+  height: 18px;
+  border: 3px solid var(--ink);
+  background: var(--parchment-dark);
+}
+.wagon-app .order-band { position: absolute; top: 0; bottom: 0; }
+.wagon-app .band-bad { background: var(--blood); }
+.wagon-app .band-warn { background: var(--warn); }
+.wagon-app .band-good { background: var(--good-light); }
+.wagon-app .order-needle {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 6px;
+  margin-left: -3px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--gold);
+  transition: left 0.5s steps(10);
+}
+.wagon-app .order-ticks {
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  margin-top: 6px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--wood-dark);
+}
+.wagon-app .order-ticks span { position: absolute; transform: translateX(-50%); }
+.wagon-app .order-ticks span:nth-child(1) { left: 0; transform: none; }
+.wagon-app .order-ticks span:nth-child(2) { left: 40%; }
+.wagon-app .order-ticks span:nth-child(3) { left: 55%; }
+.wagon-app .order-ticks span:nth-child(4) { left: 65%; }
+.wagon-app .order-ticks span:nth-child(5) { left: 100%; transform: translateX(-100%); }
+.wagon-app .meter-foot { margin: 0; font-size: 18px; color: var(--wood-dark); }
+.wagon-app .meter-foot b { color: var(--blood); }
+
+.wagon-app .ratio-bar {
+  position: relative;
+  margin: 14px 0 26px;
+  height: 22px;
+  border: 3px solid var(--ink);
+  background: var(--parchment-dark);
+}
+.wagon-app .ratio-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--law-blue);
+  transition: width 0.5s steps(10);
+}
+.wagon-app .ratio-bar.zone-warn .ratio-fill { background: var(--warn); }
+.wagon-app .ratio-bar.zone-bad .ratio-fill { background: var(--blood); }
+.wagon-app .ratio-tick {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 4px;
+  margin-left: -2px;
+  background: var(--ink);
+}
+.wagon-app .ratio-tick span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 6px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  white-space: nowrap;
+  color: var(--wood-dark);
+}
+
+.wagon-app .stat-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.wagon-app .stat { padding: 0 6px; border-left: 3px solid var(--wood); }
+.wagon-app .stat:first-child { border-left: 0; padding-left: 0; }
+.wagon-app .stat dt {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--wood-dark);
+  margin-bottom: 6px;
+}
+.wagon-app .stat dt span { display: block; margin-top: 3px; font-family: var(--font-term); font-size: 15px; color: var(--straw-dark); }
+.wagon-app .stat dd { margin: 0; line-height: 1; }
+.wagon-app .stat-value { font-family: var(--font-pixel); font-size: 18px; color: var(--ink); }
+.wagon-app .stat-value.is-low { color: var(--blood); }
+.wagon-app .stat-value.is-high { color: var(--law-blue); }
+.wagon-app .stat-unit { font-size: 16px; color: var(--wood-dark); }
+.wagon-app .stat dd small { display: block; margin-top: 4px; font-size: 15px; color: var(--straw-dark); }
+
+.wagon-app .interp-card {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--ink) !important;
+  color: var(--parchment) !important;
+}
+.wagon-app .interp-label { font-family: var(--font-pixel); font-size: 9px; color: var(--straw); }
+.wagon-app .interp-card strong { font-family: var(--font-west); font-weight: 400; font-size: 24px; color: var(--gold); }
+
+.wagon-app .equation-card h2,
+.wagon-app .be-card h2 { margin-bottom: 8px; }
+.wagon-app .equation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--font-term);
+  font-size: 26px;
+  color: var(--ink);
+}
+.wagon-app .eq-ph { font-family: var(--font-pixel); font-size: 14px; color: var(--blood); }
+.wagon-app .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; }
+.wagon-app .frac .num,
+.wagon-app .frac .den { padding: 0 8px; white-space: nowrap; }
+.wagon-app .frac .num { border-bottom: 3px solid var(--ink); }
+.wagon-app .frac small { font-size: 14px; color: var(--straw-dark); }
+.wagon-app .frac .num span:first-child,
+.wagon-app .frac .den span:first-child,
+.wagon-app .equation-steps span span,
+.wagon-app .equation-steps b { font-family: var(--font-pixel); font-size: 12px; color: var(--law-blue); }
+.wagon-app .equation-steps b { color: var(--blood); font-size: 14px; }
+.wagon-app .equation-steps {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 12px;
+  border-left: 3px dashed var(--straw-dark);
+  font-size: 22px;
+}
+.wagon-app .equation-mmhg { margin: 10px 0 0; font-size: 16px; color: var(--straw-dark); }
+
+.wagon-app .be-card p { margin: 0 0 10px; font-size: 18px; }
+.wagon-app .be-grid {
+  margin: 0 0 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+}
+.wagon-app .be-grid dt { font-size: 16px; color: var(--wood-dark); }
+.wagon-app .be-grid dd { margin: 2px 0 0; font-family: var(--font-pixel); font-size: 11px; color: var(--ink); }
+.wagon-app .be-word { font-size: 19px; color: var(--ink); padding: 8px 10px; background: var(--parchment-dark); border-left: 4px solid var(--blood); }
+.wagon-app .comp-hint { font-size: 18px; color: var(--law-blue); margin: 10px 0 0 !important; }
+
+/* ---------- controls ---------- */
+.wagon-app .controls-panel {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 14px 24px;
+}
+.wagon-app .control-group { display: flex; flex-direction: column; gap: 8px; }
+.wagon-app .slider-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 130px;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+.wagon-app .slider-row output {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  text-align: right;
+  color: var(--blood);
+}
+.wagon-app .slider-row input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--blood);
+  height: 28px;
+  cursor: pointer;
+}
+.wagon-app .control-note { margin: 0; font-size: 17px; color: var(--wood-dark); }
+.wagon-app .control-note b { color: var(--blood); font-family: var(--font-pixel); font-size: 10px; }
+.wagon-app kbd {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  padding: 2px 5px;
+  background: var(--ink);
+  color: var(--gold);
+}
+
+.wagon-app .btn-row { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: stretch; }
+.wagon-app .px-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  width: auto;
+  min-height: 0;
+  margin: 3px;
+  padding: 10px 14px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 0;
+  box-shadow:
+    inset -4px -4px 0 var(--gold-dark),
+    inset 4px 4px 0 var(--gold-light),
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+.wagon-app .px-btn small {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-term);
+  font-size: 15px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.wagon-app .px-btn:hover { filter: brightness(1.08); }
+.wagon-app .px-btn:active { transform: translate(3px, 3px); }
+.wagon-app .px-btn:focus-visible { outline: 3px solid #fff; outline-offset: 5px; }
+.wagon-app .px-btn-danger {
+  background: var(--blood);
+  color: var(--parchment);
+  box-shadow:
+    inset -4px -4px 0 #7a1812,
+    inset 4px 4px 0 #d9564d,
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+.wagon-app .px-btn-good {
+  background: var(--law-blue);
+  color: var(--parchment);
+  box-shadow:
+    inset -4px -4px 0 #1d3d5e,
+    inset 4px 4px 0 #5a8ab8,
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+.wagon-app .px-btn-ghost {
+  background: var(--parchment-dark);
+  box-shadow:
+    inset -4px -4px 0 var(--straw),
+    inset 4px 4px 0 #fff3d6,
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+.wagon-app .px-btn-scn.is-active {
+  background: var(--wood);
+  color: var(--gold);
+  box-shadow:
+    inset -4px -4px 0 var(--wood-dark),
+    inset 4px 4px 0 var(--wood-light),
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+
+/* ---------- scenarios ---------- */
+.wagon-app .scenario-panel {
+  padding: 14px 16px;
+  scroll-margin-top: 12px;
+}
+.wagon-app .scenario-panel h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: 24px;
+  color: var(--wood-dark);
+}
+.wagon-app .scenario-panel p { margin: 0 0 12px; font-size: 20px; }
+.wagon-app .how-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 19px;
+  counter-reset: how;
+}
+.wagon-app .how-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  counter-increment: how;
+}
+.wagon-app .how-list li::before {
+  content: counter(how);
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  background: var(--wood);
+  color: var(--gold);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+/* ---------- reference ---------- */
+.wagon-app .reference-panel { padding: 8px 18px; }
+.wagon-app .reference-panel details { border-top: 2px dashed var(--straw-dark); padding: 10px 0; }
+.wagon-app .reference-panel details:first-child { border-top: 0; }
+.wagon-app .reference-panel summary {
+  cursor: pointer;
+  font-family: var(--font-west);
+  font-size: 22px;
+  color: var(--blood);
+}
+.wagon-app .ref-list { margin: 10px 0 0; padding-left: 0; list-style: none; display: grid; gap: 8px; font-size: 19px; }
+.wagon-app .ref-list li { padding-left: 14px; border-left: 4px solid var(--wood); }
+.wagon-app .ref-list strong { color: var(--wood-dark); }
+.wagon-app .ref-table { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 19px; }
+.wagon-app .ref-table th,
+.wagon-app .ref-table td { padding: 5px 8px; border: 2px solid var(--straw-dark); text-align: center; }
+.wagon-app .ref-table th { background: var(--wood); color: var(--gold); font-family: var(--font-pixel); font-size: 9px; }
+.wagon-app .ref-note { margin: 10px 0 0; font-size: 17px; color: var(--wood-dark); }
+
+.wagon-app .wd-footer { display: flex; justify-content: center; padding-top: 10px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1080px) {
+  .wagon-app .wd-layout { grid-template-columns: 1fr; }
+  .wagon-app .readout-panel {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .wagon-app .readout-panel .equation-card,
+  .wagon-app .readout-panel .be-card,
+  .wagon-app .readout-panel .stat-grid { grid-column: 1 / -1; }
+  .wagon-app .cast-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .wagon-app .controls-panel,
+  .wagon-app .readout-panel { grid-template-columns: 1fr; }
+  .wagon-app .scenario-bar { flex-direction: column; align-items: flex-start; }
+  .wagon-app .slider-row { grid-template-columns: 1fr; gap: 4px; }
+  .wagon-app .slider-row output { text-align: left; }
+  .wagon-app .stat-grid { grid-template-columns: 1fr; }
+  .wagon-app .stat { border-left: 0; padding-left: 0; }
+  .wagon-app .cast-strip { grid-template-columns: 1fr; }
+  .wagon-app .building,
+  .wagon-app .building-stack { width: 104px; }
+  .wagon-app .building-sign { font-size: 7px; }
+  .wagon-app .town-top { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wagon-app .actor.is-moving,
+  .wagon-app .actor.is-riding,
+  .wagon-app .wagon-art { animation: none; }
+  .wagon-app .order-needle,
+  .wagon-app .ratio-fill { transition: none; }
+}

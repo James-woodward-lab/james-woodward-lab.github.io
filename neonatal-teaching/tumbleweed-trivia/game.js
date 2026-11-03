@@ -7,6 +7,7 @@
   }
 
   const MAX_MISSES = 3;
+  const FACT_EVERY = 3; // a campfire fact card after every N questions
   const SETTINGS_KEY = "tumbleweedSettings";
   const BEST_KEY = "tumbleweedBest";
 
@@ -22,6 +23,7 @@
     queueIndex: 0,
     question: null,
     mistakes: [],
+    facts: bank.factDeck(),
   };
 
   const els = {};
@@ -149,7 +151,7 @@
   function setPhase(next) {
     state.phase = next;
     els.screenAttract.hidden = next !== "attract";
-    els.screenGame.hidden = next !== "asking" && next !== "feedback" && next !== "paused";
+    els.screenGame.hidden = next !== "asking" && next !== "feedback" && next !== "paused" && next !== "fact";
     els.screenEnd.hidden = next !== "gameover";
     els.pauseOverlay.hidden = next !== "paused";
   }
@@ -162,6 +164,7 @@
       topic: q.topic,
       stem: q.stem,
       why: q.why,
+      fact: q.fact || "",
       choices: shuffled.map((p) => p.text),
       answer: shuffled.findIndex((p) => p.correct),
     };
@@ -188,6 +191,7 @@
         <p class="plaque-stem">${q.stem}</p>
         <div class="choices">${choices}</div>
         <p class="plaque-why" hidden></p>
+        <p class="plaque-fact" hidden></p>
         <div class="next-row">
           <button type="button" class="px-btn" id="btn-next" hidden>Next question</button>
         </div>
@@ -198,6 +202,22 @@
     els.board.querySelector("#btn-next").addEventListener("click", afterFeedback);
     setPhase("asking");
     els.board.focus({ preventScroll: true });
+  }
+
+  function showFactCard() {
+    const fact = state.facts.next();
+    els.board.innerHTML = `
+      <article class="plaque plaque--fact">
+        <p class="plaque-topic">Campfire fact</p>
+        <div class="fact-flame" aria-hidden="true"></div>
+        <p class="fact-text">${fact}</p>
+        <div class="next-row">
+          <button type="button" class="px-btn" id="btn-next">&#9654; Ride on</button>
+        </div>
+      </article>`;
+    els.board.querySelector("#btn-next").addEventListener("click", nextQuestion);
+    setPhase("fact");
+    els.board.querySelector("#btn-next").focus({ preventScroll: true });
   }
 
   function answer(index) {
@@ -214,6 +234,11 @@
     const why = els.board.querySelector(".plaque-why");
     why.hidden = false;
     why.textContent = q.why;
+    if (q.fact) {
+      const factEl = els.board.querySelector(".plaque-fact");
+      factEl.hidden = false;
+      factEl.innerHTML = `<span class="fact-label">Did you know?</span> ${q.fact}`;
+    }
     const next = els.board.querySelector("#btn-next");
     next.hidden = false;
     if (state.misses + (right ? 0 : 1) >= MAX_MISSES && !right) {
@@ -247,6 +272,10 @@
       endGame();
       return;
     }
+    if (state.asked > 0 && state.asked % FACT_EVERY === 0) {
+      showFactCard();
+      return;
+    }
     nextQuestion();
   }
 
@@ -267,6 +296,7 @@
             <div class="review-why">${m.q.why}</div>
           </li>`).join("")
       : '<li class="review-empty">A clean round.</li>';
+    els.endFact.textContent = state.facts.next();
     sfx.over();
     setPhase("gameover");
     window.scrollTo(0, 0);
@@ -320,6 +350,11 @@
       afterFeedback();
       return;
     }
+    if (state.phase === "fact" && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      nextQuestion();
+      return;
+    }
     if (state.phase === "asking" && /^[1-4]$/.test(e.key)) {
       e.preventDefault();
       answer(Number(e.key) - 1);
@@ -353,6 +388,7 @@
     els.endAsked = $("end-asked");
     els.endRecord = $("end-record");
     els.endReview = $("end-review");
+    els.endFact = $("end-fact");
 
     applyForm(loadSettings());
     els.attractBest.textContent = pad6(loadBest());

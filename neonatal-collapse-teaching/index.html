@@ -896,7 +896,7 @@
         type: "choice",
         chapter: "ACT 1",
         title: "Blood Tests",
-        narrative: "You have IV access and enough blood for some but not all of the tests you want. Which bloods do you request?",
+        narrative: "Your SpR tells you to admit the baby, get IV access, and bloods and they will see you on the unit when they come back with the 26 weeker. You have IV access and enough blood for some but not all of the tests you want. Which bloods do you request?",
         question: "What blood tests do you request?",
         choices: {
           a: "FBC, U&E, CRP, LFTs, Glucose",
@@ -938,7 +938,7 @@
         choices: {
           a: "Severe raised AG metabolic acidosis almost certainly sepsis; treat with antibiotics first",
           b: "Severe raised AG metabolic acidosis; consider all causes and treat simultaneously",
-          c: "Respiratory failure - call anaethetics urgently for I+V"
+          c: "Respiratory failure, attempt an urgent intubation"
         },
         correctChoice: "b",
         correct: "B: Severe raised anion-gap metabolic acidosis; treat sepsis and investigate/treat other causes in parallel",
@@ -970,7 +970,7 @@
         choices: {
           a: "0.9% NaCl 5ml/kg bolus first followed by dextrose bolus",
           b: "10% dextrose 2ml/kg IV bolus followed by 0.9% saline bolus",
-          c: "Call SORT and ask for their advice before proceeding"
+          c: "Start peripheral TPN"
         },
         correctChoice: "b",
         correct: "B: 10% dextrose 2ml/kg IV bolus, then a saline bolus if still shocked",
@@ -978,16 +978,12 @@
         danger: "Do not let one diagnosis or one treatment crowd out the others. A saline bolus alone does not correct hypoglycaemia. Dextrose alone may not be enough if the child is truly shocked. The safest approach is parallel resuscitation: correct glucose, support circulation, call for senior help, and keep reassessing as new information arrives.",
         wrongOutcomes: {
           a: "A saline bolus first is not automatically wrong: if Theo is shocked or peri-arrest, circulation has to be supported immediately and a cautious 0.9% sodium chloride bolus is appropriate. The key is not to let volume resuscitation delay glucose. In this scenario the blood glucose is critically low, so if he is not collapsed or in severe shock, giving 10% dextrose first is often the better first move, followed by reassessment and saline if perfusion remains poor.",
-          c: "Calling SORT is absolutely appropriate, but it must happen in parallel with treatment, not before treatment. Theo is hypoglycaemic and clinically unstable now. Waiting on the phone delays the two interventions already in your hands: giving 10% dextrose and supporting circulation. Make the call, but allocate someone else to do it while you start resuscitation."
+          c: "Peripheral TPN does not treat this minute. Theo's glucose is 1.0 mmol/L and he is poorly perfused now. TPN takes time to prescribe, prepare, and run, and it is not a substitute for an immediate 10% dextrose bolus. Give the dextrose first, then a saline bolus if he is still shocked. Nutrition, including TPN, can be planned once he is stable."
         },
         wrongOutcomeImages: {
           a: {
             src: "../images/saline-bolus.png",
             alt: "0.9% sodium chloride infusion connected to an intravenous access device"
-          },
-          c: {
-            src: "../images/sort-ambulance-team.png",
-            alt: "Southampton Oxford Retrieval Team standing beside an emergency ambulance"
           }
         }
       },

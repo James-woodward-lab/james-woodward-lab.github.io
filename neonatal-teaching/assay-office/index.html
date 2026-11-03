@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#22143d">
+  <meta name="color-scheme" content="dark">
+  <title>The Assay Office - Neonatal Teaching</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rye&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/app-theme.css">
+  <link rel="stylesheet" href="assay-office.css?v=20261103a">
+  <script src="../../js/theme-toggle.js"></script>
+</head>
+<body class="assay-app">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="px-cactus" viewBox="0 0 12 16" shape-rendering="crispEdges">
+      <rect x="5" y="1" width="2" height="15" fill="#2f6b30"/>
+      <rect x="4" y="2" width="1" height="14" fill="#4c9a45"/>
+      <rect x="7" y="2" width="1" height="14" fill="#1f4a20"/>
+      <rect x="1" y="5" width="2" height="5" fill="#2f6b30"/>
+      <rect x="1" y="9" width="4" height="2" fill="#2f6b30"/>
+      <rect x="9" y="3" width="2" height="6" fill="#2f6b30"/>
+      <rect x="7" y="8" width="4" height="2" fill="#2f6b30"/>
+    </symbol>
+    <symbol id="px-mesas" viewBox="0 0 160 30" preserveAspectRatio="none" shape-rendering="crispEdges">
+      <g fill="#7a2f3b">
+        <rect x="0" y="18" width="160" height="12"/>
+        <rect x="8" y="10" width="26" height="8"/>
+        <rect x="12" y="6" width="18" height="4"/>
+        <rect x="58" y="13" width="36" height="5"/>
+        <rect x="64" y="9" width="22" height="4"/>
+        <rect x="116" y="9" width="32" height="9"/>
+        <rect x="122" y="5" width="18" height="4"/>
+      </g>
+      <g fill="#4a1d2c">
+        <rect x="0" y="24" width="160" height="6"/>
+        <rect x="28" y="20" width="24" height="4"/>
+        <rect x="94" y="21" width="30" height="3"/>
+        <rect x="140" y="19" width="20" height="5"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="ao-app">
+
+  <header class="ao-header">
+    <div class="scenery" aria-hidden="true">
+      <div class="px-sun"></div>
+      <svg class="mesas"><use href="#px-mesas"/></svg>
+      <svg class="cactus cactus-a"><use href="#px-cactus"/></svg>
+      <svg class="cactus cactus-b"><use href="#px-cactus"/></svg>
+      <div class="ground-strip"></div>
+    </div>
+    <div class="header-inner">
+      <a class="px-link" href="../index.html">&#9664; Gas Saloon</a>
+      <p class="title-kicker">What the machine measures, and what it works out</p>
+      <h1 class="game-title">The Assay Office</h1>
+      <p class="title-sub">In the Old West the assay office tested your ore. This one tests your blood.</p>
+    </div>
+  </header>
+
+  <!-- Measured vs calculated -->
+  <section class="panel split-panel" aria-labelledby="mvc-title">
+    <h2 id="mvc-title" class="panel-title full">Measured or calculated?</h2>
+    <p class="rule-line full">Bicarbonate and base excess are calculated, not directly measured. The analyser measures pH and PaCO&#8322; first, then uses the Henderson&ndash;Hasselbalch relationship for bicarbonate and a Siggaard&ndash;Andersen / Van Slyke-type equation for base excess.</p>
+    <div class="mvc-card measured">
+      <h3>Measured <small>by electrodes and light</small></h3>
+      <ul class="chip-list">
+        <li><b>pH</b><span>glass electrode</span></li>
+        <li><b>PaCO&#8322;</b><span>Severinghaus electrode</span></li>
+        <li><b>PaO&#8322;</b><span>Clark electrode</span></li>
+        <li><b>Hb, sO&#8322;, COHb, MetHb</b><span>co-oximeter</span></li>
+        <li><b>Na&#8314; K&#8314; Ca&#178;&#8314; Cl&#8315;</b><span>ion-selective electrodes</span></li>
+        <li><b>Glucose, lactate</b><span>enzyme electrodes</span></li>
+      </ul>
+    </div>
+    <div class="mvc-card calculated">
+      <h3>Calculated <small>by the machine&rsquo;s arithmetic</small></h3>
+      <ul class="chip-list">
+        <li><b>HCO&#8323;&#8315;</b><span>from pH and PaCO&#8322;</span></li>
+        <li><b>Actual base excess</b><span>from HCO&#8323;&#8315;, pH and Hb</span></li>
+        <li><b>Standard base excess</b><span>from HCO&#8323;&#8315; and pH</span></li>
+        <li><b>Anion gap</b><span>from Na&#8314;, Cl&#8315;, HCO&#8323;&#8315;</span></li>
+        <li><b>Standard bicarbonate</b><span>HCO&#8323;&#8315; at PaCO&#8322; 5.3 kPa</span></li>
+        <li><b>P/F ratio, A&ndash;a gradient</b><span>from PaO&#8322; and FiO&#8322;</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Journey of the sample -->
+  <section class="panel journey-panel" aria-labelledby="journey-title">
+    <div class="journey-head">
+      <h2 id="journey-title" class="panel-title">The journey of a sample</h2>
+      <div class="stepper-nav">
+        <button class="px-btn px-btn-ghost" id="btn-prev" type="button" aria-label="Previous station">&#9664; Back</button>
+        <span class="step-count"><b id="step-num">1</b> / <span id="step-total">7</span></span>
+        <button class="px-btn" id="btn-next" type="button" aria-label="Next station">Next &#9654;</button>
+      </div>
+    </div>
+
+    <div class="journey-body">
+      <div class="machine-wrap">
+        <svg class="machine" viewBox="0 0 420 300" shape-rendering="crispEdges" role="img" aria-label="Diagram of a blood gas analyser with its stations">
+          <!-- body -->
+          <rect x="30" y="20" width="360" height="260" fill="#3b2212"/>
+          <rect x="36" y="26" width="348" height="248" fill="#6b3f1f"/>
+          <rect x="36" y="26" width="348" height="6" fill="#9a6233"/>
+          <!-- sample path -->
+          <path class="sample-path" d="M60 150 H110 V110 H170 V190 H230 V110 H290 V150 H350" fill="none" stroke="#1b0f08" stroke-width="8"/>
+          <path class="sample-path-inner" d="M60 150 H110 V110 H170 V190 H230 V110 H290 V150 H350" fill="none" stroke="#dcbc7f" stroke-width="4" stroke-dasharray="8 6"/>
+
+          <!-- 1 syringe / inlet -->
+          <g class="station" data-step="1">
+            <rect x="44" y="134" width="32" height="32" fill="#f3dfb1"/>
+            <rect x="12" y="144" width="36" height="12" fill="#dcbc7f"/>
+            <rect x="4" y="140" width="8" height="20" fill="#f3dfb1"/>
+            <rect x="20" y="146" width="20" height="8" fill="#b3261e"/>
+            <text x="60" y="186" class="station-label" text-anchor="middle">INLET</text>
+          </g>
+          <!-- 2 pH electrode -->
+          <g class="station" data-step="2">
+            <rect x="96" y="60" width="28" height="60" fill="#f3dfb1"/>
+            <rect x="104" y="40" width="12" height="20" fill="#dcbc7f"/>
+            <rect x="100" y="100" width="20" height="16" fill="#2f5d8a"/>
+            <text x="110" y="134" class="station-label" text-anchor="middle">pH</text>
+          </g>
+          <!-- 3 CO2 electrode -->
+          <g class="station" data-step="3">
+            <rect x="156" y="180" width="28" height="60" fill="#f3dfb1"/>
+            <rect x="164" y="240" width="12" height="20" fill="#dcbc7f"/>
+            <rect x="160" y="184" width="20" height="16" fill="#2f5d8a"/>
+            <rect x="156" y="176" width="28" height="4" fill="#f2c14e"/>
+            <text x="170" y="170" class="station-label" text-anchor="middle">CO&#8322;</text>
+          </g>
+          <!-- 4 O2 electrode -->
+          <g class="station" data-step="4">
+            <rect x="216" y="60" width="28" height="60" fill="#f3dfb1"/>
+            <rect x="224" y="40" width="12" height="20" fill="#dcbc7f"/>
+            <rect x="226" y="104" width="8" height="12" fill="#c48a1e"/>
+            <rect x="216" y="116" width="28" height="4" fill="#f2c14e"/>
+            <text x="230" y="134" class="station-label" text-anchor="middle">O&#8322;</text>
+          </g>
+          <!-- 5 co-oximeter -->
+          <g class="station" data-step="5">
+            <rect x="270" y="176" width="48" height="56" fill="#1b0f08"/>
+            <rect x="276" y="182" width="36" height="44" fill="#22143d"/>
+            <rect x="280" y="200" width="28" height="4" fill="#ff5a4a"/>
+            <rect x="280" y="206" width="28" height="4" fill="#f2c14e"/>
+            <rect x="280" y="212" width="28" height="4" fill="#a6ff7d"/>
+            <text x="294" y="248" class="station-label" text-anchor="middle">OXIMETER</text>
+          </g>
+          <!-- 6 ion-selective / enzyme -->
+          <g class="station" data-step="6">
+            <rect x="330" y="60" width="16" height="56" fill="#f3dfb1"/>
+            <rect x="350" y="60" width="16" height="56" fill="#f3dfb1"/>
+            <rect x="334" y="100" width="8" height="12" fill="#2f6b30"/>
+            <rect x="354" y="100" width="8" height="12" fill="#2f6b30"/>
+            <text x="348" y="134" class="station-label" text-anchor="middle">ISE</text>
+          </g>
+          <!-- 7 calculator and printout -->
+          <g class="station" data-step="7">
+            <rect x="336" y="200" width="44" height="40" fill="#1b0f08"/>
+            <rect x="342" y="206" width="32" height="20" fill="#a6ff7d"/>
+            <rect x="346" y="210" width="24" height="2" fill="#1b0f08"/>
+            <rect x="346" y="216" width="18" height="2" fill="#1b0f08"/>
+            <rect x="350" y="240" width="20" height="30" fill="#f3dfb1"/>
+            <text x="358" y="192" class="station-label" text-anchor="middle">PRINTOUT</text>
+          </g>
+
+          <!-- travelling sample drop -->
+          <g class="sample-drop" id="sample-drop">
+            <rect x="-6" y="-6" width="12" height="12" fill="#b3261e"/>
+            <rect x="-4" y="-8" width="8" height="2" fill="#b3261e"/>
+            <rect x="-2" y="-4" width="2" height="2" fill="#ff8a7e"/>
+          </g>
+
+          <!-- water bath line -->
+          <rect x="36" y="268" width="348" height="6" fill="#2f5d8a"/>
+          <text x="210" y="292" class="bath-label" text-anchor="middle">37 &deg;C water bath</text>
+        </svg>
+      </div>
+
+      <div class="station-text">
+        <p class="station-kicker" id="station-kicker">Station 1</p>
+        <h3 id="station-title">Syringe and inlet</h3>
+        <div id="station-body"></div>
+        <dl class="station-out" id="station-out"></dl>
+      </div>
+    </div>
+
+    <ol class="station-dots" id="station-dots" aria-label="Stations">
+      <li><button type="button" data-step="1">Inlet</button></li>
+      <li><button type="button" data-step="2">pH</button></li>
+      <li><button type="button" data-step="3">CO&#8322;</button></li>
+      <li><button type="button" data-step="4">O&#8322;</button></li>
+      <li><button type="button" data-step="5">Co-oximeter</button></li>
+      <li><button type="button" data-step="6">Electrolytes</button></li>
+      <li><button type="button" data-step="7">Calculator</button></li>
+    </ol>
+  </section>
+
+  <!-- Bicarbonate -->
+  <section class="panel calc-panel" aria-labelledby="hco3-title">
+    <h2 id="hco3-title" class="panel-title">Bicarbonate calculation</h2>
+    <p>The machine starts with the Henderson&ndash;Hasselbalch equation, written here with PaCO&#8322; in kPa:</p>
+    <div class="equation">
+      <span class="eq-lhs">pH</span> = 6.1 + log<sub>10</sub>
+      <span class="frac">
+        <span class="num">[HCO&#8323;&#8315;]</span>
+        <span class="den">0.225 &times; PaCO&#8322;</span>
+      </span>
+    </div>
+    <p class="eq-alt">In mmHg the constant is 0.03: pH = 6.1 + log<sub>10</sub>([HCO&#8323;&#8315;] / (0.03 &times; PaCO&#8322;)).</p>
+    <p>Rearranging gives the calculated bicarbonate:</p>
+    <div class="equation">
+      <span class="eq-lhs">[HCO&#8323;&#8315;]</span> = 0.225 &times; PaCO&#8322; &times; 10<sup>(pH &minus; 6.1)</sup>
+    </div>
+    <p class="eq-alt">mmHg form: [HCO&#8323;&#8315;] = 0.03 &times; PaCO&#8322; &times; 10<sup>(pH &minus; 6.1)</sup>. Bicarbonate comes out in mmol/L either way.</p>
+
+    <div class="worked">
+      <h3>Worked example</h3>
+      <p>pH 7.20, PaCO&#8322; 9.33 kPa <small>(70 mmHg)</small></p>
+      <div class="worked-steps">
+        <span>[HCO&#8323;&#8315;] = 0.225 &times; 9.33 &times; 10<sup>(7.20 &minus; 6.1)</sup></span>
+        <span>= 2.10 &times; 10<sup>1.10</sup></span>
+        <span>= 2.10 &times; 12.6</span>
+        <span class="result">&asymp; 26.4 mmol/L</span>
+      </div>
+      <p>So the analyser reports a bicarbonate of about 26 mmol/L. The high PaCO&#8322; has driven the acidaemia while bicarbonate is near normal: an acute respiratory acidosis.</p>
+    </div>
+  </section>
+
+  <!-- Base excess -->
+  <section class="panel calc-panel" aria-labelledby="be-title">
+    <h2 id="be-title" class="panel-title">Base excess calculation</h2>
+    <p>Base excess asks: how much strong acid or base would need to be added to return the blood to pH 7.40, at PaCO&#8322; 5.3 kPa <small>(40 mmHg)</small> and 37 &deg;C? A negative value is often called a base deficit.</p>
+
+    <h3>Simplified formula</h3>
+    <div class="equation">
+      <span class="eq-lhs">BE</span> = 0.9287 &times; ([HCO&#8323;&#8315;] &minus; 24.4 + 14.83 &times; (pH &minus; 7.40))
+    </div>
+    <p>Or, directly from the two measured values:</p>
+    <div class="equation">
+      <span class="eq-lhs">BE</span> = 0.209 &times; PaCO&#8322; &times; 10<sup>(pH &minus; 6.1)</sup> + 13.77 &times; pH &minus; 124.58
+    </div>
+    <p class="eq-alt">mmHg form: BE = 0.02786 &times; PaCO&#8322; &times; 10<sup>(pH &minus; 6.1)</sup> + 13.77 &times; pH &minus; 124.58. These are Siggaard&ndash;Andersen-derived approximations; exact algorithms vary slightly between analyser manufacturers.</p>
+
+    <div class="worked">
+      <h3>Worked example</h3>
+      <p>pH 7.18, HCO&#8323;&#8315; 11 mmol/L</p>
+      <div class="worked-steps">
+        <span>BE = 0.9287 &times; (11 &minus; 24.4 + 14.83 &times; (7.18 &minus; 7.40))</span>
+        <span>= 0.9287 &times; (&minus;13.4 + 14.83 &times; (&minus;0.22))</span>
+        <span>= 0.9287 &times; (&minus;13.4 &minus; 3.26)</span>
+        <span class="result">&asymp; &minus;15.5 mmol/L</span>
+      </div>
+      <p>A base deficit of about 15 mmol/L: a substantial metabolic acidosis. The standard base excess formula below gives about &minus;17.4 for the same gas, which is why the two figures on a printout rarely match exactly.</p>
+    </div>
+
+    <h3>Why haemoglobin matters</h3>
+    <p>Full blood base excess also accounts for haemoglobin, because haemoglobin is an important non-bicarbonate buffer. A more complete Van Slyke form is:</p>
+    <div class="equation equation-wrap">
+      <span class="eq-lhs">BE</span> = (1 &minus; 0.014 &times; Hb) &times; ([HCO&#8323;&#8315;] &minus; 24.8 + (1.43 &times; Hb + 7.7) &times; (pH &minus; 7.40))
+    </div>
+    <p class="eq-alt">Hb is in g/dL here. UK results report Hb in g/L: divide by 10. The analyser may use measured haemoglobin from the co-oximeter to refine this calculation.</p>
+
+    <h3>Standard versus actual base excess</h3>
+    <div class="abe-sbe">
+      <div class="be-card">
+        <h4>Actual base excess <small>ABE, BE(B)</small></h4>
+        <p><strong>What it represents:</strong> base excess of the blood sample at its actual haemoglobin and oxygenation.</p>
+        <p><strong>Practical use:</strong> more influenced by the sample&rsquo;s own haemoglobin buffering; useful when Hb is far from normal.</p>
+      </div>
+      <div class="be-card">
+        <h4>Standard base excess <small>SBE, BE(ecf)</small></h4>
+        <p><strong>What it represents:</strong> base excess calculated for extracellular fluid, effectively assuming a normal (diluted) haemoglobin of about 5 g/dL.</p>
+        <p><strong>Practical use:</strong> commonly used to estimate the metabolic component of an acid&ndash;base disorder.</p>
+      </div>
+    </div>
+    <p>Standard base excess is often calculated as:</p>
+    <div class="equation">
+      <span class="eq-lhs">SBE</span> = [HCO&#8323;&#8315;] &minus; 24.8 + 16.2 &times; (pH &minus; 7.40)
+    </div>
+    <p>It is designed to isolate the non-respiratory, metabolic component more cleanly than actual base excess.</p>
+  </section>
+
+  <!-- Try your own gas -->
+  <section class="panel live-panel" aria-labelledby="live-title">
+    <div class="live-head">
+      <h2 id="live-title" class="panel-title">Try your own gas</h2>
+      <div class="btn-row">
+        <button class="px-btn px-btn-scn" type="button" data-preset="normal">Normal</button>
+        <button class="px-btn px-btn-scn" type="button" data-preset="acute-resp">Acute respiratory acidosis</button>
+        <button class="px-btn px-btn-scn" type="button" data-preset="met-acid">Metabolic acidosis</button>
+        <button class="px-btn px-btn-scn" type="button" data-preset="chronic">Chronic hypercapnia</button>
+        <button class="px-btn px-btn-scn" type="button" data-preset="met-alk">Metabolic alkalosis</button>
+      </div>
+    </div>
+    <div class="live-body">
+      <div class="live-inputs">
+        <p class="input-head">Measured by the electrodes</p>
+        <label class="slider-row" for="in-ph">
+          <span>pH</span>
+          <input type="range" id="in-ph" min="6.80" max="7.80" step="0.01" value="7.40">
+          <output id="out-ph" for="in-ph">7.40</output>
+        </label>
+        <label class="slider-row" for="in-co2">
+          <span>PaCO&#8322;</span>
+          <input type="range" id="in-co2" min="2.0" max="12.0" step="0.1" value="5.3">
+          <output id="out-co2" for="in-co2">5.3 kPa</output>
+        </label>
+        <label class="slider-row" for="in-hb">
+          <span>Hb</span>
+          <input type="range" id="in-hb" min="50" max="220" step="5" value="150">
+          <output id="out-hb" for="in-hb">150 g/L</output>
+        </label>
+        <p class="input-note">H&#8314; = <b id="out-h">40</b> nmol/L &middot; PaCO&#8322; = <b id="out-co2-mmhg">40</b> mmHg &middot; dissolved CO&#8322; = <b id="out-diss">1.20</b> mmol/L</p>
+      </div>
+
+      <div class="live-outputs">
+        <p class="input-head">Calculated by the machine</p>
+
+        <div class="calc-row">
+          <div class="calc-name">HCO&#8323;&#8315;</div>
+          <div class="calc-value"><b id="r-hco3">24.0</b> <small>mmol/L</small></div>
+          <div class="calc-sub" id="s-hco3">0.225 &times; 5.3 &times; 10<sup>(7.40 &minus; 6.1)</sup></div>
+        </div>
+
+        <div class="calc-row">
+          <div class="calc-name">BE <small>simplified</small></div>
+          <div class="calc-value"><b id="r-be-simple">0.0</b> <small>mmol/L</small></div>
+          <div class="calc-sub" id="s-be-simple">0.9287 &times; (24.0 &minus; 24.4 + 14.83 &times; (7.40 &minus; 7.40))</div>
+        </div>
+
+        <div class="calc-row">
+          <div class="calc-name">BE <small>direct from pH and PaCO&#8322;</small></div>
+          <div class="calc-value"><b id="r-be-direct">0.0</b> <small>mmol/L</small></div>
+          <div class="calc-sub" id="s-be-direct">0.209 &times; 5.3 &times; 10<sup>1.30</sup> + 13.77 &times; 7.40 &minus; 124.58</div>
+        </div>
+
+        <div class="calc-row">
+          <div class="calc-name">Actual BE <small>Van Slyke, with Hb</small></div>
+          <div class="calc-value"><b id="r-be-vs">0.0</b> <small>mmol/L</small></div>
+          <div class="calc-sub" id="s-be-vs">(1 &minus; 0.014 &times; 15.0) &times; (24.0 &minus; 24.8 + (1.43 &times; 15.0 + 7.7) &times; (7.40 &minus; 7.40))</div>
+        </div>
+
+        <div class="calc-row">
+          <div class="calc-name">Standard BE</div>
+          <div class="calc-value"><b id="r-sbe">0.0</b> <small>mmol/L</small></div>
+          <div class="calc-sub" id="s-sbe">24.0 &minus; 24.8 + 16.2 &times; (7.40 &minus; 7.40)</div>
+        </div>
+
+        <p class="live-read" id="live-read">Normal acid&ndash;base.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Saloon version -->
+  <section class="panel saloon-panel" aria-labelledby="saloon-title">
+    <h2 id="saloon-title" class="panel-title">Saloon version</h2>
+    <ul class="saloon-list">
+      <li><strong>Bicarbonate</strong> is the amount of &ldquo;buffer barrels&rdquo; currently in the saloon, calculated from the pH telegraph and the CO&#8322; still.</li>
+      <li><strong>Base excess</strong> is the number of barrels of acid or base the sheriff would need to add, or remove, to restore the saloon to neutral pH while holding the CO&#8322; steam pressure constant.</li>
+      <li><strong>Negative base excess / base deficit</strong> means the saloon has used up buffer stock: think metabolic acidosis.</li>
+      <li><strong>Positive base excess</strong> means there is surplus buffer stock: think metabolic alkalosis.</li>
+    </ul>
+    <p class="saloon-bridge">Over at <a class="inline-link" href="../wagon-depot/index.html">The Wagon Depot</a> the same barrels are drawn as sheriffs, and the CO&#8322; still as wagons.</p>
+  </section>
+
+  <!-- Pitfalls -->
+  <section class="panel ref-panel" aria-labelledby="diff-title">
+    <h2 id="diff-title" class="panel-title">Why the numbers can differ</h2>
+    <ul class="ref-list">
+      <li><strong>Manufacturers&rsquo; algorithms vary.</strong> Two analysers given the same pH and PaCO&#8322; can print base excess figures a unit or so apart. Compare trends on the same machine.</li>
+      <li><strong>Calculated HCO&#8323;&#8315; is not laboratory total CO&#8322;.</strong> The lab&rsquo;s &ldquo;bicarbonate&rdquo; on a biochemistry profile is measured enzymatically as total CO&#8322; and includes dissolved CO&#8322; and carbamino compounds, so it runs 1&ndash;2 mmol/L higher.</li>
+      <li><strong>Temperature.</strong> Everything is measured at 37 &deg;C. Entering a patient temperature (a cooled baby at 33.5 &deg;C) changes the reported PaCO&#8322; and PaO&#8322; but not the calculated base excess.</li>
+      <li><strong>Sample errors feed straight into the arithmetic.</strong> An air bubble lowers PaCO&#8322;, so the calculated bicarbonate falls too. Liquid heparin dilutes the sample. A long delay lets cells make acid.</li>
+      <li><strong>Hb matters for actual BE.</strong> At Hb 80 g/L the Van Slyke correction is small; at 220 g/L in a polycythaemic newborn it is not. Standard BE sidesteps this by assuming a fixed Hb.</li>
+    </ul>
+    <p class="disclaimer">Teaching aid only. Constants are the commonly quoted approximations and are not those of any particular analyser.</p>
+  </section>
+
+  <footer class="ao-footer">
+    <a class="px-link" href="../index.html">&#9664; Back to the Gas Saloon</a>
+  </footer>
+
+</main>
+
+<script src="calc.js?v=20261103a"></script>
+<script src="app.js?v=20261103a"></script>
+</body>
+</html>

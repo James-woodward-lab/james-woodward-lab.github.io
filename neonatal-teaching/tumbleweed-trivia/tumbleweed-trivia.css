@@ -649,6 +649,74 @@ body.tumbleweed-app .back-home-link { display: none !important; }
   background: #fff6dc;
   box-shadow: 0 0 0 2px var(--ink);
 }
+.tumbleweed-app .plaque-fact {
+  margin: 10px 0 0;
+  padding: 10px 12px 10px 14px;
+  font-size: clamp(17px, 1.9vw, 20px);
+  line-height: 1.2;
+  color: var(--wood-dark);
+  background: #fbefd2;
+  border-left: 6px solid var(--gold-dark);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.tumbleweed-app .fact-label {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 6px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  background: var(--gold-dark);
+  color: var(--ink);
+}
+
+/* campfire fact card between questions */
+.tumbleweed-app .plaque--fact {
+  text-align: center;
+  background: var(--ink);
+  color: var(--parchment);
+  box-shadow:
+    0 0 0 3px var(--gold-dark),
+    0 0 0 7px var(--ink),
+    0 0 0 10px var(--wood),
+    8px 10px 0 6px rgba(27, 15, 8, 0.35);
+}
+.tumbleweed-app .plaque--fact .plaque-topic { color: var(--gold); }
+.tumbleweed-app .fact-flame {
+  width: 40px;
+  height: 52px;
+  margin: 4px auto 12px;
+  background: linear-gradient(to top, #ffd25e 0 30%, #ec7f3a 30% 65%, #b3261e 65% 100%);
+  clip-path: polygon(
+    50% 0, 62% 18%, 78% 10%, 76% 34%, 94% 36%, 84% 56%, 100% 72%,
+    80% 84%, 70% 100%, 30% 100%, 20% 84%, 0 72%, 16% 56%, 6% 36%,
+    24% 34%, 22% 10%, 38% 18%
+  );
+  animation: tw-flicker 0.5s steps(2) infinite;
+}
+@keyframes tw-flicker {
+  0%, 100% { transform: scaleX(1) translateY(0); }
+  50% { transform: scaleX(0.92) translateY(-2px); }
+}
+.tumbleweed-app .fact-text {
+  margin: 0 auto;
+  max-width: 560px;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.2;
+}
+.tumbleweed-app .plaque--fact .next-row { justify-content: center; }
+
+.tumbleweed-app .end-fact {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  background: #fbefd2;
+  border-left: 6px solid var(--gold-dark);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.tumbleweed-app .end-fact p { margin: 6px 0 0; font-size: 20px; line-height: 1.2; }
+
 .tumbleweed-app .next-row {
   display: flex;
   justify-content: flex-end;
@@ -726,6 +794,7 @@ body.tumbleweed-app .back-home-link { display: none !important; }
   .tumbleweed-app .blink-soft,
   .tumbleweed-app .go-kicker,
   .tumbleweed-app .go-record,
+  .tumbleweed-app .fact-flame,
   .tumbleweed-app .pause-title,
   .tumbleweed-app .stage.shake { animation: none; }
 }

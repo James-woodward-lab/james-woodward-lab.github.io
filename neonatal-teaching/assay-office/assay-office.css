@@ -1,0 +1,463 @@
+/* The Assay Office — how a blood gas analyser works (explainer) */
+
+body.assay-app {
+  --ink: #1b0f08;
+  --wood-dark: #3b2212;
+  --wood: #6b3f1f;
+  --wood-light: #9a6233;
+  --parchment: #f3dfb1;
+  --parchment-dark: #dcbc7f;
+  --gold: #f2c14e;
+  --gold-dark: #c48a1e;
+  --gold-light: #ffe39a;
+  --blood: #b3261e;
+  --straw: #c4a05a;
+  --straw-dark: #8a6a32;
+  --law-blue: #2f5d8a;
+  --good: #2f6b30;
+  --warn: #ec7f3a;
+  --sky-1: #22143d;
+  --sky-2: #452058;
+  --sky-3: #84305a;
+  --sky-4: #c9493f;
+  --sky-5: #ec7f3a;
+  --sky-6: #f5b553;
+  --sand: #d9a35b;
+  --sand-dark: #b8813f;
+  --font-west: "Rye", Georgia, serif;
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-term: "VT323", ui-monospace, monospace;
+
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--sky-1);
+  color: var(--parchment);
+  font-family: var(--font-term);
+  font-size: 20px;
+  line-height: 1.25;
+  overflow-x: hidden;
+}
+
+body.assay-app *,
+body.assay-app *::before,
+body.assay-app *::after { box-sizing: border-box; }
+
+body.assay-app [hidden] { display: none !important; }
+
+body.assay-app .theme-toggle,
+body.assay-app .back-home-link { display: none !important; }
+
+.assay-app svg { max-width: none; }
+
+.assay-app .ao-app {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 0 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+/* ---------- header ---------- */
+.assay-app .ao-header {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -16px;
+  padding: 14px 16px 18px;
+  min-height: 190px;
+  display: flex;
+  align-items: flex-end;
+}
+.assay-app .scenery {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--sky-1) 0 18%,
+    var(--sky-2) 18% 34%,
+    var(--sky-3) 34% 50%,
+    var(--sky-4) 50% 64%,
+    var(--sky-5) 64% 78%,
+    var(--sky-6) 78% 100%
+  );
+}
+.assay-app .scenery .ground-strip {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 44px;
+  background:
+    radial-gradient(circle, var(--sand-dark) 0 2px, transparent 2.5px) 0 0 / 40px 30px,
+    var(--sand);
+  border-top: 4px solid var(--ink);
+}
+.assay-app .scenery .mesas { position: absolute; left: 0; width: 100%; bottom: 44px; height: 60px; }
+.assay-app .scenery .cactus { position: absolute; bottom: 38px; height: 56px; width: 42px; }
+.assay-app .scenery .cactus-a { left: 4%; }
+.assay-app .scenery .cactus-b { right: 6%; height: 40px; width: 30px; }
+.assay-app .px-sun {
+  position: absolute;
+  left: 70%;
+  bottom: 90px;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(to bottom, #fff0a8 0 40%, #ffd25e 40% 70%, #ffb347 70% 100%);
+  clip-path: polygon(
+    30% 0, 70% 0, 70% 8%, 84% 8%, 84% 16%, 92% 16%, 92% 30%, 100% 30%,
+    100% 70%, 92% 70%, 92% 84%, 84% 84%, 84% 92%, 70% 92%, 70% 100%,
+    30% 100%, 30% 92%, 16% 92%, 16% 84%, 8% 84%, 8% 70%, 0 70%,
+    0 30%, 8% 30%, 8% 16%, 16% 16%, 16% 8%, 30% 8%
+  );
+}
+.assay-app .header-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 30px;
+}
+.assay-app .px-link {
+  align-self: flex-start;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+  text-decoration: none;
+}
+.assay-app .px-link:hover { text-decoration: underline; }
+.assay-app .title-kicker {
+  margin: 6px 0 0;
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.2vw, 11px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--straw);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+.assay-app .game-title {
+  margin: 0;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  text-align: center;
+  color: var(--gold);
+  text-shadow: 4px 4px 0 var(--ink), 8px 8px 0 var(--blood), 12px 12px 0 var(--ink);
+}
+.assay-app .title-sub {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ---------- panels ---------- */
+.assay-app .panel {
+  padding: 16px 20px 18px;
+  background: var(--parchment);
+  color: var(--ink);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 9px var(--wood),
+    0 0 0 12px var(--ink),
+    8px 10px 0 12px rgba(27, 15, 8, 0.45);
+}
+.assay-app .panel:first-of-type { margin-top: 12px; }
+.assay-app .panel p { margin: 0 0 10px; }
+.assay-app .panel p:last-child { margin-bottom: 0; }
+.assay-app .panel-title {
+  margin: 0 0 10px;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: 26px;
+  color: var(--blood);
+}
+.assay-app .panel h3 {
+  margin: 16px 0 6px;
+  font-family: var(--font-west);
+  font-weight: 400;
+  font-size: 21px;
+  color: var(--wood-dark);
+}
+.assay-app .panel h3 small,
+.assay-app .panel h4 small {
+  font-family: var(--font-term);
+  font-size: 16px;
+  color: var(--straw-dark);
+  margin-left: 6px;
+}
+.assay-app .panel small { font-size: 0.8em; color: var(--straw-dark); }
+.assay-app .disclaimer { margin-top: 12px; font-size: 16px; color: var(--straw-dark); }
+.assay-app .inline-link { color: var(--blood); }
+
+/* ---------- measured vs calculated ---------- */
+.assay-app .split-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+.assay-app .split-panel .full { grid-column: 1 / -1; }
+.assay-app .rule-line {
+  padding: 10px 12px;
+  background: var(--ink);
+  color: var(--parchment);
+  font-size: 19px;
+}
+.assay-app .mvc-card { padding: 10px 12px; border: 3px solid var(--ink); background: #fff6dc; }
+.assay-app .mvc-card.measured { border-color: var(--law-blue); }
+.assay-app .mvc-card.calculated { border-color: var(--blood); }
+.assay-app .mvc-card h3 { margin: 0 0 8px; font-size: 20px; }
+.assay-app .mvc-card.measured h3 { color: var(--law-blue); }
+.assay-app .mvc-card.calculated h3 { color: var(--blood); }
+.assay-app .chip-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.assay-app .chip-list li { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 2px dashed var(--parchment-dark); padding-bottom: 4px; }
+.assay-app .chip-list b { font-family: var(--font-pixel); font-size: 10px; color: var(--ink); }
+.assay-app .chip-list span { font-size: 17px; color: var(--wood-dark); text-align: right; }
+
+/* ---------- journey / stepper ---------- */
+.assay-app .journey-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.assay-app .stepper-nav { display: flex; align-items: center; gap: 8px; }
+.assay-app .step-count { font-family: var(--font-pixel); font-size: 11px; color: var(--wood-dark); padding: 0 6px; }
+.assay-app .journey-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 1fr);
+  gap: 18px 24px;
+  align-items: start;
+}
+.assay-app .machine-wrap { border: 3px solid var(--ink); background: var(--parchment-dark); padding: 6px; }
+.assay-app .machine { width: 100%; height: auto; display: block; }
+.assay-app .station { opacity: 0.55; transition: opacity 0.25s; cursor: default; }
+.assay-app .station.is-active { opacity: 1; }
+.assay-app .station.is-active rect:first-child { filter: drop-shadow(0 0 0 var(--gold)); }
+.assay-app .station-label {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  fill: var(--parchment);
+}
+.assay-app .station.is-active .station-label { fill: var(--gold); }
+.assay-app .bath-label { font-family: var(--font-term); font-size: 13px; fill: var(--parchment); }
+.assay-app .sample-path-inner { animation: ao-flow 1.2s linear infinite; }
+@keyframes ao-flow { to { stroke-dashoffset: -28; } }
+.assay-app .sample-drop { transition: transform 0.6s steps(12); }
+.assay-app .station.is-active > rect:first-child { stroke: var(--gold); stroke-width: 3; }
+
+.assay-app .station-text { min-width: 0; }
+.assay-app .station-kicker {
+  margin: 0 0 4px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blood);
+}
+.assay-app .station-text h3 { margin: 0 0 8px; font-size: 24px; }
+.assay-app .station-text p { font-size: 19px; }
+.assay-app .station-out {
+  margin: 12px 0 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  padding: 8px 10px;
+  background: #fff6dc;
+  box-shadow: 0 0 0 2px var(--ink);
+  font-size: 17px;
+}
+.assay-app .station-out dt { font-family: var(--font-pixel); font-size: 9px; color: var(--law-blue); align-self: center; }
+.assay-app .station-out dd { margin: 0; }
+.assay-app .station-dots {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.assay-app .station-dots button {
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  padding: 6px 10px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  background: var(--parchment-dark);
+  color: var(--ink);
+  box-shadow: 0 0 0 2px var(--ink);
+  cursor: pointer;
+}
+.assay-app .station-dots button.is-active { background: var(--wood); color: var(--gold); }
+.assay-app .station-dots button:focus-visible { outline: 3px solid var(--blood); outline-offset: 2px; }
+
+/* ---------- equations ---------- */
+.assay-app .equation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  font-size: 24px;
+  color: var(--ink);
+  background: #fff6dc;
+  border-left: 6px solid var(--law-blue);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.assay-app .equation-wrap { font-size: 21px; }
+.assay-app .eq-lhs { font-family: var(--font-pixel); font-size: 13px; color: var(--blood); margin-right: 4px; }
+.assay-app .equation sup, .assay-app .equation sub { font-size: 0.7em; }
+.assay-app .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; }
+.assay-app .frac .num, .assay-app .frac .den { padding: 0 8px; white-space: nowrap; }
+.assay-app .frac .num { border-bottom: 3px solid var(--ink); }
+.assay-app .eq-alt { font-size: 17px; color: var(--straw-dark); margin-top: -4px !important; }
+
+.assay-app .worked {
+  margin: 14px 0 0;
+  padding: 10px 14px 12px;
+  background: var(--parchment-dark);
+  border-left: 6px solid var(--gold-dark);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.assay-app .worked h3 { margin: 0 0 6px; }
+.assay-app .worked-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0 10px;
+  padding-left: 12px;
+  border-left: 3px dashed var(--straw-dark);
+  font-size: 21px;
+}
+.assay-app .worked-steps .result { font-family: var(--font-pixel); font-size: 13px; color: var(--blood); margin-top: 4px; }
+
+.assay-app .abe-sbe { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0 12px; }
+.assay-app .be-card { padding: 10px 12px; background: #fff6dc; box-shadow: 0 0 0 2px var(--ink); }
+.assay-app .be-card h4 { margin: 0 0 6px; font-family: var(--font-west); font-weight: 400; font-size: 19px; color: var(--wood-dark); }
+.assay-app .be-card p { font-size: 18px; margin: 0 0 6px; }
+
+/* ---------- live panel ---------- */
+.assay-app .live-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.assay-app .live-body { display: grid; grid-template-columns: minmax(260px, 0.9fr) 1.4fr; gap: 16px 24px; align-items: start; }
+.assay-app .input-head { font-family: var(--font-pixel); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wood-dark); margin-bottom: 8px !important; }
+.assay-app .live-inputs .input-head { color: var(--law-blue); }
+.assay-app .live-outputs .input-head { color: var(--blood); }
+.assay-app .slider-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 90px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 19px;
+}
+.assay-app .slider-row output { font-family: var(--font-pixel); font-size: 10px; text-align: right; color: var(--law-blue); }
+.assay-app .slider-row input[type="range"] { width: 100%; margin: 0; height: 28px; accent-color: var(--law-blue); cursor: pointer; }
+.assay-app .input-note { font-size: 17px; color: var(--wood-dark); }
+.assay-app .input-note b { font-family: var(--font-pixel); font-size: 9px; color: var(--ink); }
+
+.assay-app .calc-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) auto;
+  gap: 2px 12px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #fff6dc;
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.assay-app .calc-name { font-family: var(--font-pixel); font-size: 10px; color: var(--ink); align-self: center; }
+.assay-app .calc-name small { display: block; margin-top: 3px; font-family: var(--font-term); font-size: 15px; color: var(--straw-dark); }
+.assay-app .calc-value { justify-self: end; align-self: center; }
+.assay-app .calc-value b { font-family: var(--font-pixel); font-size: 16px; color: var(--blood); }
+.assay-app .calc-value.is-low b { color: var(--blood); }
+.assay-app .calc-value.is-high b { color: var(--law-blue); }
+.assay-app .calc-value.is-ok b { color: var(--good); }
+.assay-app .calc-sub { grid-column: 1 / -1; font-size: 17px; color: var(--wood-dark); border-top: 2px dashed var(--parchment-dark); padding-top: 4px; }
+.assay-app .live-read { padding: 8px 10px; background: var(--ink); color: var(--gold); font-family: var(--font-west); font-size: 20px; }
+
+/* ---------- buttons ---------- */
+.assay-app .btn-row { display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.assay-app .px-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  width: auto;
+  min-height: 0;
+  margin: 3px;
+  padding: 9px 12px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: 0;
+  box-shadow:
+    inset -4px -4px 0 var(--gold-dark),
+    inset 4px 4px 0 var(--gold-light),
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+.assay-app .px-btn:hover { filter: brightness(1.08); }
+.assay-app .px-btn:active { transform: translate(3px, 3px); }
+.assay-app .px-btn:focus-visible { outline: 3px solid #fff; outline-offset: 5px; }
+.assay-app .px-btn:disabled { opacity: 0.45; cursor: default; filter: none; }
+.assay-app .px-btn-ghost {
+  background: var(--parchment-dark);
+  box-shadow:
+    inset -4px -4px 0 var(--straw),
+    inset 4px 4px 0 #fff3d6,
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+.assay-app .px-btn-scn.is-active {
+  background: var(--wood);
+  color: var(--gold);
+  box-shadow:
+    inset -4px -4px 0 var(--wood-dark),
+    inset 4px 4px 0 var(--wood-light),
+    0 0 0 3px var(--ink),
+    4px 4px 0 3px rgba(27, 15, 8, 0.55);
+}
+
+/* ---------- saloon and reference ---------- */
+.assay-app .saloon-list { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 8px; font-size: 20px; }
+.assay-app .saloon-list li { padding-left: 14px; border-left: 4px solid var(--gold-dark); }
+.assay-app .saloon-list strong { color: var(--blood); }
+.assay-app .saloon-bridge { font-size: 18px; color: var(--wood-dark); }
+.assay-app .ref-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 19px; }
+.assay-app .ref-list li { padding-left: 14px; border-left: 4px solid var(--wood); }
+.assay-app .ref-list strong { color: var(--wood-dark); }
+
+.assay-app .ao-footer { display: flex; justify-content: center; padding-top: 10px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .assay-app .journey-body,
+  .assay-app .live-body,
+  .assay-app .split-panel,
+  .assay-app .abe-sbe { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .assay-app .slider-row { grid-template-columns: 1fr; gap: 4px; }
+  .assay-app .slider-row output { text-align: left; }
+  .assay-app .equation { font-size: 20px; }
+  .assay-app .equation-wrap { font-size: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assay-app .sample-path-inner { animation: none; }
+  .assay-app .sample-drop,
+  .assay-app .station { transition: none; }
+}

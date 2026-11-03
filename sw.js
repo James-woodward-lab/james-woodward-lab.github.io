@@ -14,7 +14,7 @@
  * caches are cleaned on activate.
  */
 
-const CACHE_VERSION = 'v41';
+const CACHE_VERSION = 'v48';
 const SHELL_CACHE = `jwl-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `jwl-runtime-${CACHE_VERSION}`;
 
@@ -38,6 +38,9 @@ const APP_SHELL = [
   '/postnatal-review/index.html',
   '/postnatal-review/content.js',
   '/postnatal-review/review.js',
+  '/postnatal-daily-review/index.html',
+  '/postnatal-daily-review/content.js',
+  '/postnatal-daily-review/review.js',
   '/icons/icon.svg',
   '/icons/icon-maskable.svg'
 ];

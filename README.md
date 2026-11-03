@@ -22,6 +22,11 @@ bedside on a phone or trust PC.
   formats clinician-entered neonatal history and examination findings for
   manual transfer into BadgerNet. Does not interpret data, calculate
   gestation, assess risk, diagnose, or recommend treatment.
+- **📋 [Postnatal daily review](postnatal-daily-review/)** - documentation
+  aid for daily reviews of babies already on the postnatal ward or
+  transitional care. Combines selected pathway templates into one
+  BadgerNet note. Does not interpret data, assess risk, diagnose, or
+  recommend treatment.
 - **💧 [Fluid Calculator](fluid-calculator/)** - maintenance &
   replacement fluids.
 - **🫀 [QTc Calculator](qtc-calculator/)** - Bazett / Fridericia with
