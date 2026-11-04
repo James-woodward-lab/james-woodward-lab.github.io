@@ -396,7 +396,8 @@
     state.scenario = state.queue[state.queueIndex];
     state.queueIndex += 1;
     state.feedbackOpen = false;
-    state.orderIds = (state.scenario.actions || bank.ACTIONS.map((a) => a.id)).slice();
+    const actionIds = state.scenario.actions || bank.ACTIONS.map((a) => a.id);
+    state.orderIds = bank.presentOrder(actionIds, state.scenario.correctAction);
 
     els.vignette.textContent = state.scenario.vignette;
     els.chips.innerHTML = contextChips(state.scenario.context);

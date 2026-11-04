@@ -494,11 +494,29 @@
     return shuffle(preferred.length ? preferred : SCENARIOS.slice());
   }
 
+  /*
+   * Buttons keep a familiar order (oxygen, then support, then labs), but the
+   * correct order is lifted out and dropped into a random slot. Similar
+   * orders stay near the same place; the right one does not.
+   */
+  function presentOrder(actionIds, correctId) {
+    const rank = new Map(ACTIONS.map((action, index) => [action.id, index]));
+    const ordered = actionIds.slice().sort((a, b) => (rank.get(a) ?? 99) - (rank.get(b) ?? 99));
+    if (!correctId || ordered.indexOf(correctId) === -1) {
+      return ordered;
+    }
+    const rest = ordered.filter((id) => id !== correctId);
+    const slot = Math.floor(Math.random() * (rest.length + 1));
+    rest.splice(slot, 0, correctId);
+    return rest;
+  }
+
   window.BicarbBanditScenarios = {
     ACTIONS,
     ACTION_LABELS,
     SCENARIOS,
     shuffle,
     scenariosForAge,
+    presentOrder,
   };
 })();
