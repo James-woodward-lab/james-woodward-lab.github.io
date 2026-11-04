@@ -751,3 +751,69 @@ body.postnatal-review-app .problem-name {
   cursor: default;
   border-color: var(--border);
 }
+
+/* Problem checklists */
+.check-tally {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.check-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+}
+
+.check-item.is-done { border-left-color: var(--accent); }
+.check-item.is-missing { border-left-color: var(--warn); }
+
+.check-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.check-label {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  color: var(--text);
+}
+
+.check-mark {
+  color: var(--accent);
+  margin-right: 6px;
+}
+
+.check-shared {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.check-value {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--text-soft);
+}
+
+.check-item.is-missing .check-value { color: var(--muted); font-style: italic; }
+
+.check-jump {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: var(--fs-xs);
+}

@@ -213,4 +213,45 @@ assert.strictEqual(listed.indexOf('Review at'), -1, 'old review line is replaced
 var dropped = review.normalize({ pathways: [], problems: [{ type: 'sepsis' }, { type: 'murmur' }] });
 assert.deepStrictEqual(dropped.problems.map(function (p) { return p.type; }), ['murmur'], 'unticked pathways leave the problems list');
 
+/* Problem templates: prompts only, shared answers, data entered once. */
+var content = require('./content.js');
+Object.keys(content.TEMPLATES).forEach(function (type) {
+  content.TEMPLATES[type].forEach(function (id) {
+    assert.ok(content.CHECK_ITEMS[id], 'template item exists: ' + type + ' ' + id);
+  });
+});
+var templateText = JSON.stringify(content.CHECK_ITEMS);
+assert.ok(!/mmol|\d\s*%|\d\.\d\s*(kg|\u00B0C)/i.test(templateText.replace(/2\.24 kg/g, '')), 'templates carry no thresholds or targets');
+
+var templated = review.buildNote({
+  problems: [{ type: 'jaundice' }, { type: 'hdn' }, { type: 'idm' }],
+  jaundice: 'tsb', jaundiceValue: '210', jaundiceAgeHours: '40', jaundicePlot: 'below',
+  glucoses: [{ time: '09:00', value: '2.9', method: 'meter' }],
+  feedMode: 'breast',
+  checks: {
+    bloodGroupDat: { text: 'O positive, DAT negative' },
+    chartGestation: { status: 'yes' },
+    haemPlan: { status: 'no' },
+    datLeaflet: { status: 'na' }
+  }
+});
+assert.ok(templated.indexOf('Jaundice.\nSerum bilirubin 210 at 40 hours, below the treatment line on the chart used.') !== -1, 'jaundice data is written once under the first problem that uses it');
+assert.strictEqual(templated.split('Baby blood group and DAT: O positive, DAT negative.').length, 2, 'a shared answer prints once');
+assert.ok(templated.indexOf('Plotted on the chart for birth gestation.') !== -1, 'confirmed item is written');
+assert.ok(templated.indexOf('Antenatal haematology and obstetric plan not yet checked.') !== -1, 'not yet is written');
+assert.strictEqual(templated.indexOf('DAT-positive parent leaflet'), -1, 'N/A is left out');
+assert.ok(templated.indexOf('Infant of diabetic mother.\nBlood glucose: 2.9 mmol/L on a meter at 09:00.') !== -1, 'glucose is written under the problem that uses it when no glucose pathway is ticked');
+assert.strictEqual(templated.split('breastfeeds').length, 2, 'feeding is not repeated under problems');
+
+var emptyTemplate = review.buildNote({ problems: [{ type: 'murmur' }] });
+assert.strictEqual(emptyTemplate.split('Murmur.').length, 2, 'an unfilled checklist adds no empty heading below the list');
+
+var lpFirst = review.buildNote({ pathways: ['late-preterm'], problems: [{ type: 'jaundice' }, { type: 'late-preterm' }], jaundice: 'none', weightToday: '2.1' });
+assert.ok(lpFirst.indexOf('Jaundice.\nNo clinical jaundice.') !== -1, 'jaundice moves to the jaundice problem when it is listed first');
+assert.strictEqual(lpFirst.split('No clinical jaundice.').length, 2, 'jaundice is not repeated under late preterm');
+assert.ok(lpFirst.indexOf('Weight today 2.1 kg.') !== -1, 'weight still written once');
+
+assert.strictEqual(review.sourceText(review.normalize({ feedMode: 'formula', feedAmount: '30' }), 'feeding'), 'formula, 30 ml.', 'feeding prompt reads from the feeding panel');
+assert.strictEqual(review.sourceText(review.normalize({}), 'glucose'), '', 'empty panels show nothing to autofill');
+
 console.log('postnatal daily review tests passed');

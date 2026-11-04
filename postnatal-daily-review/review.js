@@ -39,6 +39,7 @@
       ageHours: '',
       pathways: [],
       problems: [],
+      checks: {},
       pendingOther: '',
       escalation: '',
       sinceLast: '',
@@ -84,7 +85,7 @@
   function normalize(partial) {
     var state = emptyState();
     if (!partial || typeof partial !== 'object') return state;
-    var nested = { obs: 1, answers: 1, multi: 1, exam: 1 };
+    var nested = { obs: 1, answers: 1, multi: 1, exam: 1, checks: 1 };
     Object.keys(partial).forEach(function (key) {
       if (partial[key] === undefined) return;
       if (nested[key] && partial[key] && typeof partial[key] === 'object' && !Array.isArray(partial[key])) {
@@ -114,6 +115,7 @@
     if (!state.answers) state.answers = {};
     if (!state.multi) state.multi = {};
     if (!state.exam) state.exam = {};
+    if (!state.checks || typeof state.checks !== 'object' || Array.isArray(state.checks)) state.checks = {};
     return state;
   }
 
@@ -500,10 +502,8 @@
   function latePretermSection(state) {
     if (!hasPathway(state, 'late-preterm')) return [];
     var lines = ['Late preterm pathway.'];
-    lines.push(jaundiceSentence(state));
-    if (state.weightToday && String(state.weightToday).trim()) {
-      lines.push('Weight today ' + String(state.weightToday).trim() + (/kg$/i.test(String(state.weightToday).trim()) ? '.' : ' kg.'));
-    }
+    if (dataOwner(state, 'jaundice') === 'late-preterm') lines.push(jaundiceSentence(state));
+    if (dataOwner(state, 'weight') === 'late-preterm') lines.push(weightSentence(state));
     if (tempOwner(state) === 'temperature') {
       lines.push('Thermal care documented with temperature management below.');
     } else {
@@ -574,6 +574,131 @@
     return ['Hypoglycaemia pathway.', body];
   }
 
+  /* ------------------------------------------------ problem templates */
+
+  function templateFor(type) {
+    return (content.TEMPLATES && content.TEMPLATES[type]) || [];
+  }
+
+  function weightSentence(state) {
+    var weight = String(state.weightToday || '').trim();
+    if (!weight) return '';
+    return 'Weight today ' + weight + (/kg$/i.test(weight) ? '.' : ' kg.');
+  }
+
+  /* What another panel already holds, shown as-is. Never interpreted. */
+  function sourceText(state, source) {
+    if (source === 'gestation') return String(state.gestationAtBirth || '').trim();
+    if (source === 'feeding') return feedingSentence(state).replace(/^Feeding: /, '');
+    if (source === 'obs') return obsSentence(state);
+    if (source === 'glucose') {
+      var rows = filledGlucoses(state);
+      return rows.length ? rows.map(formatGlucose).join(', ') + '.' : '';
+    }
+    if (source === 'temps') return cleanLines([thermalCareSentence(state), temperatureSentence(state)]).replace(/\n/g, ' ');
+    if (source === 'jaundice') return jaundiceSentence(state);
+    if (source === 'weight') return weightSentence(state);
+    return '';
+  }
+
+  /* Which problem's section in the note carries shared data that has no
+   * pathway home of its own: the first listed problem that uses it. */
+  var NATIVE_SOURCES = {
+    'late-preterm': ['jaundice', 'weight', 'glucose', 'temps'],
+    hypoglycaemia: ['glucose'],
+    temperature: ['temps']
+  };
+
+  function dataOwner(state, source) {
+    if (source === 'glucose' && glucoseOwner(state)) return '';
+    if (source === 'temps' && tempOwner(state)) return '';
+    var problems = state.problems || [];
+    for (var i = 0; i < problems.length; i += 1) {
+      if (templateFor(problems[i].type).indexOf(source) !== -1) return problems[i].type;
+    }
+    return '';
+  }
+
+  function usesSource(state, source) {
+    return (state.problems || []).some(function (problem) {
+      return templateFor(problem.type).indexOf(source) !== -1;
+    });
+  }
+
+  function ownedSourceLines(state, type) {
+    var native = NATIVE_SOURCES[type] || [];
+    return ['jaundice', 'weight', 'glucose', 'temps'].filter(function (source) {
+      return native.indexOf(source) === -1 && dataOwner(state, source) === type;
+    }).map(function (source) {
+      if (source === 'jaundice') return jaundiceSentence(state);
+      if (source === 'weight') return weightSentence(state);
+      if (source === 'glucose') return glucoseSentence(state, '');
+      return cleanLines([thermalCareSentence(state), temperatureSentence(state)]);
+    });
+  }
+
+  function checkAnswer(state, id) {
+    var answer = state.checks && state.checks[id];
+    return answer && typeof answer === 'object' ? answer : {};
+  }
+
+  function checkLine(state, id) {
+    var item = content.CHECK_ITEMS[id];
+    if (!item || item.kind === 'source') return '';
+    var answer = checkAnswer(state, id);
+    if (item.kind === 'confirm') {
+      if (answer.status === 'yes') return item.yes;
+      if (answer.status === 'no') return item.no;
+      return '';
+    }
+    var text = String(answer.text || '').trim();
+    return text ? item.label + ': ' + ensurePeriod(text) : '';
+  }
+
+  function checkAddressed(state, id) {
+    var item = content.CHECK_ITEMS[id];
+    if (!item) return false;
+    if (item.kind === 'source') return !!sourceText(state, item.source);
+    var answer = checkAnswer(state, id);
+    if (item.kind === 'confirm') return !!answer.status;
+    return !!String(answer.text || '').trim();
+  }
+
+  /* Shared items print once, under the first listed problem that has them. */
+  function templateLines(state, type, printed) {
+    var lines = [];
+    templateFor(type).forEach(function (id) {
+      if (printed[id]) return;
+      var line = checkLine(state, id);
+      if (!line) return;
+      printed[id] = true;
+      lines.push(line);
+    });
+    return lines;
+  }
+
+  var PATHWAY_SECTIONS = {
+    sepsis: function (state) { return sepsisSection(state); },
+    'late-preterm': function (state) { return latePretermSection(state); },
+    temperature: function (state) { return temperatureSection(state); },
+    hypoglycaemia: function (state) { return hypoglycaemiaSection(state); }
+  };
+
+  function problemSection(state, problem, printed) {
+    var extra = ownedSourceLines(state, problem.type).concat(templateLines(state, problem.type, printed));
+    var builder = PATHWAY_SECTIONS[problem.type];
+    if (builder) {
+      var base = builder(state);
+      if (!base.length) return [];
+      var body = cleanLines([base[1] || ''].concat(extra));
+      return body ? [base[0], body] : [base[0]];
+    }
+    var text = cleanLines(extra);
+    var label = problemLabel(problem);
+    if (!text || !label) return [];
+    return [ensurePeriod(label), text];
+  }
+
   function planItems(state) {
     var bits = [];
     if (state.plan && state.plan.trim()) {
@@ -607,10 +732,10 @@
     blocks.push(parentConcernSentence(state));
     blocks.push(midwifeConcernSentence(state));
     blocks.push(examinationText(state));
-    blocks = blocks.concat(sepsisSection(state));
-    blocks = blocks.concat(latePretermSection(state));
-    blocks = blocks.concat(temperatureSection(state));
-    blocks = blocks.concat(hypoglycaemiaSection(state));
+    var printed = {};
+    state.problems.forEach(function (problem) {
+      blocks = blocks.concat(problemSection(state, problem, printed));
+    });
     blocks.push(planParagraph(state));
     blocks.push(nextReviewParagraph(state));
     var body = cleanLines(blocks);
@@ -621,7 +746,7 @@
   function missingRequired(state) {
     return {
       context: ageInHours(state) == null,
-      pathways: !state.pathways.length
+      pathways: !state.problems.length
     };
   }
 
@@ -798,6 +923,13 @@
     state.noteEdits = {};
     if (target.dataset.field) state[target.dataset.field] = target.value;
     else if (target.dataset.obs) state.obs[target.dataset.obs] = target.value;
+    else if (target.dataset.checkText) {
+      var checkId = target.dataset.checkText;
+      state.checks[checkId] = Object.assign({}, checkAnswer(state, checkId), { text: target.value });
+      document.querySelectorAll('[data-check-text="' + checkId + '"]').forEach(function (other) {
+        if (other !== target) other.value = target.value;
+      });
+    }
     else if (target.dataset.problemField) {
       var problem = state.problems[Number(target.dataset.index)];
       if (problem) problem[target.dataset.problemField] = target.value;
@@ -829,6 +961,7 @@
     if (button.dataset.step) { go(button.dataset.step); return; }
     if (button.dataset.action) { runAction(button.dataset.action, button); return; }
     if (button.dataset.pathway) { togglePathway(button.dataset.pathway); return; }
+    if (button.dataset.checkStatus) { setCheckStatus(button.dataset.checkStatus, button.dataset.value); return; }
     if (button.dataset.problemAdd) { addProblem(button.dataset.problemAdd); return; }
     if (button.dataset.problemStatus) { setProblemStatus(button); return; }
     if (button.dataset.problemMove) { moveProblem(button); return; }
@@ -895,6 +1028,13 @@
       state.pathways.splice(index, 1);
       state.problems = state.problems.filter(function (p) { return p.type !== id; });
     }
+    persist();
+    paint();
+  }
+
+  function setCheckStatus(id, value) {
+    var answer = checkAnswer(state, id);
+    state.checks[id] = Object.assign({}, answer, { status: answer.status === value ? '' : value });
     persist();
     paint();
   }
@@ -1154,7 +1294,7 @@
         '</div>';
     }).join('');
     return groupCard('Problems list',
-      '<div class="field">' + fieldLabel('Pathways') + '<p class="hint">Each pathway you tick opens its own section in Pathways.</p>' + pathwayChips + '</div>' +
+      '<div class="field">' + fieldLabel('Pathways') + '<p class="hint">Each problem you add gets a checklist in Problem checks.</p>' + pathwayChips + '</div>' +
       '<div class="field">' + fieldLabel('Other problems') + extraChips + '</div>' +
       '<p class="hint">Only problems you choose appear at the top of the note, in the order shown here.</p>' +
       (rows ? '<div class="problem-list">' + rows + '</div>' : '')
@@ -1267,67 +1407,126 @@
   }
 
   function sharedGlucoseCard() {
-    if (!hasPathway(state, 'late-preterm') && !hasPathway(state, 'hypoglycaemia')) return '';
+    if (!usesSource(state, 'glucose')) return '';
     return groupCard('Blood glucose',
-      '<p class="hint">Entered once. Written under the selected glucose pathways without interpreting the value.</p>' +
+      '<p class="hint">Entered once. Shown in every problem that needs it, without interpreting the value.</p>' +
       glucoseRowsHtml()
     );
   }
 
+  function sharedJaundiceCard() {
+    if (!usesSource(state, 'jaundice')) return '';
+    return groupCard('Jaundice',
+      bindChoices('jaundice', 'Jaundice', content.JAUNDICE) +
+      '<div id="jaundice-detail"><div class="num-row">' +
+        input('jaundiceValue', 'Value', state.jaundiceValue, { mode: 'decimal' }) +
+        input('jaundiceAgeHours', 'Age in hours', state.jaundiceAgeHours, { type: 'number', mode: 'decimal' }) +
+      '</div>' +
+      bindChoices('jaundicePlot', 'Treatment line, from your chart', [
+        { value: 'below', label: 'Below' },
+        { value: 'on', label: 'On' },
+        { value: 'above', label: 'Above', abnormal: true }
+      ]) + '</div>'
+    );
+  }
+
+  function sharedWeightCard() {
+    if (!usesSource(state, 'weight')) return '';
+    return groupCard('Weight',
+      input('weightToday', 'Weight today', state.weightToday, { wide: true, placeholder: '2.31 kg' })
+    );
+  }
+
   function sharedTemperatureCard() {
-    if (!hasPathway(state, 'late-preterm') && !hasPathway(state, 'temperature')) return '';
+    if (!usesSource(state, 'temps')) return '';
     return groupCard('Thermal care',
       bindChoices('thermalCare', 'Setting', content.THERMAL_CARE) +
       tempRowsHtml()
     );
   }
 
-  function pathwaysHtml() {
-    var cards = '';
-    if (hasPathway(state, 'sepsis')) {
-      cards += groupCard('Suspected sepsis',
-        input('antibioticDay', 'Antibiotic day', state.antibioticDay, { wide: true, placeholder: '2' }) +
+  function pathwayInputs(type) {
+    if (type === 'sepsis') {
+      return input('antibioticDay', 'Antibiotic day', state.antibioticDay, { wide: true, placeholder: '2' }) +
         input('antibioticWhat', 'What is being given', state.antibioticWhat, { wide: true, placeholder: 'Names only. Doses stay on the drug chart.' }) +
         bindChoices('cultureStatus', 'Blood culture', content.CULTURE_STATUS) +
         '<div id="culture-detail-wrap">' + input('cultureDetail', 'Culture detail', state.cultureDetail, { wide: true }) + '</div>' +
         area('bloodResults', 'Blood results', state.bloodResults, 3) +
-        area('sepsisCourse', 'Clinical course', state.sepsisCourse, 3)
-      );
+        area('sepsisCourse', 'Clinical course', state.sepsisCourse, 3);
     }
-    if (hasPathway(state, 'late-preterm')) {
-      cards += groupCard('Late preterm pathway',
-        bindChoices('jaundice', 'Jaundice', content.JAUNDICE) +
-        '<div id="jaundice-detail"><div class="num-row">' +
-          input('jaundiceValue', 'Value', state.jaundiceValue, { mode: 'decimal' }) +
-          input('jaundiceAgeHours', 'Age in hours', state.jaundiceAgeHours, { type: 'number', mode: 'decimal' }) +
-        '</div>' +
-        bindChoices('jaundicePlot', 'Treatment line, from your chart', [
-          { value: 'below', label: 'Below' },
-          { value: 'on', label: 'On' },
-          { value: 'above', label: 'Above', abnormal: true }
-        ]) + '</div>' +
-        input('weightToday', 'Weight today', state.weightToday, { wide: true, placeholder: '2.31 kg' }) +
-        area('lpNote', 'Other late preterm notes', state.lpNote, 3)
-      );
+    if (type === 'late-preterm') {
+      return area('lpNote', 'Other late preterm notes', state.lpNote, 3);
     }
-    if (hasPathway(state, 'temperature')) {
-      cards += groupCard('Temperature management',
-        area('tempEnvironment', 'Environment', state.tempEnvironment, 3) +
-        area('tempWeaning', 'Weaning note', state.tempWeaning, 3)
-      );
+    if (type === 'temperature') {
+      return area('tempEnvironment', 'Environment', state.tempEnvironment, 3) +
+        area('tempWeaning', 'Weaning note', state.tempWeaning, 3);
     }
-    if (hasPathway(state, 'hypoglycaemia')) {
-      cards += groupCard('Hypoglycaemia pathway',
-        '<div class="field">' + fieldLabel('Documented reason') + multiButtons('hypoReasons', content.HYPO_REASONS, state.multi.hypoReasons || []) + '</div>' +
+    if (type === 'hypoglycaemia') {
+      return '<div class="field">' + fieldLabel('Documented reason') + multiButtons('hypoReasons', content.HYPO_REASONS, state.multi.hypoReasons || []) + '</div>' +
         '<div id="hypo-reason-other-wrap">' + input('hypoReasonOther', 'Other reason', state.hypoReasonOther, { wide: true }) + '</div>' +
         '<div class="field">' + fieldLabel('Symptoms') + multiButtons('hypoSymptoms', content.HYPO_SYMPTOMS, state.multi.hypoSymptoms || []) + '</div>' +
-        '<div id="hypo-symptom-other-wrap">' + input('hypoSymptomOther', 'Other symptoms', state.hypoSymptomOther, { wide: true }) + '</div>'
-      );
+        '<div id="hypo-symptom-other-wrap">' + input('hypoSymptomOther', 'Other symptoms', state.hypoSymptomOther, { wide: true }) + '</div>';
     }
+    return '';
+  }
+
+  function sharedWith(id, type) {
+    var names = [];
+    state.problems.forEach(function (problem) {
+      if (problem.type === type) return;
+      if (templateFor(problem.type).indexOf(id) === -1) return;
+      var label = problemLabel(problem);
+      if (label && names.indexOf(label) === -1) names.push(label);
+    });
+    return names.length ? '<span class="check-shared">Also in ' + esc(names.join(', ')) + '</span>' : '';
+  }
+
+  function checkItemHtml(id, type) {
+    var item = content.CHECK_ITEMS[id];
+    if (!item) return '';
+    var done = checkAddressed(state, id);
+    var head = '<span class="check-label">' + (done ? '<span class="check-mark" aria-hidden="true">\u2713</span>' : '') + esc(item.label) + '</span>';
+    if (item.kind === 'source') {
+      var where = content.CHECK_SOURCES[item.source] || {};
+      var value = sourceText(state, item.source);
+      return '<div class="check-item is-source' + (done ? ' is-done' : ' is-missing') + '">' +
+        '<div class="check-head">' + head +
+        '<button type="button" class="text-button check-jump" data-step="' + esc(where.step || '') + '">' + (done ? 'Edit in ' : 'Add in ') + esc(where.where || '') + '</button></div>' +
+        '<p class="check-value">' + esc(value || 'Not entered yet.') + '</p></div>';
+    }
+    var answer = checkAnswer(state, id);
+    if (item.kind === 'confirm') {
+      var buttons = content.CHECK_STATUSES.map(function (option) {
+        var on = answer.status === option.value;
+        return '<button type="button" class="choice choice--tight' + (on ? ' is-selected' : '') + '" data-check-status="' + id + '" data-value="' + option.value + '">' + esc(option.label) + '</button>';
+      }).join('');
+      return '<div class="check-item' + (done ? ' is-done' : '') + '"><div class="check-head">' + head + sharedWith(id, type) + '</div>' +
+        '<div class="choices" role="group" aria-label="' + esc(item.label) + '">' + buttons + '</div></div>';
+    }
+    return '<label class="check-item field' + (done ? ' is-done' : '') + '"><span class="check-head">' + head + sharedWith(id, type) + '</span>' +
+      '<input data-check-text="' + id + '" value="' + esc(answer.text || '') + '" autocomplete="off"' + (item.placeholder ? ' placeholder="' + esc(item.placeholder) + '"' : '') + '></label>';
+  }
+
+  function problemCheckCard(problem) {
+    var ids = templateFor(problem.type);
+    var inputs = pathwayInputs(problem.type);
+    if (!ids.length && !inputs) return '';
+    var label = problemLabel(problem) || 'Problem';
+    var count = ids.filter(function (id) { return checkAddressed(state, id); }).length;
+    var tally = ids.length ? '<p class="check-tally">' + count + ' of ' + ids.length + ' checked</p>' : '';
+    var list = ids.length ? '<div class="check-list">' + ids.map(function (id) { return checkItemHtml(id, problem.type); }).join('') + '</div>' : '';
+    return groupCard(label, tally + inputs + list);
+  }
+
+  function pathwaysHtml() {
+    var cards = state.problems.map(problemCheckCard).join('');
     return '<section class="step">' +
-      '<p id="pathways-needed" class="quiet-prompt">Select one or more pathways in Context.</p>' +
+      '<p id="pathways-needed" class="quiet-prompt">Add one or more problems in Context.</p>' +
+      '<p class="hint">Prompts to check and document. Items marked from another panel fill in from what you entered there. Shared items fill in across problems and print once in the note.</p>' +
       sharedGlucoseCard() +
       sharedTemperatureCard() +
+      sharedJaundiceCard() +
+      sharedWeightCard() +
       cards +
       '</section>';
   }
@@ -1413,6 +1612,7 @@
     normalize: normalize,
     ageInHours: ageInHours,
     buildNote: buildNote,
+    sourceText: sourceText,
     problemsText: problemsText,
     glucoseOwner: glucoseOwner,
     tempOwner: tempOwner,

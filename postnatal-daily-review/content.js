@@ -21,7 +21,7 @@
   var STEPS = [
     { id: 'context', label: 'Context' },
     { id: 'progress', label: 'Progress' },
-    { id: 'pathways', label: 'Pathways' },
+    { id: 'pathways', label: 'Problem checks' },
     { id: 'examination', label: 'Examination' },
     { id: 'plan', label: 'Plan' }
   ];
@@ -51,7 +51,10 @@
     { id: 'resp', label: 'Respiratory symptoms' },
     { id: 'murmur', label: 'Murmur' },
     { id: 'antenatal', label: 'Antenatal finding' },
-    { id: 'maternal-meds', label: 'Maternal medication' },
+    { id: 'hdn', label: 'Risk of haemolytic disease' },
+    { id: 'psychotropic', label: 'Maternal antidepressant or antipsychotic' },
+    { id: 'thyro', label: 'Maternal thyrotoxicosis' },
+    { id: 'maternal-meds', label: 'Other maternal medication' },
     { id: 'hips', label: 'Hip risk factors' },
     { id: 'other', label: 'Other' }
   ];
@@ -75,6 +78,118 @@
     { value: 'hearing', label: 'Hearing screen' },
     { value: 'hepb', label: 'Hep B vaccine' },
     { value: 'other', label: 'Other' }
+  ];
+
+  /*
+   * Problem templates: an aide-memoire of what to check and document for each
+   * problem. Prompts only. They carry no thresholds, targets, or management
+   * rules, and nothing is filled in by the app from numbers.
+   *
+   * kind 'source'  - shows what was already entered in another panel.
+   * kind 'text'    - free text, shared by every problem that lists the item.
+   * kind 'confirm' - Done / Not yet / N/A, shared the same way.
+   */
+  var CHECK_SOURCES = {
+    gestation: { step: 'context', where: 'Context' },
+    feeding: { step: 'progress', where: 'Feeding' },
+    obs: { step: 'examination', where: 'Observations' },
+    glucose: { step: 'pathways', where: 'Blood glucose' },
+    temps: { step: 'pathways', where: 'Thermal care' },
+    jaundice: { step: 'pathways', where: 'Jaundice' },
+    weight: { step: 'pathways', where: 'Weight' }
+  };
+
+  var CHECK_ITEMS = {
+    gestation: { kind: 'source', source: 'gestation', label: 'Gestation at birth' },
+    feeding: { kind: 'source', source: 'feeding', label: 'Feeding' },
+    obs: { kind: 'source', source: 'obs', label: 'Observations' },
+    glucose: { kind: 'source', source: 'glucose', label: 'Blood glucose' },
+    temps: { kind: 'source', source: 'temps', label: 'Temperature and thermal care' },
+    jaundice: { kind: 'source', source: 'jaundice', label: 'Jaundice and bilirubin' },
+    weight: { kind: 'source', source: 'weight', label: 'Weight' },
+
+    birthWeight: { kind: 'text', label: 'Birth weight and centile', placeholder: '2.24 kg, 9th centile' },
+    lpRiskFactors: { kind: 'text', label: 'Additional risk factors', placeholder: 'For example, SGA, maternal diabetes, beta-blocker, resuscitation, condition affecting feeding' },
+    sepsisRiskFactors: { kind: 'text', label: 'Infection risk factors and red flags', placeholder: 'As documented' },
+    infectionSigns: { kind: 'text', label: 'Signs of infection checked', placeholder: 'Behaviour, tone, breathing, temperature, feeding' },
+    obsPlan: { kind: 'text', label: 'Observation frequency and duration', placeholder: 'As planned' },
+    feedPlan: { kind: 'text', label: 'Individual feeding plan', placeholder: 'Volumes, frequency, top-ups, expressing' },
+    nappies: { kind: 'text', label: 'Wet nappies and stools' },
+    hypoTreatment: { kind: 'text', label: 'Treatment given', placeholder: 'For example, top-ups, gel, other' },
+    glucosePlan: { kind: 'text', label: 'Glucose monitoring plan', placeholder: 'As agreed' },
+    tempReversible: { kind: 'confirm', label: 'Hat, wrapping and draughts checked', yes: 'Hat, wrapping and draughts checked.', no: 'Hat, wrapping and draughts not yet checked.' },
+    tempStable: { kind: 'text', label: 'Time with stable temperatures in a cot' },
+    sepsisDuration: { kind: 'text', label: 'Planned antibiotic duration and review point' },
+    jaundiceOnset: { kind: 'text', label: 'When jaundice was first noticed' },
+    chartGestation: { kind: 'confirm', label: 'Plotted on the chart for birth gestation', yes: 'Plotted on the chart for birth gestation.', no: 'Not yet plotted on the chart for birth gestation.' },
+    bloodGroupDat: { kind: 'text', label: 'Baby blood group and DAT', placeholder: 'With maternal group' },
+    phototherapy: { kind: 'text', label: 'Phototherapy' },
+    bilirubinPlan: { kind: 'text', label: 'Next bilirubin', placeholder: 'As planned' },
+    maternalAntibodies: { kind: 'text', label: 'Maternal group, antibodies and anti-D history' },
+    haemPlan: { kind: 'confirm', label: 'Antenatal haematology and obstetric plan checked', yes: 'Antenatal haematology and obstetric plan checked.', no: 'Antenatal haematology and obstetric plan not yet checked.' },
+    fbcSbr: { kind: 'text', label: 'FBC and SBR results' },
+    hdnFollowUp: { kind: 'text', label: 'Follow-up bloods and medicines', placeholder: 'As planned' },
+    datLeaflet: { kind: 'confirm', label: 'DAT-positive parent leaflet, if applicable', yes: 'DAT-positive parent leaflet given.', no: 'DAT-positive parent leaflet not yet given.' },
+    medsDetail: { kind: 'text', label: 'Medication and timing of last dose' },
+    adaptationSigns: { kind: 'text', label: 'Signs of poor adaptation checked', placeholder: 'Feeding, tone, irritability, jitteriness, breathing' },
+    pulseOx: { kind: 'confirm', label: 'Pulse oximetry screening', yes: 'Pulse oximetry screening completed.', no: 'Pulse oximetry screening not yet completed.' },
+    bfMedsAdvice: { kind: 'text', label: 'Breastfeeding advice for this medication' },
+    adaptationLeaflet: { kind: 'confirm', label: 'Poor adaptation parent leaflet', yes: 'Poor adaptation parent leaflet given.', no: 'Poor adaptation parent leaflet not yet given.' },
+    trab: { kind: 'text', label: 'Maternal TrAB and thyroid history' },
+    neonatalTrab: { kind: 'text', label: 'Neonatal TrAB sent and result' },
+    thyroSigns: { kind: 'text', label: 'Signs of thyrotoxicosis checked', placeholder: 'Heart rate, breathing, temperature, irritability, goitre' },
+    tftPlan: { kind: 'text', label: 'Thyroid function follow-up booked' },
+    thyroLetters: { kind: 'confirm', label: 'GP and parent thyroid letters', yes: 'GP and parent thyroid letters given.', no: 'GP and parent thyroid letters not yet given.' },
+    respFindings: { kind: 'text', label: 'Work of breathing and oxygen need' },
+    murmurDetail: { kind: 'text', label: 'Murmur findings' },
+    femorals: { kind: 'text', label: 'Femoral pulses' },
+    satsPrePost: { kind: 'text', label: 'Pre- and post-ductal saturations' },
+    cardiacPlan: { kind: 'text', label: 'Echo or cardiology follow-up', placeholder: 'As planned' },
+    birthInjury: { kind: 'text', label: 'Birth injury checked', placeholder: 'For example, clavicles, arm movements' },
+    antenatalDetail: { kind: 'text', label: 'Antenatal finding' },
+    postnatalTests: { kind: 'text', label: 'Postnatal tests and referrals', placeholder: 'As planned' },
+    hipRisk: { kind: 'text', label: 'Hip risk factor', placeholder: 'For example, breech, family history' },
+    hipExam: { kind: 'text', label: 'Hip examination' },
+    hipScan: { kind: 'confirm', label: 'Hip ultrasound requested', yes: 'Hip ultrasound requested.', no: 'Hip ultrasound not yet requested.' },
+    weightChange: { kind: 'text', label: 'Change from birth weight', placeholder: 'As you have calculated it' },
+    weightPlan: { kind: 'text', label: 'Next weight', placeholder: 'As planned' },
+    bfAssessment: { kind: 'confirm', label: 'Breastfeeding assessment', yes: 'Breastfeeding assessment completed.', no: 'Breastfeeding assessment not yet completed.' },
+    feedSupport: { kind: 'confirm', label: 'Infant feeding team involved', yes: 'Infant feeding team involved.', no: 'Infant feeding team not yet involved.' },
+    lpLeaflet: { kind: 'confirm', label: 'Late preterm parent leaflet', yes: 'Late preterm parent leaflet given.', no: 'Late preterm parent leaflet not yet given.' },
+    hypoLeaflet: { kind: 'confirm', label: 'Hypoglycaemia parent leaflet', yes: 'Hypoglycaemia parent leaflet given.', no: 'Hypoglycaemia parent leaflet not yet given.' },
+    nipe: { kind: 'confirm', label: 'NIPE', yes: 'NIPE completed.', no: 'NIPE not yet completed.' },
+    carSeat: { kind: 'confirm', label: 'Car seat challenge, if applicable', yes: 'Car seat challenge done.', no: 'Car seat challenge not yet done.' },
+    dischargeMeds: { kind: 'confirm', label: 'Discharge vitamins and iron', yes: 'Discharge vitamins and iron prescribed.', no: 'Discharge vitamins and iron not yet prescribed.' },
+    communityFollowUp: { kind: 'text', label: 'Community follow-up', placeholder: 'For example, weight and bilirubin checks' },
+    parentsUpdated: { kind: 'confirm', label: 'Parents updated', yes: 'Parents updated.', no: 'Parents not yet updated.' },
+    safetyNet: { kind: 'confirm', label: 'Safety-net advice', yes: 'Safety-net advice given.', no: 'Safety-net advice not yet given.' }
+  };
+
+  var TEMPLATES = {
+    sepsis: ['sepsisRiskFactors', 'infectionSigns', 'obs', 'temps', 'feeding', 'sepsisDuration', 'parentsUpdated'],
+    'late-preterm': ['gestation', 'birthWeight', 'lpRiskFactors', 'obs', 'obsPlan', 'temps', 'feeding', 'feedPlan', 'glucose', 'jaundice', 'weight', 'infectionSigns', 'lpLeaflet', 'nipe', 'carSeat', 'dischargeMeds', 'communityFollowUp', 'safetyNet'],
+    temperature: ['temps', 'tempReversible', 'infectionSigns', 'glucose', 'tempStable'],
+    hypoglycaemia: ['glucose', 'feeding', 'feedPlan', 'bfAssessment', 'temps', 'hypoTreatment', 'glucosePlan', 'hypoLeaflet'],
+    jaundice: ['jaundiceOnset', 'jaundice', 'chartGestation', 'bloodGroupDat', 'phototherapy', 'feeding', 'weight', 'bilirubinPlan'],
+    feeding: ['feeding', 'feedPlan', 'bfAssessment', 'feedSupport', 'nappies', 'weight'],
+    'weight-loss': ['birthWeight', 'weight', 'weightChange', 'feeding', 'feedPlan', 'nappies', 'jaundice', 'weightPlan', 'communityFollowUp'],
+    idm: ['glucose', 'feeding', 'obs', 'respFindings', 'glucosePlan', 'nipe'],
+    sga: ['birthWeight', 'glucose', 'temps', 'feeding', 'feedPlan', 'weight', 'nipe'],
+    lga: ['birthWeight', 'glucose', 'feeding', 'birthInjury'],
+    resp: ['obs', 'respFindings', 'infectionSigns', 'feeding'],
+    murmur: ['murmurDetail', 'femorals', 'satsPrePost', 'cardiacPlan', 'safetyNet'],
+    antenatal: ['antenatalDetail', 'postnatalTests', 'parentsUpdated'],
+    hdn: ['maternalAntibodies', 'haemPlan', 'bloodGroupDat', 'fbcSbr', 'jaundice', 'bilirubinPlan', 'hdnFollowUp', 'datLeaflet', 'safetyNet'],
+    psychotropic: ['medsDetail', 'obs', 'obsPlan', 'adaptationSigns', 'pulseOx', 'feeding', 'bfMedsAdvice', 'nipe', 'adaptationLeaflet', 'safetyNet'],
+    thyro: ['trab', 'neonatalTrab', 'thyroSigns', 'obs', 'feeding', 'tftPlan', 'thyroLetters', 'safetyNet'],
+    'maternal-meds': ['medsDetail', 'obs', 'feeding', 'safetyNet'],
+    hips: ['hipRisk', 'hipExam', 'hipScan']
+  };
+
+  var CHECK_STATUSES = [
+    { value: 'yes', label: 'Done' },
+    { value: 'no', label: 'Not yet' },
+    { value: 'na', label: 'N/A' }
   ];
 
   var THERMAL_CARE = [
@@ -248,6 +363,10 @@
     EXTRA_PROBLEMS: EXTRA_PROBLEMS,
     PROBLEM_STATUSES: PROBLEM_STATUSES,
     PENDING_ITEMS: PENDING_ITEMS,
+    CHECK_SOURCES: CHECK_SOURCES,
+    CHECK_ITEMS: CHECK_ITEMS,
+    CHECK_STATUSES: CHECK_STATUSES,
+    TEMPLATES: TEMPLATES,
     THERMAL_CARE: THERMAL_CARE,
     HYPO_REASONS: HYPO_REASONS,
     HYPO_SYMPTOMS: HYPO_SYMPTOMS,
