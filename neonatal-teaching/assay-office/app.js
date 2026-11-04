@@ -10,67 +10,81 @@
   /* ---------- stations ---------- */
   const STATIONS = [
     {
-      title: "Syringe and inlet",
+      title: "Capillary tube and inlet",
       drop: [60, 150],
+      origin: ["14%", "52%"],
       body: [
-        "The sample arrives in a syringe lined with dry, balanced heparin. Bubbles are expelled and the syringe is capped, because air pulls PaO₂ toward 20 kPa and drags PaCO₂ down.",
-        "The analyser aspirates 65–100 microlitres into a measuring chamber held at 37 °C. Everything downstream is measured at that temperature, whatever the patient's temperature.",
+        "The sample is in a thin glass capillary with dry heparin, filled to the end and sealed. A bubble pulls oxygen up toward room air, and lets carbon dioxide leak out.",
+        "The machine takes the blood from the tube and holds it at 37 °C. Every number after this is at that temperature, not the baby's.",
       ],
-      out: [["Volume", "about 0.1 mL"], ["Temperature", "37 °C in the chamber"], ["Check", "no bubbles, no clots, mixed, analysed within minutes"]],
+      lead: "Fill the capillary tube, keep the air out, then warm it to 37 °C.",
+      out: [["Takes", "about 0.1 mL"], ["Holds it at", "37 °C"], ["Watch for", "bubbles, clots, delay"]],
     },
     {
       title: "pH glass electrode",
       drop: [110, 110],
+      origin: ["26%", "32%"],
       body: [
-        "A thin bulb of special glass lets hydrogen ions interact with its surface. The potential difference across the glass, compared with a stable reference electrode, changes by about 61 millivolts for every pH unit at 37 °C.",
-        "The machine reads the millivolts, compares them with two calibration buffers, and reports pH. This is the first of the two numbers everything else is built on. Sørensen defined pH in 1909; the glass electrode made it a bedside measurement.",
+        "Hydrogen ions bind the outer surface of a thin glass membrane. They do not cross. The inside is a fixed pH, so the voltage shifts by about 61 mV for each pH unit.",
+        "A reference electrode stays steady. It meets the blood through a KCl junction, and the meter reads the difference. Bicarbonate and base excess are both built on this pH.",
       ],
-      out: [["Measures", "pH (hydrogen ion activity)"], ["Signal", "voltage, Nernst slope about 61 mV per pH unit"], ["Reported as", "pH, and H⁺ in nmol/L on some printouts"]],
+      lead: "pH is a voltage across glass. The hydrogen ions stay outside.",
+      out: [["Measures", "pH"], ["How", "about 61 mV per pH unit"], ["Why it matters", "the first number everything else uses"]],
     },
     {
       title: "Severinghaus CO₂ electrode",
       drop: [170, 190],
+      origin: ["40%", "68%"],
       body: [
-        "This is a pH electrode in disguise. The blood never touches it: CO₂ diffuses through a thin gas-permeable membrane into a film of bicarbonate solution. There it forms carbonic acid, the film's pH falls, and a second glass electrode reads that change.",
-        "Because only gas crosses the membrane, the reading is the partial pressure of CO₂, not the bicarbonate. This is the second measured number. Together with pH it lets the machine calculate bicarbonate.",
+        "Blood never touches the electrode. Carbon dioxide slips through a membrane, acidifies a thin bicarbonate film, and the pH of that film falls.",
+        "Only gas gets through, so the reading is PaCO₂, not bicarbonate. Pair it with pH and the machine can calculate bicarbonate.",
       ],
-      out: [["Measures", "PaCO₂ in kPa"], ["Signal", "pH change in a bicarbonate film behind a membrane"], ["Normal", "4.7–6.0 kPa (35–45 mmHg)"]],
+      lead: "The CO₂ electrode is a pH electrode behind a gas membrane.",
+      out: [["Measures", "PaCO₂"], ["How", "pH change in a bicarbonate film"], ["Usual range", "4.7–6.0 kPa"]],
     },
     {
       title: "Clark O₂ electrode",
       drop: [230, 110],
+      origin: ["55%", "32%"],
       body: [
-        "Oxygen diffuses through another membrane to a platinum cathode held at about −0.6 volts. Each oxygen molecule that arrives is reduced, and the tiny current that flows is proportional to the oxygen tension.",
-        "Clark's design dates from 1954 and is still used, although many modern analysers measure oxygen optically instead, using a dye whose fluorescence is quenched by oxygen.",
+        "Oxygen crosses a membrane onto platinum held at about −0.6 V. Each molecule that arrives is used up, and the current that flows goes up with the oxygen tension.",
+        "That current is dissolved PaO₂ only, about 2% of the oxygen in blood. Some machines skip the cathode and use a dye whose glow oxygen dims.",
       ],
-      out: [["Measures", "PaO₂ in kPa"], ["Signal", "current at a platinum cathode (or fluorescence quenching)"], ["Note", "PaO₂ is dissolved oxygen only: about 2% of the oxygen in blood"]],
+      lead: "Oxygen that reaches the cathode makes a tiny current.",
+      out: [["Measures", "PaO₂"], ["How", "current, or a dye whose glow fades"], ["Remember", "dissolved oxygen only, not the haemoglobin"]],
     },
     {
       title: "Co-oximeter",
       drop: [290, 150],
+      origin: ["70%", "70%"],
       body: [
-        "The sample is haemolysed and light of many wavelengths is shone through it. Each form of haemoglobin absorbs a different pattern: oxyhaemoglobin, deoxyhaemoglobin, carboxyhaemoglobin, methaemoglobin and, on neonatal settings, fetal haemoglobin.",
-        "From the pattern the machine reports total haemoglobin and the true saturation. A pulse oximeter uses only two wavelengths and cannot separate COHb or MetHb. The haemoglobin value also feeds the actual base excess calculation.",
+        "The blood is lysed and several colours of light shine through it. Oxyhaemoglobin, deoxyhaemoglobin, carboxyhaemoglobin and methaemoglobin each swallow a different pattern.",
+        "From that pattern you get total haemoglobin and a true saturation. A pulse oximeter uses only two colours, so it cannot see COHb or MetHb. Haemoglobin also feeds actual base excess, because it buffers.",
       ],
-      out: [["Measures", "tHb, sO₂, O₂Hb, COHb, MetHb, HbF"], ["Signal", "light absorbance at several wavelengths"], ["Feeds", "actual base excess (Hb is a buffer) and oxygen content"]],
+      lead: "Light tells the forms of haemoglobin apart.",
+      out: [["Measures", "Hb and the saturations"], ["How", "which colours get absorbed"], ["Also used for", "actual base excess"]],
     },
     {
       title: "Ion-selective and enzyme electrodes",
       drop: [350, 150],
+      origin: ["83%", "32%"],
       body: [
-        "A row of small electrodes, each with a membrane that lets through mostly one ion: sodium, potassium, ionised calcium, chloride. Like the pH electrode they produce a voltage that depends on the ion's activity.",
-        "Glucose and lactate use enzyme electrodes: glucose oxidase or lactate oxidase on a membrane turns the substrate into hydrogen peroxide, which is measured as a current. From sodium, chloride and the calculated bicarbonate the machine also works out the anion gap.",
+        "Sodium, potassium, calcium and chloride each have a membrane that mostly lets that one ion through. Like pH, the ion makes a voltage.",
+        "Glucose and lactate are different: an enzyme on the membrane turns them into a current. Sodium, chloride and the bicarbonate just calculated then give the anion gap.",
       ],
-      out: [["Measures", "Na⁺, K⁺, Ca²⁺, Cl⁻, glucose, lactate"], ["Signal", "voltage (ions) or current (enzyme reactions)"], ["Calculated from these", "anion gap"]],
+      lead: "Each ion has its own door. Glucose and lactate use an enzyme.",
+      out: [["Measures", "Na⁺, K⁺, Ca²⁺, Cl⁻, glucose, lactate"], ["How", "voltage for ions, current for enzymes"], ["Then calculated", "the anion gap"]],
     },
     {
       title: "Calculator and printout",
       drop: [358, 196],
+      origin: ["85%", "72%"],
       body: [
-        "Now the arithmetic. With pH and PaCO₂ measured, the machine solves Henderson–Hasselbalch for bicarbonate: HCO₃⁻ = 0.225 × PaCO₂ × 10^(pH − 6.1). Then it puts bicarbonate, pH and haemoglobin into a Van Slyke-type equation for base excess, and a fixed-haemoglobin version for standard base excess.",
-        "None of these numbers was measured. If the pH electrode drifts, bicarbonate and base excess drift with it. Calibration every few hours and quality-control samples keep the measured pair honest so the calculated ones can be trusted.",
+        "Bicarbonate is 0.225 × PaCO₂ × 10^(pH − 6.1). Base excess then asks how much acid or base would bring the pH back to 7.40 if PaCO₂ were 5.3 kPa.",
+        "Haemoglobin joins only the actual base excess, because haemoglobin buffers. None of these numbers was measured. If the pH electrode drifts, they drift with it.",
       ],
-      out: [["Calculates", "HCO₃⁻, actual BE, standard BE, standard HCO₃⁻, anion gap, P/F"], ["From", "pH and PaCO₂ (plus Hb for actual BE)"], ["Rule", "measured pair first, calculated values second"]],
+      lead: "pH and PaCO₂ go in. Bicarbonate and base excess come out.",
+      out: [["Works out", "HCO₃⁻, base excess, anion gap"], ["From", "pH and PaCO₂, plus Hb for actual BE"], ["Rule", "trust the measured pair first"]],
     },
   ];
 
@@ -82,7 +96,8 @@
     "met-alk": { pH: 7.52, paco2Kpa: 6.0, hbGl: 150, label: "Metabolic alkalosis" },
   };
 
-  const state = { step: 1, input: { ...PRESETS.normal }, preset: "normal" };
+  const state = { step: 1, zoomToken: 0, input: { ...PRESETS.normal }, preset: "normal" };
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const els = {};
 
   function fmt(v, dp) {
@@ -107,8 +122,8 @@
     els.stepNum.textContent = String(state.step);
     els.stationKicker.textContent = `Station ${state.step} of ${total}`;
     els.stationTitle.textContent = s.title;
-    els.stationBody.innerHTML = s.body.map((p) => `<p>${p}</p>`).join("");
-    els.stationOut.innerHTML = s.out.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+    els.stationBody.innerHTML = `<p class="station-lead">${s.lead}</p>` + s.body.map((p) => `<p>${p}</p>`).join("");
+    els.stationOut.innerHTML = s.out.map(([k, v]) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`).join("");
 
     document.querySelectorAll(".machine .station").forEach((g) => {
       g.classList.toggle("is-active", Number(g.getAttribute("data-step")) === state.step);
@@ -116,13 +131,53 @@
     document.querySelectorAll(".station-dots button").forEach((b) => {
       const active = Number(b.getAttribute("data-step")) === state.step;
       b.classList.toggle("is-active", active);
-      b.setAttribute("aria-current", active ? "step" : "false");
+      if (active) b.setAttribute("aria-current", "step");
+      else b.removeAttribute("aria-current");
     });
     /* CSS transform (user units) so the drop slides between stations */
     els.sampleDrop.style.transform = `translate(${s.drop[0]}px, ${s.drop[1]}px)`;
+    playZoom(s);
 
     els.btnPrev.disabled = state.step === 1;
     els.btnNext.disabled = state.step === total;
+  }
+
+  function playZoom(station) {
+    const stage = els.assayStage;
+    stage.style.setProperty("--ox", station.origin[0]);
+    stage.style.setProperty("--oy", station.origin[1]);
+    document.querySelectorAll(".zoom-scene").forEach((svg) => {
+      const on = Number(svg.getAttribute("data-step")) === state.step;
+      svg.classList.toggle("is-on", on);
+      svg.removeAttribute("hidden");
+      if (!on) {
+        svg.pauseAnimations();
+        return;
+      }
+      if (reduceMotion) {
+        svg.pauseAnimations();
+        return;
+      }
+      svg.unpauseAnimations();
+      try {
+        svg.setCurrentTime(0);
+      } catch (err) {
+        /* older browsers without SVG time control */
+      }
+    });
+    if (reduceMotion) {
+      stage.classList.add("is-zoomed");
+      return;
+    }
+    stage.classList.remove("is-zoomed");
+    state.zoomToken += 1;
+    const token = state.zoomToken;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (token !== state.zoomToken) return;
+        stage.classList.add("is-zoomed");
+      });
+    });
   }
 
   /* ---------- live calculator ---------- */
@@ -217,7 +272,7 @@
   /* ---------- wiring ---------- */
   function cache() {
     const ids = [
-      "step-num", "step-total", "btn-prev", "btn-next", "sample-drop",
+      "step-num", "step-total", "btn-prev", "btn-next", "sample-drop", "assay-stage",
       "station-kicker", "station-title", "station-body", "station-out",
       "in-ph", "in-co2", "in-hb", "out-ph", "out-co2", "out-hb", "out-h", "out-co2-mmhg", "out-diss",
       "r-hco3", "s-hco3", "r-be-simple", "s-be-simple", "r-be-direct", "s-be-direct",

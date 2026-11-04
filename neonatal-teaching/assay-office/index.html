@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rye&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/app-theme.css">
-  <link rel="stylesheet" href="assay-office.css?v=20261103a">
+  <link rel="stylesheet" href="assay-office.css?v=20261104j">
   <script src="../../js/theme-toggle.js"></script>
 </head>
 <body class="assay-app">
@@ -64,34 +64,6 @@
     </div>
   </header>
 
-  <!-- Measured vs calculated -->
-  <section class="panel split-panel" aria-labelledby="mvc-title">
-    <h2 id="mvc-title" class="panel-title full">Measured or calculated?</h2>
-    <p class="rule-line full">Bicarbonate and base excess are calculated, not directly measured. The analyser measures pH and PaCO&#8322; first, then uses the Henderson&ndash;Hasselbalch relationship for bicarbonate and a Siggaard&ndash;Andersen / Van Slyke-type equation for base excess.</p>
-    <div class="mvc-card measured">
-      <h3>Measured <small>by electrodes and light</small></h3>
-      <ul class="chip-list">
-        <li><b>pH</b><span>glass electrode</span></li>
-        <li><b>PaCO&#8322;</b><span>Severinghaus electrode</span></li>
-        <li><b>PaO&#8322;</b><span>Clark electrode</span></li>
-        <li><b>Hb, sO&#8322;, COHb, MetHb</b><span>co-oximeter</span></li>
-        <li><b>Na&#8314; K&#8314; Ca&#178;&#8314; Cl&#8315;</b><span>ion-selective electrodes</span></li>
-        <li><b>Glucose, lactate</b><span>enzyme electrodes</span></li>
-      </ul>
-    </div>
-    <div class="mvc-card calculated">
-      <h3>Calculated <small>by the machine&rsquo;s arithmetic</small></h3>
-      <ul class="chip-list">
-        <li><b>HCO&#8323;&#8315;</b><span>from pH and PaCO&#8322;</span></li>
-        <li><b>Actual base excess</b><span>from HCO&#8323;&#8315;, pH and Hb</span></li>
-        <li><b>Standard base excess</b><span>from HCO&#8323;&#8315; and pH</span></li>
-        <li><b>Anion gap</b><span>from Na&#8314;, Cl&#8315;, HCO&#8323;&#8315;</span></li>
-        <li><b>Standard bicarbonate</b><span>HCO&#8323;&#8315; at PaCO&#8322; 5.3 kPa</span></li>
-        <li><b>P/F ratio, A&ndash;a gradient</b><span>from PaO&#8322; and FiO&#8322;</span></li>
-      </ul>
-    </div>
-  </section>
-
   <!-- Journey of the sample -->
   <section class="panel journey-panel" aria-labelledby="journey-title">
     <div class="journey-head">
@@ -105,6 +77,8 @@
 
     <div class="journey-body">
       <div class="machine-wrap">
+        <div class="assay-stage" id="assay-stage">
+        <div class="stage-overview">
         <svg class="machine" viewBox="0 0 420 300" shape-rendering="crispEdges" role="img" aria-label="Diagram of a blood gas analyser with its stations">
           <!-- body -->
           <rect x="30" y="20" width="360" height="260" fill="#3b2212"/>
@@ -114,12 +88,12 @@
           <path class="sample-path" d="M60 150 H110 V110 H170 V190 H230 V110 H290 V150 H350" fill="none" stroke="#1b0f08" stroke-width="8"/>
           <path class="sample-path-inner" d="M60 150 H110 V110 H170 V190 H230 V110 H290 V150 H350" fill="none" stroke="#dcbc7f" stroke-width="4" stroke-dasharray="8 6"/>
 
-          <!-- 1 syringe / inlet -->
+          <!-- 1 capillary tube / inlet -->
           <g class="station" data-step="1">
-            <rect x="44" y="134" width="32" height="32" fill="#f3dfb1"/>
-            <rect x="12" y="144" width="36" height="12" fill="#dcbc7f"/>
-            <rect x="4" y="140" width="8" height="20" fill="#f3dfb1"/>
-            <rect x="20" y="146" width="20" height="8" fill="#b3261e"/>
+            <rect x="6" y="146" width="8" height="10" fill="#6b3f1f"/>
+            <rect x="14" y="146" width="52" height="10" fill="#d7ecff" stroke="#1b0f08" stroke-width="1"/>
+            <rect x="18" y="148" width="34" height="6" fill="#b3261e"/>
+            <rect x="54" y="146" width="6" height="10" fill="#ec7f3a"/>
             <text x="60" y="186" class="station-label" text-anchor="middle">INLET</text>
           </g>
           <!-- 2 pH electrode -->
@@ -183,13 +157,301 @@
           <rect x="36" y="268" width="348" height="6" fill="#2f5d8a"/>
           <text x="210" y="292" class="bath-label" text-anchor="middle">37 &deg;C water bath</text>
         </svg>
+        </div>
+        <div class="stage-zoom" id="stage-zoom">
+
+          <svg class="zoom-scene" data-step="1" viewBox="0 0 420 300" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="420" height="300" fill="#f3dfb1"/>
+            <rect x="0" y="208" width="420" height="92" fill="#fff6dc"/>
+            <text x="40" y="36" text-anchor="middle" class="zoom-name">clay seal</text>
+            <text x="112" y="36" text-anchor="middle" class="zoom-name">blood</text>
+            <text x="172" y="36" text-anchor="middle" class="zoom-name">heparin</text>
+            <text x="330" y="36" text-anchor="middle" class="zoom-name">37&deg;C chamber</text>
+            <rect x="24" y="108" width="16" height="36" fill="#6b3f1f"/>
+            <rect x="40" y="100" width="156" height="52" fill="#e7f3ff" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="164" y="100" width="16" height="52" fill="#ec7f3a"/>
+            <rect x="196" y="116" width="16" height="20" fill="#9a6233"/>
+            <rect x="48" y="112" width="18" height="28" fill="#b3261e">
+              <animate attributeName="width" values="18;104;104;18" keyTimes="0;0.4;0.7;1" dur="3.4s" repeatCount="indefinite"/>
+            </rect>
+            <text x="160" y="92" text-anchor="middle" class="zoom-name">air bubble</text>
+            <g>
+              <rect x="78" y="120" width="16" height="14" fill="#fff6dc" stroke="#1b0f08" stroke-width="2"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 86 0; 108 -56" keyTimes="0;0.45;1" dur="3.4s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.55;1" dur="3.4s" repeatCount="indefinite"/>
+            </g>
+            <rect x="212" y="124" width="36" height="8" fill="#1b0f08"/>
+            <text x="230" y="108" text-anchor="middle" class="zoom-name">inlet</text>
+            <g>
+              <rect x="216" y="126" width="20" height="4" fill="#b3261e"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 64 8; 86 28; 86 28" keyTimes="0;0.45;0.7;1" dur="3.4s" repeatCount="indefinite"/>
+            </g>
+            <rect x="252" y="64" width="152" height="124" fill="#3b2212"/>
+            <rect x="260" y="72" width="136" height="108" fill="#2f5d8a"/>
+            <rect x="276" y="104" width="104" height="56" fill="#6b3f1f"/>
+            <rect x="288" y="120" width="80" height="26" fill="#b3261e"/>
+            <text x="328" y="96" text-anchor="middle" class="zoom-name on-dark">sample</text>
+            <text x="210" y="242" text-anchor="middle" class="zoom-label">Fill the tube. Lose the air. Warm to 37&deg;C.</text>
+            <text x="210" y="268" text-anchor="middle" class="zoom-note">A bubble raises PaO&#8322; and lowers PaCO&#8322;.</text>
+          </svg>
+
+          <svg class="zoom-scene" data-step="2" viewBox="0 0 420 300" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="420" height="300" fill="#f3dfb1"/>
+            <rect x="0" y="208" width="420" height="92" fill="#fff6dc"/>
+            <text x="56" y="32" text-anchor="middle" class="zoom-name">blood</text>
+            <text x="156" y="32" text-anchor="middle" class="zoom-name">glass</text>
+            <text x="360" y="32" text-anchor="middle" class="zoom-name">reference</text>
+            <rect x="20" y="56" width="72" height="112" fill="#b3261e"/>
+            <text x="56" y="80" text-anchor="middle" class="zoom-name on-dark">H+</text>
+            <g>
+              <rect x="40" y="92" width="16" height="14" fill="#7eb6ff" stroke="#1b0f08" stroke-width="2"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 60 0; 60 0; 0 0" keyTimes="0;0.38;0.72;1" dur="3.6s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="52" y="122" width="16" height="14" fill="#7eb6ff" stroke="#1b0f08" stroke-width="2"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 48 0; 48 0; 0 0" keyTimes="0;0.42;0.74;1" dur="3.6s" begin="0.18s" repeatCount="indefinite"/>
+            </g>
+            <rect x="144" y="44" width="24" height="20" fill="#d7ecff" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="116" y="64" width="80" height="104" fill="#d7ecff" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="119" y="76" width="10" height="80" fill="#7eb6ff">
+              <animate attributeName="fill" values="#7eb6ff;#7eb6ff;#f2c14e;#f2c14e;#7eb6ff" keyTimes="0;0.34;0.5;0.76;1" dur="3.6s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="136" y="80" width="48" height="72" fill="#fff6dc"/>
+            <text x="160" y="112" text-anchor="middle" class="zoom-name">fixed</text>
+            <text x="160" y="132" text-anchor="middle" class="zoom-name">pH</text>
+            <rect x="152" y="36" width="8" height="56" fill="#d9d9d9" stroke="#1b0f08" stroke-width="2"/>
+            <text x="176" y="58" class="zoom-name">Ag</text>
+            <rect x="160" y="40" width="96" height="4" fill="#1b0f08"/>
+            <rect x="252" y="40" width="4" height="36" fill="#1b0f08"/>
+            <rect x="214" y="76" width="92" height="92" fill="#1b0f08"/>
+            <rect x="222" y="84" width="76" height="76" fill="#fff6dc"/>
+            <text x="260" y="104" text-anchor="middle" class="zoom-name">mV</text>
+            <g>
+              <text x="260" y="124" text-anchor="middle" class="zoom-name">0</text>
+              <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.34;0.5;0.76;1" dur="3.6s" repeatCount="indefinite"/>
+            </g>
+            <g opacity="0">
+              <text x="260" y="124" text-anchor="middle" class="zoom-name">+61</text>
+              <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.34;0.5;0.76;1" dur="3.6s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="258" y="128" width="4" height="28" fill="#b3261e"/>
+              <animateTransform attributeName="transform" type="rotate" values="-18 260 156; -18 260 156; 26 260 156; 26 260 156; -18 260 156" keyTimes="0;0.34;0.52;0.76;1" dur="3.6s" repeatCount="indefinite"/>
+            </g>
+            <rect x="324" y="52" width="72" height="116" fill="#6b3f1f" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="336" y="88" width="48" height="56" fill="#f2c14e"/>
+            <text x="360" y="120" text-anchor="middle" class="zoom-name">KCl</text>
+            <rect x="354" y="40" width="8" height="52" fill="#d9d9d9" stroke="#1b0f08" stroke-width="2"/>
+            <text x="368" y="66" class="zoom-name on-dark">Ag</text>
+            <rect x="324" y="72" width="30" height="4" fill="#1b0f08"/>
+            <rect x="320" y="72" width="4" height="36" fill="#1b0f08"/>
+            <rect x="306" y="104" width="18" height="4" fill="#1b0f08"/>
+            <rect x="92" y="172" width="268" height="8" fill="#9a6233"/>
+            <rect x="346" y="160" width="8" height="20" fill="#1b0f08"/>
+            <rect x="366" y="160" width="8" height="20" fill="#1b0f08"/>
+            <text x="210" y="198" text-anchor="middle" class="zoom-name">KCl junction</text>
+            <text x="210" y="242" text-anchor="middle" class="zoom-label">H+ binds the outer glass and stops.</text>
+            <text x="210" y="268" text-anchor="middle" class="zoom-note">One pH unit is about 61 mV at 37°C.</text>
+          </svg>
+
+          <svg class="zoom-scene" data-step="3" viewBox="0 0 420 300" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="420" height="300" fill="#f3dfb1"/>
+            <rect x="0" y="208" width="420" height="92" fill="#fff6dc"/>
+            <text x="70" y="36" text-anchor="middle" class="zoom-name">blood</text>
+            <text x="156" y="36" text-anchor="middle" class="zoom-name">membrane</text>
+            <text x="270" y="36" text-anchor="middle" class="zoom-name">bicarbonate film</text>
+            <rect x="16" y="56" width="108" height="136" fill="#b3261e"/>
+            <rect x="136" y="56" width="36" height="136" fill="#f2c14e" stroke="#1b0f08" stroke-width="2"/>
+            <rect x="184" y="56" width="150" height="136" fill="#f2c14e">
+              <animate attributeName="fill" values="#f2c14e;#f2c14e;#c9493f;#c9493f;#f2c14e" keyTimes="0;0.35;0.6;0.8;1" dur="3.4s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="348" y="96" width="24" height="64" fill="#d7ecff" stroke="#2f5d8a" stroke-width="3"/>
+            <text x="360" y="202" text-anchor="middle" class="zoom-name">pH electrode</text>
+            <g>
+              <rect x="36" y="78" width="36" height="16" fill="#1b0f08"/>
+              <text x="42" y="91" class="zoom-name on-dark">CO&#8322;</text>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 160 20; 190 20; 190 20" keyTimes="0;0.45;0.62;1" dur="3.4s" repeatCount="indefinite"/>
+            </g>
+            <rect x="32" y="150" width="52" height="18" fill="#ffe39a" stroke="#1b0f08" stroke-width="2"/>
+            <text x="36" y="164" class="zoom-name">HCO&#8323;&#8315;</text>
+            <text x="70" y="188" text-anchor="middle" class="zoom-name">stays in blood</text>
+            <text x="210" y="242" text-anchor="middle" class="zoom-label">Only CO&#8322; crosses. The film turns acid.</text>
+            <text x="210" y="268" text-anchor="middle" class="zoom-note">That pH change is read as PaCO&#8322;.</text>
+          </svg>
+
+          <svg class="zoom-scene" data-step="4" viewBox="0 0 420 300" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="420" height="300" fill="#f3dfb1"/>
+            <rect x="0" y="208" width="420" height="92" fill="#fff6dc"/>
+            <text x="64" y="36" text-anchor="middle" class="zoom-name">blood</text>
+            <text x="146" y="36" text-anchor="middle" class="zoom-name">membrane</text>
+            <text x="230" y="36" text-anchor="middle" class="zoom-name">electrolyte</text>
+            <rect x="16" y="56" width="96" height="128" fill="#b3261e"/>
+            <rect x="124" y="56" width="36" height="128" fill="#f2c14e" stroke="#1b0f08" stroke-width="2"/>
+            <rect x="172" y="56" width="116" height="128" fill="#d7ecff" stroke="#1b0f08" stroke-width="2"/>
+            <rect x="196" y="70" width="68" height="16" fill="#b7c2cb"/>
+            <text x="230" y="104" text-anchor="middle" class="zoom-name">silver anode</text>
+            <rect x="188" y="148" width="84" height="18" fill="#c48a1e"/>
+            <text x="230" y="182" text-anchor="middle" class="zoom-name">platinum cathode</text>
+            <g>
+              <rect x="36" y="84" width="40" height="16" fill="#fff6dc" stroke="#1b0f08" stroke-width="2"/>
+              <text x="44" y="97" class="zoom-name">O&#8322;</text>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 150 48; 168 62; 168 62" keyTimes="0;0.45;0.62;1" dur="3.2s" repeatCount="indefinite"/>
+            </g>
+            <polyline points="272,157 320,157 320,118 390,118" fill="none" stroke="#c48a1e" stroke-width="4" stroke-dasharray="8 6">
+              <animate attributeName="stroke-dashoffset" values="0;-28" dur="0.7s" repeatCount="indefinite"/>
+            </polyline>
+            <text x="360" y="108" text-anchor="middle" class="zoom-name">current</text>
+            <text x="210" y="242" text-anchor="middle" class="zoom-label">Oxygen hits the cathode and a current flows.</text>
+            <text x="210" y="268" text-anchor="middle" class="zoom-note">Or a dye whose glow oxygen dims.</text>
+          </svg>
+
+          <svg class="zoom-scene" data-step="5" viewBox="0 0 420 300" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="420" height="300" fill="#f3dfb1"/>
+            <rect x="0" y="208" width="420" height="92" fill="#fff6dc"/>
+            <text x="34" y="36" text-anchor="middle" class="zoom-name">lamp</text>
+            <text x="190" y="36" text-anchor="middle" class="zoom-name">lysed blood</text>
+            <text x="320" y="36" text-anchor="middle" class="zoom-name">absorbance</text>
+            <rect x="16" y="64" width="36" height="100" fill="#1b0f08"/>
+            <text x="70" y="184" text-anchor="middle" class="zoom-name">four colours</text>
+            <g>
+              <rect x="56" y="72" width="78" height="8" fill="#ff5a4a"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 100 0; 100 0; 0 0" keyTimes="0;0.4;0.62;1" dur="3.4s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="56" y="92" width="78" height="8" fill="#f2c14e"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 100 0; 100 0; 0 0" keyTimes="0;0.45;0.66;1" dur="3.4s" begin="0.15s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="56" y="112" width="78" height="8" fill="#7dcea0"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 100 0; 100 0; 0 0" keyTimes="0;0.45;0.66;1" dur="3.4s" begin="0.3s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="56" y="132" width="78" height="8" fill="#7eb6ff"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 100 0; 100 0; 0 0" keyTimes="0;0.45;0.66;1" dur="3.4s" begin="0.45s" repeatCount="indefinite"/>
+            </g>
+            <rect x="168" y="58" width="48" height="120" fill="#fff6dc" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="176" y="70" width="32" height="96" fill="#b3261e"/>
+            <text x="261" y="188" text-anchor="middle" class="zoom-name">O&#8322;Hb</text>
+            <text x="305" y="188" text-anchor="middle" class="zoom-name">HHb</text>
+            <text x="349" y="188" text-anchor="middle" class="zoom-name">COHb</text>
+            <text x="393" y="188" text-anchor="middle" class="zoom-name">MetHb</text>
+            <rect x="248" y="150" width="26" height="12" fill="#ff5a4a">
+              <animate attributeName="height" values="12;70;70;12" keyTimes="0;0.45;0.75;1" dur="3.4s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="150;92;92;150" keyTimes="0;0.45;0.75;1" dur="3.4s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="292" y="150" width="26" height="12" fill="#6b3f1f">
+              <animate attributeName="height" values="12;48;48;12" keyTimes="0;0.5;0.78;1" dur="3.4s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="150;114;114;150" keyTimes="0;0.5;0.78;1" dur="3.4s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="336" y="150" width="26" height="12" fill="#f2c14e">
+              <animate attributeName="height" values="12;28;28;12" keyTimes="0;0.55;0.8;1" dur="3.4s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="150;134;134;150" keyTimes="0;0.55;0.8;1" dur="3.4s" repeatCount="indefinite"/>
+            </rect>
+            <rect x="380" y="150" width="26" height="12" fill="#2f6b30">
+              <animate attributeName="height" values="12;22;22;12" keyTimes="0;0.58;0.82;1" dur="3.4s" repeatCount="indefinite"/>
+              <animate attributeName="y" values="150;140;140;150" keyTimes="0;0.58;0.82;1" dur="3.4s" repeatCount="indefinite"/>
+            </rect>
+            <text x="210" y="242" text-anchor="middle" class="zoom-label">Each haemoglobin takes a different colour.</text>
+            <text x="210" y="268" text-anchor="middle" class="zoom-note">Two colours cannot see COHb or MetHb.</text>
+          </svg>
+
+          <svg class="zoom-scene" data-step="6" viewBox="0 0 420 300" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="420" height="300" fill="#f3dfb1"/>
+            <rect x="0" y="208" width="420" height="92" fill="#fff6dc"/>
+            <text x="42" y="36" text-anchor="middle" class="zoom-name">Na+</text>
+            <text x="114" y="36" text-anchor="middle" class="zoom-name">K+</text>
+            <text x="186" y="36" text-anchor="middle" class="zoom-name">Ca&#178;+</text>
+            <text x="258" y="36" text-anchor="middle" class="zoom-name">Cl&#8315;</text>
+            <text x="348" y="36" text-anchor="middle" class="zoom-name">glucose</text>
+            <rect x="24" y="88" width="36" height="78" fill="#fff6dc" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="96" y="88" width="36" height="78" fill="#fff6dc" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="168" y="88" width="36" height="78" fill="#fff6dc" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="240" y="88" width="36" height="78" fill="#fff6dc" stroke="#1b0f08" stroke-width="3"/>
+            <rect x="24" y="112" width="36" height="8" fill="#2f5d8a"/>
+            <rect x="96" y="112" width="36" height="8" fill="#84305a"/>
+            <rect x="168" y="112" width="36" height="8" fill="#2f6b30"/>
+            <rect x="240" y="112" width="36" height="8" fill="#c48a1e"/>
+            <text x="150" y="184" text-anchor="middle" class="zoom-name">selective membrane</text>
+            <g>
+              <rect x="34" y="52" width="16" height="14" fill="#f2c14e"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 0 70; 0 70; 0 0" keyTimes="0;0.4;0.7;1" dur="3.2s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="106" y="52" width="16" height="14" fill="#84305a"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 0 70; 0 70; 0 0" keyTimes="0;0.46;0.74;1" dur="3.2s" begin="0.2s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="178" y="52" width="16" height="14" fill="#2f6b30"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 0 70; 0 70; 0 0" keyTimes="0;0.5;0.76;1" dur="3.2s" begin="0.35s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="250" y="52" width="16" height="14" fill="#7eb6ff"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 0 70; 0 70; 0 0" keyTimes="0;0.52;0.78;1" dur="3.2s" begin="0.5s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="106" y="52" width="16" height="14" fill="#f2c14e"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 0 22; 0 0" keyTimes="0;0.35;1" dur="3.2s" begin="0.8s" repeatCount="indefinite"/>
+            </g>
+            <text x="114" y="78" text-anchor="middle" class="zoom-name">blocked</text>
+            <rect x="312" y="100" width="84" height="52" fill="#2f6b30"/>
+            <text x="354" y="130" text-anchor="middle" class="zoom-name on-dark">enzyme</text>
+            <g>
+              <rect x="328" y="56" width="18" height="14" fill="#f2c14e"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 18 52; 18 52; 0 0" keyTimes="0;0.4;0.62;1" dur="3.2s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="378" y="118" width="12" height="12" fill="#ffe39a"/>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 22 0; 22 0; 0 0" keyTimes="0;0.55;0.75;1" dur="3.2s" repeatCount="indefinite"/>
+            </g>
+            <text x="354" y="172" text-anchor="middle" class="zoom-name">current</text>
+            <text x="210" y="242" text-anchor="middle" class="zoom-label">Each ion has its own membrane.</text>
+            <text x="210" y="268" text-anchor="middle" class="zoom-note">Glucose and lactate use an enzyme.</text>
+          </svg>
+
+          <svg class="zoom-scene" data-step="7" viewBox="0 0 420 300" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="420" height="300" fill="#f3dfb1"/>
+            <rect x="0" y="208" width="420" height="92" fill="#fff6dc"/>
+            <text x="70" y="36" text-anchor="middle" class="zoom-name">measured</text>
+            <text x="210" y="36" text-anchor="middle" class="zoom-name">equation</text>
+            <text x="346" y="36" text-anchor="middle" class="zoom-name">printout</text>
+            <g>
+              <rect x="24" y="56" width="92" height="32" fill="#2f5d8a"/>
+              <text x="70" y="78" text-anchor="middle" class="zoom-name on-dark">pH</text>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 78 28; 78 28; 0 0" keyTimes="0;0.35;0.7;1" dur="3.6s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="24" y="100" width="92" height="32" fill="#2f5d8a"/>
+              <text x="70" y="122" text-anchor="middle" class="zoom-name on-dark">PaCO&#8322;</text>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 78 -8; 78 -8; 0 0" keyTimes="0;0.4;0.72;1" dur="3.6s" begin="0.15s" repeatCount="indefinite"/>
+            </g>
+            <g>
+              <rect x="24" y="144" width="92" height="32" fill="#6b3f1f"/>
+              <text x="70" y="166" text-anchor="middle" class="zoom-name on-dark">Hb</text>
+              <animateTransform attributeName="transform" type="translate" values="0 0; 0 0; 78 -36; 78 -36; 0 0" keyTimes="0;0.35;0.55;0.8;1" dur="3.6s" repeatCount="indefinite"/>
+            </g>
+            <rect x="156" y="72" width="108" height="96" fill="#1b0f08"/>
+            <text x="210" y="104" text-anchor="middle" class="zoom-name on-dark">bicarbonate</text>
+            <text x="210" y="132" text-anchor="middle" class="zoom-name on-dark">base excess</text>
+            <g opacity="0">
+              <rect x="286" y="64" width="118" height="116" fill="#fff6dc" stroke="#1b0f08" stroke-width="3"/>
+              <text x="345" y="92" text-anchor="middle" class="zoom-name">bicarbonate</text>
+              <text x="345" y="120" text-anchor="middle" class="zoom-name">actual BE</text>
+              <text x="345" y="148" text-anchor="middle" class="zoom-name">standard BE</text>
+              <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.42;0.58;0.82;1" dur="3.6s" repeatCount="indefinite"/>
+            </g>
+            <text x="210" y="242" text-anchor="middle" class="zoom-label">Measured values in. Calculated values out.</text>
+            <text x="210" y="268" text-anchor="middle" class="zoom-note">Hb is used only for actual base excess.</text>
+          </svg>
+
+        </div>
+        </div>
       </div>
 
       <div class="station-text">
         <p class="station-kicker" id="station-kicker">Station 1</p>
-        <h3 id="station-title">Syringe and inlet</h3>
+        <h3 id="station-title">Capillary tube and inlet</h3>
         <div id="station-body"></div>
-        <dl class="station-out" id="station-out"></dl>
+        <div class="station-facts" id="station-out"></div>
       </div>
     </div>
 
@@ -202,6 +464,33 @@
       <li><button type="button" data-step="6">Electrolytes</button></li>
       <li><button type="button" data-step="7">Calculator</button></li>
     </ol>
+  </section>
+
+  <section class="panel split-panel" aria-labelledby="mvc-title">
+    <h2 id="mvc-title" class="panel-title full">What was measured, and what was worked out</h2>
+    <p class="rule-line full">The machine only measures a few things: pH, the two gases, haemoglobin, and some ions. Bicarbonate and base excess are sums from those measurements. If a measured number is wrong, the calculated ones follow it.</p>
+    <div class="mvc-card measured">
+      <h3>Measured <small>electrodes and light</small></h3>
+      <ul class="chip-list">
+        <li><b>pH</b><span>hydrogen ions on glass</span></li>
+        <li><b>PaCO&#8322;</b><span>gas crosses a membrane, then a pH electrode</span></li>
+        <li><b>PaO&#8322;</b><span>oxygen makes a current, or dims a dye</span></li>
+        <li><b>Haemoglobin</b><span>several colours of light through lysed blood</span></li>
+        <li><b>Na&#8314; K&#8314; Ca&#178;&#8314; Cl&#8315;</b><span>one membrane for each ion</span></li>
+        <li><b>Glucose, lactate</b><span>an enzyme turns them into a current</span></li>
+      </ul>
+    </div>
+    <div class="mvc-card calculated">
+      <h3>Calculated <small>arithmetic after that</small></h3>
+      <ul class="chip-list">
+        <li><b>Bicarbonate</b><span>from pH and PaCO&#8322; only</span></li>
+        <li><b>Actual base excess</b><span>bicarbonate, pH, and this sample&rsquo;s haemoglobin</span></li>
+        <li><b>Standard base excess</b><span>same idea, but haemoglobin is assumed</span></li>
+        <li><b>Anion gap</b><span>sodium, chloride, and the bicarbonate just calculated</span></li>
+        <li><b>Standard bicarbonate</b><span>bicarbonate as if PaCO&#8322; were 5.3 kPa</span></li>
+        <li><b>P/F and A&ndash;a</b><span>from PaO&#8322; and the oxygen you are giving</span></li>
+      </ul>
+    </div>
   </section>
 
   <!-- Bicarbonate -->
@@ -392,6 +681,6 @@
 </main>
 
 <script src="calc.js?v=20261103a"></script>
-<script src="app.js?v=20261103a"></script>
+<script src="app.js?v=20261104k"></script>
 </body>
 </html>
