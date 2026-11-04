@@ -362,20 +362,6 @@
       fact: "The Siggaard-Andersen nomogram let clinicians read base excess off a chart years before machines calculated it.",
     },
     {
-      id: "hist-torr",
-      topic: "history",
-      stem: "The unit mmHg is also called the torr. Who is it named after?",
-      choices: [
-        "Evangelista Torricelli, who built the first mercury barometer in 1643",
-        "Alessandro Volta, inventor of the battery",
-        "Anders Celsius, who devised the centigrade scale",
-        "Blaise Pascal, after whom the kPa is named",
-      ],
-      answer: 0,
-      why: "The kilopascal is the SI unit used on UK gases: 5.3 kPa is 40 mmHg, and 1 kPa is about 7.5 mmHg. Torricelli showed air has weight by supporting a column of mercury.",
-      fact: "The kilopascal is named after Pascal, who had the barometer carried up a mountain to prove pressure falls with altitude.",
-    },
-    {
       id: "hist-oximeter",
       topic: "history",
       stem: "Pulse oximetry was invented in 1974 by Takuo Aoyagi. What does it measure that a blood gas does not?",
