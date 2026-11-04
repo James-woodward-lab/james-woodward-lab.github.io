@@ -971,15 +971,15 @@ body.bicarb-bandit-app .back-home-link {
 
 .bicarb-bandit-app .gas-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: baseline;
-  gap: 8px;
+  gap: 14px;
   line-height: 1.05;
 }
 
 .bicarb-bandit-app .gas-label {
-  font-size: 20px;
-  color: var(--wood);
+  font-size: clamp(26px, 2.4vw, 32px);
+  color: var(--ink);
 }
 
 .bicarb-bandit-app .gas-val {

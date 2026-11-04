@@ -22,7 +22,6 @@
   const MIN_CARD_W = 140;
   const LANE_PAD = 10;
   const ROPE_DELAY_MS = 420;
-  const AUTO_CONTINUE_MS = 1600;
   const MAX_REVIEW = 8;
   const SETTINGS_KEY = "gasRodeoSettings";
 
@@ -35,6 +34,31 @@
   ];
 
   const AGE_SHORT = { day0: "Day 0", day1to2: "Day 1-2", child: ">2 d" };
+
+  const HORSE_NAMES = [
+    "Anion Gallop",
+    "Stable pH",
+    "Mane-tabolic",
+    "Hypercapneigh-a",
+    "Haemo-Gallopin\u2019",
+    "Sats Entertainment",
+    "FiO2 and Furious",
+    "Fully Compensated",
+    "Shuntland Pony",
+    "Venous Express",
+    "Hasselbolt",
+    "Bi-Carbonneigh",
+    "Respiratory Alka-Hoofsis",
+    "Dead Space Cowboy",
+    "RodeO2",
+    "Lactasso",
+    "Gasslinger",
+    "Alkalamity Jane",
+    "Butch Acidy",
+    "pHilly Kid",
+    "Desperad-O2",
+    "Anion Wrangler",
+  ];
 
   const state = {
     phase: "attract",
@@ -59,7 +83,6 @@
     lanes: [],
     cardW: 190,
     cardH: 200,
-    autoTimer: 0,
     ropeTimer: 0,
   };
 
@@ -220,7 +243,7 @@
       const cls = state.hints && dir !== "normal" ? ` is-${dir}` : "";
       return `<div class="pv${cls}"><span class="pv-label">${fd.label}</span><span class="pv-val">${f[fd.fmtKey]}</span></div>`;
     }).join("");
-    return `<div class="poster"><div class="poster-head">WANTED</div>${rows}</div>`;
+    return `<div class="poster"><div class="poster-head">${ent.horse || "Outlaw"}</div>${rows}</div>`;
   }
 
   function bigPosterHtml(ent, revealed) {
@@ -243,7 +266,7 @@
         </tr>`;
     }).join("");
     return `
-      <div class="poster-head">WANTED</div>
+      <div class="poster-head">${ent.horse || "Outlaw"}</div>
       <p class="poster-sub">for crimes against acid-base balance</p>
       <table class="big-table">
         <thead><tr><th></th><th>Value</th><th>Normal</th><th></th></tr></thead>
@@ -304,6 +327,7 @@
     probe.className = "gas-card";
     probe.style.visibility = "hidden";
     probe.innerHTML = trailCardHtml({
+      horse: "Respiratory Alka-Hoofsis",
       values: { pH: 7.35, pco2Kpa: 5.5, po2Kpa: 11.5, baseExcess: -10.5, hco3: 24.5 },
       evaluation: { highlights: {} },
     });
@@ -452,6 +476,19 @@
     }
   }
 
+  function nextHorseName() {
+    if (!state.horseDeck || !state.horseDeck.length) {
+      state.horseDeck = HORSE_NAMES.slice();
+      for (let i = state.horseDeck.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = state.horseDeck[i];
+        state.horseDeck[i] = state.horseDeck[j];
+        state.horseDeck[j] = tmp;
+      }
+    }
+    return state.horseDeck.pop();
+  }
+
   /* ---------------- Entities ---------------- */
 
   function spawnEntity() {
@@ -468,6 +505,7 @@
     const packed = gen.generateGas(state.ageGroup);
     const ent = {
       id: state.nextId++,
+      horse: nextHorseName(),
       lane,
       x: -state.cardW,
       values: packed.values,
@@ -673,17 +711,12 @@
     rideBtn.addEventListener("click", rideOn);
     rideBtn.focus({ preventScroll: true });
     updateHud();
-
-    if (isRight) {
-      state.autoTimer = setTimeout(rideOn, AUTO_CONTINUE_MS);
-    }
   }
 
   function rideOn() {
     if (state.phase !== "classify") {
       return;
     }
-    clearTimeout(state.autoTimer);
     if (state.captured) {
       removeEntity(state.captured);
       state.captured = null;
@@ -696,7 +729,6 @@
   /* ---------------- Round lifecycle ---------------- */
 
   function clearTimers() {
-    clearTimeout(state.autoTimer);
     clearTimeout(state.ropeTimer);
   }
 
