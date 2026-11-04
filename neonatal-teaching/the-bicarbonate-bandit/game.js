@@ -58,6 +58,7 @@
     phase: "attract",
     ageGroup: "day0",
     pace: "standard",
+    markAbnormal: true,
     score: 0,
     streak: 0,
     gap: START_GAP,
@@ -155,6 +156,7 @@
           ageGroup: state.ageGroup,
           pace: state.pace,
           sound: sfx.isEnabled(),
+          markAbnormal: state.markAbnormal,
         })
       );
     } catch (_e) {
@@ -182,6 +184,7 @@
     state.ageGroup = age ? age.value : "day0";
     state.pace = pace ? pace.value : "standard";
     sfx.setEnabled(els.soundToggle.checked);
+    state.markAbnormal = els.markToggle ? els.markToggle.checked : true;
   }
 
   function applyForm(s) {
@@ -198,6 +201,9 @@
       setRadio("pace", s.pace);
     }
     els.soundToggle.checked = s.sound !== false;
+    if (els.markToggle) {
+      els.markToggle.checked = s.markAbnormal !== false;
+    }
     readForm();
   }
 
@@ -216,6 +222,7 @@
   }
 
   function fieldDir(values, key, highlights) {
+    if (!state.markAbnormal) return "normal";
     if (highlights[key]) return highlights[key];
     const range = LAB_RANGES[key];
     const value = values[key];
@@ -256,9 +263,10 @@
     if (!ctx) {
       return "";
     }
-    return Object.entries(ctx)
-      .map(([k, v]) => `<span class="chip">${k}: ${v}</span>`)
-      .join("");
+    const shown = [];
+    if (ctx.support) shown.push(["Support", ctx.support]);
+    if (ctx.fio2) shown.push(["FiO₂", ctx.fio2]);
+    return shown.map(([k, v]) => `<span class="chip">${k}: ${v}</span>`).join("");
   }
 
   /* ---------- HUD / chase ---------- */
@@ -388,7 +396,7 @@
     state.scenario = state.queue[state.queueIndex];
     state.queueIndex += 1;
     state.feedbackOpen = false;
-    state.orderIds = bank.ACTIONS.map((a) => a.id);
+    state.orderIds = (state.scenario.actions || bank.ACTIONS.map((a) => a.id)).slice();
 
     els.vignette.textContent = state.scenario.vignette;
     els.chips.innerHTML = contextChips(state.scenario.context);
@@ -655,7 +663,7 @@
       }
       return;
     }
-    if (state.phase === "chasing" && /^[1-7]$/.test(e.key)) {
+    if (state.phase === "chasing" && /^[1-9]$/.test(e.key)) {
       const idx = Number(e.key) - 1;
       const id = state.orderIds[idx];
       if (id) {
@@ -689,6 +697,7 @@
     els.age = $("hud-age");
     els.lives = $("hud-lives");
     els.soundToggle = $("sound-toggle");
+    els.markToggle = $("mark-toggle");
     els.attractBest = $("attract-best");
     els.endKicker = $("end-kicker");
     els.endTitle = $("end-title");
@@ -705,7 +714,7 @@
     updateChaseSprites();
 
     document
-      .querySelectorAll('input[name="age"], input[name="pace"], #sound-toggle')
+      .querySelectorAll('input[name="age"], input[name="pace"], #sound-toggle, #mark-toggle')
       .forEach((input) => {
         input.addEventListener("change", () => {
           refreshAttractBest();

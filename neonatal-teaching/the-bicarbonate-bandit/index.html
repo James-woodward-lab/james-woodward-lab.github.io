@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rye&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/app-theme.css">
-  <link rel="stylesheet" href="bicarbonate-bandit.css?v=20261018g">
+  <link rel="stylesheet" href="bicarbonate-bandit.css?v=20261104a">
   <script src="../../js/theme-toggle.js"></script>
 </head>
 <body class="bicarb-bandit-app">
@@ -68,8 +68,8 @@
         <section class="panel-block">
           <h2 class="block-title">How to ride</h2>
           <ol class="how-list">
-            <li><span class="how-num">1</span><span>Read the vignette and the whole panel — pH and gases can be a decoy. Check Hb, glucose and electrolytes.</span></li>
-            <li><span class="how-num">2</span><span>Pick the next sensible order before the timer runs out.</span></li>
+            <li><span class="how-num">1</span><span>The vignette only sets the scene. The order comes from the panel: gases, Hb, glucose and electrolytes.</span></li>
+            <li><span class="how-num">2</span><span>The orders change with the baby. Oxygen, high flow, CPAP, intubation or ventilator settings appear only when they fit.</span></li>
             <li><span class="how-num">3</span><span>Correct answers close the gap and push the chase right. Wrongs pull the bandit away.</span></li>
             <li><span class="how-num">4</span><span>Eight right orders catch the bandit on the right. Three wrongs or timeouts in a row and the posse loses them.</span></li>
           </ol>
@@ -95,6 +95,7 @@
             <label><input type="radio" name="pace" value="standard" checked><span>Gallop</span></label>
             <label><input type="radio" name="pace" value="hard"><span>Stampede</span></label>
           </fieldset>
+          <label class="px-check"><input type="checkbox" id="mark-toggle" checked><span>Highlight out-of-range values</span></label>
           <label class="px-check"><input type="checkbox" id="sound-toggle" checked><span>Sound effects</span></label>
           <p class="best-line">Best score <strong id="attract-best">000000</strong></p>
           <button type="button" class="px-btn px-btn--big blink-soft" id="btn-start">&#9654; Form a posse</button>
@@ -277,8 +278,8 @@
   </section>
 </main>
 
-<script src="../../js/gas-core.js?v=20261018g"></script>
-<script src="scenarios.js?v=20261018g"></script>
-<script src="game.js?v=20261018g"></script>
+<script src="../../js/gas-core.js?v=20261104a"></script>
+<script src="scenarios.js?v=20261104a"></script>
+<script src="game.js?v=20261104a"></script>
 </body>
 </html>
