@@ -19,10 +19,9 @@
   }
 
   var STEPS = [
-    { id: 'context', label: 'Context' },
-    { id: 'progress', label: 'Progress' },
-    { id: 'pathways', label: 'Problem checks' },
-    { id: 'examination', label: 'Examination' },
+    { id: 'context', label: 'Baby' },
+    { id: 'today', label: 'Today' },
+    { id: 'checks', label: 'Checks' },
     { id: 'plan', label: 'Plan' }
   ];
 
@@ -90,13 +89,13 @@
    * kind 'confirm' - Done / Not yet / N/A, shared the same way.
    */
   var CHECK_SOURCES = {
-    gestation: { step: 'context', where: 'Context' },
-    feeding: { step: 'progress', where: 'Feeding' },
-    obs: { step: 'examination', where: 'Observations' },
-    glucose: { step: 'pathways', where: 'Blood glucose' },
-    temps: { step: 'pathways', where: 'Thermal care' },
-    jaundice: { step: 'pathways', where: 'Jaundice' },
-    weight: { step: 'pathways', where: 'Weight' }
+    gestation: { step: 'context', where: 'Baby' },
+    feeding: { step: 'today', where: 'Today' },
+    obs: { step: 'today', where: 'Today' },
+    glucose: { step: 'today', where: 'Today' },
+    temps: { step: 'today', where: 'Today' },
+    jaundice: { step: 'today', where: 'Today' },
+    weight: { step: 'today', where: 'Today' }
   };
 
   var CHECK_ITEMS = {
@@ -118,12 +117,7 @@
     cxr: { kind: 'text', label: 'Chest X-ray, if respiratory signs' },
     lpConsidered: { kind: 'text', label: 'Lumbar puncture considered', placeholder: 'Decision and who it was discussed with' },
     repeatCrp: { kind: 'text', label: 'Repeat CRP', placeholder: 'When sent and result' },
-    gentLevels: { kind: 'text', label: 'Gentamicin levels, if on gentamicin' },
     seniorDiscussed: { kind: 'confirm', label: 'Discussed with registrar or consultant', yes: 'Discussed with registrar or consultant.', no: 'Not yet discussed with registrar or consultant.' },
-    handover: { kind: 'confirm', label: 'Added to postnatal ward handover', yes: 'Added to postnatal ward handover.', no: 'Not yet added to postnatal ward handover.' },
-    microList: { kind: 'confirm', label: 'Added to microbiology review list', yes: 'Added to microbiology review list.', no: 'Not yet added to microbiology review list.' },
-    infectionLeaflet: { kind: 'confirm', label: 'Infection in newborns leaflet', yes: 'Infection in newborns leaflet given.', no: 'Infection in newborns leaflet not yet given.' },
-    gbsLeaflet: { kind: 'confirm', label: 'GBS leaflet and future pregnancy advice, if GBS identified', yes: 'GBS leaflet and future pregnancy advice given.', no: 'GBS leaflet and future pregnancy advice not yet given.' },
     jaundiceRiskFactors: { kind: 'text', label: 'Risk factors for significant jaundice', placeholder: 'For example, gestation, sibling needed phototherapy, exclusive breastfeeding, jaundice in first 24 hours' },
     jaundiceExam: { kind: 'confirm', label: 'Examined undressed in good light (sclerae, gums, blanched skin)', yes: 'Examined undressed in good light, including sclerae, gums and blanched skin.', no: 'Not yet examined undressed in good light.' },
     bilirubinMethod: { kind: 'confirm', label: 'Serum or transcutaneous choice checked for gestation and age', yes: 'Bilirubin method checked for gestation and age.', no: 'Bilirubin method not yet checked for gestation and age.' },
@@ -180,12 +174,11 @@
     carSeat: { kind: 'confirm', label: 'Car seat challenge, if applicable', yes: 'Car seat challenge done.', no: 'Car seat challenge not yet done.' },
     dischargeMeds: { kind: 'confirm', label: 'Discharge vitamins and iron', yes: 'Discharge vitamins and iron prescribed.', no: 'Discharge vitamins and iron not yet prescribed.' },
     communityFollowUp: { kind: 'text', label: 'Community follow-up', placeholder: 'For example, weight and bilirubin checks' },
-    parentsUpdated: { kind: 'confirm', label: 'Parents updated', yes: 'Parents updated.', no: 'Parents not yet updated.' },
     safetyNet: { kind: 'confirm', label: 'Safety-net advice', yes: 'Safety-net advice given.', no: 'Safety-net advice not yet given.' }
   };
 
   var TEMPLATES = {
-    sepsis: ['sepsisRiskFactors', 'sepsisRedFlags', 'infectionSigns', 'obs', 'obsPlan', 'satsChecked', 'temps', 'feeding', 'abxStart', 'cxr', 'lpConsidered', 'repeatCrp', 'gentLevels', 'sepsisDuration', 'seniorDiscussed', 'parentsUpdated', 'handover', 'microList', 'infectionLeaflet', 'gbsLeaflet', 'safetyNet'],
+    sepsis: ['sepsisRiskFactors', 'sepsisRedFlags', 'infectionSigns', 'obs', 'obsPlan', 'satsChecked', 'temps', 'feeding', 'abxStart', 'cxr', 'lpConsidered', 'repeatCrp', 'sepsisDuration', 'seniorDiscussed', 'safetyNet'],
     'late-preterm': ['gestation', 'birthWeight', 'lpRiskFactors', 'obs', 'obsPlan', 'temps', 'feeding', 'feedPlan', 'glucose', 'jaundice', 'weight', 'infectionSigns', 'lpLeaflet', 'nipe', 'carSeat', 'dischargeMeds', 'communityFollowUp', 'safetyNet'],
     temperature: ['temps', 'tempReversible', 'infectionSigns', 'glucose', 'tempStable'],
     hypoglycaemia: ['glucose', 'feeding', 'feedPlan', 'bfAssessment', 'temps', 'hypoTreatment', 'glucosePlan', 'hypoLeaflet'],
@@ -197,7 +190,7 @@
     lga: ['birthWeight', 'glucose', 'feeding', 'birthInjury'],
     resp: ['obs', 'respFindings', 'infectionSigns', 'feeding'],
     murmur: ['murmurDetail', 'femorals', 'satsPrePost', 'cardiacPlan', 'safetyNet'],
-    antenatal: ['antenatalDetail', 'postnatalTests', 'parentsUpdated'],
+    antenatal: ['antenatalDetail', 'postnatalTests'],
     hdn: ['maternalAntibodies', 'haemPlan', 'bloodGroupDat', 'fbcSbr', 'jaundice', 'bilirubinPlan', 'hdnFollowUp', 'datLeaflet', 'safetyNet'],
     psychotropic: ['medsDetail', 'obs', 'obsPlan', 'adaptationSigns', 'pulseOx', 'feeding', 'bfMedsAdvice', 'nipe', 'adaptationLeaflet', 'safetyNet'],
     thyro: ['trab', 'neonatalTrab', 'thyroSigns', 'obs', 'feeding', 'tftPlan', 'thyroLetters', 'safetyNet'],
@@ -259,7 +252,6 @@
     { id: 'repeat-crp', label: 'Repeat CRP as planned', text: 'Repeat CRP as planned.', pathways: ['sepsis'] },
     { id: 'review-culture', label: 'Review with culture', text: 'Review with the culture result.', pathways: ['sepsis'] },
     { id: 'abx-review', label: 'Review antibiotics as planned', text: 'Review antibiotics at the planned review point.', pathways: ['sepsis'] },
-    { id: 'infection-leaflet', label: 'Infection leaflet', text: 'Infection in newborns leaflet given.', pathways: ['sepsis'] },
     { id: 'bili-repeat', label: 'Repeat bilirubin as planned', text: 'Repeat bilirubin as planned.', pathways: ['jaundice'] },
     { id: 'photo-continue', label: 'Continue phototherapy', text: 'Continue phototherapy.', pathways: ['jaundice'] },
     { id: 'rebound', label: 'Rebound bilirubin as planned', text: 'Rebound bilirubin as planned.', pathways: ['jaundice'] },

@@ -817,3 +817,85 @@ body.postnatal-review-app .problem-name {
   padding: 4px 10px;
   font-size: var(--fs-xs);
 }
+
+/* Daily review: one step at a time, note stays in view. */
+body.postnatal-daily-review-app .step-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: var(--sp-4);
+}
+
+body.postnatal-daily-review-app .step-nav .text-button {
+  min-width: 8rem;
+  text-align: center;
+}
+
+body.postnatal-daily-review-app .step-nav .is-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-on);
+  font-weight: var(--fw-semibold);
+}
+
+body.postnatal-daily-review-app .exam-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+body.postnatal-daily-review-app .exam-toolbar .hint { flex: 1 1 12rem; }
+
+body.postnatal-daily-review-app .exam-row.is-settled .exam-body,
+body.postnatal-daily-review-app .exam-row.is-settled .exam-extra {
+  display: none;
+}
+
+body.postnatal-daily-review-app .check-done {
+  margin: 0;
+}
+
+body.postnatal-daily-review-app .check-done summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+body.postnatal-daily-review-app .check-done .check-list {
+  margin-top: 8px;
+}
+
+@media (min-width: 1000px) {
+  body.postnatal-daily-review-app .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+    column-gap: var(--sp-4);
+    align-items: start;
+  }
+
+  body.postnatal-daily-review-app .step-bar,
+  body.postnatal-daily-review-app #step-panel {
+    grid-column: 1;
+  }
+
+  body.postnatal-daily-review-app .note-panel {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 12px;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    max-height: calc(100vh - 24px);
+  }
+
+  body.postnatal-daily-review-app .note-body {
+    max-height: calc(100vh - 16rem);
+    overflow: auto;
+  }
+}

@@ -32,6 +32,7 @@
       place: '',
       placeOther: '',
       gestationAtBirth: '',
+      background: '',
       ageMode: 'manual',
       birthAt: '',
       reviewAt: '',
@@ -59,7 +60,7 @@
       midwifeConcern: '',
       midwifeWords: '',
       exam: {},
-      obs: { temp: '', hr: '', rr: '', sats: '', oxygen: '', fio2: '' },
+      obs: { temp: '', hr: '', rr: '', sats: '', oxygen: '', fio2: '', stable24: '' },
       glucoses: [{ time: '', value: '', method: '' }],
       temps: [{ time: '', value: '' }],
       thermalCare: '',
@@ -249,15 +250,29 @@
     return '';
   }
 
-  function openingLine(state) {
+  function placeSentence(state) {
     var place = placeLabel(state);
-    var age = ageInHours(state);
-    if (!place && age == null) return '';
-    var opening = 'Reviewed';
-    if (place === 'transitional care') opening += ' on transitional care';
-    else if (place) opening += ' on the ' + place;
-    if (age != null) opening += ' at ' + shortAge(age) + ' of age';
-    return opening + '.';
+    if (!place) return '';
+    if (place === 'transitional care') return 'Reviewed on transitional care.';
+    return 'Reviewed on the ' + place + '.';
+  }
+
+  function dayOfLife(state) {
+    var hours = ageInHours(state);
+    if (hours == null) return '';
+    var totalMinutes = Math.round(hours * 60);
+    var days = Math.floor(totalMinutes / (24 * 60));
+    var rem = totalMinutes - days * 24 * 60;
+    if (days >= 1 && rem < 3) return 'Day ' + days + ' of life';
+    if (days >= 1) return 'Day ' + days + ' of life, ' + hoursWord(rem / 60);
+    return hoursWord(totalMinutes / 60) + ' of life';
+  }
+
+  function lifeLine(state) {
+    var gestation = String(state.gestationAtBirth || '').trim();
+    var life = dayOfLife(state);
+    if (gestation && life) return gestation + ' - ' + life;
+    return gestation || life;
   }
 
   function feedingSentence(state) {
@@ -307,6 +322,7 @@
   function obsSentence(state) {
     var obs = state.obs || {};
     var bits = [];
+    if (obs.stable24 === 'yes') bits.push('Obs stable previous 24 hours');
     if (obs.temp) bits.push('Temperature: ' + obs.temp + '\u00B0C');
     if (obs.hr) bits.push('HR: ' + obs.hr);
     if (obs.rr) bits.push('RR: ' + obs.rr);
@@ -734,37 +750,64 @@
     return bits;
   }
 
-  function planParagraph(state) {
+  function planBody(state) {
     var bits = planItems(state);
-    if (!bits.length) return '';
-    if (bits.length === 1) return 'Plan: ' + bits[0];
-    return 'Plan:\n' + bits.map(function (bit, index) {
-      return (index + 1) + '. ' + bit;
-    }).join('\n');
+    var planText = '';
+    if (bits.length === 1) planText = bits[0];
+    else if (bits.length) {
+      planText = bits.map(function (bit, index) {
+        return (index + 1) + '. ' + bit;
+      }).join('\n');
+    }
+    return cleanLines([planText, nextReviewParagraph(state)]);
+  }
+
+  function todayText(state) {
+    return cleanLines([
+      placeSentence(state),
+      state.sinceLast && state.sinceLast.trim() ? ensurePeriod(state.sinceLast.trim()) : '',
+      feedingSentence(state),
+      parentConcernSentence(state),
+      midwifeConcernSentence(state),
+      examinationText(state)
+    ]);
+  }
+
+  function problemBlocks(state) {
+    var printed = {};
+    var blocks = [];
+    state.problems.forEach(function (problem) {
+      var lines = problemSection(state, problem, printed);
+      if (!lines.length) return;
+      var heading = String(lines[0] || '').replace(/\.+$/, '');
+      var body = cleanLines(lines.slice(1));
+      if (!heading || !body) return;
+      blocks.push('**' + heading + '**\n' + body);
+    });
+    return blocks;
+  }
+
+  function headed(title, body) {
+    body = String(body || '').trim();
+    if (!body) return '';
+    return '**' + title + '**\n' + body;
   }
 
   function buildNote(partial) {
     var state = normalize(partial);
-    var blocks = [];
+    var parts = [];
+    var life = lifeLine(state);
+    if (life) parts.push(life);
+    var background = String(state.background || '').trim();
+    if (background) parts.push(headed('Background', background));
     var problems = problemsText(state);
-    blocks.push(openingLine(state));
-    if (state.gestationAtBirth && String(state.gestationAtBirth).trim()) {
-      blocks.push('Gestation at birth ' + String(state.gestationAtBirth).trim() + '.');
-    }
-    if (state.sinceLast && state.sinceLast.trim()) blocks.push(ensurePeriod(state.sinceLast.trim()));
-    blocks.push(feedingSentence(state));
-    blocks.push(parentConcernSentence(state));
-    blocks.push(midwifeConcernSentence(state));
-    blocks.push(examinationText(state));
-    var printed = {};
-    state.problems.forEach(function (problem) {
-      blocks = blocks.concat(problemSection(state, problem, printed));
-    });
-    blocks.push(planParagraph(state));
-    blocks.push(nextReviewParagraph(state));
-    var body = cleanLines(blocks);
-    if (!problems) return body;
-    return body ? problems + '\n\n' + body : problems;
+    if (problems) parts.push(problems);
+    var today = todayText(state);
+    if (today) parts.push(headed('Today', today));
+    problemBlocks(state).forEach(function (block) { parts.push(block); });
+    var plan = planBody(state);
+    if (plan) parts.push(headed('Plan', plan));
+    return parts.join('\n\n');
   }
 
   function missingRequired(state) {
@@ -814,14 +857,15 @@
   function paint() {
     state.noteEdits = {};
     var y = window.scrollY;
-    document.getElementById('step-panel').innerHTML = content.STEPS.map(function (step, index) {
-      return '<section id="section-' + step.id + '" class="review-section" aria-labelledby="section-title-' + step.id + '">' +
-        '<h2 class="section-title" id="section-title-' + step.id + '"><span class="step-index">' + (index + 1) + '</span>' + esc(step.label) + '</h2>' +
-        stepHtml(step.id) + '</section>';
-    }).join('');
+    var current = content.STEPS.filter(function (step) { return step.id === state.step; })[0] || content.STEPS[0];
+    state.step = current.id;
+    var index = content.STEPS.indexOf(current);
+    document.getElementById('step-panel').innerHTML =
+      '<section id="section-' + current.id + '" class="review-section" aria-labelledby="section-title-' + current.id + '">' +
+      '<h2 class="section-title" id="section-title-' + current.id + '"><span class="step-index">' + (index + 1) + '</span>' + esc(current.label) + '</h2>' +
+      stepHtml(current.id) + '</section>';
     refreshChrome();
     window.scrollTo(0, y);
-    syncCurrentFromScroll();
   }
 
   function refreshChrome() {
@@ -866,7 +910,7 @@
     var missing = missingRequired(state);
     return content.STEPS.map(function (step, index) {
       var className = 'step-link' + (state.step === step.id ? ' is-current' : '');
-      if ((step.id === 'context' && missing.context) || (step.id === 'pathways' && missing.pathways)) className += ' is-incomplete';
+      if ((step.id === 'context' && missing.context) || (step.id === 'checks' && missing.pathways)) className += ' is-incomplete';
       return '<button type="button" class="' + className + '" data-step="' + step.id + '"><span class="step-index">' + (index + 1) + '</span>' + esc(step.label) + '</button>';
     }).join('');
   }
@@ -880,10 +924,8 @@
     if (state.gestationAtBirth || age != null || place) {
       left = [String(state.gestationAtBirth || '').trim(), age != null ? shortAge(age) : '', place].filter(Boolean).join(' · ');
     }
-    var names = content.PATHWAYS.filter(function (item) {
-      return hasPathway(state, item.id);
-    }).map(function (item) { return item.label; });
-    var pathwayLine = names.length ? names.join(', ') : 'No pathway selected';
+    var names = state.problems.map(problemLabel).filter(Boolean);
+    var pathwayLine = names.length ? names.join(', ') : 'No problem selected';
     el.innerHTML = '<p class="status-main"><strong>' + esc(left) + '</strong>' +
       '<span>' + esc(pathwayLine) + '</span></p>' +
       '<p class="status-count-note">Selected pathways only. Not a risk score or management recommendation.</p>';
@@ -1004,10 +1046,17 @@
   }
 
   function go(step) {
+    var known = content.STEPS.some(function (item) { return item.id === step; });
+    if (!known) return;
+    if (step === state.step) {
+      var target = document.getElementById('section-' + step);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     state.step = step;
-    var target = document.getElementById('section-' + step);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    markCurrent(step);
+    persist();
+    paint();
+    window.scrollTo(0, 0);
   }
 
   function runAction(action, button) {
@@ -1028,6 +1077,17 @@
     if (action === 'remove-glucose' && button) {
       var removeGlucose = Number(button.dataset.index);
       if (state.glucoses.length > 1 && removeGlucose >= 0) state.glucoses.splice(removeGlucose, 1);
+      persist();
+      paint();
+    }
+    if (action === 'exam-all-nad') {
+      content.EXAM_SYSTEMS.forEach(function (system) {
+        var row = ensureExam(system.id);
+        row.status = 'nad';
+        row.choices = {};
+        row.note = '';
+        row.noteOpen = false;
+      });
       persist();
       paint();
     }
@@ -1280,11 +1340,23 @@
   }
 
   function stepHtml(step) {
-    if (step === 'context') return contextHtml();
-    if (step === 'progress') return progressHtml();
-    if (step === 'pathways') return pathwaysHtml();
-    if (step === 'examination') return examinationHtml();
-    return planHtml();
+    var inner = contextHtml();
+    if (step === 'today') inner = todayHtml();
+    else if (step === 'checks') inner = checksHtml();
+    else if (step === 'plan') inner = planHtml();
+    else if (step !== 'context') inner = '';
+    return '<section class="step">' + inner + stepNav(step) + '</section>';
+  }
+
+  function stepNav(step) {
+    var index = -1;
+    content.STEPS.forEach(function (item, i) { if (item.id === step) index = i; });
+    var prev = index > 0 ? content.STEPS[index - 1] : null;
+    var next = index >= 0 && index < content.STEPS.length - 1 ? content.STEPS[index + 1] : null;
+    return '<div class="step-nav">' +
+      (prev ? '<button type="button" class="text-button" data-step="' + prev.id + '">Back</button>' : '<span></span>') +
+      (next ? '<button type="button" class="text-button is-primary" data-step="' + next.id + '">Next: ' + esc(next.label) + '</button>' : '<span></span>') +
+      '</div>';
   }
 
   function problemsCard() {
@@ -1314,26 +1386,26 @@
       return '<div class="problem-row' + (problem.status === 'resolved' ? ' is-resolved' : '') + '">' +
         '<div class="problem-head"><span class="step-index">' + (index + 1) + '</span>' + title + tools + '</div>' +
         statuses +
-        '<label class="field">' + fieldLabel('Detail') + '<input data-problem-field="detail" data-index="' + index + '" value="' + esc(problem.detail) + '" autocomplete="off" placeholder="One line for the list"></label>' +
-        '<label class="field">' + fieldLabel('Plan for this problem') + '<input data-problem-field="plan" data-index="' + index + '" value="' + esc(problem.plan) + '" autocomplete="off"></label>' +
+        '<label class="field">' + fieldLabel('One line for the list') + '<input data-problem-field="detail" data-index="' + index + '" value="' + esc(problem.detail) + '" autocomplete="off" placeholder="Optional"></label>' +
         '</div>';
     }).join('');
-    return groupCard('Problems list',
-      '<div class="field">' + fieldLabel('Pathways') + '<p class="hint">Each problem you add gets a checklist in Problem checks.</p>' + pathwayChips + '</div>' +
+    return groupCard('Problems',
+      '<div class="field">' + fieldLabel('Pathways') + pathwayChips + '</div>' +
       '<div class="field">' + fieldLabel('Other problems') + extraChips + '</div>' +
-      '<p class="hint">Only problems you choose appear at the top of the note, in the order shown here.</p>' +
+      '<p class="hint">This list, including the one line, is how the problems appear in the note.</p>' +
       (rows ? '<div class="problem-list">' + rows + '</div>' : '')
     );
   }
 
   function contextHtml() {
-    return '<section class="step">' +
-      '<p id="context-needed" class="quiet-prompt">Age at review is still needed.</p>' +
+    return '<p id="context-needed" class="quiet-prompt">Age at review is still needed.</p>' +
       groupCard('Where',
         half(bindChoices('place', 'Place', content.PLACES)) +
         '<div id="place-other-wrap" class="half">' + input('placeOther', 'Where', state.placeOther, { wide: true, placeholder: 'For example, recovery' }) + '</div>'
       ) +
-      problemsCard() +
+      groupCard('Background',
+        area('background', 'Background', state.background, 3)
+      ) +
       groupCard('Gestation and age',
         input('gestationAtBirth', 'Gestation at birth (as documented by clinician)', state.gestationAtBirth, { wide: true, placeholder: 'For example, 34+2' }) +
         '<div class="field">' + fieldLabel('Current age') + choiceButtons('data-bind', 'ageMode', [
@@ -1350,11 +1422,11 @@
         '</div>' +
         '<p id="age-readout" class="readout"></p>'
       ) +
-      '</section>';
+      problemsCard();
   }
 
   function progressHtml() {
-    return '<section class="step">' +
+    return '<p class="hint">Entered once. The checklists read these instead of asking again.</p>' +
       groupCard('Since last review',
         area('sinceLast', 'Progress since last review', state.sinceLast, 4)
       ) +
@@ -1396,8 +1468,7 @@
         ])) +
         '<div id="parent-words-wrap" class="half">' + area('parentalWords', 'What the parents said', state.parentalWords, 3) + '</div>' +
         '<div id="midwife-words-wrap" class="half">' + area('midwifeWords', 'Midwife concern', state.midwifeWords, 3) + '</div>'
-      ) +
-      '</section>';
+      );
   }
 
   function glucoseRowsHtml() {
@@ -1490,7 +1561,7 @@
       return bindChoices('phototherapy', 'Phototherapy', content.PHOTOTHERAPY) +
         '<div id="phototherapy-start-wrap">' + input('phototherapyStart', 'Phototherapy started', state.phototherapyStart, { wide: true, placeholder: 'Date and time' }) + '</div>' +
         area('jaundiceNote', 'Other jaundice notes', state.jaundiceNote, 3) +
-        '<p class="hint">Bilirubin values are entered once in the Jaundice card above.</p>';
+        '<p class="hint">Bilirubin values are entered once on Today.</p>';
     }
     if (type === 'hypoglycaemia') {
       return '<div class="field">' + fieldLabel('Documented reason') + multiButtons('hypoReasons', content.HYPO_REASONS, state.multi.hypoReasons || []) + '</div>' +
@@ -1517,13 +1588,13 @@
     if (!item) return '';
     var done = checkAddressed(state, id);
     var head = '<span class="check-label">' + (done ? '<span class="check-mark" aria-hidden="true">\u2713</span>' : '') + esc(item.label) + '</span>';
-    if (item.kind === 'source') {
+      if (item.kind === 'source') {
       var where = content.CHECK_SOURCES[item.source] || {};
       var value = sourceText(state, item.source);
       return '<div class="check-item is-source' + (done ? ' is-done' : ' is-missing') + '">' +
         '<div class="check-head">' + head +
-        '<button type="button" class="text-button check-jump" data-step="' + esc(where.step || '') + '">' + (done ? 'Edit in ' : 'Add in ') + esc(where.where || '') + '</button></div>' +
-        '<p class="check-value">' + esc(value || 'Not entered yet.') + '</p></div>';
+        '<button type="button" class="text-button check-jump" data-step="' + esc(where.step || '') + '">' + (done ? 'Edit' : 'Add') + '</button></div>' +
+        '<p class="check-value">' + esc(value || 'Not entered yet. Add it on ' + (where.where || 'Today') + '.') + '</p></div>';
     }
     var answer = checkAnswer(state, id);
     if (item.kind === 'confirm') {
@@ -1538,33 +1609,52 @@
       '<input data-check-text="' + id + '" value="' + esc(answer.text || '') + '" autocomplete="off"' + (item.placeholder ? ' placeholder="' + esc(item.placeholder) + '"' : '') + '></label>';
   }
 
-  function problemCheckCard(problem) {
-    var ids = templateFor(problem.type);
-    var inputs = pathwayInputs(problem.type);
-    if (!ids.length && !inputs) return '';
-    var label = problemLabel(problem) || 'Problem';
-    var count = ids.filter(function (id) { return checkAddressed(state, id); }).length;
-    var tally = ids.length ? '<p class="check-tally">' + count + ' of ' + ids.length + ' checked</p>' : '';
-    var list = ids.length ? '<div class="check-list">' + ids.map(function (id) { return checkItemHtml(id, problem.type); }).join('') + '</div>' : '';
-    return groupCard(label, tally + inputs + list);
+  function problemPlanField(problem, index) {
+    return '<label class="field">' + fieldLabel('Plan for this problem') + '<input data-problem-field="plan" data-index="' + index + '" value="' + esc(problem.plan) + '" autocomplete="off" placeholder="Optional"></label>';
   }
 
-  function pathwaysHtml() {
-    var cards = state.problems.map(problemCheckCard).join('');
-    return '<section class="step">' +
-      '<p id="pathways-needed" class="quiet-prompt">Add one or more problems in Context.</p>' +
-      '<p class="hint">Prompts to check and document. Items marked from another panel fill in from what you entered there. Shared items fill in across problems and print once in the note.</p>' +
+  function problemCheckCard(problem, index) {
+    var ids = templateFor(problem.type);
+    var inputs = pathwayInputs(problem.type);
+    var label = problemLabel(problem) || 'Problem';
+    var open = [];
+    var doneIds = [];
+    ids.forEach(function (id) {
+      if (checkAddressed(state, id)) doneIds.push(id);
+      else open.push(id);
+    });
+    var tally = ids.length ? '<p class="check-tally">' + doneIds.length + ' of ' + ids.length + ' done</p>' : '';
+    var openList = open.length
+      ? '<div class="check-list">' + open.map(function (id) { return checkItemHtml(id, problem.type); }).join('') + '</div>'
+      : (ids.length ? '<p class="hint">Nothing left on this list.</p>' : '');
+    var doneList = doneIds.length
+      ? '<details class="check-done"><summary>Done (' + doneIds.length + ')</summary><div class="check-list">' +
+        doneIds.map(function (id) { return checkItemHtml(id, problem.type); }).join('') + '</div></details>'
+      : '';
+    return groupCard(label, tally + inputs + openList + doneList + problemPlanField(problem, index));
+  }
+
+  function todayHtml() {
+    return progressHtml() +
       sharedGlucoseCard() +
       sharedTemperatureCard() +
       sharedJaundiceCard() +
       sharedWeightCard() +
-      cards +
-      '</section>';
+      examinationHtml();
+  }
+
+  function checksHtml() {
+    var cards = state.problems.map(problemCheckCard).join('');
+    return '<p id="pathways-needed" class="quiet-prompt">Add a problem on Baby first.</p>' +
+      '<p class="hint">Still to document stays open. Done items stay available underneath. Shared answers print once.</p>' +
+      cards;
   }
 
   function examinationHtml() {
-    return '<section class="step">' +
-      groupCard('Observations',
+    return groupCard('Observations',
+        '<div class="field">' + fieldLabel('Previous 24 hours') + choiceButtons('data-obs-choice', 'stable24', [
+          { value: 'yes', label: 'Stable 24 hours' }
+        ], state.obs.stable24) + '</div>' +
         '<div class="num-row half">' +
           obsInput('temp', 'Temperature', 'decimal') +
           obsInput('hr', 'Heart rate', 'numeric') +
@@ -1579,8 +1669,8 @@
           (state.obs.oxygen === 'oxygen' ? obsInput('fio2', '% O2', 'numeric') : '') +
         '</div>'
       ) +
-      '<div class="exam-systems">' + content.EXAM_SYSTEMS.map(examRowHtml).join('') + '</div>' +
-      '</section>';
+      '<div class="exam-toolbar"><button type="button" class="text-button" data-action="exam-all-nad">All NAD</button><p class="hint">Sets every system below. Open a system again by tapping NAD once more.</p></div>' +
+      '<div class="exam-systems">' + content.EXAM_SYSTEMS.map(examRowHtml).join('') + '</div>';
   }
 
   function obsInput(key, label, mode) {
@@ -1620,8 +1710,7 @@
 
   function planHtml() {
     var phrases = visiblePlanPhrases(state);
-    return '<section class="step">' +
-      groupCard('Plan',
+    return groupCard('Plan',
         (phrases.length
           ? '<div class="choices">' + phrases.map(function (item) {
             return '<button type="button" class="choice" data-phrase="' + item.id + '">' + esc(item.label) + '</button>';
@@ -1634,8 +1723,7 @@
         '<div class="field">' + fieldLabel('Awaiting') + multiButtons('pending', content.PENDING_ITEMS, state.multi.pending || []) + '</div>' +
         '<div id="pending-other-wrap">' + input('pendingOther', 'Other awaited item', state.pendingOther, { wide: true }) + '</div>' +
         area('escalation', 'Escalate sooner if (as agreed)', state.escalation, 2)
-      ) +
-      '</section>';
+      );
   }
 
   return {
