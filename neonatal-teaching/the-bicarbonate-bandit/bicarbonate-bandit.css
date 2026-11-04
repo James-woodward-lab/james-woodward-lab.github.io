@@ -946,6 +946,33 @@ body.bicarb-bandit-app .back-home-link {
   color: var(--blood);
 }
 
+.bicarb-bandit-app .sample-line {
+  margin: 6px 0 8px;
+  text-align: center;
+}
+
+.bicarb-bandit-app .sample-type {
+  display: inline-block;
+  padding: 5px 12px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--parchment);
+  background: #3d7a4a;
+  box-shadow: 0 0 0 3px var(--ink);
+}
+
+.bicarb-bandit-app .sample-type--capillary {
+  color: var(--ink);
+  background: var(--gold);
+}
+
+.bicarb-bandit-app .sample-type--venous {
+  color: var(--parchment);
+  background: var(--blood);
+}
+
 .bicarb-bandit-app .poster-sub {
   margin: 0 0 6px;
   text-align: center;

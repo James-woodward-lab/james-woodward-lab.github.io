@@ -46,7 +46,7 @@
       ageGroup: "day1to2",
       vignette: "Preterm on nasal CPAP, FiO₂ 0.28. Settled, good chest rise, warm peripheries.",
       context: { support: "nCPAP", fio2: "0.28" },
-      values: { pH: 7.32, pco2Kpa: 5.5, po2Kpa: 6.0, baseExcess: -1.5, hco3: 22.4 },
+      values: { pH: 7.32, pco2Kpa: 5.5, po2Kpa: 4.2, baseExcess: -1.5, hco3: 22.4 },
       actions: ["fio2", "intubate", "fluid", "glucose", "electrolyte", "repeat_gas"],
       correctAction: "fio2",
       hint: "Already on CPAP with a normal PaCO₂ and a low PaO₂. Raise FiO₂.",
@@ -61,9 +61,9 @@
     {
       id: "bipap-still-hypoxic",
       ageGroup: "any",
-      vignette: "On BiPAP at FiO₂ 35%. Pinker than earlier, comfortable, no recession.",
+      vignette: "On BiPAP at FiO₂ 35%. Comfortable, no recession.",
       context: { support: "BiPAP", fio2: "35%" },
-      values: { pH: 7.37, pco2Kpa: 5.0, po2Kpa: 6.8, baseExcess: 0.4, hco3: 24.1 },
+      values: { pH: 7.37, pco2Kpa: 5.0, po2Kpa: 4.4, baseExcess: 0.4, hco3: 24.1 },
       actions: ["fio2", "highflow", "cpap", "intubate", "fluid", "repeat_gas"],
       correctAction: "fio2",
       hint: "Already on BiPAP at 35% and PaCO₂ is normal. The PaO₂ is still low, so increase FiO₂ rather than changing the mode.",
@@ -80,7 +80,7 @@
       ageGroup: "any",
       vignette: "Intubated on SIMV, FiO₂ 0.25. Chest rise is good and the tube mark is unchanged.",
       context: { support: "SIMV", fio2: "0.25" },
-      values: { pH: 7.36, pco2Kpa: 5.1, po2Kpa: 6.4, baseExcess: -0.4, hco3: 23.6 },
+      values: { pH: 7.36, pco2Kpa: 5.1, po2Kpa: 4.3, baseExcess: -0.4, hco3: 23.6 },
       actions: ["fio2", "vent", "fluid", "glucose", "electrolyte", "repeat_gas"],
       correctAction: "fio2",
       hint: "PaCO₂ is fine, so the ventilator is clearing CO₂. PaO₂ is low on a modest FiO₂: increase oxygen, do not chase CO₂ settings.",
@@ -97,7 +97,7 @@
       ageGroup: "day1to2",
       vignette: "On high-flow nasal cannula, FiO₂ 0.30. Quiet, no recession, feeding well.",
       context: { support: "High flow", fio2: "0.30" },
-      values: { pH: 7.35, pco2Kpa: 5.3, po2Kpa: 6.1, baseExcess: -0.6, hco3: 23.4 },
+      values: { pH: 7.35, pco2Kpa: 5.3, po2Kpa: 4.1, baseExcess: -0.6, hco3: 23.4 },
       actions: ["fio2", "cpap", "intubate", "fluid", "glucose", "repeat_gas"],
       correctAction: "fio2",
       hint: "Already on high flow, PaCO₂ normal, PaO₂ low. Increase FiO₂ before changing the mode of support.",
@@ -428,9 +428,9 @@
       values: { pH: 7.52, pco2Kpa: 2.2, po2Kpa: 18.5, baseExcess: 2.0, hco3: 20.0 },
       actions: ["repeat_gas", "o2_start", "intubate", "fluid", "glucose", "electrolyte"],
       correctAction: "repeat_gas",
-      hint: "A well baby cannot have a PaO₂ of 18 kPa in air. Bubbles pulled the sample toward room air. Repeat it before acting.",
+      hint: "A well baby cannot have a capillary oxygen of 18 kPa in air. Bubbles pulled the sample toward room air. Repeat it before acting.",
       wrongHints: {
-        o2_start: "Clinically well, and the PaO₂ is impossibly high for air, not low.",
+        o2_start: "Clinically well, and the oxygen is impossibly high for air, not low.",
         intubate: "Do not ventilate a feeding baby on a spoiled sample.",
         fluid: "No shock.",
         glucose: "Glucose is normal.",
@@ -474,8 +474,13 @@
   ];
 
   const LAB_DEFAULTS = { na: 139, k: 4.4, ca: 1.22, cl: 105, hb: 168, glucose: 4.1 };
+  const SAMPLE_BY_ID = {
+    bubbles: "capillary",
+    "venous-sample": "venous",
+  };
   SCENARIOS.forEach((scenario) => {
     scenario.values = Object.assign({}, LAB_DEFAULTS, scenario.values);
+    scenario.sample = SAMPLE_BY_ID[scenario.id] || "arterial";
   });
 
   function shuffle(arr) {

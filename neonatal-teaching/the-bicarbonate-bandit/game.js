@@ -73,7 +73,6 @@
     timerId: 0,
     feedbackOpen: false,
     mistakes: [],
-    autoTimer: 0,
   };
 
   const els = {};
@@ -241,15 +240,25 @@
     }).join("");
   }
 
-  function posterHtml(values) {
+  function posterHtml(scenario) {
+    const values = scenario.values;
+    const sample = scenario.sample === "venous" || scenario.sample === "capillary" ? scenario.sample : "arterial";
+    const prefix = sample === "venous" ? "Pv" : sample === "capillary" ? "Pc" : "Pa";
+    const sampleLabel = sample === "venous" ? "Venous gas" : sample === "capillary" ? "Capillary gas" : "Arterial gas";
+    const gasFields = GAS_FIELDS.map((field) => {
+      if (field.key === "pco2Kpa") return Object.assign({}, field, { label: `${prefix}CO₂` });
+      if (field.key === "po2Kpa") return Object.assign({}, field, { label: `${prefix}O₂` });
+      return field;
+    });
     const h = core.paramHighlights(values, state.ageGroup);
     return `
       <div class="poster-head">WANTED</div>
+      <p class="sample-line"><span class="sample-type sample-type--${sample}">${sampleLabel}</span></p>
       <p class="poster-sub">stolen panel · Bicarbonate Bandit</p>
       <div class="gas-cols">
         <div>
           <p class="gas-col-title">Acid–base</p>
-          ${fieldRows(values, GAS_FIELDS, h)}
+          ${fieldRows(values, gasFields, h)}
         </div>
         <div>
           <p class="gas-col-title">Labs</p>
@@ -401,7 +410,7 @@
 
     els.vignette.textContent = state.scenario.vignette;
     els.chips.innerHTML = contextChips(state.scenario.context);
-    els.poster.innerHTML = posterHtml(state.scenario.values);
+    els.poster.innerHTML = posterHtml(state.scenario);
     els.feedback.hidden = true;
     els.feedback.innerHTML = "";
 
@@ -520,17 +529,12 @@
     const ride = $("btn-ride-on");
     ride.addEventListener("click", afterFeedback);
     ride.focus({ preventScroll: true });
-
-    if (isRight) {
-      state.autoTimer = setTimeout(afterFeedback, 1600);
-    }
   }
 
   function afterFeedback() {
     if (state.phase !== "feedback") {
       return;
     }
-    clearTimeout(state.autoTimer);
     if (state.correct >= CATCHES_TO_WIN) {
       endGame(true);
       return;
@@ -544,7 +548,6 @@
 
   /* ---------- Round lifecycle ---------- */
   function resetRound() {
-    clearTimeout(state.autoTimer);
     stopTimer();
     Object.assign(state, {
       score: 0,
@@ -572,7 +575,6 @@
 
   function endGame(caught) {
     stopTimer();
-    clearTimeout(state.autoTimer);
     const prevBest = loadBest();
     const best = saveBest(state.score);
     els.endKicker.textContent = caught ? "Bandit in custody" : "The Bicarbonate Bandit got away";
@@ -616,7 +618,6 @@
   }
 
   function quitToTitle() {
-    clearTimeout(state.autoTimer);
     stopTimer();
     setPhase("attract");
     refreshAttractBest();
