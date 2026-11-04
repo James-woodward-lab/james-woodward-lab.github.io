@@ -196,7 +196,7 @@ var listed = review.buildNote({
   place: 'postnatal',
   pathways: ['sepsis'],
   problems: [
-    { type: 'jaundice', status: 'new', detail: 'SBR below line', plan: 'repeat as planned' },
+    { type: 'feeding', status: 'new', detail: 'SBR below line', plan: 'repeat as planned' },
     { type: 'sepsis', status: 'ongoing', detail: 'day 2 antibiotics', plan: '' },
     { type: 'other', label: 'Tongue tie', status: '', detail: '', plan: '' }
   ],
@@ -205,7 +205,7 @@ var listed = review.buildNote({
   pendingOther: 'repeat SBR',
   escalation: 'temperature unstable'
 });
-assert.strictEqual(listed.indexOf('Problems:\n1. Jaundice (new): SBR below line. Plan: repeat as planned.\n2. Suspected sepsis (ongoing): day 2 antibiotics.\n3. Tongue tie.'), 0, 'problems lead the note in the chosen order');
+assert.strictEqual(listed.indexOf('Problems:\n1. Feeding difficulty (new): SBR below line. Plan: repeat as planned.\n2. Suspected sepsis (ongoing): day 2 antibiotics.\n3. Tongue tie.'), 0, 'problems lead the note in the chosen order');
 assert.ok(listed.indexOf('Suspected sepsis.') > listed.indexOf('3. Tongue tie.'), 'pathway sections still follow below');
 assert.ok(listed.indexOf('Next review: tomorrow. Awaiting: Blood culture, repeat SBR. Escalate sooner if: temperature unstable.') !== -1, 'next review line is written');
 assert.strictEqual(listed.indexOf('Review at'), -1, 'old review line is replaced');
@@ -224,6 +224,7 @@ var templateText = JSON.stringify(content.CHECK_ITEMS);
 assert.ok(!/mmol|\d\s*%|\d\.\d\s*(kg|\u00B0C)/i.test(templateText.replace(/2\.24 kg/g, '')), 'templates carry no thresholds or targets');
 
 var templated = review.buildNote({
+  pathways: ['jaundice'],
   problems: [{ type: 'jaundice' }, { type: 'hdn' }, { type: 'idm' }],
   jaundice: 'tsb', jaundiceValue: '210', jaundiceAgeHours: '40', jaundicePlot: 'below',
   glucoses: [{ time: '09:00', value: '2.9', method: 'meter' }],
@@ -246,12 +247,37 @@ assert.strictEqual(templated.split('breastfeeds').length, 2, 'feeding is not rep
 var emptyTemplate = review.buildNote({ problems: [{ type: 'murmur' }] });
 assert.strictEqual(emptyTemplate.split('Murmur.').length, 2, 'an unfilled checklist adds no empty heading below the list');
 
-var lpFirst = review.buildNote({ pathways: ['late-preterm'], problems: [{ type: 'jaundice' }, { type: 'late-preterm' }], jaundice: 'none', weightToday: '2.1' });
+var lpFirst = review.buildNote({ pathways: ['late-preterm', 'jaundice'], problems: [{ type: 'jaundice' }, { type: 'late-preterm' }], jaundice: 'none', weightToday: '2.1' });
 assert.ok(lpFirst.indexOf('Jaundice.\nNo clinical jaundice.') !== -1, 'jaundice moves to the jaundice problem when it is listed first');
 assert.strictEqual(lpFirst.split('No clinical jaundice.').length, 2, 'jaundice is not repeated under late preterm');
 assert.ok(lpFirst.indexOf('Weight today 2.1 kg.') !== -1, 'weight still written once');
 
 assert.strictEqual(review.sourceText(review.normalize({ feedMode: 'formula', feedAmount: '30' }), 'feeding'), 'formula, 30 ml.', 'feeding prompt reads from the feeding panel');
 assert.strictEqual(review.sourceText(review.normalize({}), 'glucose'), '', 'empty panels show nothing to autofill');
+
+/* Jaundice is a pathway; it owns bilirubin data wherever it sits in the list. */
+var content2 = require('./content.js');
+assert.ok(content2.PATHWAYS.some(function (p) { return p.id === 'jaundice'; }), 'jaundice is a main pathway');
+assert.ok(!content2.EXTRA_PROBLEMS.some(function (p) { return p.id === 'jaundice'; }), 'jaundice is not listed twice');
+var jPath = review.buildNote({
+  pathways: ['late-preterm', 'jaundice'],
+  problems: [{ type: 'late-preterm' }, { type: 'jaundice' }],
+  jaundice: 'tsb', jaundiceValue: '250', jaundiceAgeHours: '50',
+  phototherapy: 'single', phototherapyStart: '08:00 today',
+  checks: { jaundiceExam: { status: 'yes' }, reboundPlan: { text: '12 to 18 hours after stopping' } }
+});
+assert.ok(jPath.indexOf('Jaundice.\nSerum bilirubin 250 at 50 hours.\nOn single phototherapy since 08:00 today.') !== -1, 'jaundice pathway writes bilirubin and phototherapy');
+assert.strictEqual(jPath.split('Serum bilirubin 250').length, 2, 'bilirubin is not repeated under late preterm');
+assert.ok(jPath.indexOf('Rebound bilirubin after phototherapy: 12 to 18 hours after stopping.') !== -1, 'jaundice checklist text is written');
+var removedPathway = review.normalize({ pathways: [], problems: [{ type: 'jaundice' }] });
+assert.strictEqual(removedPathway.problems.length, 0, 'unticking jaundice removes it from the list');
+
+var sepsisNote = review.buildNote({
+  pathways: ['sepsis'],
+  checks: { abxStart: { text: '03/11 14:30' }, seniorDiscussed: { status: 'yes' }, gbsLeaflet: { status: 'na' } }
+});
+assert.ok(sepsisNote.indexOf('Antibiotics started (date and time): 03/11 14:30.') !== -1, 'sepsis antibiotic start prompt is written');
+assert.ok(sepsisNote.indexOf('Discussed with registrar or consultant.') !== -1, 'senior discussion is written');
+assert.strictEqual(sepsisNote.indexOf('GBS leaflet'), -1, 'N/A sepsis items are left out');
 
 console.log('postnatal daily review tests passed');

@@ -75,6 +75,9 @@
       jaundiceValue: '',
       jaundiceAgeHours: '',
       jaundicePlot: '',
+      phototherapy: '',
+      phototherapyStart: '',
+      jaundiceNote: '',
       weightToday: '',
       lpNote: '',
       plan: '',
@@ -533,6 +536,24 @@
     return ['Temperature management.', body];
   }
 
+  function phototherapySentence(state) {
+    var match = content.PHOTOTHERAPY.filter(function (item) { return item.value === state.phototherapy; })[0];
+    if (!match) return '';
+    var start = String(state.phototherapyStart || '').trim();
+    if (start && (state.phototherapy === 'single' || state.phototherapy === 'multiple')) {
+      return match.prose.replace(/\.$/, '') + ' since ' + ensurePeriod(start);
+    }
+    return match.prose;
+  }
+
+  function jaundiceSection(state) {
+    if (!hasPathway(state, 'jaundice')) return [];
+    var lines = [jaundiceSentence(state), phototherapySentence(state)];
+    if (state.jaundiceNote && state.jaundiceNote.trim()) lines.push(ensurePeriod(state.jaundiceNote.trim()));
+    var body = cleanLines(lines);
+    return body ? ['Jaundice.', body] : ['Jaundice.'];
+  }
+
   function hypoReasonSentences(state) {
     var selected = state.multi.hypoReasons || [];
     var bits = [];
@@ -606,12 +627,14 @@
   var NATIVE_SOURCES = {
     'late-preterm': ['jaundice', 'weight', 'glucose', 'temps'],
     hypoglycaemia: ['glucose'],
-    temperature: ['temps']
+    temperature: ['temps'],
+    jaundice: ['jaundice']
   };
 
   function dataOwner(state, source) {
     if (source === 'glucose' && glucoseOwner(state)) return '';
     if (source === 'temps' && tempOwner(state)) return '';
+    if (source === 'jaundice' && hasPathway(state, 'jaundice')) return 'jaundice';
     var problems = state.problems || [];
     for (var i = 0; i < problems.length; i += 1) {
       if (templateFor(problems[i].type).indexOf(source) !== -1) return problems[i].type;
@@ -681,7 +704,8 @@
     sepsis: function (state) { return sepsisSection(state); },
     'late-preterm': function (state) { return latePretermSection(state); },
     temperature: function (state) { return temperatureSection(state); },
-    hypoglycaemia: function (state) { return hypoglycaemiaSection(state); }
+    hypoglycaemia: function (state) { return hypoglycaemiaSection(state); },
+    jaundice: function (state) { return jaundiceSection(state); }
   };
 
   function problemSection(state, problem, printed) {
@@ -905,6 +929,7 @@
     show('parent-words-wrap', state.parentalConcern === 'concerned');
     show('midwife-words-wrap', state.midwifeConcern === 'yes');
     show('culture-detail-wrap', state.cultureStatus === 'growth');
+    show('phototherapy-start-wrap', state.phototherapy === 'single' || state.phototherapy === 'multiple');
     show('jaundice-detail', state.jaundice === 'tcb' || state.jaundice === 'tsb');
     show('hypo-reason-other-wrap', (state.multi.hypoReasons || []).indexOf('other') !== -1);
     show('pending-other-wrap', (state.multi.pending || []).indexOf('other') !== -1);
@@ -1460,6 +1485,12 @@
     if (type === 'temperature') {
       return area('tempEnvironment', 'Environment', state.tempEnvironment, 3) +
         area('tempWeaning', 'Weaning note', state.tempWeaning, 3);
+    }
+    if (type === 'jaundice') {
+      return bindChoices('phototherapy', 'Phototherapy', content.PHOTOTHERAPY) +
+        '<div id="phototherapy-start-wrap">' + input('phototherapyStart', 'Phototherapy started', state.phototherapyStart, { wide: true, placeholder: 'Date and time' }) + '</div>' +
+        area('jaundiceNote', 'Other jaundice notes', state.jaundiceNote, 3) +
+        '<p class="hint">Bilirubin values are entered once in the Jaundice card above.</p>';
     }
     if (type === 'hypoglycaemia') {
       return '<div class="field">' + fieldLabel('Documented reason') + multiButtons('hypoReasons', content.HYPO_REASONS, state.multi.hypoReasons || []) + '</div>' +

@@ -36,13 +36,13 @@
     { id: 'sepsis', label: 'Suspected sepsis' },
     { id: 'late-preterm', label: 'Late preterm pathway' },
     { id: 'temperature', label: 'Temperature management' },
-    { id: 'hypoglycaemia', label: 'Hypoglycaemia' }
+    { id: 'hypoglycaemia', label: 'Hypoglycaemia' },
+    { id: 'jaundice', label: 'Jaundice' }
   ];
 
   /* Problems beyond the four pathways. Clinician picks each one; nothing is
    * added from gestation, results, or any other entered value. */
   var EXTRA_PROBLEMS = [
-    { id: 'jaundice', label: 'Jaundice' },
     { id: 'feeding', label: 'Feeding difficulty' },
     { id: 'weight-loss', label: 'Weight loss' },
     { id: 'idm', label: 'Infant of diabetic mother' },
@@ -111,19 +111,38 @@
     birthWeight: { kind: 'text', label: 'Birth weight and centile', placeholder: '2.24 kg, 9th centile' },
     lpRiskFactors: { kind: 'text', label: 'Additional risk factors', placeholder: 'For example, SGA, maternal diabetes, beta-blocker, resuscitation, condition affecting feeding' },
     sepsisRiskFactors: { kind: 'text', label: 'Infection risk factors and red flags', placeholder: 'As documented' },
-    infectionSigns: { kind: 'text', label: 'Signs of infection checked', placeholder: 'Behaviour, tone, breathing, temperature, feeding' },
+    infectionSigns: { kind: 'text', label: 'Clinical indicators of infection checked', placeholder: 'Behaviour, tone, breathing, heart rate, temperature, feeding, glucose' },
+    sepsisRedFlags: { kind: 'text', label: 'Red flags in the baby', placeholder: 'As documented, or none' },
+    abxStart: { kind: 'text', label: 'Antibiotics started (date and time)' },
+    satsChecked: { kind: 'confirm', label: 'Oxygen saturations checked at review', yes: 'Oxygen saturations checked at review.', no: 'Oxygen saturations not yet checked at review.' },
+    cxr: { kind: 'text', label: 'Chest X-ray, if respiratory signs' },
+    lpConsidered: { kind: 'text', label: 'Lumbar puncture considered', placeholder: 'Decision and who it was discussed with' },
+    repeatCrp: { kind: 'text', label: 'Repeat CRP', placeholder: 'When sent and result' },
+    gentLevels: { kind: 'text', label: 'Gentamicin levels, if on gentamicin' },
+    seniorDiscussed: { kind: 'confirm', label: 'Discussed with registrar or consultant', yes: 'Discussed with registrar or consultant.', no: 'Not yet discussed with registrar or consultant.' },
+    handover: { kind: 'confirm', label: 'Added to postnatal ward handover', yes: 'Added to postnatal ward handover.', no: 'Not yet added to postnatal ward handover.' },
+    microList: { kind: 'confirm', label: 'Added to microbiology review list', yes: 'Added to microbiology review list.', no: 'Not yet added to microbiology review list.' },
+    infectionLeaflet: { kind: 'confirm', label: 'Infection in newborns leaflet', yes: 'Infection in newborns leaflet given.', no: 'Infection in newborns leaflet not yet given.' },
+    gbsLeaflet: { kind: 'confirm', label: 'GBS leaflet and future pregnancy advice, if GBS identified', yes: 'GBS leaflet and future pregnancy advice given.', no: 'GBS leaflet and future pregnancy advice not yet given.' },
+    jaundiceRiskFactors: { kind: 'text', label: 'Risk factors for significant jaundice', placeholder: 'For example, gestation, sibling needed phototherapy, exclusive breastfeeding, jaundice in first 24 hours' },
+    jaundiceExam: { kind: 'confirm', label: 'Examined undressed in good light (sclerae, gums, blanched skin)', yes: 'Examined undressed in good light, including sclerae, gums and blanched skin.', no: 'Not yet examined undressed in good light.' },
+    bilirubinMethod: { kind: 'confirm', label: 'Serum or transcutaneous choice checked for gestation and age', yes: 'Bilirubin method checked for gestation and age.', no: 'Bilirubin method not yet checked for gestation and age.' },
+    haemolysisBloods: { kind: 'text', label: 'Other bloods, if sent', placeholder: 'For example, FBC, film, PCV, G6PD, cultures' },
+    encephalopathySigns: { kind: 'confirm', label: 'Signs of bilirubin encephalopathy checked', yes: 'Signs of bilirubin encephalopathy checked.', no: 'Signs of bilirubin encephalopathy not yet checked.' },
+    phototherapyCare: { kind: 'confirm', label: 'Eye protection, temperature and hydration checked during phototherapy', yes: 'Eye protection, temperature and hydration checked during phototherapy.', no: 'Phototherapy care checks not yet done.' },
+    reboundPlan: { kind: 'text', label: 'Rebound bilirubin after phototherapy', placeholder: 'As planned' },
+    jaundiceInfo: { kind: 'confirm', label: 'Jaundice and phototherapy information given', yes: 'Jaundice and phototherapy information given to parents.', no: 'Jaundice and phototherapy information not yet given.' },
     obsPlan: { kind: 'text', label: 'Observation frequency and duration', placeholder: 'As planned' },
     feedPlan: { kind: 'text', label: 'Individual feeding plan', placeholder: 'Volumes, frequency, top-ups, expressing' },
-    nappies: { kind: 'text', label: 'Wet nappies and stools' },
+    nappies: { kind: 'text', label: 'Wet nappies and stools', placeholder: 'Including dark urine or pale stools' },
     hypoTreatment: { kind: 'text', label: 'Treatment given', placeholder: 'For example, top-ups, gel, other' },
     glucosePlan: { kind: 'text', label: 'Glucose monitoring plan', placeholder: 'As agreed' },
     tempReversible: { kind: 'confirm', label: 'Hat, wrapping and draughts checked', yes: 'Hat, wrapping and draughts checked.', no: 'Hat, wrapping and draughts not yet checked.' },
     tempStable: { kind: 'text', label: 'Time with stable temperatures in a cot' },
-    sepsisDuration: { kind: 'text', label: 'Planned antibiotic duration and review point' },
+    sepsisDuration: { kind: 'text', label: 'Antibiotic review point and planned duration' },
     jaundiceOnset: { kind: 'text', label: 'When jaundice was first noticed' },
     chartGestation: { kind: 'confirm', label: 'Plotted on the chart for birth gestation', yes: 'Plotted on the chart for birth gestation.', no: 'Not yet plotted on the chart for birth gestation.' },
     bloodGroupDat: { kind: 'text', label: 'Baby blood group and DAT', placeholder: 'With maternal group' },
-    phototherapy: { kind: 'text', label: 'Phototherapy' },
     bilirubinPlan: { kind: 'text', label: 'Next bilirubin', placeholder: 'As planned' },
     maternalAntibodies: { kind: 'text', label: 'Maternal group, antibodies and anti-D history' },
     haemPlan: { kind: 'confirm', label: 'Antenatal haematology and obstetric plan checked', yes: 'Antenatal haematology and obstetric plan checked.', no: 'Antenatal haematology and obstetric plan not yet checked.' },
@@ -166,11 +185,11 @@
   };
 
   var TEMPLATES = {
-    sepsis: ['sepsisRiskFactors', 'infectionSigns', 'obs', 'temps', 'feeding', 'sepsisDuration', 'parentsUpdated'],
+    sepsis: ['sepsisRiskFactors', 'sepsisRedFlags', 'infectionSigns', 'obs', 'obsPlan', 'satsChecked', 'temps', 'feeding', 'abxStart', 'cxr', 'lpConsidered', 'repeatCrp', 'gentLevels', 'sepsisDuration', 'seniorDiscussed', 'parentsUpdated', 'handover', 'microList', 'infectionLeaflet', 'gbsLeaflet', 'safetyNet'],
     'late-preterm': ['gestation', 'birthWeight', 'lpRiskFactors', 'obs', 'obsPlan', 'temps', 'feeding', 'feedPlan', 'glucose', 'jaundice', 'weight', 'infectionSigns', 'lpLeaflet', 'nipe', 'carSeat', 'dischargeMeds', 'communityFollowUp', 'safetyNet'],
     temperature: ['temps', 'tempReversible', 'infectionSigns', 'glucose', 'tempStable'],
     hypoglycaemia: ['glucose', 'feeding', 'feedPlan', 'bfAssessment', 'temps', 'hypoTreatment', 'glucosePlan', 'hypoLeaflet'],
-    jaundice: ['jaundiceOnset', 'jaundice', 'chartGestation', 'bloodGroupDat', 'phototherapy', 'feeding', 'weight', 'bilirubinPlan'],
+    jaundice: ['jaundiceOnset', 'jaundiceRiskFactors', 'jaundiceExam', 'jaundice', 'bilirubinMethod', 'chartGestation', 'bloodGroupDat', 'haemolysisBloods', 'infectionSigns', 'encephalopathySigns', 'phototherapyCare', 'feeding', 'feedSupport', 'nappies', 'weight', 'bilirubinPlan', 'reboundPlan', 'jaundiceInfo', 'safetyNet'],
     feeding: ['feeding', 'feedPlan', 'bfAssessment', 'feedSupport', 'nappies', 'weight'],
     'weight-loss': ['birthWeight', 'weight', 'weightChange', 'feeding', 'feedPlan', 'nappies', 'jaundice', 'weightPlan', 'communityFollowUp'],
     idm: ['glucose', 'feeding', 'obs', 'respFindings', 'glucosePlan', 'nipe'],
@@ -220,6 +239,13 @@
     { value: 'growth', label: 'Growth' }
   ];
 
+  var PHOTOTHERAPY = [
+    { value: 'none', label: 'Not on phototherapy', prose: 'Not on phototherapy.' },
+    { value: 'single', label: 'Single', prose: 'On single phototherapy.' },
+    { value: 'multiple', label: 'Multiple', prose: 'On multiple phototherapy.' },
+    { value: 'stopped', label: 'Stopped', prose: 'Phototherapy stopped.' }
+  ];
+
   var JAUNDICE = [
     { value: 'none', label: 'None documented', prose: 'No clinical jaundice.' },
     { value: 'clinical', label: 'Clinical jaundice', prose: 'Clinical jaundice documented.' },
@@ -232,6 +258,12 @@
     { id: 'culture-pending', label: 'Culture pending', text: 'Blood culture still pending.', pathways: ['sepsis'] },
     { id: 'repeat-crp', label: 'Repeat CRP as planned', text: 'Repeat CRP as planned.', pathways: ['sepsis'] },
     { id: 'review-culture', label: 'Review with culture', text: 'Review with the culture result.', pathways: ['sepsis'] },
+    { id: 'abx-review', label: 'Review antibiotics as planned', text: 'Review antibiotics at the planned review point.', pathways: ['sepsis'] },
+    { id: 'infection-leaflet', label: 'Infection leaflet', text: 'Infection in newborns leaflet given.', pathways: ['sepsis'] },
+    { id: 'bili-repeat', label: 'Repeat bilirubin as planned', text: 'Repeat bilirubin as planned.', pathways: ['jaundice'] },
+    { id: 'photo-continue', label: 'Continue phototherapy', text: 'Continue phototherapy.', pathways: ['jaundice'] },
+    { id: 'rebound', label: 'Rebound bilirubin as planned', text: 'Rebound bilirubin as planned.', pathways: ['jaundice'] },
+    { id: 'jaundice-feeds', label: 'Frequent feeds', text: 'Encourage frequent feeds with feeding support.', pathways: ['jaundice'] },
     { id: 'feed-continue', label: 'Continue feeding plan', text: 'Continue current feeding plan.', pathways: ['late-preterm', 'hypoglycaemia'] },
     { id: 'obs-continue', label: 'Continue observations', text: 'Continue observations.', pathways: ['late-preterm', 'sepsis', 'temperature'] },
     { id: 'feed-support', label: 'Feeding support', text: 'Continue feeding support.', pathways: ['late-preterm'] },
@@ -372,6 +404,7 @@
     HYPO_SYMPTOMS: HYPO_SYMPTOMS,
     CULTURE_STATUS: CULTURE_STATUS,
     JAUNDICE: JAUNDICE,
+    PHOTOTHERAPY: PHOTOTHERAPY,
     PLAN_PHRASES: PLAN_PHRASES,
     EXAM_SYSTEMS: EXAM_SYSTEMS
   };
