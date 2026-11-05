@@ -374,11 +374,24 @@
     return (state.lanes[lane] || state.cardH / 2) - state.cardH / 2;
   }
 
+  /* Lock the poster to the device pixel grid. Fractional offsets make the
+     pixel type shimmer while the card is moving, which is hard to read. */
+  function devicePx(value) {
+    const dpr = window.devicePixelRatio || 1;
+    return Math.round(value * dpr) / dpr;
+  }
+
   function positionCard(ent) {
     if (!ent.el) {
       return;
     }
-    ent.el.style.transform = `translate3d(${ent.x.toFixed(1)}px, ${laneTop(ent.lane).toFixed(1)}px, 0)`;
+    const x = devicePx(ent.x);
+    const y = devicePx(laneTop(ent.lane));
+    if (ent.drawX !== x || ent.drawY !== y) {
+      ent.drawX = x;
+      ent.drawY = y;
+      ent.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    }
     if (state.hints && ent.evaluation.isMustCatch && ent.x > els.playfield.clientWidth * 0.6) {
       ent.el.classList.add("hint-pulse");
     }

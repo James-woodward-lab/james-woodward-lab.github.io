@@ -935,7 +935,6 @@ body.gas-rodeo-app .back-home-link {
   top: 0;
   width: var(--card-w);
   padding: 9px;
-  container-type: inline-size;
   will-change: transform;
 }
 
@@ -943,6 +942,8 @@ body.gas-rodeo-app .back-home-link {
   position: relative;
   padding: 6px 10px 8px;
   color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background:
     radial-gradient(circle at 15% 20%, rgba(154, 98, 51, 0.12) 0 12px, transparent 13px),
     radial-gradient(circle at 85% 75%, rgba(154, 98, 51, 0.1) 0 16px, transparent 17px),
@@ -960,7 +961,7 @@ body.gas-rodeo-app .back-home-link {
   border-bottom: 2px dashed var(--wood);
   text-align: center;
   font-family: var(--font-west);
-  font-size: clamp(13px, 8cqw, 20px);
+  font-size: clamp(13px, calc(var(--card-w) * 0.08), 20px);
   letter-spacing: 0.02em;
   line-height: 1.05;
   color: var(--blood);
@@ -975,12 +976,12 @@ body.gas-rodeo-app .back-home-link {
 }
 
 .gas-rodeo-app .pv-label {
-  font-size: clamp(18px, 12cqw, 30px);
+  font-size: clamp(18px, calc(var(--card-w) * 0.12), 30px);
   color: var(--wood);
 }
 
 .gas-rodeo-app .pv-val {
-  font-size: clamp(26px, 18cqw, 44px);
+  font-size: clamp(26px, calc(var(--card-w) * 0.18), 44px);
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }

@@ -159,10 +159,6 @@ body.neonatal-teaching-hub .back-home-link {
   color: var(--blood);
 }
 
-.neonatal-teaching-hub .hub-board p {
-  margin: 0 0 14px;
-}
-
 .neonatal-teaching-hub .hub-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -218,8 +214,7 @@ body.neonatal-teaching-hub .back-home-link {
   font-size: 21px;
 }
 
-.neonatal-teaching-hub .hub-game-cta,
-.neonatal-teaching-hub .hub-btn {
+.neonatal-teaching-hub .hub-game-cta {
   align-self: flex-start;
   margin: 6px 3px 3px;
   padding: 10px 14px;
@@ -233,10 +228,6 @@ body.neonatal-teaching-hub .back-home-link {
     inset -4px -4px 0 var(--gold-dark),
     inset 4px 4px 0 #ffe39a,
     0 0 0 3px var(--ink);
-}
-
-.neonatal-teaching-hub .hub-btn:hover {
-  filter: brightness(1.08);
 }
 
 .neonatal-teaching-hub .hub-footer {
