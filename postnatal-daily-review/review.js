@@ -77,6 +77,8 @@
       jaundiceAgeHours: '',
       jaundicePlot: '',
       phototherapy: '',
+      passedUrine: '',
+      bowelsOpen: '',
       phototherapyStart: '',
       jaundiceNote: '',
       weightToday: '',
@@ -299,6 +301,23 @@
     if (state.lastFeed && state.lastFeed.trim()) bits.push('last feed ' + state.lastFeed.trim());
     if (!bits.length) return '';
     return 'Feeding: ' + bits.join(', ') + '.';
+  }
+
+  function eliminationSentence(state) {
+    var urine = state.passedUrine;
+    var bowels = state.bowelsOpen;
+    if (urine === 'yes' && bowels === 'yes') return 'Passed urine and bowels opened.';
+    if (urine === 'no' && bowels === 'no') return 'Not yet passed urine or opened bowels.';
+    var bits = [];
+    if (urine === 'yes') bits.push('Passed urine.');
+    if (urine === 'no') bits.push('Not yet passed urine.');
+    if (bowels === 'yes') bits.push('Bowels opened.');
+    if (bowels === 'no') bits.push('Bowels not yet opened.');
+    return bits.join(' ');
+  }
+
+  function feedingAndNappies(state) {
+    return [feedingSentence(state), eliminationSentence(state)].filter(Boolean).join(' ');
   }
 
   function parentConcernSentence(state) {
@@ -626,7 +645,7 @@
   /* What another panel already holds, shown as-is. Never interpreted. */
   function sourceText(state, source) {
     if (source === 'gestation') return String(state.gestationAtBirth || '').trim();
-    if (source === 'feeding') return feedingSentence(state).replace(/^Feeding: /, '');
+    if (source === 'feeding') return feedingAndNappies(state).replace(/^Feeding: /, '');
     if (source === 'obs') return obsSentence(state);
     if (source === 'glucose') {
       var rows = filledGlucoses(state);
@@ -766,7 +785,7 @@
     return cleanLines([
       placeSentence(state),
       state.sinceLast && state.sinceLast.trim() ? ensurePeriod(state.sinceLast.trim()) : '',
-      feedingSentence(state),
+      feedingAndNappies(state),
       parentConcernSentence(state),
       midwifeConcernSentence(state),
       examinationText(state)
@@ -1449,6 +1468,14 @@
         half(input('lastFeed', 'Last feed', state.lastFeed, { wide: true, placeholder: '40 minutes ago' })) +
         yn('topUps', 'Top-ups', 'Yes', 'No') +
         '<div id="topup-amount-wrap" class="half">' + input('topUpAmount', 'Top-up amount (ml)', state.topUpAmount, { type: 'number', mode: 'decimal' }) + '</div>' +
+        half(bindChoices('passedUrine', 'Passed urine', [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'Not yet', abnormal: true }
+        ])) +
+        half(bindChoices('bowelsOpen', 'Bowels open', [
+          { value: 'yes', label: 'Yes' },
+          { value: 'no', label: 'Not yet', abnormal: true }
+        ])) +
         '<div class="field">' + fieldLabel('Feeding problems') + multiButtons('feedProblems', [
           { value: 'none', label: 'None of these' },
           { value: 'vomiting', label: 'Vomiting', abnormal: true },

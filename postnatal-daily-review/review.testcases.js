@@ -284,4 +284,12 @@ assert.ok(sepsisNote.indexOf('Discussed with registrar or consultant.') !== -1, 
 assert.strictEqual(sepsisNote.indexOf('Gentamicin levels'), -1, 'gentamicin levels are not a prompt');
 assert.strictEqual(sepsisNote.indexOf('GBS leaflet'), -1, 'GBS leaflet is not a prompt');
 
+/* Urine and bowels sit with feeding. */
+var both = review.buildNote({ feedMode: 'breast', passedUrine: 'yes', bowelsOpen: 'yes' });
+assert.ok(both.indexOf('Feeding: breastfeeds. Passed urine and bowels opened.') !== -1, 'urine and bowels follow the feeding line');
+var mixed = review.buildNote({ passedUrine: 'yes', bowelsOpen: 'no' });
+assert.ok(mixed.indexOf('Passed urine. Bowels not yet opened.') !== -1, 'not yet is written as entered');
+assert.strictEqual(review.buildNote({ feedMode: 'formula' }).indexOf('urine'), -1, 'nothing written when not ticked');
+assert.strictEqual(review.sourceText(review.normalize({ feedMode: 'formula', bowelsOpen: 'yes' }), 'feeding'), 'formula. Bowels opened.', 'problem checklists show urine and bowels with feeding');
+
 console.log('postnatal daily review tests passed');
