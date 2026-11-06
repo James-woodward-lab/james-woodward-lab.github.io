@@ -77,6 +77,7 @@
       jaundiceAgeHours: '',
       jaundicePlot: '',
       phototherapy: '',
+      impression: '',
       passedUrine: '',
       bowelsOpen: '',
       phototherapyStart: '',
@@ -824,6 +825,8 @@
     var today = todayText(state);
     if (today) parts.push(headed('Today', today));
     problemBlocks(state).forEach(function (block) { parts.push(block); });
+    var impression = String(state.impression || '').trim();
+    if (impression) parts.push(headed('Impression', ensurePeriod(impression)));
     var plan = planBody(state);
     if (plan) parts.push(headed('Plan', plan));
     return parts.join('\n\n');
@@ -1738,6 +1741,7 @@
   function planHtml() {
     var phrases = visiblePlanPhrases(state);
     return groupCard('Plan',
+        area('impression', 'Impression', state.impression, 2) +
         (phrases.length
           ? '<div class="choices">' + phrases.map(function (item) {
             return '<button type="button" class="choice" data-phrase="' + item.id + '">' + esc(item.label) + '</button>';
