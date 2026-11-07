@@ -155,9 +155,7 @@
       var line = (index + 1) + '. ' + problemLabel(problem);
       if (statuses[problem.status]) line += ' (' + statuses[problem.status] + ')';
       var detail = String(problem.detail || '').trim();
-      var plan = String(problem.plan || '').trim();
       line += detail ? ': ' + ensurePeriod(detail) : '.';
-      if (plan) line += ' Plan: ' + ensurePeriod(plan);
       return line;
     }).join('\n');
   }
@@ -744,8 +742,15 @@
     jaundice: function (state) { return jaundiceSection(state); }
   };
 
+  function problemPlanText(problem) {
+    var plan = String(problem.plan || '').trim();
+    return plan ? ensurePeriod(plan) : '';
+  }
+
   function problemSection(state, problem, printed) {
     var extra = ownedSourceLines(state, problem.type).concat(templateLines(state, problem.type, printed));
+    var plan = problemPlanText(problem);
+    if (plan) extra.push('Plan: ' + plan);
     var builder = PATHWAY_SECTIONS[problem.type];
     if (builder) {
       var base = builder(state);
@@ -767,6 +772,12 @@
         if (trimmed) bits.push(ensurePeriod(trimmed));
       });
     }
+    /* Each problem's own plan is copied into the main plan, in list order. */
+    (state.problems || []).forEach(function (problem) {
+      var plan = problemPlanText(problem);
+      var label = problemLabel(problem);
+      if (plan) bits.push(label ? label + ': ' + plan : plan);
+    });
     return bits;
   }
 
