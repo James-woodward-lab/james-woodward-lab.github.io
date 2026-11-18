@@ -291,106 +291,155 @@
     { id: 'unwell', label: 'Unwell appearing' }
   ];
 
+  /*
+   * Examination systems, in the order they appear on screen and in the note.
+   *
+   * Each system is written on its own line. Every selected option adds a short
+   * prose fragment; fragments that share a `sentence` number are comma-joined
+   * into one sentence. `nad` names the option written when the clinician taps
+   * NAD for the whole system. `lead` lets a system name open its first
+   * sentence (for example "Abdomen soft, non-tender"). `detail` points at a
+   * sub-control whose text or choices complete the option's prose.
+   * `detailOnly` sub-controls never write on their own.
+   */
+  function ok(value, label, prose, extra) {
+    return opt(value, label, Object.assign({ normal: true, prose: prose }, extra || {}));
+  }
+
+  function ab(value, label, prose, extra) {
+    return opt(value, label, Object.assign({ abnormal: true, prose: prose }, extra || {}));
+  }
+
   var RESP_EFFORT = ['mild', 'moderate', 'severe'];
+  var MALE_OR_UNRECORDED = ['male', 'other', ''];
 
   var EXAM_SYSTEMS = [
     {
       id: 'general',
       label: 'General',
-      shortLabel: 'General appearance',
-      nad: 'Appears well and handles comfortably.',
+      shortLabel: 'general appearance',
       controls: [
         {
-          id: 'wellbeing',
-          label: 'Appearance',
-          type: 'single',
+          id: 'appearance', label: 'Appearance', type: 'single', nad: 'well',
           options: [
-            opt('well', 'Well', { normal: true, prose: 'Appears well.' }),
-            opt('mild', 'Mildly unwell', { abnormal: true, prose: 'Appears mildly unwell.' }),
-            opt('unwell', 'Unwell', { abnormal: true, prose: 'Appears unwell.' })
+            ok('well', 'Looks well', 'looks well'),
+            ab('mild', 'Mildly unwell', 'looks mildly unwell'),
+            ab('unwell', 'Unwell', 'looks unwell')
           ]
         },
         {
-          id: 'cry',
-          label: 'Cry',
-          type: 'single',
+          id: 'colour', label: 'Colour', type: 'single', guide: 'indicator', nad: 'pink',
           options: [
-            opt('settled', 'Settled', { normal: true, prose: 'Settled.' }),
-            opt('normal', 'Usual cry', { normal: true, prose: 'Cry usual.' }),
-            opt('high', 'High-pitched', { abnormal: true, prose: 'High-pitched cry.' }),
-            opt('weak', 'Weak', { abnormal: true, prose: 'Weak cry.' })
+            ok('pink', 'Pink', 'pink'),
+            ab('pale', 'Pale', 'pale'),
+            ab('plethoric', 'Plethoric', 'plethoric'),
+            ab('mottled', 'Mottled', 'mottled'),
+            ab('peripheral', 'Peripheral cyanosis', 'peripherally cyanosed'),
+            ab('central', 'Central cyanosis', 'centrally cyanosed', { factor: 'hypoxia' })
           ]
         },
         {
-          id: 'alertness',
-          label: 'Behaviour',
-          type: 'single',
-          guide: 'indicator',
+          id: 'behaviour', label: 'Behaviour', type: 'single', guide: 'indicator', nad: 'alert',
           options: [
-            opt('alert', 'Alert and active', { normal: true, prose: 'Alert and active.' }),
-            opt('sleepy', 'Sleepy but rousable', { normal: true, prose: 'Sleepy but rousable.' }),
-            opt('lethargic', 'Lethargic', { abnormal: true, factor: 'altered-behaviour', prose: 'Lethargic.' }),
-            opt('irritable', 'Irritable', { abnormal: true, factor: 'altered-behaviour', prose: 'Irritable.' }),
-            opt('inconsolable', 'Inconsolable', { abnormal: true, factor: 'altered-behaviour', prose: 'Inconsolable.' })
+            ok('alert', 'Alert and active', 'alert and active'),
+            ok('settled', 'Settled', 'settled'),
+            ok('sleepy', 'Sleepy but rousable', 'sleepy but rousable'),
+            ab('irritable', 'Irritable', 'irritable', { factor: 'altered-behaviour' }),
+            ab('lethargic', 'Lethargic', 'lethargic', { factor: 'altered-behaviour' }),
+            ab('inconsolable', 'Inconsolable', 'inconsolable', { factor: 'altered-behaviour' })
           ]
+        },
+        {
+          id: 'cry', label: 'Cry', type: 'single', nad: 'normal',
+          options: [
+            ok('normal', 'Normal', 'normal cry'),
+            ab('high', 'High-pitched', 'high-pitched cry'),
+            ab('weak', 'Weak', 'weak cry')
+          ]
+        },
+        {
+          id: 'mucosa', label: 'Mucous membranes', type: 'single', nad: 'moist',
+          options: [
+            ok('moist', 'Moist', 'MMM'),
+            ab('dry', 'Dry', 'dry mucous membranes')
+          ]
+        },
+        {
+          id: 'dysmorphism', label: 'Dysmorphic features', type: 'yn', sentence: 1, nad: 'no',
+          options: [
+            ab('yes', 'Yes', 'dysmorphic features', { detail: 'dysmorphismDetail' }),
+            ok('no', 'No', 'no dysmorphic features')
+          ]
+        },
+        {
+          id: 'dysmorphismDetail', label: 'Describe', type: 'text', sub: true, detailOnly: true,
+          showIf: { control: 'dysmorphism', values: ['yes'] }
         }
       ]
     },
     {
-      id: 'perfusion',
-      label: 'Perfusion',
-      shortLabel: 'Perfusion',
-      nad: 'Warm and well perfused. CRT under 2 seconds. Fontanelle soft. Mucous membranes moist.',
+      id: 'head',
+      label: 'Head and face',
+      shortLabel: 'head and face',
       controls: [
         {
-          id: 'crtCentral',
-          label: 'Central CRT',
-          type: 'single',
-          tight: true,
+          id: 'fontanelle', label: 'Anterior fontanelle', type: 'single', nad: 'soft',
           options: [
-            opt('<2', '<2s', { normal: true, prose: 'Central CRT under 2 seconds.' }),
-            opt('2-3', '2-3s', { abnormal: true, prose: 'Central CRT 2 to 3 seconds.' }),
-            opt('>3', '>3s', { abnormal: true, prose: 'Central CRT over 3 seconds.' })
+            ok('soft', 'Soft and flat', 'AF soft and flat'),
+            ab('full', 'Full', 'AF full'),
+            ab('bulging', 'Bulging', 'AF bulging'),
+            ab('sunken', 'Sunken', 'AF sunken')
           ]
         },
         {
-          id: 'crtPeripheral',
-          label: 'Peripheral CRT',
-          type: 'single',
-          tight: true,
+          id: 'sutures', label: 'Sutures', type: 'single', nad: 'normal',
           options: [
-            opt('<2', '<2s', { normal: true, prose: 'Peripheral CRT under 2 seconds.' }),
-            opt('2-3', '2-3s', { abnormal: true, prose: 'Peripheral CRT 2 to 3 seconds.' }),
-            opt('>3', '>3s', { abnormal: true, prose: 'Peripheral CRT over 3 seconds.' })
+            ok('normal', 'Normal', 'sutures normal'),
+            ab('overriding', 'Overriding', 'overriding sutures'),
+            ab('widened', 'Widened', 'widened sutures')
           ]
         },
         {
-          id: 'perfusion',
-          label: 'Perfusion',
-          type: 'single',
+          id: 'scalp', label: 'Scalp', type: 'multi', nad: 'none',
           options: [
-            opt('warm', 'Warm and well perfused', { normal: true, prose: 'Warm and well perfused.' }),
-            opt('cool', 'Cool peripherally', { abnormal: true, prose: 'Cool peripherally.' }),
-            opt('shut', 'Shut down', { abnormal: true, prose: 'Peripherally shut down.' })
+            ok('none', 'No swelling', 'no scalp swelling', { exclusive: true }),
+            ab('caput', 'Caput', 'caput succedaneum'),
+            ab('cephalhaematoma', 'Cephalhaematoma', 'cephalhaematoma'),
+            ab('subgaleal', 'Subgaleal swelling', 'subgaleal swelling'),
+            ab('chignon', 'Chignon', 'chignon'),
+            ab('marks', 'Instrument marks', 'instrument marks')
           ]
         },
         {
-          id: 'fontanelle',
-          label: 'Fontanelle',
-          type: 'single',
+          id: 'eyes', label: 'Eyes', type: 'multi', sentence: 1,
           options: [
-            opt('soft', 'Soft', { normal: true, prose: 'Fontanelle soft.' }),
-            opt('bulging', 'Bulging', { abnormal: true, prose: 'Fontanelle bulging.' }),
-            opt('sunken', 'Sunken', { abnormal: true, prose: 'Fontanelle sunken.' })
+            ok('normal', 'Normal', 'eyes normal', { exclusive: true }),
+            ab('sticky', 'Sticky', 'sticky eyes'),
+            ab('swollen', 'Red, swollen lids', 'red, swollen eyelids'),
+            ab('subconjunctival', 'Subconjunctival haemorrhage', 'subconjunctival haemorrhage')
           ]
         },
         {
-          id: 'mucosa',
-          label: 'Mucous membranes',
-          type: 'single',
+          id: 'face', label: 'Face', type: 'single', sentence: 1,
           options: [
-            opt('moist', 'Moist mucous membranes', { normal: true, prose: 'Moist mucous membranes.' }),
-            opt('dry', 'Dry mucous membranes', { abnormal: true, prose: 'Dry mucous membranes.' })
+            ok('symmetrical', 'Symmetrical', 'face symmetrical'),
+            ab('asymmetrical', 'Asymmetrical', 'facial asymmetry')
+          ]
+        },
+        {
+          id: 'palate', label: 'Palate', type: 'single', sentence: 1, nad: 'intact',
+          options: [
+            ok('intact', 'Intact', 'palate intact'),
+            ab('cleft-lip', 'Cleft lip', 'cleft lip'),
+            ab('cleft-palate', 'Cleft palate', 'cleft palate'),
+            ab('cleft-both', 'Cleft lip and palate', 'cleft lip and palate')
+          ]
+        },
+        {
+          id: 'tongueTie', label: 'Tongue tie', type: 'yn', sentence: 1,
+          options: [
+            ab('yes', 'Yes', 'tongue tie'),
+            ok('no', 'No', 'no tongue tie')
           ]
         }
       ]
@@ -398,139 +447,76 @@
     {
       id: 'respiratory',
       label: 'Respiratory',
-      shortLabel: 'Chest',
-      nad: 'Good chest rise. Chest clear, no increased work of breathing or grunting. No cyanosis.',
+      shortLabel: 'respiratory',
       controls: [
         {
-          id: 'wob',
-          label: 'Work of breathing',
-          type: 'single',
-          guide: 'indicator',
+          id: 'wob', label: 'Work of breathing', type: 'single', guide: 'indicator', nad: 'none',
           options: [
-            opt('none', 'None', { normal: true, prose: 'No increased work of breathing.' }),
-            opt('mild', 'Mild', { abnormal: true, factor: 'resp-distress', prose: 'Mild work of breathing.' }),
-            opt('moderate', 'Moderate', { abnormal: true, factor: 'resp-distress', prose: 'Moderate work of breathing.' }),
-            opt('severe', 'Severe', { abnormal: true, factor: 'resp-distress', prose: 'Severe work of breathing.' })
+            ok('none', 'Normal', 'no increased WOB'),
+            ab('mild', 'Mildly increased', 'mildly increased WOB', { factor: 'resp-distress' }),
+            ab('moderate', 'Moderately increased', 'moderately increased WOB', { factor: 'resp-distress' }),
+            ab('severe', 'Severely increased', 'severely increased WOB', { factor: 'resp-distress' })
           ]
         },
         {
-          id: 'grunting',
-          label: 'Grunting',
-          type: 'yn',
-          guide: 'indicator',
-          options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'resp-distress', prose: 'Grunting.' }),
-            opt('no', 'No', { normal: true, prose: 'No grunting.' })
-          ]
-        },
-        {
-          id: 'effortSigns',
-          label: 'Signs of increased work',
-          type: 'multi',
-          sub: true,
+          id: 'effortSigns', label: 'Signs', type: 'multi', sub: true,
           showIf: { control: 'wob', values: RESP_EFFORT },
           options: [
-            opt('recessions', 'Recessions', { abnormal: true, prose: 'Recession.', supersededBy: 'recessions' }),
-            opt('bobbing', 'Head bobbing', { abnormal: true, prose: 'Head bobbing.' }),
-            opt('flaring', 'Nasal flaring', { abnormal: true, prose: 'Nasal flaring.' }),
-            opt('accessory', 'Accessory muscle use', { abnormal: true, prose: 'Accessory muscle use.' })
+            ab('subcostal', 'Subcostal recession', 'subcostal recession'),
+            ab('intercostal', 'Intercostal recession', 'intercostal recession'),
+            ab('sternal', 'Sternal recession', 'sternal recession'),
+            ab('tug', 'Tracheal tug', 'tracheal tug'),
+            ab('flaring', 'Nasal flaring', 'nasal flaring'),
+            ab('bobbing', 'Head bobbing', 'head bobbing')
           ]
         },
         {
-          id: 'recessions',
-          label: 'Recessions',
-          type: 'multi',
-          sub: true,
-          showIf: { control: 'effortSigns', values: ['recessions'] },
+          id: 'grunting', label: 'Grunting', type: 'yn', guide: 'indicator', nad: 'no',
           options: [
-            opt('subcostal', 'Subcostal', { abnormal: true, prose: 'Subcostal recession.' }),
-            opt('intercostal', 'Intercostal', { abnormal: true, prose: 'Intercostal recession.' }),
-            opt('sternal', 'Sternal', { abnormal: true, prose: 'Sternal recession.' })
+            ab('yes', 'Yes', 'grunting', { factor: 'resp-distress' }),
+            ok('no', 'No', 'no grunting')
           ]
         },
         {
-          id: 'chestAppearance',
-          label: 'Chest appearance',
-          type: 'single',
+          id: 'airway', label: 'Upper airway noise', type: 'multi',
           options: [
-            opt('good', 'Good chest rise', { normal: true, prose: 'Good chest rise.' }),
-            opt('poor', 'Poor chest rise', { abnormal: true, prose: 'Poor chest rise.' }),
-            opt('asymmetrical', 'Asymmetrical chest rise', { abnormal: true, prose: 'Asymmetrical chest rise.' })
+            ok('none', 'None', 'no stridor or stertor', { exclusive: true }),
+            ab('stridor', 'Stridor', 'stridor'),
+            ab('stertor', 'Stertor', 'stertor'),
+            ab('secretions', 'Secretions', 'audible upper airway secretions')
           ]
         },
         {
-          id: 'airway',
-          label: 'Upper airway sounds',
-          type: 'single',
+          id: 'expansion', label: 'Chest expansion', type: 'single', sentence: 1, nad: 'good',
           options: [
-            opt('none', 'No airway noises', { normal: true, prose: 'No added upper airway sounds.' }),
-            opt('sounds', 'Upper airway sounds', { abnormal: true, prose: 'Upper airway sounds.', supersededBy: 'airwayFindings' })
+            ok('good', 'Good, symmetrical', 'good symmetrical chest expansion'),
+            ab('reduced', 'Reduced', 'reduced chest expansion'),
+            ab('asymmetrical', 'Asymmetrical', 'asymmetrical chest expansion')
           ]
         },
         {
-          id: 'airwayFindings',
-          label: 'Upper airway sound findings',
-          type: 'multi',
-          sub: true,
-          panel: 'airway',
-          showIf: { control: 'airway', values: ['sounds'] },
+          id: 'auscultation', label: 'Auscultation', type: 'single', sentence: 1, nad: 'clear',
           options: [
-            opt('soft-stridor', 'Soft stridor', { abnormal: true, prose: 'Soft stridor.' }),
-            opt('harsh-stridor', 'Harsh stridor', { abnormal: true, prose: 'Harsh stridor.' }),
-            opt('stertorous', 'Stertorous', { abnormal: true, prose: 'Stertorous.' }),
-            opt('secretions', 'Upper airway secretions audible', { abnormal: true, prose: 'Upper airway secretions audible.' })
+            ok('clear', 'Clear, equal AE', 'chest clear with equal AE'),
+            ab('abnormal', 'Abnormal', 'abnormal breath sounds', { detail: 'addedSounds', detailStyle: 'replace' })
           ]
         },
         {
-          id: 'auscultation',
-          label: 'Auscultation',
-          type: 'single',
+          id: 'addedSounds', label: 'Findings', type: 'multi', sub: true, detailOnly: true,
+          showIf: { control: 'auscultation', values: ['abnormal'] },
           options: [
-            opt('clear', 'Chest clear and equal air entry', { normal: true, prose: 'Chest clear on auscultation with equal air entry.' }),
-            opt('added', 'Added sounds', { abnormal: true, prose: 'Added sounds.', supersededBy: 'addedSounds' })
+            ab('crackles', 'Crackles', 'crackles'),
+            ab('wheeze', 'Wheeze', 'wheeze'),
+            ab('bronchial', 'Bronchial breathing', 'bronchial breathing'),
+            ab('reduced-left', 'Reduced AE left', 'reduced AE on left'),
+            ab('reduced-right', 'Reduced AE right', 'reduced AE on right')
           ]
         },
         {
-          id: 'addedSounds',
-          label: 'Added sounds',
-          type: 'multi',
-          sub: true,
-          panel: 'added',
-          showIf: { control: 'auscultation', values: ['added'] },
+          id: 'apnoea', label: 'Apnoea witnessed', type: 'yn', guide: 'red', sentence: 2,
           options: [
-            opt('crackles', 'Crackles', { abnormal: true, prose: 'Crackles.' }),
-            opt('wheeze', 'Wheeze', { abnormal: true, prose: 'Wheeze.' }),
-            opt('reduced', 'Reduced air entry', { abnormal: true, prose: 'Reduced air entry.' }),
-            opt('other', 'Other', { abnormal: true, prose: 'Other added sounds.', supersededBy: 'addedOther' })
-          ]
-        },
-        {
-          id: 'addedOther',
-          label: 'Other added sounds',
-          type: 'text',
-          abnormal: true,
-          sub: true,
-          panel: 'added',
-          showIf: { control: 'addedSounds', values: ['other'] }
-        },
-        {
-          id: 'apnoea',
-          label: 'Apnoea',
-          type: 'yn',
-          guide: 'red',
-          options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'apnoea', prose: 'Apnoea.' }),
-            opt('no', 'No', { normal: true, prose: 'No apnoea witnessed.' })
-          ]
-        },
-        {
-          id: 'cyanosis',
-          label: 'Cyanosis',
-          type: 'single',
-          options: [
-            opt('none', 'No cyanosis', { normal: true, prose: 'No cyanosis.' }),
-            opt('peripheral', 'Peripheral cyanosis', { abnormal: true, prose: 'Peripheral cyanosis.' }),
-            opt('central', 'Central cyanosis', { abnormal: true, factor: 'hypoxia', prose: 'Central cyanosis.' })
+            ab('yes', 'Yes', 'apnoea witnessed', { factor: 'apnoea' }),
+            ok('no', 'No', 'no apnoea witnessed')
           ]
         }
       ]
@@ -538,141 +524,104 @@
     {
       id: 'cardiovascular',
       label: 'Cardiovascular',
-      shortLabel: 'Cardiovascular',
-      nad: 'Heart sounds normal, femoral and brachial pulses palpable. No peripheral oedema.',
+      shortLabel: 'cardiovascular',
       controls: [
         {
-          id: 'sounds',
-          label: 'Heart sounds',
-          type: 'single',
+          id: 'sounds', label: 'Heart sounds', type: 'single', nad: 'normal',
           options: [
-            opt('normal', 'Normal', { normal: true, prose: 'Heart sounds normal.' }),
-            opt('murmur', 'Murmur', { abnormal: true, compose: 'murmur' })
+            ok('normal', 'I+II+0', 'HS I+II+0'),
+            ab('murmur', 'Murmur', '', { compose: 'murmur' })
           ]
         },
         {
-          id: 'murmurTiming',
-          label: 'Timing',
-          type: 'multi',
-          sub: true,
-          panel: 'murmur',
+          id: 'murmurTiming', label: 'Timing', type: 'single', sub: true, panel: 'murmur', detailOnly: true,
           showIf: { control: 'sounds', values: ['murmur'] },
           options: [
-            opt('ejection', 'Ejection systolic'),
-            opt('pansystolic', 'Pansystolic'),
-            opt('diastolic', 'Diastolic'),
-            opt('continuous', 'Continuous')
+            ab('ejection', 'Ejection systolic', 'ESM'),
+            ab('pansystolic', 'Pansystolic', 'PSM'),
+            ab('continuous', 'Continuous', 'continuous murmur'),
+            ab('diastolic', 'Diastolic', 'diastolic murmur')
           ]
         },
         {
-          id: 'murmurGrade',
-          label: 'Grade',
-          type: 'single',
-          sub: true,
-          panel: 'murmur',
+          id: 'murmurGrade', label: 'Grade (/6)', type: 'single', sub: true, panel: 'murmur', tight: true, detailOnly: true,
+          showIf: { control: 'sounds', values: ['murmur'] },
+          options: [opt('1', '1'), opt('2', '2'), opt('3', '3'), opt('4', '4'), opt('5', '5'), opt('6', '6')]
+        },
+        {
+          id: 'murmurCharacter', label: 'Character', type: 'multi', sub: true, panel: 'murmur', detailOnly: true,
           showIf: { control: 'sounds', values: ['murmur'] },
           options: [
-            opt('1', '1'),
-            opt('2', '2'),
-            opt('3', '3'),
-            opt('4', '4'),
-            opt('5', '5'),
-            opt('6', '6')
+            opt('soft', 'Soft', { prose: 'soft' }),
+            opt('harsh', 'Harsh', { prose: 'harsh' }),
+            opt('blowing', 'Blowing', { prose: 'blowing' }),
+            opt('machinery', 'Machinery', { prose: 'machinery' })
           ]
         },
         {
-          id: 'murmurLocation',
-          label: 'Location',
-          type: 'multi',
-          sub: true,
-          panel: 'murmur',
+          id: 'murmurLocation', label: 'Loudest at', type: 'multi', sub: true, panel: 'murmur', detailOnly: true,
           showIf: { control: 'sounds', values: ['murmur'] },
           options: [
-            opt('ulse', 'Upper left sternal edge'),
-            opt('urse', 'Upper right sternal edge'),
-            opt('llse', 'Lower left sternal edge'),
-            opt('apex', 'Apex')
+            opt('ulse', 'ULSE', { prose: 'ULSE' }),
+            opt('urse', 'URSE', { prose: 'URSE' }),
+            opt('llse', 'LLSE', { prose: 'LLSE' }),
+            opt('apex', 'Apex', { prose: 'apex' })
           ]
         },
         {
-          id: 'murmurRadiation',
-          label: 'Radiation',
-          type: 'multi',
-          sub: true,
-          panel: 'murmur',
+          id: 'murmurRadiation', label: 'Radiation', type: 'multi', sub: true, panel: 'murmur', detailOnly: true,
           showIf: { control: 'sounds', values: ['murmur'] },
           options: [
-            opt('axilla', 'Axilla'),
-            opt('carotids', 'Carotids'),
-            opt('back', 'Back'),
-            opt('none', 'None')
+            opt('none', 'None', { prose: 'none', exclusive: true }),
+            opt('axilla', 'Axilla', { prose: 'axilla' }),
+            opt('back', 'Back', { prose: 'back' }),
+            opt('carotids', 'Carotids', { prose: 'carotids' })
           ]
         },
         {
-          id: 'murmurCharacter',
-          label: 'Character',
-          type: 'multi',
-          sub: true,
-          panel: 'murmur',
-          showIf: { control: 'sounds', values: ['murmur'] },
+          id: 'brachials', label: 'Brachial pulses', type: 'single', sentence: 1, nad: 'palpable',
           options: [
-            opt('soft', 'Soft'),
-            opt('harsh', 'Harsh'),
-            opt('blowing', 'Blowing'),
-            opt('rumbling', 'Rumbling'),
-            opt('vibratory', 'Vibratory')
+            ok('palpable', 'Palpable', 'brachials palpable'),
+            ab('weak', 'Weak', 'brachials weak'),
+            ab('absent', 'Absent', 'brachials absent')
           ]
         },
         {
-          id: 'murmurPitch',
-          label: 'Pitch',
-          type: 'multi',
-          sub: true,
-          panel: 'murmur',
-          showIf: { control: 'sounds', values: ['murmur'] },
+          id: 'femorals', label: 'Femoral pulses', type: 'single', sentence: 1, nad: 'palpable',
           options: [
-            opt('low', 'Low'),
-            opt('medium', 'Medium'),
-            opt('high', 'High')
+            ok('palpable', 'Palpable', 'femorals palpable'),
+            ab('weak', 'Weak', 'femorals weak'),
+            ab('absent', 'Absent', 'femorals absent')
           ]
         },
         {
-          id: 'femorals',
-          label: 'Femoral pulses',
-          type: 'single',
+          id: 'crt', label: 'Central CRT', type: 'single', tight: true, sentence: 1, nad: '<2',
           options: [
-            opt('normal', 'Palpable', { normal: true, prose: 'Femorals palpable.' }),
-            opt('weak', 'Weak', { abnormal: true, prose: 'Femoral pulses weak.' }),
-            opt('absent', 'Absent', { abnormal: true, prose: 'Femoral pulses absent.' })
+            ok('<2', '<2s', 'CRT <2s'),
+            ab('2-3', '2-3s', 'CRT 2-3s'),
+            ab('>3', '>3s', 'CRT >3s')
           ]
         },
         {
-          id: 'brachials',
-          label: 'Brachial pulses',
-          type: 'single',
+          id: 'peripheries', label: 'Peripheries', type: 'single', sentence: 1, nad: 'warm',
           options: [
-            opt('normal', 'Palpable', { normal: true, prose: 'Brachial pulses palpable.' }),
-            opt('weak', 'Weak', { abnormal: true, prose: 'Brachial pulses weak.' }),
-            opt('absent', 'Absent', { abnormal: true, prose: 'Brachial pulses absent.' })
+            ok('warm', 'Warm', 'warm peripheries'),
+            ab('cool', 'Cool', 'cool peripheries'),
+            ab('cold', 'Cold', 'cold peripheries')
           ]
         },
         {
-          id: 'oedema',
-          label: 'Oedema',
-          type: 'single',
+          id: 'oedema', label: 'Oedema', type: 'yn', sentence: 2,
           options: [
-            opt('none', 'No peripheral oedema', { normal: true, prose: 'No peripheral oedema.' }),
-            opt('present', 'Oedema present', { abnormal: true, prose: 'Oedema present.' })
+            ab('yes', 'Yes', 'oedema'),
+            ok('no', 'No', 'no oedema')
           ]
         },
         {
-          id: 'shock',
-          label: 'Signs of shock',
-          type: 'yn',
-          guide: 'red',
+          id: 'shock', label: 'Signs of shock', type: 'yn', guide: 'red', sentence: 2,
           options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'shock', prose: 'Signs of shock.' }),
-            opt('no', 'No', { normal: true, prose: 'No signs of shock.' })
+            ab('yes', 'Yes', 'signs of shock', { factor: 'shock' }),
+            ok('no', 'No', 'no signs of shock')
           ]
         }
       ]
@@ -680,72 +629,92 @@
     {
       id: 'abdomen',
       label: 'Abdomen',
-      shortLabel: 'Abdomen',
-      nad: 'Abdomen soft, non-tender, not distended, no organomegaly. Cord healthy. Genitalia normal for sex. Anus patent.',
+      shortLabel: 'abdomen',
+      lead: 'Abdomen',
       controls: [
         {
-          id: 'feel',
-          label: 'Feel',
-          type: 'single',
+          id: 'palpation', label: 'Palpation', type: 'single', nad: 'soft',
           options: [
-            opt('soft', 'Soft', { normal: true, fragment: true, prose: 'soft' }),
-            opt('tense', 'Tense', { abnormal: true, fragment: true, prose: 'tense' })
+            ok('soft', 'Soft', 'soft', { lead: true }),
+            ab('firm', 'Firm', 'firm', { lead: true }),
+            ab('tense', 'Tense', 'tense', { lead: true })
           ]
         },
         {
-          id: 'tenderness',
-          label: 'Tenderness',
-          type: 'yn',
+          id: 'tenderness', label: 'Tender', type: 'yn', nad: 'no',
           options: [
-            opt('yes', 'Yes', { abnormal: true, fragment: true, prose: 'tender' }),
-            opt('no', 'No', { normal: true, fragment: true, prose: 'non-tender' })
+            ab('yes', 'Yes', 'tender', { lead: true }),
+            ok('no', 'No', 'non-tender', { lead: true })
           ]
         },
         {
-          id: 'distension',
-          label: 'Distension',
-          type: 'yn',
-          guide: 'indicator',
+          id: 'distension', label: 'Distended', type: 'yn', guide: 'indicator', nad: 'no',
           options: [
-            opt('yes', 'Yes', { abnormal: true, factor: 'feed-intolerance', fragment: true, prose: 'distended' }),
-            opt('no', 'No', { normal: true, fragment: true, prose: 'not distended' })
+            ab('yes', 'Yes', 'distended', { lead: true, factor: 'feed-intolerance' }),
+            ok('no', 'No', 'non-distended', { lead: true })
           ]
         },
         {
-          id: 'organs',
-          label: 'Organomegaly',
-          type: 'yn',
+          id: 'masses', label: 'Organomegaly or masses', type: 'multi', nad: 'none',
           options: [
-            opt('yes', 'Yes', { abnormal: true, fragment: true, prose: 'organomegaly' }),
-            opt('no', 'No', { normal: true, fragment: true, prose: 'no organomegaly' })
+            ok('none', 'None', 'no organomegaly or masses', { exclusive: true }),
+            ab('liver', 'Hepatomegaly', 'hepatomegaly'),
+            ab('spleen', 'Splenomegaly', 'splenomegaly'),
+            ab('mass', 'Mass', 'palpable mass')
           ]
         },
         {
-          id: 'cord',
-          label: 'Umbilicus and cord',
-          type: 'single',
+          id: 'bowelSounds', label: 'Bowel sounds', type: 'single',
           options: [
-            opt('healthy', 'Healthy', { normal: true, prose: 'Cord healthy.' }),
-            opt('red', 'Red', { abnormal: true, prose: 'Umbilicus red.' }),
-            opt('discharge', 'Discharge', { abnormal: true, prose: 'Umbilical discharge.' })
+            ok('present', 'Present', 'bowel sounds present'),
+            ab('absent', 'Absent', 'bowel sounds absent')
           ]
         },
         {
-          id: 'genitalia',
-          label: 'Genitalia',
-          type: 'single',
+          id: 'cord', label: 'Umbilicus', type: 'multi', sentence: 1, nad: 'clean',
           options: [
-            opt('normal', 'Normal for sex', { normal: true, prose: 'Genitalia normal for sex.' }),
-            opt('abnormal', 'Abnormal', { abnormal: true, prose: 'Genitalia abnormal.' })
+            ok('clean', 'Clean and dry', 'cord clean and dry', { exclusive: true }),
+            ab('flare', 'Periumbilical flare', 'periumbilical flare'),
+            ab('discharge', 'Discharge', 'umbilical discharge'),
+            ab('bleeding', 'Bleeding', 'umbilical bleeding'),
+            ab('hernia', 'Umbilical hernia', 'umbilical hernia')
+          ]
+        }
+      ]
+    },
+    {
+      id: 'genitalia',
+      label: 'Genitalia and anus',
+      shortLabel: 'genitalia and anus',
+      controls: [
+        {
+          id: 'genitalia', label: 'Genitalia', type: 'single', nad: 'normal',
+          options: [
+            ok('normal', 'Normal', 'normal genitalia', {
+              proseBySex: { male: 'normal male genitalia', female: 'normal female genitalia' }
+            }),
+            ab('abnormal', 'Abnormal', 'abnormal genitalia', { detail: 'genitaliaDetail', detailStyle: 'replace' })
           ]
         },
         {
-          id: 'anus',
-          label: 'Anus',
-          type: 'single',
+          id: 'genitaliaDetail', label: 'Describe', type: 'text', sub: true, detailOnly: true,
+          showIf: { control: 'genitalia', values: ['abnormal'] }
+        },
+        {
+          id: 'testes', label: 'Testes', type: 'single', sexes: MALE_OR_UNRECORDED, nad: 'descended', nadSexes: ['male'],
           options: [
-            opt('patent', 'Patent', { normal: true, prose: 'Anus patent.' }),
-            opt('not', 'Not patent', { abnormal: true, prose: 'Anus not patent.' })
+            ok('descended', 'Descended bilaterally', 'testes descended bilaterally'),
+            ab('left', 'Left undescended', 'left testis undescended'),
+            ab('right', 'Right undescended', 'right testis undescended'),
+            ab('both', 'Both undescended', 'bilateral undescended testes')
+          ]
+        },
+        {
+          id: 'anus', label: 'Anus', type: 'single', nad: 'patent',
+          options: [
+            ok('patent', 'Patent', 'anus patent'),
+            ab('anterior', 'Anteriorly placed', 'anteriorly placed anus'),
+            ab('not', 'Not patent', 'anus not patent')
           ]
         }
       ]
@@ -753,67 +722,51 @@
     {
       id: 'neurology',
       label: 'Neurology',
-      shortLabel: 'Neurology',
-      nad: 'Tone normal. Primitive reflexes present.',
+      shortLabel: 'neurology',
       controls: [
         {
-          id: 'tone',
-          label: 'Tone',
-          type: 'single',
-          guide: 'indicator',
+          id: 'tone', label: 'Tone', type: 'single', guide: 'indicator', nad: 'normal',
           options: [
-            opt('normal', 'Normal', { normal: true, prose: 'Tone normal.' }),
-            opt('low', 'Reduced tone', { abnormal: true, factor: 'altered-tone', prose: 'Tone reduced.' }),
-            opt('high', 'Increased tone', { abnormal: true, factor: 'altered-tone', prose: 'Tone increased.' }),
-            opt('other', 'Other', { abnormal: true, fallback: 'Neurological finding not described.' })
+            ok('normal', 'Normal', 'normal tone'),
+            ab('low', 'Hypotonia', 'hypotonia', { factor: 'altered-tone' }),
+            ab('high', 'Hypertonia', 'hypertonia', { factor: 'altered-tone' })
           ]
         },
         {
-          id: 'moro',
-          heading: 'Reflexes',
-          label: 'Moro equal and present',
-          type: 'yn',
+          id: 'movements', label: 'Movements', type: 'single', nad: 'normal',
           options: [
-            opt('yes', 'Yes', { normal: true, prose: 'Moro equal and present.' }),
-            opt('no', 'No', { abnormal: true, prose: 'Moro not equal and present.' })
+            ok('normal', 'Normal', 'no abnormal movements'),
+            ab('jittery', 'Jittery, stops with restraint', 'jittery, stops with gentle restraint'),
+            ab('abnormal', 'Abnormal', 'abnormal movements', { detail: 'movementsDetail' })
           ]
         },
         {
-          id: 'grasp',
-          label: 'Palmar and plantar grasp',
-          type: 'yn',
+          id: 'movementsDetail', label: 'Describe', type: 'text', sub: true, detailOnly: true,
+          showIf: { control: 'movements', values: ['abnormal'] }
+        },
+        {
+          id: 'moro', heading: 'Primitive reflexes', label: 'Moro', type: 'single', sentence: 1, nad: 'present',
           options: [
-            opt('yes', 'Yes', { normal: true, prose: 'Palmar and plantar grasp present.' }),
-            opt('no', 'No', { abnormal: true, prose: 'Palmar and plantar grasp not present.' })
+            ok('present', 'Present', 'Moro present'),
+            ab('asymmetrical', 'Asymmetrical', 'asymmetrical Moro'),
+            ab('absent', 'Absent', 'Moro absent')
           ]
         },
         {
-          id: 'stepping',
-          label: 'Stepping reflex',
-          type: 'yn',
+          id: 'grasp', label: 'Grasp', type: 'single', sentence: 1, nad: 'present',
           options: [
-            opt('yes', 'Yes', { normal: true, prose: 'Stepping reflex present.' }),
-            opt('no', 'No', { abnormal: true, prose: 'Stepping reflex not present.' })
+            ok('present', 'Present', 'grasp present'),
+            ab('weak', 'Weak', 'grasp weak'),
+            ab('absent', 'Absent', 'grasp absent')
           ]
         },
         {
-          id: 'suck',
-          label: 'Sucking',
-          type: 'single',
+          id: 'suck', label: 'Suck', type: 'single', sentence: 1, nad: 'present',
           options: [
-            opt('good', 'Good', { normal: true, prose: 'Suck good.' }),
-            opt('poor', 'Poor', { abnormal: true, prose: 'Suck poor.' }),
-            opt('uncoordinated', 'Uncoordinated', { abnormal: true, prose: 'Suck uncoordinated.' }),
-            opt('absent', 'Absent', { abnormal: true, prose: 'Suck absent.' })
-          ]
-        },
-        {
-          id: 'gag',
-          label: 'Gag reflex',
-          type: 'yn',
-          options: [
-            opt('yes', 'Yes', { normal: true, prose: 'Gag reflex present.' }),
-            opt('no', 'No', { abnormal: true, prose: 'Gag reflex not present.' })
+            ok('present', 'Present', 'suck present'),
+            ab('weak', 'Weak', 'suck weak'),
+            ab('uncoordinated', 'Uncoordinated', 'uncoordinated suck'),
+            ab('absent', 'Absent', 'suck absent')
           ]
         }
       ]
@@ -821,40 +774,99 @@
     {
       id: 'skin',
       label: 'Skin',
-      shortLabel: 'Skin',
-      nad: 'Pink, no rash, mottling, or cyanosis.',
+      shortLabel: 'skin',
       controls: [
         {
-          id: 'colour',
-          label: 'Colour',
-          type: 'single',
-          guide: 'indicator',
+          id: 'jaundice', label: 'Jaundice', type: 'single', nad: 'none',
           options: [
-            opt('pink', 'Pink', { normal: true, prose: 'Pink.' }),
-            opt('pale', 'Pale', { abnormal: true, prose: 'Pale.' }),
-            opt('jaundiced', 'Jaundiced', { abnormal: true, prose: 'Jaundiced.' }),
-            opt('mottled', 'Mottled', { abnormal: true, prose: 'Mottled.' }),
-            opt('cyanosed', 'Cyanosed', { abnormal: true, factor: 'hypoxia', prose: 'Centrally cyanosed.' })
+            ok('none', 'None', 'not jaundiced'),
+            ab('face', 'To face', 'jaundiced to face'),
+            ab('trunk', 'To trunk', 'jaundiced to trunk'),
+            ab('limbs', 'To limbs', 'jaundiced to limbs'),
+            ab('palms', 'To palms and soles', 'jaundiced to palms and soles')
           ]
         },
         {
-          id: 'rash',
-          label: 'Rash',
-          type: 'single',
+          id: 'rash', label: 'Rash', type: 'multi', nad: 'none',
           options: [
-            opt('none', 'None', { normal: true, prose: 'No rash.' }),
-            opt('blanching', 'Blanching', { abnormal: true, prose: 'Blanching rash.' }),
-            opt('non', 'Non-blanching', { abnormal: true, prose: 'Non-blanching rash.' })
+            ok('none', 'None', 'no rash', { exclusive: true }),
+            ab('etn', 'Erythema toxicum', 'erythema toxicum'),
+            ab('milia', 'Milia', 'milia'),
+            ab('pustules', 'Pustules', 'pustules'),
+            ab('vesicles', 'Vesicles', 'vesicles'),
+            ab('petechiae', 'Petechiae', 'petechiae'),
+            ab('other', 'Other', 'rash', { detail: 'rashDetail', detailStyle: 'replace' })
           ]
         },
         {
-          id: 'bruising',
-          label: 'Bruising',
-          type: 'yn',
+          id: 'rashDetail', label: 'Describe rash', type: 'text', sub: true, detailOnly: true,
+          showIf: { control: 'rash', values: ['other'] }
+        },
+        {
+          id: 'bruising', label: 'Bruising', type: 'yn', nad: 'no',
           options: [
-            opt('yes', 'Yes', { abnormal: true, prose: 'Bruising.' }),
-            opt('no', 'No', { normal: true, prose: 'No bruising.' })
+            ab('yes', 'Yes', 'bruising', { detail: 'bruisingDetail' }),
+            ok('no', 'No', 'no bruising')
           ]
+        },
+        {
+          id: 'bruisingDetail', label: 'Where', type: 'text', sub: true, detailOnly: true,
+          showIf: { control: 'bruising', values: ['yes'] }
+        },
+        {
+          id: 'birthmarks', label: 'Birthmarks', type: 'yn', sentence: 1,
+          options: [
+            ab('yes', 'Yes', 'birthmarks', { detail: 'birthmarksDetail' }),
+            ok('no', 'No', 'no birthmarks')
+          ]
+        },
+        {
+          id: 'birthmarksDetail', label: 'Describe', type: 'text', sub: true, detailOnly: true,
+          showIf: { control: 'birthmarks', values: ['yes'] }
+        }
+      ]
+    },
+    {
+      id: 'limbs',
+      label: 'Limbs and spine',
+      shortLabel: 'limbs and spine',
+      controls: [
+        {
+          id: 'limbMovement', label: 'Limb movements', type: 'single', nad: 'symmetrical',
+          options: [
+            ok('symmetrical', 'Symmetrical', 'moving all limbs symmetrically'),
+            ab('reduced', 'Reduced', 'reduced movement', { detail: 'reducedLimbs', detailJoin: ' of ' })
+          ]
+        },
+        {
+          id: 'reducedLimbs', label: 'Which limb', type: 'multi', sub: true, detailOnly: true,
+          showIf: { control: 'limbMovement', values: ['reduced'] },
+          options: [
+            ab('left-arm', 'Left arm', 'left arm'),
+            ab('right-arm', 'Right arm', 'right arm'),
+            ab('left-leg', 'Left leg', 'left leg'),
+            ab('right-leg', 'Right leg', 'right leg')
+          ]
+        },
+        {
+          id: 'clavicles', label: 'Clavicles', type: 'single', nad: 'intact',
+          options: [
+            ok('intact', 'Intact', 'clavicles intact'),
+            ab('left', 'Left swelling or crepitus', 'left clavicular swelling or crepitus'),
+            ab('right', 'Right swelling or crepitus', 'right clavicular swelling or crepitus')
+          ]
+        },
+        {
+          id: 'spine', label: 'Spine', type: 'single', nad: 'intact',
+          options: [
+            ok('intact', 'Intact', 'spine intact'),
+            ab('dimple', 'Sacral dimple', 'sacral dimple'),
+            ab('other', 'Other', 'spinal abnormality', { detail: 'spineDetail', detailStyle: 'replace' })
+          ]
+        },
+        {
+          id: 'spineDetail', label: 'Describe', type: 'text', sub: true, detailOnly: true,
+          showIf: { control: 'spine', values: ['other'] }
         }
       ]
     }

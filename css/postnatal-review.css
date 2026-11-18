@@ -899,3 +899,26 @@ body.postnatal-daily-review-app .check-done .check-list {
     overflow: auto;
   }
 }
+
+/* Postnatal review (not the daily review): examination toolbar and NAD preview */
+body.postnatal-review-app:not(.postnatal-daily-review-app) .exam-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 12px 0;
+}
+
+body.postnatal-review-app:not(.postnatal-daily-review-app) .exam-toolbar .hint { flex: 1 1 12rem; }
+
+body.postnatal-review-app:not(.postnatal-daily-review-app) .exam-row.is-settled .exam-body,
+body.postnatal-review-app:not(.postnatal-daily-review-app) .exam-row.is-settled .exam-extra {
+  display: none;
+}
+
+.exam-nad-line {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+}

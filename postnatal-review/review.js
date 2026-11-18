@@ -215,24 +215,6 @@
     return selectedOptions(control, choices).map(function (option) { return option.label; });
   }
 
-  function murmurProse(system, choices) {
-    var details = [];
-    selectedLabels(system, 'murmurTiming', choices).forEach(function (label) {
-      details.push(label.toLowerCase());
-    });
-    if (choices.murmurGrade) details.push('grade ' + choices.murmurGrade);
-    var loc = selectedLabels(system, 'murmurLocation', choices).map(function (label) { return label.toLowerCase(); });
-    if (loc.length) details.push('at ' + loc.join(', '));
-    var rad = selectedLabels(system, 'murmurRadiation', choices).map(function (label) { return label.toLowerCase(); });
-    if (rad.length) details.push('radiation ' + rad.join(', '));
-    var character = selectedLabels(system, 'murmurCharacter', choices).map(function (label) { return label.toLowerCase(); });
-    if (character.length) details.push(character.join(', '));
-    var pitch = selectedLabels(system, 'murmurPitch', choices).map(function (label) { return label.toLowerCase() + '-pitched'; });
-    if (pitch.length) details.push(pitch.join(', '));
-    if (!details.length) return 'Murmur present.';
-    return 'Murmur present (' + details.join('; ') + ').';
-  }
-
   function niceLines(answerKey, state) {
     if (!state.answers || state.answers[answerKey] !== 'yes') return [];
     var entry = content.NICE_DOC[answerKey];
@@ -318,90 +300,184 @@
   function obsSentence(state) {
     var obs = state.obs || {};
     var bits = [];
-    if (obs.temp) bits.push('Temperature: ' + obs.temp + '\u00B0C');
-    if (obs.hr) bits.push('HR: ' + obs.hr);
-    if (obs.rr) bits.push('RR: ' + obs.rr);
-    if (obs.sats) {
-      var sats = 'Sats: ' + obs.sats + '%';
-      if (obs.oxygen === 'air') sats += ' in air';
-      if (obs.oxygen === 'oxygen') {
-        var fio2 = num(obs.fio2);
-        sats += fio2 != null ? ' in ' + fio2 + '% oxygen' : ' in oxygen';
-      }
-      bits.push(sats);
-    } else if (obs.oxygen === 'oxygen') {
-      var fio2Only = num(obs.fio2);
-      bits.push(fio2Only != null ? 'Oxygen: ' + fio2Only + '%' : 'Oxygen');
-    } else if (obs.oxygen === 'air') {
-      bits.push('Breathing air');
-    }
-    var text = bits.length ? bits.join('. ') + '.' : '';
+    if (obs.temp) bits.push('Temp ' + obs.temp + '\u00B0C');
+    if (obs.hr) bits.push('HR ' + obs.hr);
+    if (obs.rr) bits.push('RR ' + obs.rr);
+    var fio2 = num(obs.fio2);
+    var breathing = '';
+    if (obs.oxygen === 'air') breathing = 'air';
+    if (obs.oxygen === 'oxygen') breathing = fio2 != null ? fio2 + '% O2' : 'O2';
+    if (obs.sats) bits.push('SpO2 ' + obs.sats + '%' + (breathing ? ' in ' + breathing : ''));
+    else if (breathing) bits.push('in ' + breathing);
+    var text = bits.length ? capitalise(bits.join(', ')) + '.' : '';
     var other = String(state.obsOther || '').trim();
-    if (other) text += (text ? ' ' : '') + ensurePeriod(other);
+    if (other) text += (text ? ' ' : '') + ensurePeriod(capitalise(other));
     return text;
   }
 
-  function findingsProse(system, row) {
-    var abnormal = [];
-    var normal = [];
-    var fragments = [];
-    var flagged = false;
-    var note = '';
-    var choices = row.choices || {};
-    var shown = visibleControls(system, choices);
-    var shownIds = shown.map(function (control) { return control.id; });
-    shown.forEach(function (control) {
+  /* Each system is written on its own line in screen order. Selected options
+   * add short fragments; fragments in the same sentence are comma-joined and
+   * repeated words are folded ("no increased WOB or grunting", "Moro, grasp
+   * and suck present"). */
+  var MERGE_SUFFIXES = ['present', 'palpable', 'absent', 'intact', 'weak', 'recession'];
+
+  function capitalise(text) {
+    var value = String(text || '');
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function stripStop(text) {
+    return String(text || '').trim().replace(/[.\s]+$/, '');
+  }
+
+  function joinList(items, word) {
+    if (items.length < 2) return items.join('');
+    return items.slice(0, -1).join(', ') + ' ' + word + ' ' + items[items.length - 1];
+  }
+
+  function mergeSuffix(text) {
+    if (text.indexOf('(') !== -1) return '';
+    for (var i = 0; i < MERGE_SUFFIXES.length; i += 1) {
+      var tail = ' ' + MERGE_SUFFIXES[i];
+      if (text.length > tail.length && text.slice(-tail.length) === tail) return MERGE_SUFFIXES[i];
+    }
+    return '';
+  }
+
+  function mergeFragments(list) {
+    var out = [];
+    var i = 0;
+    while (i < list.length) {
+      var j = i + 1;
+      var prefix = list[i].indexOf('no ') === 0 ? 'no ' : (list[i].indexOf('normal ') === 0 ? 'normal ' : '');
+      if (prefix) {
+        while (j < list.length && list[j].indexOf(prefix) === 0) j += 1;
+        if (j - i > 1) {
+          var items = [];
+          list.slice(i, j).forEach(function (text) {
+            var rest = text.slice(prefix.length);
+            items = items.concat(prefix === 'no ' ? rest.split(' or ') : [rest]);
+          });
+          out.push(prefix + joinList(items, prefix === 'no ' ? 'or' : 'and'));
+          i = j;
+          continue;
+        }
+      }
+      var suffix = mergeSuffix(list[i]);
+      if (suffix) {
+        j = i + 1;
+        while (j < list.length && mergeSuffix(list[j]) === suffix) j += 1;
+        if (j - i > 1) {
+          out.push(joinList(list.slice(i, j).map(function (text) {
+            return text.slice(0, -(suffix.length + 1));
+          }), 'and') + ' ' + suffix);
+          i = j;
+          continue;
+        }
+      }
+      out.push(list[i]);
+      i += 1;
+    }
+    return out;
+  }
+
+  function controlApplies(control, sex) {
+    return !control.sexes || control.sexes.indexOf(sex || '') !== -1;
+  }
+
+  function activeControls(system, choices, sex) {
+    return visibleControls(system, choices).filter(function (control) { return controlApplies(control, sex); });
+  }
+
+  function optionProse(option, sex) {
+    if (option.proseBySex && option.proseBySex[sex]) return option.proseBySex[sex];
+    return option.prose || '';
+  }
+
+  function murmurProse(system, choices) {
+    function picked(id) {
+      var control = findControl(system, id);
+      return control ? selectedOptions(control, choices) : [];
+    }
+    var timing = picked('murmurTiming')[0];
+    var words = [];
+    if (choices.murmurGrade) words.push('grade ' + choices.murmurGrade + '/6');
+    var character = picked('murmurCharacter').map(function (option) { return option.prose; });
+    if (character.length) words.push(joinList(character, 'and'));
+    words.push(timing ? timing.prose : 'murmur');
+    var text = 'HS I+II + ' + words.join(' ');
+    var location = picked('murmurLocation').map(function (option) { return option.prose; });
+    if (location.length) text += ' at ' + joinList(location, 'and');
+    var radiation = picked('murmurRadiation');
+    if (radiation.some(function (option) { return option.exclusive; })) text += ', non-radiating';
+    else if (radiation.length) text += ', radiating to ' + joinList(radiation.map(function (option) { return option.prose; }), 'and');
+    return text;
+  }
+
+  function optionFragments(system, option, choices, sex) {
+    if (option.compose === 'murmur') return [murmurProse(system, choices)];
+    var prose = optionProse(option, sex);
+    if (option.detail) {
+      var detail = findControl(system, option.detail);
+      var picked = detail && controlVisible(system, detail, choices) ? selectedOptions(detail, choices) : [];
+      if (picked.length) {
+        if (detail.type === 'text') {
+          var text = stripStop(picked[0].value);
+          return [option.detailStyle === 'replace' ? text : prose + ' (' + text + ')'];
+        }
+        var parts = picked.map(function (item) { return item.prose || item.label.toLowerCase(); });
+        if (option.detailStyle === 'replace') return parts;
+        if (option.detailJoin) return [prose + option.detailJoin + joinList(parts, 'and')];
+        return [prose + ' (' + parts.join(', ') + ')'];
+      }
+    }
+    return prose ? [prose] : [];
+  }
+
+  function systemSentences(system, choices, sex, shorter) {
+    var groups = [];
+    activeControls(system, choices, sex).forEach(function (control) {
+      if (control.type === 'text' || control.detailOnly) return;
       selectedOptions(control, choices).forEach(function (option) {
-        if (option.abnormal) flagged = true;
-        if (option.compose === 'murmur') {
-          var murmur = murmurProse(system, choices);
-          if (option.abnormal) abnormal.push(murmur);
-          else normal.push(murmur);
-          return;
-        }
-        if (!option.prose) return;
-        if (option.supersededBy && shownIds.indexOf(option.supersededBy) !== -1) {
-          var detail = choices[option.supersededBy];
-          if (Array.isArray(detail) ? detail.length : detail) return;
-        }
-        if (option.fragment) {
-          fragments.push(option.prose);
-          return;
-        }
-        if (option.abnormal) abnormal.push(option.prose);
-        else normal.push(option.prose);
-      });
-    });
-    var hasNote = noteVisible(system, choices) && row.note && String(row.note).trim();
-    if (hasNote) {
-      note = ensurePeriod(row.note);
-    } else {
-      shown.forEach(function (control) {
-        selectedOptions(control, choices).forEach(function (option) {
-          if (option.fallback) abnormal.push(option.fallback);
+        if (shorter && !option.abnormal) return;
+        var index = control.sentence || 0;
+        optionFragments(system, option, choices, sex).forEach(function (text) {
+          if (!text) return;
+          if (!groups[index]) groups[index] = [];
+          groups[index].push({ text: text, lead: !!option.lead });
         });
       });
-    }
-    return { abnormal: abnormal, normal: normal, fragments: fragments, flagged: flagged, note: note };
+    });
+    var sentences = [];
+    groups.forEach(function (group, index) {
+      if (!group || !group.length) return;
+      var joined = mergeFragments(group.map(function (fragment) { return fragment.text; })).join(', ');
+      if (index === 0 && system.lead && group[0].lead) joined = system.lead + ' ' + joined;
+      sentences.push(ensurePeriod(capitalise(joined)));
+    });
+    return sentences;
   }
 
-  function formatExamBlock(system, split, shorter) {
-    var sentences = split.abnormal.concat(shorter ? [] : split.normal);
-    if (split.note) sentences.push(split.note);
-    var chunks = [];
-    if (split.fragments && split.fragments.length) {
-      chunks.push(ensurePeriod(system.label + ' ' + split.fragments.join(', ')));
-    }
-    if (sentences.length) {
-      if (chunks.length) chunks.push(sentences.join(' '));
-      else chunks.push(system.label + ': ' + sentences.join(' '));
-    }
-    return chunks.join(' ');
+  function nadChoices(system, sex) {
+    var choices = {};
+    system.controls.forEach(function (control) {
+      if (!control.nad || !controlApplies(control, sex)) return;
+      if (control.nadSexes && control.nadSexes.indexOf(sex || '') === -1) return;
+      choices[control.id] = control.type === 'multi' ? [control.nad] : control.nad;
+    });
+    return choices;
   }
 
-  function notExaminedSentence(labels) {
-    var phrase = listPhrase(labels);
-    return phrase.charAt(0).toUpperCase() + phrase.slice(1) + ' not examined this review.';
+  function nadLine(system, sex) {
+    return systemSentences(system, nadChoices(system, sex), sex, false).join(' ');
+  }
+
+  function examLine(system, row, sex, shorter) {
+    if (row.status === 'nad') return shorter ? '' : nadLine(system, sex);
+    var choices = row.choices || {};
+    var sentences = systemSentences(system, choices, sex, shorter);
+    if (noteVisible(system, choices) && row.note && String(row.note).trim()) sentences.push(ensurePeriod(row.note));
+    return sentences.join(' ');
   }
 
   function examinationText(state, shorter) {
@@ -414,32 +490,18 @@
       if (age != null) opening += ' at ' + shortAge(age) + ' of age';
       lines.push(opening + '.');
     }
-    var abnormalBlocks = [];
-    var normalBlocks = [];
+    lines.push(obsSentence(state));
     var skipped = [];
     content.EXAM_SYSTEMS.forEach(function (system) {
       var row = examRow(state, system.id);
       if (!row) return;
       if (row.status === 'not') {
-        var label = system.shortLabel.charAt(0).toLowerCase() + system.shortLabel.slice(1);
-        skipped.push(label);
+        skipped.push(system.shortLabel);
         return;
       }
-      if (row.status === 'nad') {
-        if (!shorter) normalBlocks.push(system.label + ': ' + system.nad);
-        return;
-      }
-      var split = findingsProse(system, row);
-      var block = formatExamBlock(system, split, shorter);
-      if (!block) return;
-      if (split.abnormal.length || split.flagged) abnormalBlocks.push(block);
-      else normalBlocks.push(block);
+      lines.push(examLine(system, row, state.sex, shorter));
     });
-    var observations = obsSentence(state);
-    if (observations) lines.push(observations);
-    lines = lines.concat(abnormalBlocks);
-    if (!shorter) lines = lines.concat(normalBlocks);
-    if (skipped.length) lines.push(notExaminedSentence(skipped));
+    if (skipped.length) lines.push('Not examined: ' + skipped.join(', ') + '.');
     return cleanLines(lines);
   }
 
@@ -989,6 +1051,18 @@
       paint();
       window.scrollTo(0, 0);
     }
+    if (action === 'exam-rest-nad') {
+      content.EXAM_SYSTEMS.forEach(function (system) {
+        var row = ensureExam(system.id);
+        if (row.status || examHasEntries(row)) return;
+        row.status = 'nad';
+        row.choices = {};
+        row.note = '';
+        row.noteOpen = false;
+      });
+      persist();
+      paint();
+    }
     if (action === 'add-glucose') {
       state.glucoses.push({ time: '', value: '', method: '' });
       persist();
@@ -1057,6 +1131,15 @@
     });
   }
 
+  function examHasEntries(row) {
+    if (row.note && String(row.note).trim()) return true;
+    var choices = row.choices || {};
+    return Object.keys(choices).some(function (key) {
+      var value = choices[key];
+      return Array.isArray(value) ? value.length > 0 : !!String(value || '').trim();
+    });
+  }
+
   function toggleExamStatus(id, status) {
     var row = ensureExam(id);
     row.status = row.status === status ? '' : status;
@@ -1082,9 +1165,18 @@
   function toggleExamMulti(button) {
     var row = ensureExam(button.dataset.exam);
     var list = Array.isArray(row.choices[button.dataset.control]) ? row.choices[button.dataset.control].slice() : [];
+    var system = examSystem(button.dataset.exam);
+    var control = system ? findControl(system, button.dataset.control) : null;
+    var exclusive = (control && control.options || []).filter(function (option) { return option.exclusive; })
+      .map(function (option) { return option.value; });
     var index = list.indexOf(button.dataset.value);
-    if (index === -1) list.push(button.dataset.value);
-    else list.splice(index, 1);
+    if (index === -1) {
+      if (exclusive.indexOf(button.dataset.value) !== -1) list = [];
+      else list = list.filter(function (value) { return exclusive.indexOf(value) === -1; });
+      list.push(button.dataset.value);
+    } else {
+      list.splice(index, 1);
+    }
     row.choices[button.dataset.control] = list;
     row.status = '';
     pruneHiddenChoices(button.dataset.exam, row);
@@ -1457,6 +1549,7 @@
         '</div>' +
         area('obsOther', 'Other', state.obsOther, 2)
       ) +
+      '<div class="exam-toolbar"><button type="button" class="text-button" data-action="exam-rest-nad">Rest NAD</button><p class="hint">Marks every system with nothing entered as NAD. Tap NAD again to open a system.</p></div>' +
       '<div class="exam-systems">' + content.EXAM_SYSTEMS.map(examRowHtml).join('') + '</div>' +
       '</section>';
   }
@@ -1473,7 +1566,7 @@
       return '<button type="button" class="' + className + '" data-exam="' + system.id + '" data-exam-status="' + status + '">' + label + '</button>';
     }
     var choices = findingsActive(row) ? row.choices || {} : {};
-    var controls = visibleControls(system, choices);
+    var controls = activeControls(system, choices, state.sex);
     var parts = [];
     for (var i = 0; i < controls.length; i += 1) {
       var control = controls[i];
@@ -1507,8 +1600,11 @@
       ? '<label class="exam-note field field--stack">' + fieldLabel('Other notes') + '<textarea data-exam-note="' + system.id + '" rows="2" autocomplete="off">' + esc(findingsActive(row) ? row.note || '' : '') + '</textarea></label>'
       : '';
     var settled = row.status === 'nad' || row.status === 'not';
-    return '<article class="exam-row' + (settled ? ' is-settled' : '') + '"><div class="exam-row-head"><h3>' + esc(system.label) + '</h3><div class="exam-actions">' + statusButton('nad', 'NAD') + statusButton('not', 'Not examined') + '</div></div>' +
-      '<div class="exam-body">' + parts.join('') + '</div><div class="exam-extra">' + noteBtn + note + '</div></article>';
+    var preview = row.status === 'nad'
+      ? '<p class="exam-nad-line">' + esc(nadLine(system, state.sex)) + '</p>'
+      : '';
+    return '<article class="exam-row' + (settled ? ' is-settled' : '') + '" data-system="' + system.id + '"><div class="exam-row-head"><h3>' + esc(system.label) + '</h3><div class="exam-actions">' + statusButton('nad', 'NAD') + statusButton('not', 'Not examined') + '</div></div>' +
+      preview + '<div class="exam-body">' + parts.join('') + '</div><div class="exam-extra">' + noteBtn + note + '</div></article>';
   }
 
   function examControlHtml(systemId, control, choices) {

@@ -34,7 +34,6 @@ function sample() {
     reasons: ['sepsis'],
     exam: {
       general: { status: 'nad', note: '', choices: {} },
-      perfusion: { status: 'nad', note: '', choices: {} },
       respiratory: { status: 'nad', note: '', choices: {} },
       cardiovascular: { status: 'nad', note: '', choices: {} },
       neurology: { status: 'nad', note: '', choices: {} },
@@ -79,10 +78,8 @@ assert.strictEqual(boxes.otherCount, 2, 'GBS and term rupture count as two other
 assert.ok(!('framework' in boxes), 'framework management sentence is not returned');
 
 assert.ok(boxes.examination.indexOf('postnatal ward') !== -1, 'place is in the examination');
-assert.ok(boxes.examination.indexOf('Temperature: 36.8') !== -1, 'temperature is transcribed as entered');
-assert.ok(boxes.examination.indexOf('HR: 138') !== -1, 'heart rate is transcribed as entered');
-assert.ok(boxes.examination.indexOf('Sats: 99% in air') !== -1, 'saturations are transcribed as entered');
-assert.ok(boxes.examination.indexOf('not examined this review') !== -1, 'skipped systems are written');
+assert.ok(boxes.examination.indexOf('Temp 36.8\u00B0C, HR 138, RR 48, SpO2 99% in air.') !== -1, 'observations are transcribed as entered on one line');
+assert.ok(boxes.examination.indexOf('Not examined: skin.') !== -1, 'skipped systems are written');
 assert.strictEqual(boxes.examination.indexOf('pyrexial'), -1, 'observation adjectives are not invented');
 assert.strictEqual(boxes.examination.indexOf('tachycardic'), -1, 'observation adjectives are not invented');
 assert.strictEqual(boxes.examination.indexOf('temperature abnormality'), -1, 'observation risk labels are not invented');
@@ -90,9 +87,9 @@ assert.strictEqual(boxes.examination.indexOf('temperature abnormality'), -1, 'ob
 var hot = review.buildBoxes({
   obs: { temp: '38.4', hr: '175', rr: '72', sats: '88', oxygen: 'oxygen', fio2: '40' }
 });
-assert.ok(hot.examination.indexOf('Temperature: 38.4') !== -1, 'hot temperature is transcribed');
-assert.ok(hot.examination.indexOf('HR: 175') !== -1, 'high heart rate is transcribed');
-assert.ok(hot.examination.indexOf('RR: 72') !== -1, 'high respiratory rate is transcribed');
+assert.ok(hot.examination.indexOf('Temp 38.4') !== -1, 'hot temperature is transcribed');
+assert.ok(hot.examination.indexOf('HR 175') !== -1, 'high heart rate is transcribed');
+assert.ok(hot.examination.indexOf('RR 72') !== -1, 'high respiratory rate is transcribed');
 assert.strictEqual(hot.redCount, 0, 'abnormal observations do not create red flags');
 assert.strictEqual(hot.otherCount, 0, 'abnormal observations do not create other factors');
 assert.strictEqual(hot.examination.indexOf('NICE'), -1, 'observations alone do not create NICE labels');
@@ -152,9 +149,9 @@ assert.ok(review.buildBoxes({ answers: { thrombocytopenia: 'yes' } }).review.ind
 var jaundiceYoung = review.buildBoxes({
   ageMode: 'manual',
   ageHours: '10',
-  exam: { skin: { status: '', note: '', choices: { colour: 'jaundiced' } } }
+  exam: { skin: { status: '', note: '', choices: { jaundice: 'face' } } }
 });
-assert.ok(jaundiceYoung.examination.indexOf('Jaundiced.') !== -1, 'jaundice finding is transcribed');
+assert.ok(jaundiceYoung.examination.indexOf('Jaundiced to face.') !== -1, 'jaundice finding is transcribed');
 assert.strictEqual(jaundiceYoung.review.indexOf('within 24 hours'), -1, 'age plus jaundice does not create a clinical indicator');
 assert.ok(review.buildBoxes({ answers: { 'jaundice-24h': 'yes' } }).review.indexOf('NICE early-onset neonatal infection clinical indicator documented: jaundice within 24 hours of birth.') !== -1, 'explicit jaundice within 24 hours uses the NICE label');
 assert.ok(review.buildBoxes({ answers: { pphn: 'yes' } }).review.indexOf('Persistent pulmonary hypertension of the newborn documented.') !== -1, 'PPHN is transcribed when selected');
@@ -167,28 +164,29 @@ var abnormal = review.buildBoxes({
   ageMode: 'manual',
   ageHours: '6',
   exam: {
-    perfusion: { status: 'nad', note: '', choices: {} },
     cardiovascular: { status: 'nad', note: '', choices: {} },
     respiratory: { status: '', note: '', choices: { grunting: 'yes' } },
     skin: { status: 'not', note: '', choices: {} }
   }
 });
-assert.ok(abnormal.examination.indexOf('Respiratory: Grunting.') !== -1, 'grunting is grouped under Respiratory');
-assert.ok(abnormal.examination.indexOf('Cardiovascular:') !== -1, 'NAD cardiovascular stays grouped under its system');
-assert.ok(abnormal.examination.indexOf('Respiratory:') < abnormal.examination.indexOf('Cardiovascular:'), 'systems with abnormal findings lead');
-assert.ok(abnormal.examination.indexOf('Grunting') < abnormal.examination.indexOf('Fontanelle soft'), 'selected abnormal findings lead');
+assert.ok(abnormal.examination.indexOf('\nGrunting.\n') !== -1, 'respiratory findings sit on their own line without a tag');
+assert.strictEqual(abnormal.examination.indexOf('Respiratory:'), -1, 'no system tag is written');
+assert.strictEqual(abnormal.examination.indexOf('Cardiovascular:'), -1, 'no system tag is written for NAD systems');
+assert.ok(abnormal.examination.indexOf('HS I+II+0. Brachials and femorals palpable, CRT <2s, warm peripheries.') !== -1, 'cardiovascular NAD is concise');
+assert.ok(abnormal.examination.indexOf('Grunting') < abnormal.examination.indexOf('HS I+II+0'), 'systems keep screen order');
 
 var abdomen = review.buildBoxes({
   exam: {
     abdomen: {
       status: '',
       note: '',
-      choices: { feel: 'soft', tenderness: 'no', distension: 'no', organs: 'no', cord: 'healthy' }
+      choices: { palpation: 'soft', tenderness: 'no', distension: 'no', masses: ['none'], cord: ['clean'] }
     }
   }
 });
-assert.ok(abdomen.examination.indexOf('Abdomen soft, non-tender, not distended, no organomegaly. Cord healthy.') !== -1, 'abdomen findings are comma-joined after one Abdomen');
+assert.ok(abdomen.examination.indexOf('Abdomen soft, non-tender, non-distended, no organomegaly or masses. Cord clean and dry.') !== -1, 'abdomen findings follow one Abdomen');
 assert.strictEqual(abdomen.examination.indexOf('Abdomen soft.'), -1, 'abdomen findings are not written as separate Abdomen sentences');
+assert.ok(review.buildBoxes({ exam: { abdomen: { status: '', note: '', choices: { masses: ['liver'] } } } }).examination === 'Hepatomegaly.', 'Abdomen only leads adjectives');
 
 var withNote = review.buildBoxes({
   exam: {
@@ -197,20 +195,19 @@ var withNote = review.buildBoxes({
     cardiovascular: { status: '', note: 'Soft systolic murmur at the left sternal edge.', choices: { sounds: 'murmur' } }
   }
 });
-assert.ok(withNote.examination.indexOf('Respiratory: Grunting. Louder on handling.') !== -1, 'respiratory free text stays under Respiratory');
-assert.ok(withNote.examination.indexOf('Cardiovascular: Murmur present. Soft systolic murmur at the left sternal edge.') !== -1, 'cardiovascular free text stays under Cardiovascular');
-assert.ok(withNote.examination.indexOf('Respiratory:') < withNote.examination.indexOf('Cardiovascular:'), 'system order is preserved with free text');
-assert.strictEqual(withNote.examination.indexOf('Louder on handling.'), withNote.examination.indexOf('Respiratory: Grunting. Louder on handling.') + 'Respiratory: Grunting. '.length, 'custom text is not lifted above its system heading');
+assert.ok(withNote.examination.indexOf('Grunting. Louder on handling.') !== -1, 'respiratory free text stays on the respiratory line');
+assert.ok(withNote.examination.indexOf('HS I+II + murmur. Soft systolic murmur at the left sternal edge.') !== -1, 'cardiovascular free text stays on the cardiovascular line');
+assert.ok(withNote.examination.indexOf('Grunting.') < withNote.examination.indexOf('HS I+II'), 'system order is preserved with free text');
 
 var oxygen = review.buildBoxes({ obs: { sats: '92', oxygen: 'oxygen', fio2: '30' } });
-assert.ok(oxygen.examination.indexOf('Sats: 92% in 30% oxygen') !== -1, 'oxygen requirement is transcribed');
+assert.ok(oxygen.examination.indexOf('SpO2 92% in 30% O2') !== -1, 'oxygen requirement is transcribed');
 
 var effort = review.buildBoxes({
-  exam: { respiratory: { status: '', note: '', choices: { wob: 'moderate', effortSigns: ['recessions', 'flaring'], recessions: ['subcostal'] } } }
+  exam: { respiratory: { status: '', note: '', choices: { wob: 'moderate', effortSigns: ['subcostal', 'intercostal', 'flaring'], grunting: 'no', airway: ['none'] } } }
 });
-assert.ok(effort.examination.indexOf('Moderate work of breathing') !== -1, 'work of breathing is written');
-assert.ok(effort.examination.indexOf('Nasal flaring') !== -1, 'effort signs are written');
+assert.ok(effort.examination.indexOf('Moderately increased WOB, subcostal and intercostal recession, nasal flaring, no grunting, stridor or stertor.') !== -1, 'work of breathing and effort signs are folded together');
 assert.strictEqual(effort.examination.indexOf('NICE'), -1, 'exam findings do not auto-tag NICE');
+assert.ok(review.buildBoxes({ exam: { respiratory: { status: '', note: '', choices: { wob: 'none', grunting: 'no' } } } }).examination.indexOf('No increased WOB or grunting.') !== -1, 'repeated "no" is folded');
 
 assert.ok(!/start antibiotics/i.test(review.buildBoxes({ answers: { cpr: 'yes' } }).discussion), 'the note does not recommend starting antibiotics');
 assert.ok(!/without waiting for results/i.test(review.buildBoxes({ answers: { cpr: 'yes', chorio: 'yes' } }).discussion), 'threshold management sentences are gone');
@@ -237,39 +234,25 @@ assert.ok(review.buildBoxes({ antibiotics: 'none' }).discussion.indexOf('Plan: N
 
 var perfusion = review.buildBoxes({
   exam: {
-    perfusion: {
-      status: '',
-      note: '',
-      choices: { crtCentral: '>3', perfusion: 'cool', mucosa: 'dry', fontanelle: 'sunken' }
-    }
+    cardiovascular: { status: '', note: '', choices: { crt: '>3', peripheries: 'cool', femorals: 'weak', brachials: 'palpable' } },
+    general: { status: '', note: '', choices: { mucosa: 'dry' } },
+    head: { status: '', note: '', choices: { fontanelle: 'sunken' } }
   }
 });
-assert.ok(perfusion.examination.indexOf('Perfusion: Central CRT over 3 seconds. Cool peripherally. Fontanelle sunken. Dry mucous membranes.') !== -1, 'perfusion findings stay under Perfusion');
+assert.ok(perfusion.examination.indexOf('Brachials palpable, femorals weak, CRT >3s, cool peripheries.') !== -1, 'perfusion sits on the cardiovascular line');
+assert.ok(perfusion.examination.indexOf('Dry mucous membranes.') !== -1, 'mucous membranes sit on the general line');
+assert.ok(perfusion.examination.indexOf('AF sunken.') !== -1, 'fontanelle sits on the head line');
 
 var auscultation = review.buildBoxes({
-  exam: {
-    respiratory: {
-      status: '',
-      note: '',
-      choices: { auscultation: 'clear', cyanosis: 'none', chestAppearance: 'good' }
-    }
-  }
+  exam: { respiratory: { status: '', note: '', choices: { auscultation: 'clear', expansion: 'good' } } }
 });
-assert.ok(auscultation.examination.indexOf('Chest clear on auscultation with equal air entry.') !== -1, 'clear chest uses the auscultation sentence');
-assert.ok(auscultation.examination.indexOf('Good chest rise.') !== -1, 'chest appearance is transcribed');
-assert.ok(auscultation.examination.indexOf('No cyanosis.') !== -1, 'cyanosis is transcribed');
+assert.ok(auscultation.examination.indexOf('Good symmetrical chest expansion, chest clear with equal AE.') !== -1, 'expansion and auscultation share a sentence');
 
 var added = review.buildBoxes({
-  exam: {
-    respiratory: {
-      status: '',
-      note: '',
-      choices: { auscultation: 'added', addedSounds: ['crackles', 'wheeze'] }
-    }
-  }
+  exam: { respiratory: { status: '', note: '', choices: { auscultation: 'abnormal', addedSounds: ['crackles', 'wheeze'] } } }
 });
-assert.ok(added.examination.indexOf('Crackles.') !== -1 && added.examination.indexOf('Wheeze.') !== -1, 'added sounds are listed');
-assert.strictEqual(added.examination.indexOf('Added sounds.'), -1, 'generic added-sounds sentence is dropped once details are chosen');
+assert.ok(added.examination.indexOf('Crackles, wheeze.') !== -1, 'added sounds are listed');
+assert.strictEqual(added.examination.indexOf('abnormal breath sounds'), -1, 'generic sentence is dropped once details are chosen');
 
 var murmur = review.buildBoxes({
   exam: {
@@ -278,39 +261,52 @@ var murmur = review.buildBoxes({
       note: '',
       choices: {
         sounds: 'murmur',
-        murmurTiming: ['ejection'],
+        murmurTiming: 'ejection',
         murmurGrade: '2',
         murmurLocation: ['llse'],
         murmurRadiation: ['axilla'],
-        murmurCharacter: ['soft'],
-        murmurPitch: ['high']
+        murmurCharacter: ['soft']
       }
     }
   }
 });
-assert.ok(murmur.examination.indexOf('Murmur present (ejection systolic; grade 2; at lower left sternal edge; radiation axilla; soft; high-pitched).') !== -1, 'murmur details follow the examination-notes pattern');
+assert.ok(murmur.examination.indexOf('HS I+II + grade 2/6 soft ESM at LLSE, radiating to axilla.') !== -1, 'murmur is written in standard shorthand');
 
 var reflexes = review.buildBoxes({
-  exam: {
-    neurology: {
-      status: '',
-      note: '',
-      choices: { tone: 'normal', moro: 'yes', grasp: 'yes', stepping: 'yes', suck: 'good', gag: 'yes' }
-    }
-  }
+  exam: { neurology: { status: '', note: '', choices: { tone: 'normal', movements: 'normal', moro: 'present', grasp: 'present', suck: 'present' } } }
 });
-assert.ok(reflexes.examination.indexOf('Moro equal and present.') !== -1, 'Moro is transcribed');
-assert.ok(reflexes.examination.indexOf('Palmar and plantar grasp present.') !== -1, 'grasp is transcribed');
-assert.ok(reflexes.examination.indexOf('Suck good.') !== -1, 'suck is transcribed');
+assert.ok(reflexes.examination.indexOf('Normal tone, no abnormal movements. Moro, grasp and suck present.') !== -1, 'reflexes are folded into one sentence');
 
 var extraNote = review.buildBoxes({
   exam: {
-    general: { status: '', note: 'Handles well in the cot.', noteOpen: true, choices: { alertness: 'alert', cry: 'settled' } }
+    general: { status: '', note: 'Handles well in the cot.', noteOpen: true, choices: { behaviour: 'alert', cry: 'normal' } }
   }
 });
-assert.ok(extraNote.examination.indexOf('Alert and active.') !== -1, 'alert and active is transcribed');
-assert.ok(extraNote.examination.indexOf('Settled.') !== -1, 'settled cry is transcribed');
-assert.ok(extraNote.examination.indexOf('Handles well in the cot.') !== -1, 'other notes stay under the system');
+assert.ok(extraNote.examination.indexOf('Alert and active, normal cry. Handles well in the cot.') !== -1, 'other notes follow the system findings');
+
+var allNad = {};
+['general', 'head', 'respiratory', 'cardiovascular', 'abdomen', 'genitalia', 'neurology', 'skin', 'limbs'].forEach(function (id) {
+  allNad[id] = { status: 'nad', note: '', choices: {} };
+});
+var male = review.buildBoxes({ sex: 'male', exam: allNad }).examination;
+assert.ok(male.indexOf('Normal male genitalia, testes descended bilaterally, anus patent.') !== -1, 'male NAD names testes');
+var female = review.buildBoxes({ sex: 'female', exam: allNad }).examination;
+assert.ok(female.indexOf('Normal female genitalia, anus patent.') !== -1, 'female NAD leaves out testes');
+assert.strictEqual(review.buildBoxes({ exam: allNad }).examination.indexOf('testes'), -1, 'testes are not claimed when sex is not recorded');
+assert.strictEqual(male.split('\n').length, 9, 'each system is on its own line');
+assert.strictEqual(/[A-Z][a-z]+( and [a-z]+)?: /.test(male), false, 'no system tags are written');
+assert.ok(male.indexOf('Not jaundiced, no rash or bruising.') !== -1, 'skin NAD folds repeated words');
+assert.ok(male.indexOf('Moving all limbs symmetrically, clavicles and spine intact.') !== -1, 'limbs NAD is concise');
+
+var shortNote = review.buildBoxes({
+  shorter: true,
+  exam: { respiratory: { status: '', note: '', choices: { wob: 'none', grunting: 'yes' } }, skin: { status: 'nad', note: '', choices: {} } }
+}).examination;
+assert.strictEqual(shortNote, 'Grunting.', 'shorter note keeps only abnormal findings');
+
+assert.deepStrictEqual(review.collectFactors({
+  exam: { general: { status: '', note: '', choices: { colour: 'central', behaviour: 'lethargic' } } }
+}).map(function (factor) { return factor.id; }).sort(), ['altered-behaviour', 'hypoxia'], 'explicit exam buttons still map to their NICE items');
 
 var hours = review.ageInHours({ ageMode: 'times', birthAt: '2026-01-01T00:00', reviewAt: '2026-01-01T18:30' });
 assert.ok(Math.abs(hours - 18.5) < 0.02, 'age from clock times is 18.5 hours');
@@ -326,7 +322,7 @@ var obsOtherState = sample();
 obsOtherState.obs = { temp: '36.8', hr: '', rr: '', sats: '', oxygen: '', fio2: '' };
 obsOtherState.obsOther = 'Pre- and post-ductal sats 98% and 99%';
 var obsOtherBoxes = review.buildBoxes(obsOtherState);
-assert.ok(obsOtherBoxes.examination.indexOf('Temperature: 36.8\u00B0C. Pre- and post-ductal sats 98% and 99%.') !== -1, 'other observations free text follows the observations');
+assert.ok(obsOtherBoxes.examination.indexOf('Temp 36.8\u00B0C. Pre- and post-ductal sats 98% and 99%.') !== -1, 'other observations free text follows the observations');
 var obsOnlyOther = sample();
 obsOnlyOther.obsOther = 'Obs stable on chart';
 assert.ok(review.buildBoxes(obsOnlyOther).examination.indexOf('Obs stable on chart.') !== -1, 'other observations text is written on its own');
