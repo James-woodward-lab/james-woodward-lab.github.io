@@ -50,21 +50,20 @@ function sample() {
 
 var boxes = review.buildBoxes(sample());
 
-assert.ok(boxes.review.indexOf('39+2, born by normal vaginal birth, now 18 hours old.') !== -1, 'gestation and delivery lead the review without a Gestation at birth label');
+var reviewLines = boxes.review.split('\n');
+assert.strictEqual(reviewLines[0], 'Infant born at 39+2 weeks by SVD, now 18 hours old. Reviewed for infection risk.', 'the review opens with the baby and the reason for review');
 assert.strictEqual(boxes.review.indexOf('Gestation at birth'), -1, 'Gestation at birth wording is removed');
-assert.ok(boxes.review.indexOf('Reason for review: infection history.') !== -1, 'reason for review is written');
-assert.ok(boxes.review.indexOf('39+2') < boxes.review.indexOf('Reason for review:'), 'reason follows gestation and delivery');
-assert.ok(boxes.review.indexOf('Reason for review:') < boxes.review.indexOf('BG:'), 'BG follows the reason for review');
-assert.ok(boxes.review.indexOf('BG: Membranes ruptured for 26 hours.') !== -1, 'background features are prefixed with BG');
-assert.ok(boxes.review.indexOf('Meconium passed') !== -1, 'stools are in the review');
-assert.ok(boxes.review.indexOf('Urine passed') !== -1, 'urine is in the review');
-assert.ok(boxes.review.indexOf('No parental concern') !== -1, 'explicit parental concern is transcribed');
-assert.ok(boxes.review.indexOf('breastfeeds') !== -1, 'feeding is in the review');
+assert.strictEqual(reviewLines[1], 'No parental concern.', 'concern follows the opening');
+assert.strictEqual(reviewLines[2], 'ROM 26 hours before birth.', 'labour follows the presenting history');
+assert.strictEqual(reviewLines[3], 'NICE risk factors: maternal GBS colonisation, bacteriuria or infection this pregnancy; confirmed ROM >24 hours before term birth.', 'NICE risk factors follow labour, named once');
+assert.strictEqual(reviewLines[4], 'Breastfeeding every 2 to 3 hours, effective latch, no vomiting or feed refusal. Meconium passed, urine passed.', 'feeding and output share the since-birth line');
+assert.strictEqual(reviewLines[5], 'Glucose 3.4 mmol/L at 16:00 (blood gas). No bilirubin sent.', 'results close the review');
+assert.strictEqual(boxes.review.indexOf('BG:'), -1, 'no BG tag');
+assert.strictEqual(boxes.review.indexOf('documented'), -1, 'no repeated documented wording');
+assert.strictEqual(boxes.review.indexOf('fever'), -1, 'a No to intrapartum fever is not written');
 assert.ok(boxes.review.indexOf('Glucose 3.4') !== -1, 'glucose is transcribed without a band');
 assert.strictEqual(boxes.review.indexOf('under 1.0'), -1, 'glucose bands are not generated');
 assert.strictEqual(boxes.review.indexOf('2.0 mmol/L or more'), -1, 'glucose categories are not generated');
-assert.ok(boxes.review.indexOf('NICE early-onset neonatal infection risk factor documented: prolonged rupture of membranes before term birth.') !== -1, 'NICE label follows explicit rupture button');
-assert.ok(boxes.review.indexOf('NICE early-onset neonatal infection risk factor documented: maternal GBS colonisation, bacteriuria, or infection.') !== -1, 'NICE label follows explicit GBS button');
 assert.strictEqual(boxes.review.indexOf('red flag'), -1, 'red-flag language is not generated');
 assert.strictEqual(boxes.review.indexOf('risk factors selected'), -1, 'risk counts are not generated');
 assert.strictEqual(boxes.review.indexOf('meets NICE threshold'), -1, 'threshold statements are not generated');
@@ -101,14 +100,15 @@ assert.strictEqual(lowGlucose.otherCount, 0, 'glucose values do not become clini
 assert.strictEqual(lowGlucose.review.indexOf('NICE'), -1, 'glucose values do not create NICE labels');
 
 var acid = review.buildBoxes({ gas: { be: '12' } });
-assert.ok(acid.review.indexOf('base deficit 12') !== -1, 'base deficit is transcribed');
+assert.ok(acid.review.indexOf('Blood gas BD 12.') !== -1, 'base deficit is transcribed');
 assert.strictEqual(acid.otherCount, 0, 'gas values do not create acidosis factors');
 assert.strictEqual(acid.review.indexOf('NICE'), -1, 'gas values do not create NICE labels');
 assert.strictEqual(review.buildBoxes({ answers: { 'metabolic-acidosis': 'yes' } }).otherCount, 1, 'explicit metabolic acidosis counts as one indicator');
-assert.ok(review.buildBoxes({ answers: { 'metabolic-acidosis': 'yes' } }).review.indexOf('NICE early-onset neonatal infection clinical indicator documented: metabolic acidosis.') !== -1, 'explicit metabolic acidosis uses the NICE label');
+assert.ok(review.buildBoxes({ answers: { 'metabolic-acidosis': 'yes' } }).review.indexOf('NICE clinical indicators: metabolic acidosis (base deficit 10 mmol/L or more).') !== -1, 'explicit metabolic acidosis uses the NICE label');
 
 var noGestationCalc = review.buildBoxes({ gestationAtBirth: '35+0' });
-assert.ok(noGestationCalc.review.indexOf('35+0.') !== -1, 'preterm-looking free text is transcribed without a label');
+assert.ok(noGestationCalc.review.indexOf('Infant born at 35+0 weeks.') !== -1, 'preterm-looking free text is transcribed without a label');
+assert.ok(review.buildBoxes({ gestationAtBirth: 'term' }).review.indexOf('Infant born at term.') !== -1, 'worded gestation is kept as typed');
 assert.strictEqual(noGestationCalc.review.indexOf('Preterm baby'), -1, 'gestation free text does not classify prematurity');
 assert.strictEqual(noGestationCalc.otherCount, 0, 'gestation free text does not invent the preterm labour finding');
 assert.strictEqual(typeof review.isPreterm, 'undefined', 'isPreterm is removed');
@@ -131,20 +131,19 @@ assert.strictEqual(migrated.gestationAtBirth, '39+2', 'old numeric drafts migrat
 assert.strictEqual(migrated.gestationWeeks, undefined, 'numeric weeks are not kept as active state');
 
 var pretermButton = review.buildBoxes({ answers: { 'spontaneous-preterm': 'yes' } });
-assert.ok(pretermButton.review.indexOf('Preterm birth following spontaneous labour before 37 weeks documented.') !== -1, 'explicit preterm button is transcribed');
-assert.ok(pretermButton.review.indexOf('NICE early-onset neonatal infection risk factor documented: preterm birth after spontaneous labour.') !== -1, 'NICE label follows the explicit preterm button');
+assert.strictEqual(pretermButton.review, 'NICE risk factors: preterm birth after spontaneous labour.', 'explicit preterm button is written once under its NICE category');
 
 var unsetNice = review.buildBoxes({ answers: { 'gbs-maternal': 'no' } });
 assert.strictEqual(unsetNice.review.indexOf('NICE'), -1, 'a No answer does not create a NICE label');
 assert.strictEqual(unsetNice.review.indexOf('No maternal GBS'), -1, 'negative findings are not auto-generated from No');
 
 var sibling = review.buildBoxes({ answers: { 'sibling-infection': 'yes' } });
-assert.ok(sibling.review.indexOf('NICE early-onset neonatal infection red flag documented: infection in another baby of a multiple pregnancy.') !== -1, 'sibling infection NICE red-flag label follows an explicit yes');
+assert.ok(sibling.review.indexOf('NICE red flag: suspected or confirmed infection in another baby of this multiple pregnancy.') !== -1, 'sibling infection NICE red-flag label follows an explicit yes');
 assert.strictEqual(sibling.redCount, 1, 'sibling infection counts as one red-flag risk factor');
 
 var cpr = review.buildBoxes({ answers: { cpr: 'yes' } });
-assert.ok(cpr.review.indexOf('NICE early-onset neonatal infection red flag documented: cardiopulmonary resuscitation.') !== -1, 'CPR uses the red-flag documentation label');
-assert.ok(review.buildBoxes({ answers: { thrombocytopenia: 'yes' } }).review.indexOf('NICE early-onset neonatal infection clinical indicator documented: thrombocytopenia.') !== -1, 'thrombocytopenia uses the clinical-indicator label');
+assert.ok(cpr.review.indexOf('NICE red flags: needed CPR.') !== -1, 'CPR uses the red-flag documentation label');
+assert.ok(review.buildBoxes({ answers: { thrombocytopenia: 'yes' } }).review.indexOf('NICE clinical indicators: thrombocytopenia.') !== -1, 'thrombocytopenia uses the clinical-indicator label');
 
 var jaundiceYoung = review.buildBoxes({
   ageMode: 'manual',
@@ -153,9 +152,9 @@ var jaundiceYoung = review.buildBoxes({
 });
 assert.ok(jaundiceYoung.examination.indexOf('Jaundiced to face.') !== -1, 'jaundice finding is transcribed');
 assert.strictEqual(jaundiceYoung.review.indexOf('within 24 hours'), -1, 'age plus jaundice does not create a clinical indicator');
-assert.ok(review.buildBoxes({ answers: { 'jaundice-24h': 'yes' } }).review.indexOf('NICE early-onset neonatal infection clinical indicator documented: jaundice within 24 hours of birth.') !== -1, 'explicit jaundice within 24 hours uses the NICE label');
-assert.ok(review.buildBoxes({ answers: { pphn: 'yes' } }).review.indexOf('Persistent pulmonary hypertension of the newborn documented.') !== -1, 'PPHN is transcribed when selected');
-assert.ok(review.buildBoxes({ answers: { encephalopathy: 'yes' } }).review.indexOf('Signs of neonatal encephalopathy documented.') !== -1, 'encephalopathy is transcribed when selected');
+assert.ok(review.buildBoxes({ answers: { 'jaundice-24h': 'yes' }, jaundiceNoticedHours: '14' }).review.indexOf('NICE clinical indicators: jaundice within 24 hours of birth (noticed at 14 hours).') !== -1, 'explicit jaundice within 24 hours uses the NICE label');
+assert.ok(review.buildBoxes({ answers: { pphn: 'yes' } }).review.indexOf('NICE clinical indicators: PPHN.') !== -1, 'PPHN is transcribed when selected');
+assert.ok(review.buildBoxes({ answers: { encephalopathy: 'yes' } }).review.indexOf('NICE clinical indicators: signs of neonatal encephalopathy.') !== -1, 'encephalopathy is transcribed when selected');
 assert.strictEqual(review.buildBoxes({ obs: { hr: '180', temp: '38.4' } }).otherCount, 0, 'heart rate and temperature values do not become clinical indicators');
 assert.strictEqual(jaundiceYoung.examination.indexOf('NICE'), -1, 'exam findings do not auto-tag NICE');
 
@@ -217,7 +216,7 @@ var kaiser = review.buildBoxes({
   shorter: true,
   kaiser: { well: '0.4 per 1000, routine care', equivocal: 'Blood culture.', unwell: '' }
 });
-assert.ok(kaiser.review.indexOf('BG: Kaiser Permanente. Well appearing: 0.4 per 1000, routine care. Equivocal: Blood culture.') !== -1, 'filled Kaiser boxes are transcribed under BG');
+assert.ok(kaiser.review.indexOf('Kaiser EOS calculator. Well appearing: 0.4 per 1000, routine care. Equivocal: Blood culture.') !== -1, 'filled Kaiser boxes are transcribed with their labels');
 assert.strictEqual(kaiser.review.indexOf('Unwell appearing'), -1, 'an empty Kaiser box is left out');
 
 var senior = review.buildBoxes({ antibiotics: 'senior', seniorDecision: 'observe for 12 hours', seniorOutcome: 'Registrar agrees with plan' });
@@ -327,5 +326,41 @@ var obsOnlyOther = sample();
 obsOnlyOther.obsOther = 'Obs stable on chart';
 assert.ok(review.buildBoxes(obsOnlyOther).examination.indexOf('Obs stable on chart.') !== -1, 'other observations text is written on its own');
 assert.strictEqual(boxes.review.indexOf('Apgar'), -1, 'Apgars are no longer written');
+
+var full = review.buildBoxes({
+  sex: 'male',
+  gestationAtBirth: '39+2',
+  modeOfBirth: 'instrumental',
+  centile: '9',
+  ageMode: 'manual',
+  ageHours: '18',
+  reasons: ['sepsis', 'feeding'],
+  historyNote: 'Sleepy overnight',
+  parentalConcern: 'concerned',
+  parentalWords: 'not waking for feeds',
+  midwifeConcern: 'no',
+  romHours: '20',
+  iapTiming: '2 hours before birth',
+  answers: { fever: 'yes', iap: 'given', meconium: 'yes', 'gbs-maternal': 'yes', idm: 'yes', apnoea: 'yes', 'feed-refusal': 'yes', topUps: 'yes' },
+  feedMode: 'breast',
+  feedDuration: '5 minutes',
+  feedFrequency: 'every 3 hours',
+  topUpAmount: '15',
+  stools: 'meconium',
+  stoolCount: '2',
+  urine: 'passed',
+  multi: { sinceBirth: ['jitteriness'] }
+}).review.split('\n');
+assert.deepStrictEqual(full, [
+  'Male infant born at 39+2 weeks by instrumental delivery, birth weight 9th centile, now 18 hours old. Reviewed for infection risk and feeding.',
+  'Sleepy overnight. Parents concerned: not waking for feeds. No midwife concern.',
+  'ROM 20 hours before birth, maternal intrapartum pyrexia, intrapartum antibiotics given, first dose 2 hours before birth. Meconium-stained liquor.',
+  'NICE risk factors: maternal GBS colonisation, bacteriuria or infection this pregnancy.',
+  'Hypoglycaemia risk factors: maternal diabetes.',
+  'Breastfeeding 5 minutes every 3 hours, top-ups 15 ml. Meconium passed x2, urine passed.',
+  'NICE red flags: apnoea. NICE clinical indicators: feeding difficulties. Jitteriness since birth.'
+], 'the review follows the clinical narrative order');
+assert.strictEqual(review.buildBoxes({ stools: 'none', urine: 'not' }).review, 'No stool or urine passed since birth.', 'absent output is one sentence');
+assert.strictEqual(review.buildBoxes({ parentalConcern: 'none', midwifeConcern: 'no' }).review, 'No parental or midwife concern.', 'explicit no-concern answers are folded');
 
 console.log('postnatal review tests passed');

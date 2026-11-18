@@ -215,13 +215,6 @@
     return selectedOptions(control, choices).map(function (option) { return option.label; });
   }
 
-  function niceLines(answerKey, state) {
-    if (!state.answers || state.answers[answerKey] !== 'yes') return [];
-    var entry = content.NICE_DOC[answerKey];
-    if (!entry) return [];
-    return [entry.fact, entry.label];
-  }
-
   /* Count only explicitly selected findings. Never infer from observation
    * values, gestation free text, gas results, or glucose numbers. */
   function collectFactors(partial) {
@@ -286,14 +279,6 @@
     if (state.place === 'postnatal') return 'postnatal ward';
     if (state.place === 'labour') return 'labour ward';
     if (state.place === 'other') return (state.placeOther || '').trim() || 'ward';
-    return '';
-  }
-
-  function modePhrase(state) {
-    if (state.modeOfBirth === 'svd') return 'normal vaginal birth';
-    if (state.modeOfBirth === 'instrumental') return 'instrumental birth';
-    if (state.modeOfBirth === 'caesarean') return 'caesarean birth';
-    if (state.modeOfBirth === 'other') return (state.modeOther || '').trim() || 'another mode of birth';
     return '';
   }
 
@@ -562,202 +547,298 @@
     ]);
   }
 
-  function membraneSentence(state) {
-    var hours = num(state.romHours);
-    if (hours == null) return '';
-    return 'Membranes ruptured for ' + hours + ' hours.';
+  /* ------------------------------------------------------------- review box
+   * The Review box reads as a clinical narrative, one paragraph per line:
+   *   1. Who the baby is and why they are being reviewed
+   *   2. The presenting history and any parental or midwife concern
+   *   3. Labour, then NICE infection risk factors and Kaiser, then
+   *      hypoglycaemia risk factors
+   *   4. Since birth: feeding and output, then events and NICE indicators
+   *   5. Results
+   * Only explicit answers are written. A No answer never becomes a negative
+   * statement, and nothing is counted, classified or interpreted. */
+
+  var REASON_PROSE = {
+    sepsis: 'infection risk',
+    hypoglycaemia: 'hypoglycaemia risk',
+    jaundice: 'jaundice',
+    feeding: 'feeding',
+    breathing: 'breathing',
+    temperature: 'temperature',
+    vomiting: 'vomiting',
+    weight: 'weight',
+    colour: 'colour',
+    concern: 'parental or midwife concern',
+    murmur: 'murmur',
+    anomaly: 'query anomaly'
+  };
+
+  var NICE_RISK_KEYS = [
+    'gbs-maternal', 'gbs-previous', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
+    'maternal-sepsis', 'chorio'
+  ];
+  var NICE_RED_HISTORY_KEYS = ['apnoea', 'seizures', 'cpr', 'ventilation', 'shock'];
+  var NICE_INDICATOR_KEYS = [
+    'altered-behaviour', 'altered-tone', 'feed-refusal', 'feed-intolerance', 'abnormal-hr',
+    'resp-distress', 'hypoxia', 'pphn', 'jaundice-24h', 'encephalopathy', 'temp-abnormal',
+    'bleeding-coag', 'altered-glucose', 'metabolic-acidosis'
+  ];
+
+  var HYPO_PROSE = [
+    ['idm', 'maternal diabetes'],
+    ['beta-blocker', 'maternal beta-blocker in the third trimester or at birth'],
+    ['sga', 'birth weight on or under the 2nd centile'],
+    ['wasted', 'clinically wasted'],
+    ['local-hypothermia', 'hypothermia'],
+    ['local-acidosis', 'perinatal acidosis'],
+    ['local-polycythaemia', 'polycythaemia'],
+    ['local-family', 'family history of a hypoglycaemia disorder'],
+    ['local-sepsis', 'suspected or confirmed early-onset infection']
+  ];
+
+  function said(text) {
+    return String(text || '').trim();
   }
 
-  function feedingSentence(state, shorter) {
-    var modes = {
-      breast: 'breastfeeds',
-      expressed: 'expressed breast milk',
-      formula: 'formula',
-      mixed: 'mixed feeding',
-      tube: 'tube feeds'
-    };
-    var bits = [];
-    if (modes[state.feedMode]) bits.push(modes[state.feedMode]);
-    if (state.latch === 'good') bits.push('latching well');
-    if (state.latch === 'poor') bits.push('poor latch');
-    if (state.feedDuration && state.feedDuration.trim()) bits.push(state.feedDuration.trim());
-    if (state.feedAmount) bits.push(state.feedAmount + ' ml');
-    if (state.feedFrequency && state.feedFrequency.trim()) bits.push(state.feedFrequency.trim());
-    if (state.answers.topUps === 'yes') bits.push('with top-ups' + (state.topUpAmount ? ' (' + state.topUpAmount + ' ml)' : ''));
-    var problems = state.multi.feedProblems || [];
-    if (problems.indexOf('vomiting') !== -1) bits.push('vomiting');
-    if (problems.indexOf('residuals') !== -1) bits.push('large gastric residuals');
-    if (problems.indexOf('sleepy') !== -1) bits.push('sleepy at the breast');
-    if (problems.indexOf('refusal') !== -1) bits.push('feed refusal');
-    if (!shorter && problems.indexOf('none') !== -1) bits.push('no vomiting');
-    if (state.lastFeed && state.lastFeed.trim()) bits.push('last feed ' + state.lastFeed.trim());
-    if (!bits.length) return '';
-    return 'Feeding: ' + bits.join(', ') + '.';
+  function listJoin(items) {
+    var separator = items.some(function (item) { return item.indexOf(',') !== -1; }) ? '; ' : ', ';
+    return items.join(separator);
   }
 
-  function stoolSentence(state) {
-    if (state.stools === 'none') return 'No stool passed yet.';
-    if (state.stools === 'meconium') return state.stoolCount ? 'Meconium passed (' + state.stoolCount + ').' : 'Meconium passed.';
-    if (state.stools === 'changing') return state.stoolCount ? 'Changing stool (' + state.stoolCount + ').' : 'Changing stool.';
-    return '';
-  }
-
-  function urineSentence(state) {
-    if (state.urine === 'passed') return 'Urine passed.';
-    if (state.urine === 'not') return 'No urine passed since birth.';
-    return '';
-  }
-
-  function parentConcernSentence(state) {
-    if (state.parentalConcern === 'none') return 'No parental concern.';
-    if (state.parentalConcern === 'concerned') {
-      var words = (state.parentalWords || '').trim();
-      return words ? 'Parental concern: ' + words : 'Parents are concerned.';
-    }
-    return '';
-  }
-
-  function resultsSentences(state) {
-    var lines = [];
-    (state.glucoses || []).forEach(function (row) {
-      if (!row.value) return;
-      var sentence = 'Glucose ' + row.value + ' mmol/L';
-      if (row.method === 'gas') sentence += ' on the blood gas';
-      if (row.method === 'meter') sentence += ' on a meter';
-      if (row.time) sentence += ' at ' + row.time;
-      lines.push(sentence + '.');
+  function niceItems(keys, state, extra) {
+    return keys.filter(function (key) {
+      return state.answers[key] === 'yes' && content.NICE_DOC[key];
+    }).map(function (key) {
+      var text = content.NICE_DOC[key].short;
+      if (extra && extra[key]) text += extra[key];
+      return text;
     });
-    if (state.bilirubin.kind === 'none') lines.push('No bilirubin sent.');
-    if ((state.bilirubin.kind === 'tcb' || state.bilirubin.kind === 'tsb') && state.bilirubin.value) {
-      var name = state.bilirubin.kind === 'tcb' ? 'Transcutaneous bilirubin' : 'Serum bilirubin';
-      var sentence = name + ' ' + state.bilirubin.value;
-      if (state.bilirubin.ageHours) sentence += ' at ' + state.bilirubin.ageHours + ' hours';
-      if (state.bilirubin.plot === 'below') sentence += ', below the treatment line on the chart used';
-      if (state.bilirubin.plot === 'on') sentence += ', on the treatment line on the chart used';
-      if (state.bilirubin.plot === 'above') sentence += ', above the treatment line on the chart used';
-      lines.push(sentence + '.');
+  }
+
+  function niceSentence(label, items) {
+    if (!items.length) return '';
+    return 'NICE ' + label + ': ' + listJoin(items) + '.';
+  }
+
+  function gestationPhrase(state) {
+    var text = gestationText(state);
+    if (!text) return '';
+    if (/^\d{2}(\s*\+\s*\d)?$/.test(text)) return text.replace(/\s+/g, '') + ' weeks';
+    return text;
+  }
+
+  function birthModeProse(state) {
+    if (state.modeOfBirth === 'svd') return 'SVD';
+    if (state.modeOfBirth === 'instrumental') return 'instrumental delivery';
+    if (state.modeOfBirth === 'caesarean') return 'caesarean section';
+    if (state.modeOfBirth === 'other') return said(state.modeOther);
+    return '';
+  }
+
+  function centilePhrase(state) {
+    var text = said(state.centile).replace(/\s*centile\s*$/i, '');
+    if (!text) return '';
+    if (/^\d+$/.test(text)) {
+      var n = Number(text);
+      var tens = n % 100;
+      var suffix = (tens >= 11 && tens <= 13) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
+      text += suffix;
     }
-    var gasBits = [];
-    if (state.gas.ph) gasBits.push('pH ' + state.gas.ph);
-    if (state.gas.be) gasBits.push('base deficit ' + state.gas.be);
-    if (state.gas.lactate) gasBits.push('lactate ' + state.gas.lactate);
-    if (state.gas.glucose) gasBits.push('glucose ' + state.gas.glucose);
-    if (gasBits.length) lines.push('Blood gas: ' + gasBits.join(', ') + '.');
-    lines = lines.concat(niceLines('thrombocytopenia', state));
-    lines = lines.concat(niceLines('coagulation', state));
-    if (state.answers.hyperglycaemia === 'yes') lines.push('Hyperglycaemia documented.');
-    if (state.resultsNote && state.resultsNote.trim()) lines.push(ensurePeriod(state.resultsNote.trim()));
-    return lines;
+    return 'birth weight ' + text + ' centile';
   }
 
-  function reasonSentence(state) {
-    if (!state.reasons || !state.reasons.length) return '';
-    var reasonLabels = content.REASONS.filter(function (reason) {
-      return state.reasons.indexOf(reason.id) !== -1;
-    }).map(function (reason) { return reason.label.toLowerCase(); });
-    if (state.reasons.indexOf('other') !== -1 && state.reasonOther && state.reasonOther.trim()) {
-      reasonLabels = reasonLabels.filter(function (label) { return label !== 'other'; });
-      reasonLabels.push(state.reasonOther.trim());
-    }
-    if (!reasonLabels.length) return '';
-    return 'Reason for review: ' + reasonLabels.join(', ') + '.';
-  }
-
-  function backgroundFeatures(state) {
-    var bits = [];
-    if (state.sex) bits.push('Sex: ' + state.sex + '.');
-    if (state.centile && state.centile.trim()) bits.push('Birth-weight centile ' + state.centile.trim() + '.');
-    bits.push(membraneSentence(state));
-    [
-      'gbs-maternal', 'gbs-previous', 'spontaneous-preterm', 'rom-preterm-18', 'rom-term-24',
-      'maternal-sepsis', 'chorio', 'sibling-infection'
-    ].forEach(function (key) {
-      bits = bits.concat(niceLines(key, state));
-    });
-    if (state.answers.idm === 'yes') bits.push('Mother with diabetes, including gestational, documented.');
-    if (state.answers['beta-blocker'] === 'yes') bits.push('Beta-blocker in the third trimester or at birth documented.');
-    if (state.answers.sga === 'yes') bits.push('Birth weight on or under the 2nd centile documented.');
-    if (state.answers.wasted === 'yes') bits.push('Clinically wasted documented.');
-    if (state.answers['local-hypothermia'] === 'yes') bits.push('Hypothermia documented.');
-    if (state.answers['local-acidosis'] === 'yes') bits.push('Perinatal acidosis documented.');
-    if (state.answers['local-polycythaemia'] === 'yes') bits.push('Polycythaemia documented.');
-    if (state.answers['local-family'] === 'yes') bits.push('Family history of a hypoglycaemia disorder documented.');
-    if (state.answers['local-sepsis'] === 'yes') bits.push('Suspected or confirmed early-onset infection documented.');
-    if (state.answers.iap === 'given') bits.push('Intrapartum antibiotics given' + (state.iapTiming && state.iapTiming.trim() ? ' (' + state.iapTiming.trim() + ')' : '') + '.');
-    if (state.answers.iap === 'none') bits.push('No intrapartum antibiotics.');
-    if (state.answers.fever === 'yes') bits.push('Intrapartum fever documented.');
-    if (state.answers.meconium === 'yes') bits.push('Meconium stained liquor.');
-    if (state.answers.shoulder === 'yes') bits.push('Shoulder dystocia.');
-    if (state.backgroundNote && state.backgroundNote.trim()) bits.push(ensurePeriod(state.backgroundNote.trim()));
-    bits.push(kaiserSentence(state));
-    return bits.map(function (bit) { return String(bit || '').trim(); }).filter(Boolean);
-  }
-
-  function reviewText(state, shorter) {
-    var lines = [];
-    var birth = '';
-    var gestation = gestationText(state);
-    var mode = modePhrase(state);
+  function openingLine(state) {
+    var subject = state.sex === 'male' ? 'Male infant' : (state.sex === 'female' ? 'Female infant' : 'Infant');
+    var gestation = gestationPhrase(state);
+    var mode = birthModeProse(state);
+    var centile = centilePhrase(state);
     var age = ageInHours(state);
-    if (gestation) birth += gestation;
-    if (mode) birth += (birth ? ', born by ' : 'Born by ') + mode;
-    if (age != null) birth += (birth ? ', now ' : 'Now ') + shortAge(age) + ' old';
-    if (birth) lines.push(/[.!?]$/.test(birth) ? birth : birth + '.');
-    var reason = reasonSentence(state);
-    if (reason) lines.push(reason);
-    var bg = backgroundFeatures(state);
-    if (bg.length) lines.push('BG: ' + bg.join(' '));
-    if (state.historyNote && state.historyNote.trim()) lines.push(ensurePeriod(state.historyNote.trim()));
-    lines.push(feedingSentence(state, shorter));
-    lines.push(stoolSentence(state));
-    lines.push(urineSentence(state));
-    lines.push(parentConcernSentence(state));
-    if (state.midwifeConcern === 'yes') {
-      lines.push(state.midwifeWords && state.midwifeWords.trim()
-        ? 'Midwife concern: ' + state.midwifeWords.trim()
-        : 'The midwife is concerned.');
+    var parts = [];
+    var born = '';
+    if (gestation) born += ' at ' + gestation;
+    if (mode) born += ' by ' + mode;
+    if (born) parts.push('born' + born);
+    if (centile) parts.push(centile);
+    if (age != null) parts.push((born ? 'now ' : '') + shortAge(age) + ' old');
+    var sentences = [];
+    if (parts.length || state.sex) sentences.push(subject + (parts.length ? (born ? ' ' : ', ') + parts.join(', ') : '') + '.');
+    var reasons = (state.reasons || []).map(function (id) {
+      return id === 'other' ? said(state.reasonOther) : REASON_PROSE[id];
+    }).filter(Boolean);
+    if (reasons.length) sentences.push('Reviewed for ' + joinList(reasons, 'and') + '.');
+    return sentences.join(' ');
+  }
+
+  function concernLine(state) {
+    var bits = [];
+    if (said(state.historyNote)) bits.push(ensurePeriod(said(state.historyNote)));
+    var parentWords = said(state.parentalWords);
+    var midwifeWords = said(state.midwifeWords);
+    var parentNone = state.parentalConcern === 'none';
+    var midwifeNone = state.midwifeConcern === 'no';
+    if (state.parentalConcern === 'concerned') bits.push(parentWords ? 'Parents concerned: ' + ensurePeriod(parentWords) : 'Parents concerned.');
+    if (state.midwifeConcern === 'yes') bits.push(midwifeWords ? 'Midwife concerned: ' + ensurePeriod(midwifeWords) : 'Midwife concerned.');
+    if (parentNone && midwifeNone) bits.push('No parental or midwife concern.');
+    else if (parentNone) bits.push('No parental concern.');
+    else if (midwifeNone) bits.push('No midwife concern.');
+    return bits.join(' ');
+  }
+
+  function labourLine(state) {
+    var sentences = [];
+    var infection = [];
+    var hours = num(state.romHours);
+    if (hours != null) infection.push('ROM ' + hours + ' hours before birth');
+    if (state.answers.fever === 'yes') infection.push('maternal intrapartum pyrexia');
+    if (state.answers.iap === 'given') {
+      var timing = said(state.iapTiming).replace(/[.\s]+$/, '');
+      infection.push('intrapartum antibiotics given' + (timing ? ', first dose ' + timing : ''));
     }
-    var sinceMap = {
-      apnoea: 'apnoea',
-      seizures: 'seizures',
-      'colour-change': 'colour change',
-      'temp-instability': 'temperature instability',
-      jaundice: 'jaundice noticed',
-      jitteriness: 'jitteriness',
-      'poor-tone': 'poor tone',
-      bleeding: 'unexplained excessive bleeding'
-    };
-    var since = state.multi.sinceBirth || [];
-    if (since.length) {
-      var sinceLine = 'Since birth: ' + since.map(function (id) { return sinceMap[id] || id; }).join(', ') + '.';
-      if (since.indexOf('jaundice') !== -1 && state.jaundiceNoticedHours) {
-        sinceLine += ' Jaundice noticed at ' + state.jaundiceNoticedHours + ' hours.';
-      }
-      lines.push(sinceLine);
-    }
-    if (state.historyExtra && state.historyExtra.trim()) lines.push(ensurePeriod(state.historyExtra.trim()));
-    [
-      'apnoea', 'seizures', 'cpr', 'ventilation', 'shock',
-      'altered-behaviour', 'altered-tone', 'feed-refusal', 'feed-intolerance',
-      'abnormal-hr', 'resp-distress', 'hypoxia', 'pphn', 'jaundice-24h',
-      'encephalopathy', 'temp-abnormal', 'bleeding-coag', 'altered-glucose', 'metabolic-acidosis'
-    ].forEach(function (key) {
-      lines = lines.concat(niceLines(key, state));
-    });
-    if (state.answers['jaundice-24h'] === 'yes' && state.jaundiceNoticedHours) {
-      lines.push('Jaundice noticed at ' + state.jaundiceNoticedHours + ' hours.');
-    }
-    return cleanLines(lines.concat(resultsSentences(state)));
+    if (state.answers.iap === 'none') infection.push('no intrapartum antibiotics');
+    if (infection.length) sentences.push(capitalise(infection.join(', ')) + '.');
+    var delivery = [];
+    if (state.answers.meconium === 'yes') delivery.push('meconium-stained liquor');
+    if (state.answers.shoulder === 'yes') delivery.push('shoulder dystocia');
+    if (delivery.length) sentences.push(capitalise(delivery.join(', ')) + '.');
+    if (said(state.backgroundNote)) sentences.push(ensurePeriod(said(state.backgroundNote)));
+    return sentences.join(' ');
   }
 
   function kaiserSentence(state) {
     var bag = state.kaiser && typeof state.kaiser === 'object' ? state.kaiser : {};
     var parts = content.KAISER.map(function (option) {
-      var text = String(bag[option.id] || '').trim();
-      return text ? option.label + ': ' + text.replace(/[.\s]+$/, '') : '';
+      var text = said(bag[option.id]).replace(/[.\s]+$/, '');
+      return text ? option.label + ': ' + text + '.' : '';
     }).filter(Boolean);
     if (!parts.length) return '';
-    return 'Kaiser Permanente. ' + parts.join('. ') + '.';
+    return 'Kaiser EOS calculator. ' + parts.join(' ');
+  }
+
+  function infectionRiskLine(state) {
+    return [
+      niceSentence('risk factors', niceItems(NICE_RISK_KEYS, state)),
+      niceSentence('red flag', niceItems(['sibling-infection'], state)),
+      kaiserSentence(state)
+    ].filter(Boolean).join(' ');
+  }
+
+  function hypoglycaemiaLine(state) {
+    var items = HYPO_PROSE.filter(function (pair) {
+      return state.answers[pair[0]] === 'yes';
+    }).map(function (pair) { return pair[1]; });
+    if (!items.length) return '';
+    return 'Hypoglycaemia risk factors: ' + listJoin(items) + '.';
+  }
+
+  function feedingSentence(state, shorter) {
+    var modes = {
+      breast: 'breastfeeding',
+      expressed: 'EBM feeds',
+      formula: 'formula feeding',
+      mixed: 'mixed feeding',
+      tube: 'tube feeds'
+    };
+    var bits = [];
+    var head = modes[state.feedMode] || '';
+    var size = [state.feedAmount ? state.feedAmount + ' ml' : '', said(state.feedDuration)].filter(Boolean).join(', ');
+    var amount = [size, said(state.feedFrequency)].filter(Boolean).join(' ');
+    if (head && amount) head += ' ' + amount;
+    else if (amount) head = amount;
+    if (head) bits.push(head);
+    if (state.latch === 'good') bits.push('effective latch');
+    if (state.latch === 'poor') bits.push('poor latch');
+    if (state.answers.topUps === 'yes') bits.push('top-ups' + (state.topUpAmount ? ' ' + state.topUpAmount + ' ml' : ''));
+    var problems = state.multi.feedProblems || [];
+    if (problems.indexOf('vomiting') !== -1) bits.push('vomiting');
+    if (problems.indexOf('residuals') !== -1) bits.push('large gastric residuals');
+    if (problems.indexOf('sleepy') !== -1) bits.push('sleepy at the breast');
+    if (problems.indexOf('refusal') !== -1) bits.push('feed refusal');
+    if (!shorter && problems.indexOf('none') !== -1) bits.push('no vomiting or feed refusal');
+    if (said(state.lastFeed)) bits.push('last feed ' + said(state.lastFeed));
+    if (!bits.length) return '';
+    return capitalise(bits.join(', ')) + '.';
+  }
+
+  function outputSentence(state) {
+    if (state.stools === 'none' && state.urine === 'not') return 'No stool or urine passed since birth.';
+    var bits = [];
+    var count = said(state.stoolCount);
+    var times = count ? (/^\d+$/.test(count) ? ' x' + count : ' (' + count + ')') : '';
+    if (state.stools === 'none') bits.push('no stool passed yet');
+    if (state.stools === 'meconium') bits.push('meconium passed' + times);
+    if (state.stools === 'changing') bits.push('changing stools' + times);
+    if (state.urine === 'passed') bits.push('urine passed');
+    if (state.urine === 'not') bits.push('no urine passed since birth');
+    if (!bits.length) return '';
+    return capitalise(bits.join(', ')) + '.';
+  }
+
+  function eventsLine(state) {
+    var sinceMap = {
+      apnoea: 'apnoea',
+      seizures: 'seizures',
+      'colour-change': 'colour change',
+      'temp-instability': 'temperature instability',
+      jaundice: 'jaundice',
+      jitteriness: 'jitteriness',
+      'poor-tone': 'poor tone',
+      bleeding: 'unexplained excessive bleeding'
+    };
+    var bits = [];
+    var jaundiceHours = num(state.jaundiceNoticedHours);
+    var jaundiceNote = jaundiceHours != null ? ' (noticed at ' + jaundiceHours + ' hours)' : '';
+    bits.push(niceSentence('red flags', niceItems(NICE_RED_HISTORY_KEYS, state)));
+    bits.push(niceSentence('clinical indicators', niceItems(NICE_INDICATOR_KEYS, state, { 'jaundice-24h': jaundiceNote })));
+    var since = (state.multi.sinceBirth || []).map(function (id) { return sinceMap[id] || id; });
+    if (since.length) {
+      var sinceText = capitalise(joinList(since, 'and')) + ' since birth';
+      if (since.indexOf('jaundice') !== -1 && state.answers['jaundice-24h'] !== 'yes' && jaundiceNote) sinceText += jaundiceNote;
+      bits.push(sinceText + '.');
+    }
+    if (said(state.historyExtra)) bits.push(ensurePeriod(said(state.historyExtra)));
+    return bits.filter(Boolean).join(' ');
+  }
+
+  function resultsLine(state) {
+    var bits = [];
+    var glucoses = (state.glucoses || []).filter(function (row) { return row.value; }).map(function (row) {
+      var text = row.value + ' mmol/L';
+      if (row.time) text += ' at ' + row.time;
+      if (row.method === 'gas') text += ' (blood gas)';
+      if (row.method === 'meter') text += ' (meter)';
+      return text;
+    });
+    if (glucoses.length) bits.push('Glucose ' + glucoses.join(', ') + '.');
+    if (state.answers.hyperglycaemia === 'yes') bits.push('Hyperglycaemia.');
+    if (state.bilirubin.kind === 'none') bits.push('No bilirubin sent.');
+    if ((state.bilirubin.kind === 'tcb' || state.bilirubin.kind === 'tsb') && state.bilirubin.value) {
+      var bili = (state.bilirubin.kind === 'tcb' ? 'TcB ' : 'SBR ') + state.bilirubin.value;
+      if (state.bilirubin.ageHours) bili += ' at ' + state.bilirubin.ageHours + ' hours';
+      if (state.bilirubin.plot) bili += ', ' + state.bilirubin.plot + ' the treatment line';
+      bits.push(bili + '.');
+    }
+    var gas = [];
+    if (state.gas.ph) gas.push('pH ' + state.gas.ph);
+    if (state.gas.be) gas.push('BD ' + state.gas.be);
+    if (state.gas.lactate) gas.push('lactate ' + state.gas.lactate);
+    if (state.gas.glucose) gas.push('glucose ' + state.gas.glucose);
+    if (gas.length) bits.push('Blood gas ' + gas.join(', ') + '.');
+    bits.push(niceSentence('clinical indicators', niceItems(['thrombocytopenia', 'coagulation'], state)));
+    if (said(state.resultsNote)) bits.push(ensurePeriod(said(state.resultsNote)));
+    return bits.filter(Boolean).join(' ');
+  }
+
+  function reviewText(state, shorter) {
+    return cleanLines([
+      openingLine(state),
+      concernLine(state),
+      labourLine(state),
+      infectionRiskLine(state),
+      hypoglycaemiaLine(state),
+      [feedingSentence(state, shorter), outputSentence(state)].filter(Boolean).join(' '),
+      eventsLine(state),
+      resultsLine(state)
+    ]);
   }
 
   function buildBoxes(partial) {
