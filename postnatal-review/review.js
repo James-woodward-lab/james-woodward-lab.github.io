@@ -43,9 +43,6 @@
       sex: '',
       modeOfBirth: '',
       modeOther: '',
-      plurality: '',
-      apgar1: '',
-      apgar5: '',
       romHours: '',
       iapTiming: '',
       centile: '',
@@ -74,6 +71,7 @@
       obs: {
         temp: '', hr: '', rr: '', sats: '', oxygen: '', fio2: ''
       },
+      obsOther: '',
       glucoses: [{ time: '', value: '', method: '' }],
       bilirubin: { kind: '', value: '', ageHours: '', plot: '' },
       gas: { ph: '', be: '', lactate: '', glucose: '' },
@@ -337,8 +335,10 @@
     } else if (obs.oxygen === 'air') {
       bits.push('Breathing air');
     }
-    if (!bits.length) return '';
-    return bits.join('. ') + '.';
+    var text = bits.length ? bits.join('. ') + '.' : '';
+    var other = String(state.obsOther || '').trim();
+    if (other) text += (text ? ' ' : '') + ensurePeriod(other);
+    return text;
   }
 
   function findingsProse(system, row) {
@@ -603,7 +603,6 @@
 
   function backgroundFeatures(state) {
     var bits = [];
-    if (state.plurality === 'multiple') bits.push('Multiple pregnancy.');
     if (state.sex) bits.push('Sex: ' + state.sex + '.');
     if (state.centile && state.centile.trim()) bits.push('Birth-weight centile ' + state.centile.trim() + '.');
     bits.push(membraneSentence(state));
@@ -641,9 +640,6 @@
     if (gestation) birth += gestation;
     if (mode) birth += (birth ? ', born by ' : 'Born by ') + mode;
     if (age != null) birth += (birth ? ', now ' : 'Now ') + shortAge(age) + ' old';
-    if (state.apgar1 || state.apgar5) {
-      birth += (birth ? '. Apgars ' : 'Apgars ') + (state.apgar1 || '?') + ' at 1 minute and ' + (state.apgar5 || '?') + ' at 5 minutes';
-    }
     if (birth) lines.push(/[.!?]$/.test(birth) ? birth : birth + '.');
     var reason = reasonSentence(state);
     if (reason) lines.push(reason);
@@ -1308,17 +1304,19 @@
 
   function backgroundHtml() {
     return '<section class="step">' +
-      groupCard('Birth',
+      groupCard('Labour',
         half(bindChoices('modeOfBirth', 'Mode of birth', content.MODES)) +
         '<div id="mode-other-wrap" class="half">' + input('modeOther', 'Mode', state.modeOther, { wide: true }) + '</div>' +
-        half(bindChoices('plurality', 'Plurality', [
-          { value: 'single', label: 'Singleton' },
-          { value: 'multiple', label: 'Twins or more' }
-        ])) +
-        '<div class="num-row half">' +
-          input('apgar1', 'Apgar 1 min', state.apgar1, { type: 'number', mode: 'numeric' }) +
-          input('apgar5', 'Apgar 5 min', state.apgar5, { type: 'number', mode: 'numeric' }) +
-        '</div>'
+        half(input('romHours', 'Hours of rupture before birth', state.romHours, { type: 'number', mode: 'decimal' })) +
+        yn('fever', 'Intrapartum fever', 'Yes', 'No') +
+        '<div class="field half">' + fieldLabel('Intrapartum antibiotics') + choiceButtons('data-answer', 'iap', [
+          { value: 'none', label: 'None' },
+          { value: 'given', label: 'Given' }
+        ], state.answers.iap || '') + '</div>' +
+        '<div id="iap-timing-wrap" class="half">' + input('iapTiming', 'First dose timing', state.iapTiming, { wide: true, placeholder: 'For example, 2 hours before birth' }) + '</div>' +
+        yn('meconium', 'Meconium stained liquor', 'Yes', 'No') +
+        yn('shoulder', 'Shoulder dystocia', 'Yes', 'No') +
+        area('backgroundNote', 'Other relevant history', state.backgroundNote, 4)
       ) +
       groupCard('NICE Box 1: early-onset infection risk factors',
         '<h3 class="group-subhead">Red-flag risk factor</h3>' +
@@ -1331,15 +1329,6 @@
         yn('rom-term-24', 'Confirmed rupture of membranes for more than 24 hours before a term birth', 'Yes', 'No') +
         yn('maternal-sepsis', 'Suspected or confirmed maternal sepsis in the intrapartum or early postpartum period', 'Yes', 'No') +
         yn('chorio', 'Suspected or confirmed chorioamnionitis', 'Yes', 'No')
-      ) +
-      groupCard('Documented perinatal history',
-        half(input('romHours', 'Hours of rupture before birth', state.romHours, { type: 'number', mode: 'decimal' })) +
-        yn('fever', 'Intrapartum fever', 'Yes', 'No') +
-        '<div class="field half">' + fieldLabel('Intrapartum antibiotics') + choiceButtons('data-answer', 'iap', [
-          { value: 'none', label: 'None' },
-          { value: 'given', label: 'Given' }
-        ], state.answers.iap || '') + '</div>' +
-        '<div id="iap-timing-wrap" class="half">' + input('iapTiming', 'First dose timing', state.iapTiming, { wide: true, placeholder: 'For example, 2 hours before birth' }) + '</div>'
       ) +
       groupCard('Kaiser Permanente values',
         content.KAISER.map(function (option) {
@@ -1357,11 +1346,6 @@
         yn('local-polycythaemia', 'Polycythaemia', 'Yes', 'No', 'local') +
         yn('local-family', 'Family history of a hypoglycaemia disorder', 'Yes', 'No', 'local') +
         yn('local-sepsis', 'Suspected or confirmed early-onset infection', 'Yes', 'No', 'local')
-      ) +
-      groupCard('Other relevant history',
-        yn('meconium', 'Meconium stained liquor', 'Yes', 'No') +
-        yn('shoulder', 'Shoulder dystocia', 'Yes', 'No') +
-        area('backgroundNote', 'Other relevant history', state.backgroundNote, 4)
       ) +
       '</section>';
   }
@@ -1470,7 +1454,8 @@
             { value: 'oxygen', label: 'Oxygen', abnormal: true }
           ], state.obs.oxygen) + '</div>' +
           (state.obs.oxygen === 'oxygen' ? obsInput('fio2', '% O2', 'numeric') : '') +
-        '</div>'
+        '</div>' +
+        area('obsOther', 'Other', state.obsOther, 2)
       ) +
       '<div class="exam-systems">' + content.EXAM_SYSTEMS.map(examRowHtml).join('') + '</div>' +
       '</section>';

@@ -322,4 +322,14 @@ assert.strictEqual(cleared.impression, '', 'a new baby has no impression');
 
 assert.ok(boxes.all.indexOf('Examination') !== -1 && boxes.all.indexOf('Discussion') !== -1 && boxes.all.indexOf('Review') !== -1, 'copy all names the three boxes');
 
+var obsOtherState = sample();
+obsOtherState.obs = { temp: '36.8', hr: '', rr: '', sats: '', oxygen: '', fio2: '' };
+obsOtherState.obsOther = 'Pre- and post-ductal sats 98% and 99%';
+var obsOtherBoxes = review.buildBoxes(obsOtherState);
+assert.ok(obsOtherBoxes.examination.indexOf('Temperature: 36.8\u00B0C. Pre- and post-ductal sats 98% and 99%.') !== -1, 'other observations free text follows the observations');
+var obsOnlyOther = sample();
+obsOnlyOther.obsOther = 'Obs stable on chart';
+assert.ok(review.buildBoxes(obsOnlyOther).examination.indexOf('Obs stable on chart.') !== -1, 'other observations text is written on its own');
+assert.strictEqual(boxes.review.indexOf('Apgar'), -1, 'Apgars are no longer written');
+
 console.log('postnatal review tests passed');
